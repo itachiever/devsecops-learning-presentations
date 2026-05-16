@@ -15,6 +15,17 @@ It is designed for beginners, students, working professionals, and anyone prepar
 
 # 📚 Topics Covered
 
+- Docker Concepts
+- Docker Security (OWASP Top 10 for Docker)
+- OWASP Top 10 for Web 2021
+- SAST (Static Application Security Testing)
+- SCA (Software Composition Analysis)
+- SBOM (Software Bill Of Materials)
+- CBOM (Cryptography Bill Of Materials)
+- Kubrnetes Concepts
+- 
+
+# 🔮 Further plan to cover all areas of DevOps/DevSecOps:
 - Linux Fundamentals
 - Networking Basics
 - Git & GitHub
@@ -136,9 +147,9 @@ This project is licensed under the MIT License.
 
 # 📬 Connect With Me
 
-- LinkedIn: (Add your LinkedIn)
-- YouTube: (Add your YouTube Channel)
-- GitHub: (Add your GitHub Profile)
+- Mail: itachiever@zohomail.in
+- YouTube: https://www.youtube.com/@ITAchieverYT
+- GitHub: https://github.com/itachiever
 
 ---
 
