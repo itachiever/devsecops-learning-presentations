@@ -1,5 +1,5 @@
-☸️ Kubernetes Concepts
-  0. Introduction /course overview video
+# ☸️ Kubernetes Concepts
+  	0. Introduction /course overview video
 	1. Why Kubernetes? (Problems with Docker & Docker Swarm)
 	2. What is Kubernetes? How Kubernetes Works?
 	3. Kubernetes vs Docker Swarm
