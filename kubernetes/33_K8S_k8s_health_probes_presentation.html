@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --lv:#22C55E;--lvD:rgba(34,197,94,.09);--lvB:rgba(34,197,94,.3);
+  --rd:#326CE5;--rdD:rgba(50,108,229,.1);--rdB:rgba(50,108,229,.34);
+  --hp:#00D4FF;--hpD:rgba(0,212,255,.09);--hpB:rgba(0,212,255,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --cm:#F59E0B;--cmD:rgba(245,158,11,.09);--cmB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--lv);border-color:var(--lv);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--lv);color:var(--lv)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(34,197,94,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(34,197,94,.18);border-color:var(--lv)}
+.nbtn.pri{background:linear-gradient(135deg,var(--lv),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(34,197,94,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(34,197,94,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--lv);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(34,197,94,.14);transition:all .25s}
+.bi:hover{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.lv-box{border-radius:10px;padding:9px 12px;background:var(--lvD);border:2px solid var(--lvB);text-align:center}
+.rd-box{border-radius:10px;padding:9px 12px;background:var(--rdD);border:2px solid var(--rdB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lv);padding:3px 12px;border:1px solid rgba(34,197,94,.25);border-radius:20px;background:rgba(34,197,94,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.6vw,34px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--lv) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Health Checks<br>in Kubernetes</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Liveness &amp; Readiness Probes Explained<br>— Automated health monitoring for your apps</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--lvD);color:#86EFAC;border:1px solid var(--lvB);padding:4px 11px;font-size:9px">💚 Liveness Probe</span>
+          <span class="tag" style="background:var(--rdD);color:#BAE6FD;border:1px solid var(--rdB);padding:4px 11px;font-size:9px">🔵 Readiness Probe</span>
+          <span class="tag" style="background:var(--hpD);color:#67E8F9;border:1px solid var(--hpB);padding:4px 11px;font-size:9px">🌐 HTTP / TCP / Exec</span>
+          <span class="tag" style="background:var(--cmD);color:#FDE068;border:1px solid var(--cmB);padding:4px 11px;font-size:9px">🔄 Auto-recovery</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(34,197,94,.25);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Two Probes, Two Purposes</div>
+          <div class="lv-box" style="margin-bottom:6px;box-shadow:0 0 14px rgba(34,197,94,.16)">
+            <div style="font-size:9.5px;font-weight:800;color:#86EFAC">💚 Liveness Probe</div>
+            <div style="font-size:7.5px;color:var(--muted);margin-top:2px">"Is the app alive?"</div>
+            <div style="font-size:7.5px;font-weight:600;color:#86EFAC;margin-top:4px">Fail → Restart container</div>
+          </div>
+          <div class="rd-box" style="margin-bottom:6px;box-shadow:0 0 14px rgba(50,108,229,.16)">
+            <div style="font-size:9.5px;font-weight:800;color:#BAE6FD">🔵 Readiness Probe</div>
+            <div style="font-size:7.5px;color:var(--muted);margin-top:2px">"Is the app ready for traffic?"</div>
+            <div style="font-size:7.5px;font-weight:600;color:#BAE6FD;margin-top:4px">Fail → Remove from Service endpoints</div>
+          </div>
+          <div style="font-size:8.5px;color:var(--muted);text-align:center">Kubernetes checks continuously</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Health Checks <span style="color:var(--lv)">Are Critical</span></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🧟</div><div class="bt"><strong>Container running ≠ App working</strong> — a container can appear healthy while the app inside is frozen, deadlocked, or returning errors to every request</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">😴</div><div class="bt"><strong>Apps can freeze without crashing</strong> — a Java app with a thread deadlock, a Node app stuck in an infinite loop — the process runs but serves nothing</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🚀</div><div class="bt"><strong>Apps take time to start up</strong> — Spring Boot, databases, and heavy services may need 30-60 seconds before they're ready. Sending traffic too early = errors.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">👥</div><div class="bt"><strong>Users hit broken endpoints</strong> — without health checks, a Service may route user traffic to a Pod that's completely broken. Bad user experience.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🤖</div><div class="bt"><strong>Kubernetes needs to know app state</strong> — probes give K8s the intelligence to restart broken apps and withhold traffic from unready ones automatically</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Without probes: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">K8s sends traffic to broken Pods and never restarts frozen apps. Users see errors forever. With probes: automatic detection + recovery.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Without Health Checks</div>
+            <div style="border-radius:8px;padding:9px;background:rgba(6,10,16,.5);margin-bottom:5px">
+              <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:4px">📦 Pod STATUS: Running ✓</div>
+              <div style="font-size:7.5px;color:#94A3B8;margin-bottom:3px">BUT inside the container:</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">💀 App deadlocked → 0% responses</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.25);color:#F9A8D4;font-weight:600">👥 Users</div>
+              <div style="font-size:9px;color:var(--fail)">→</div>
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:var(--failD);border:1px solid var(--failB);color:#FCA5A5;font-weight:600">💀 Broken Pod</div>
+              <div style="font-size:8px;color:var(--fail)">→ 500!</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--lvD);border:1.5px solid var(--lvB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:8px">✅ With Health Checks</div>
+            <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:5px">
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">💚 Liveness fails → K8s restarts Pod</div>
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">🔵 Readiness fails → traffic re-routed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.25);color:#F9A8D4;font-weight:600">👥 Users</div>
+              <div style="font-size:9px;color:var(--lv)">→</div>
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:var(--lvD);border:1px solid var(--lvB);color:#86EFAC;font-weight:600">✅ Healthy Pod</div>
+              <div style="font-size:8px;color:var(--lv)">→ 200!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT ARE PROBES -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What are <span style="color:var(--lv)">Probes?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🔬</div><div class="bt"><strong>Probes are periodic health checks</strong> — Kubernetes runs them on a schedule (every N seconds) to continuously verify the state of each container</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🤖</div><div class="bt"><strong>Kubelet on each node runs the probes</strong> — not an external service. The agent on the node directly checks the container and reports the result</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">📊</div><div class="bt"><strong>Three probe results:</strong> <strong style="color:#86EFAC">Success</strong> (container is healthy), <strong style="color:#FCA5A5">Failure</strong> (container is unhealthy), <strong style="color:#FDE068">Unknown</strong> (check couldn't complete)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">⏱</div><div class="bt"><strong>Configurable timing parameters</strong> — <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">initialDelaySeconds</code>, <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">periodSeconds</code>, <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">failureThreshold</code>, <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">successThreshold</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🛡</div><div class="bt"><strong>Failure threshold prevents flapping</strong> — probe must fail N times in a row (default 3) before action is taken. Single glitch won't trigger restart.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--lvD);border:1px solid var(--lvB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Probes = doctor checking patient vitals every 10 seconds 🏥. Not just once — continuously. If pulse fails 3 checks in a row → take action.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--lvD);border:2px solid var(--lvB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Probe Parameters</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:7.5px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">livenessProbe:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">httpGet:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">path:</span> <span style="color:#86EFAC">/healthz</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">port:</span> <span style="color:#86EFAC">8080</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">initialDelaySeconds:</span> <span style="color:#FDE068">15</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">periodSeconds:</span> <span style="color:#FDE068">10</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">failureThreshold:</span> <span style="color:#FDE068">3</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">successThreshold:</span> <span style="color:#FDE068">1</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:7.5px;color:#FDE068;padding:2px 8px;background:rgba(245,158,11,.1);border-radius:4px">⏱ initialDelay → wait before first check</div>
+              <div style="font-size:7.5px;color:#FDE068;padding:2px 8px;background:rgba(245,158,11,.1);border-radius:4px">🔄 period → how often to check</div>
+              <div style="font-size:7.5px;color:#FDE068;padding:2px 8px;background:rgba(245,158,11,.1);border-radius:4px">❌ failureThreshold → fails before action</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 LIVENESS -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Liveness Probe</div>
+        <div class="stitle">Is the App <span style="color:var(--lv)">Alive?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">💚</div><div class="bt"><strong>Detects frozen or dead applications</strong> — checks if the app is still functioning. A deadlocked app, infinite loop, or hung process = liveness failure.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🔄</div><div class="bt"><strong>Failure → Container is restarted</strong> — Kubernetes kills the container and starts a fresh one. Like rebooting a frozen computer automatically, no human needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">⏱</div><div class="bt"><strong>Runs continuously throughout Pod lifetime</strong> — not just at startup. Checks every N seconds forever. A healthy app can become unhealthy over time.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>Use initialDelaySeconds carefully</strong> — if set too low, K8s may restart the app before it even finishes starting up. Match your app's startup time.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--lvD)">🎯</div><div class="bt"><strong>Checks a simple endpoint — /healthz</strong> — the endpoint should return 200 if the app is functional. Not a deep health check — just "am I running OK?"</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--lvD);border:1px solid var(--lvB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Liveness = manager checking if employee is awake and conscious 👀. Not working yet — just alive. If they won't respond → call ambulance (restart).</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--lvD);border:2px solid var(--lvB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Liveness Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--rdD);border:1px solid var(--rdB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#BAE6FD">📦 Container running</div></div>
+              <div style="font-size:10px;color:var(--lv)">↓ every 10s</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--lvD);border:1.5px solid var(--lvB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#86EFAC">💚 GET /healthz → 200?</div></div>
+              <div style="display:flex;gap:6px;width:100%">
+                <div style="flex:1;border-radius:7px;padding:6px;background:var(--lvD);border:1px solid var(--lvB);text-align:center"><div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Success</div><div style="font-size:7px;color:var(--muted)">App is alive</div><div style="font-size:7px;color:#86EFAC;margin-top:2px">No action</div></div>
+                <div style="flex:1;border-radius:7px;padding:6px;background:var(--failD);border:1px solid var(--failB);text-align:center"><div style="font-size:8px;font-weight:700;color:#FCA5A5">❌ Fail ×3</div><div style="font-size:7px;color:var(--muted)">App frozen</div><div style="font-size:7px;color:#FCA5A5;margin-top:2px">🔄 Restart</div></div>
+              </div>
+            </div>
+            <div style="margin-top:7px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">Self-healing — no human intervention ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 READINESS -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Readiness Probe</div>
+        <div class="stitle">Is the App <span style="color:#BAE6FD">Ready for Traffic?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--rdD)">🔵</div><div class="bt"><strong>Checks if the app can handle requests</strong> — even a live app may not be ready yet. DB connection not established, cache warming up, startup initialization in progress.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rdD)">🚦</div><div class="bt"><strong>Failure → Pod removed from Service endpoints</strong> — the Pod stays running but the Service stops routing traffic to it. Users no longer hit this Pod.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rdD)">🤝</div><div class="bt"><strong>Pod is NOT restarted on readiness failure</strong> — unlike liveness, a readiness failure is not a restart signal. The container continues but just receives no traffic.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rdD)">🔄</div><div class="bt"><strong>Re-added to endpoints when ready</strong> — once readiness passes again (recovery, cache loaded, DB reconnected), traffic automatically flows back to this Pod.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rdD)">🚀</div><div class="bt"><strong>Critical for rolling updates</strong> — during deployment, new Pods only receive traffic once they pass readiness. Prevents users from hitting uninitialized instances.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--rdD);border:1px solid var(--rdB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Readiness = manager checking if employee is ready to serve customers 🛎. Awake but still having coffee? Don't open the counter yet. Wait till ready.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--rdD);border:2px solid var(--rdB);box-shadow:0 0 22px rgba(50,108,229,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Readiness Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#F9A8D4">👥 User requests</div></div>
+              <div style="font-size:10px;color:var(--rd)">↓ via Service</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--rdD);border:1.5px solid var(--rdB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#BAE6FD">🔵 GET /ready → 200?</div></div>
+              <div style="display:flex;gap:6px;width:100%">
+                <div style="flex:1;border-radius:7px;padding:6px;background:var(--lvD);border:1px solid var(--lvB);text-align:center"><div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Ready</div><div style="font-size:7px;color:var(--muted)">In endpoints</div><div style="font-size:7px;color:#86EFAC;margin-top:2px">Gets traffic</div></div>
+                <div style="flex:1;border-radius:7px;padding:6px;background:var(--cmD);border:1px solid var(--cmB);text-align:center"><div style="font-size:8px;font-weight:700;color:#FDE068">⚠ Not Ready</div><div style="font-size:7px;color:var(--muted)">Out of endpoints</div><div style="font-size:7px;color:#FDE068;margin-top:2px">No traffic</div></div>
+              </div>
+              <div style="font-size:7.5px;color:#BAE6FD;margin-top:2px;text-align:center">Container stays alive — just no traffic!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 LIVENESS vs READINESS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle">Liveness vs Readiness — Side by Side</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Liveness -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--lvD);border:2px solid var(--lvB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">💚</div>
+            <div><div style="font-size:13px;font-weight:800;color:#86EFAC">Liveness Probe</div><div style="font-size:8px;color:var(--muted)">"Is the app alive?"</div></div>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Detects <strong style="color:#86EFAC">app deadlocks and freezes</strong>. Runs forever. If the process hangs but doesn't crash, liveness catches it.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">🎯 Question: is app functioning?</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">⏱ Runs: throughout Pod lifetime</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">❌ Fail → Container RESTARTED</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">🛣 /healthz → must return 2xx</div>
+          </div>
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">🧟 → 🔄</div>
+            <div style="font-size:9px;font-weight:700;color:#86EFAC">Zombie app → Auto-restart</div>
+          </div>
+        </div>
+        <!-- vs -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:var(--lvD);border:1px solid var(--lvB);font-size:9px;font-weight:700;color:#86EFAC">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Readiness -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--rdD);border:2px solid var(--rdB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🔵</div>
+            <div><div style="font-size:13px;font-weight:800;color:#BAE6FD">Readiness Probe</div><div style="font-size:8px;color:var(--muted)">"Is the app ready for users?"</div></div>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Detects <strong style="color:#BAE6FD">app not ready to serve</strong>. Runs from Pod start. Prevents premature traffic during warmup or temporary unreadiness.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD">🎯 Question: can I serve requests?</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD">⏱ Runs: from container start</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">⚠ Fail → Removed from SERVICE</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD">🛣 /ready → must return 2xx</div>
+          </div>
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">🚦 → 🔄</div>
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD">Not ready → No traffic routed</div>
+          </div>
+        </div>
+        <!-- Key diff -->
+        <div style="width:158px;flex-shrink:0;border-radius:12px;padding:11px;background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.22);display:flex;flex-direction:column;gap:6px;justify-content:center">
+          <div style="font-size:8.5px;font-weight:700;color:#FDE068;text-align:center;margin-bottom:3px">💡 Key Differences</div>
+          <div style="border-radius:7px;padding:6px;background:var(--lvD);border:1px solid var(--lvB)">
+            <div style="font-size:7.5px;font-weight:700;color:#86EFAC">On Fail:</div>
+            <div style="font-size:7px;color:#94A3B8">Liveness → restart container</div>
+            <div style="font-size:7px;color:#94A3B8">Readiness → remove from svc</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:var(--rdD);border:1px solid var(--rdB)">
+            <div style="font-size:7.5px;font-weight:700;color:#BAE6FD">Container:</div>
+            <div style="font-size:7px;color:#94A3B8">Liveness fail → killed</div>
+            <div style="font-size:7px;color:#94A3B8">Readiness fail → still runs</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:var(--cmD);border:1px solid var(--cmB)">
+            <div style="font-size:7.5px;font-weight:700;color:#FDE068">Use together!</div>
+            <div style="font-size:7px;color:#94A3B8">Both work in tandem for maximum app reliability</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 PROBE TYPES -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Probe Methods</div>
+      <div class="stitle">3 Ways to Check — Probe Types</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- HTTP GET -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--lvD);border:2px solid var(--lvB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">HTTP GET</div><div style="font-size:8px;color:var(--muted)">Most common · web apps</div></div>
+            <span class="tag" style="background:rgba(34,197,94,.2);color:#86EFAC;border:1px solid var(--lvB);margin-left:auto;font-size:7px;padding:3px 7px">⭐ Popular</span>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">K8s sends an HTTP GET to a specified path and port. If it returns 2xx or 3xx → Success. 4xx/5xx or timeout → Failure.</div>
+          <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(34,197,94,.18);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">httpGet:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">path:</span> <span style="color:#86EFAC">/healthz</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">port:</span> <span style="color:#86EFAC">8080</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">scheme:</span> <span style="color:#86EFAC">HTTP</span></div>
+          </div>
+          <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Use for REST APIs &amp; web apps</div>
+        </div>
+        <!-- TCP -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--rdD);border:2px solid var(--rdB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔌</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">TCP Socket</div><div style="font-size:8px;color:var(--muted)">Non-HTTP services</div></div>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">K8s tries to open a TCP connection to the specified port. If connection succeeds → Success. Connection refused → Failure. No HTTP needed.</div>
+          <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(50,108,229,.18);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">tcpSocket:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">port:</span> <span style="color:#BAE6FD">5432</span></div>
+            <br/>
+            <div style="color:#94A3B8"># Great for databases</div>
+          </div>
+          <div style="font-size:8px;color:#BAE6FD;padding:3px 8px;background:rgba(50,108,229,.1);border-radius:4px">✅ Use for databases, gRPC, Redis</div>
+        </div>
+        <!-- Exec -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--hpD);border:2px solid var(--hpB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⌨️</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">Exec Command</div><div style="font-size:8px;color:var(--muted)">Custom scripts</div></div>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">K8s runs a command inside the container. Exit code 0 → Success. Any non-zero exit → Failure. Most flexible, can run any logic.</div>
+          <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(0,212,255,.18);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">exec:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">command:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">- cat</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">- /tmp/healthy</span></div>
+          </div>
+          <div style="font-size:8px;color:#67E8F9;padding:3px 8px;background:rgba(0,212,255,.1);border-radius:4px">✅ Use for custom health logic</div>
+        </div>
+        <!-- Summary -->
+        <div style="width:155px;flex-shrink:0;border-radius:12px;padding:11px;background:var(--cmD);border:1.5px solid var(--cmB);display:flex;flex-direction:column;gap:6px;justify-content:center">
+          <div style="font-size:8.5px;font-weight:700;color:#FDE068;text-align:center;margin-bottom:3px">Which to Use?</div>
+          <div style="border-radius:7px;padding:6px;background:var(--lvD);border:1px solid var(--lvB)">
+            <div style="font-size:7.5px;font-weight:700;color:#86EFAC">🌐 HTTP GET</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">REST APIs, web servers</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:var(--rdD);border:1px solid var(--rdB)">
+            <div style="font-size:7.5px;font-weight:700;color:#BAE6FD">🔌 TCP Socket</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">MySQL, Redis, Kafka</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:var(--hpD);border:1px solid var(--hpB)">
+            <div style="font-size:7.5px;font-weight:700;color:#67E8F9">⌨ Exec</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">Custom scripts, file checks</div>
+          </div>
+          <div style="font-size:7.5px;color:#FDE068;text-align:center;margin-top:3px">All work with both Liveness &amp; Readiness</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Slow-Starting App — Full Timeline</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <!-- Timeline -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:6px">
+          <!-- Timeline steps -->
+          <div style="display:flex;gap:10px;align-items:stretch">
+            <!-- Time markers -->
+            <div style="display:flex;flex-direction:column;gap:7px;width:42px;flex-shrink:0;padding-top:2px">
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=0s</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=15s</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=25s</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=40s</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=90s</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">t=120s</div>
+            </div>
+            <!-- Events -->
+            <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--rdD);border:1px solid var(--rdB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">📦 Container starts — Spring Boot app initializing...</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--cmD);border:1px solid var(--cmB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#FDE068;font-weight:600">⏱ initialDelaySeconds passes → first probes start</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">🔵 Readiness failing — DB connecting... → No traffic yet</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--lvD);border:1px solid var(--lvB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ Readiness passes — Pod added to Service → Users reach app</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">💚 Liveness probe detects deadlock (3 failures) → Restart triggered</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--lvD);border:1px solid var(--lvB);display:flex;align-items:center;gap:8px"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">🔄 Container restarted → App healthy again → Traffic resumes</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Config panel -->
+        <div style="width:225px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:rgba(34,197,94,.05);border:2px solid rgba(34,197,94,.2);box-shadow:0 0 16px rgba(34,197,94,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Both Probes Together</div>
+            <div style="border-radius:7px;padding:9px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.18);font-family:monospace;font-size:7.5px">
+              <div style="color:#86EFAC;margin-bottom:3px">livenessProbe:</div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">httpGet:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">path:</span> <span style="color:#86EFAC">/healthz</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">port:</span> <span style="color:#86EFAC">8080</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">initialDelaySeconds:</span> <span style="color:#FDE068">30</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">periodSeconds:</span> <span style="color:#FDE068">10</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">failureThreshold:</span> <span style="color:#FDE068">3</span></div>
+              <br/>
+              <div style="color:#BAE6FD;margin-bottom:3px">readinessProbe:</div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">httpGet:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">path:</span> <span style="color:#BAE6FD">/ready</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">port:</span> <span style="color:#BAE6FD">8080</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">initialDelaySeconds:</span> <span style="color:#FDE068">10</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">periodSeconds:</span> <span style="color:#FDE068">5</span></div>
+            </div>
+            <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:7.5px;font-weight:600;color:#86EFAC;padding:2px 8px;background:rgba(34,197,94,.1);border-radius:4px">💚 Liveness: longer delay, less frequent</div>
+              <div style="font-size:7.5px;font-weight:600;color:#BAE6FD;padding:2px 8px;background:rgba(50,108,229,.1);border-radius:4px">🔵 Readiness: shorter delay, more frequent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Best Practices</div>
+      <div class="stitle">Health Probe Best Practices</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;padding-top:8px">
+        <div style="border-radius:12px;padding:12px;background:var(--lvD);border:2px solid var(--lvB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⏱</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Set initialDelay Correctly</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Match your app's startup time. If Spring Boot takes 20s, set <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">initialDelaySeconds: 30</code>. Too short = false restarts.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--rdD);border:2px solid var(--rdB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🪶</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#BAE6FD;margin-bottom:4px">Keep Probe Endpoints Lightweight</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45"><code style="color:#BAE6FD;background:rgba(50,108,229,.1);padding:1px 4px;border-radius:3px">/healthz</code> should just return 200 instantly. Never run DB queries in a liveness probe — that creates false failures under load.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--hpD);border:2px solid var(--hpB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔵</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#67E8F9;margin-bottom:4px">Readiness Can Be Deep</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Readiness <em>can</em> check DB connectivity, cache status, downstream services. If dependencies are down, go not-ready to avoid serving bad responses.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--cmD);border:2px solid var(--cmB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔢</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Set Failure Threshold &gt; 1</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Default is 3 consecutive failures. Never set it to 1 — a single network hiccup or slow response will trigger false restarts on healthy apps.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--failD);border:2px solid var(--failB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚫</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FCA5A5;margin-bottom:4px">Don't Liveness-Probe Dependencies</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Never check external services in liveness probes. If the DB is down, that's not the app's fault — a liveness failure would restart your healthy app unnecessarily.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--lvD);border:2px solid var(--lvB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚀</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Use Startup Probe for Slow Apps</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45"><code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 4px;border-radius:3px">startupProbe</code> — a third probe type. Disables liveness until startup succeeds. Perfect for legacy apps with long boot times.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Health Checks — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--lvD);border:1.5px solid var(--lvB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">💚 👀</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Liveness Probe</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Is employee awake?</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Check if alive. If not responding after multiple checks → call in a replacement (restart).</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--rdD);border:1.5px solid var(--rdB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--lv),var(--rd));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Use Both Together</div>
+              <div style="font-size:26px;margin-top:4px">🔵 🛎</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Readiness Probe</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Is employee ready to serve?</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Still having coffee? Don't open the counter. Wait till ready then let customers in.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--hpD);border:1.5px solid var(--hpB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✅ 🤖</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Self-healing app</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Broken apps restart automatically. Unready apps don't get traffic. Users always get healthy responses.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--lvD);border:1px solid var(--lvB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">💚</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Liveness</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Fail → restart container</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--rdD);border:1px solid var(--rdB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔵</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Readiness</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Fail → remove from Service</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#67E8F9">Probe types</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">HTTP · TCP · Exec command</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⏱</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Timing matters</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Set initialDelay to startup time</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🪶</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Light endpoints</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Liveness must be instant</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--lvD);border:1px solid var(--lvB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔢</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">failureThreshold</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Never set to 1 — avoid flapping</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#86EFAC">Liveness = is employee awake?</span> <span style="color:#BAE6FD">Readiness = are they ready to serve?</span> Both together = zero-downtime reliability."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--lvD);border:1.5px solid var(--lvB)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--lv)">◆</span>Container ≠ App healthy</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--lv)">◆</span>Liveness → restarts frozen app</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--lv)">◆</span>Readiness → gates traffic</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--lv)">◆</span>HTTP · TCP · Exec methods</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--lv)">◆</span>Always set initialDelay</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Horizontal Pod<br>Autoscaler (HPA)</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Auto-scale Pods based<br>on CPU &amp; memory</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

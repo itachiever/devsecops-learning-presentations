@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --ss:#A855F7;--ssD:rgba(168,85,247,.11);--ssB:rgba(168,85,247,.35);
+  --pv:#00D4FF;--pvD:rgba(0,212,255,.09);--pvB:rgba(0,212,255,.28);
+  --dep:#326CE5;--depD:rgba(50,108,229,.11);--depB:rgba(50,108,229,.34);
+  --ok:#22C55E;--okD:rgba(34,197,94,.1);--okB:rgba(34,197,94,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --db:#F59E0B;--dbD:rgba(245,158,11,.1);--dbB:rgba(245,158,11,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--purple);border-color:var(--purple);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--purple);color:var(--purple)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(124,58,237,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(124,58,237,.2);border-color:var(--purple)}
+.nbtn.pri{background:linear-gradient(135deg,var(--purple),var(--blue));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(124,58,237,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(124,58,237,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ss);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(124,58,237,.17);transition:all .25s}
+.bi:hover{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Pod with identity */
+.ss-pod{border-radius:10px;padding:8px 10px;border:1.5px solid var(--ssB);background:var(--ssD);text-align:center;position:relative}
+.ss-pod-name{font-size:8px;font-weight:800;color:var(--ss);letter-spacing:.5px;margin-bottom:4px}
+.pvc-block{border-radius:6px;padding:4px 7px;background:var(--pvD);border:1px solid var(--pvB);font-size:7px;font-weight:700;color:#67E8F9;margin-top:5px;display:flex;align-items:center;gap:3px;justify-content:center}
+/* dep pod (anonymous) */
+.dep-pod{border-radius:10px;padding:8px 10px;border:1.5px solid var(--depB);background:var(--depD);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.15) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ss);padding:3px 12px;border:1px solid rgba(168,85,247,.25);border-radius:20px;background:rgba(168,85,247,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(28px,6vw,60px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--ss) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">StatefulSet</div>
+        <div style="font-size:clamp(10px,1.7vw,16px);color:var(--muted);margin-bottom:18px;line-height:1.5">Managing Stateful Applications in Kubernetes<br>— Stable identity, persistent storage & ordered deployment</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--ssD);color:#DDD6FE;border:1px solid var(--ssB);padding:4px 11px;font-size:9px">🪪 Stable Identity</span>
+          <span class="tag" style="background:var(--pvD);color:#67E8F9;border:1px solid var(--pvB);padding:4px 11px;font-size:9px">💾 Persistent Storage</span>
+          <span class="tag" style="background:var(--dbD);color:#FDE068;border:1px solid var(--dbB);padding:4px 11px;font-size:9px">🗄 Databases</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">📋 Ordered Pods</span>
+        </div>
+      </div>
+      <!-- right: ordered pods with storage -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:280px">
+          <div style="border-radius:14px;padding:13px;background:var(--ssD);border:2px solid var(--ssB);box-shadow:0 0 28px rgba(168,85,247,.18)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🔮 StatefulSet — mysql</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;gap:7px;align-items:center">
+                <div style="flex:1;border-radius:9px;padding:8px;background:rgba(168,85,247,.15);border:1.5px solid var(--ssB);text-align:center">
+                  <div style="font-size:9px;font-weight:800;color:#DDD6FE">mysql-0</div>
+                  <div style="font-size:12px;margin:3px 0">🗄</div>
+                  <div style="font-size:7px;color:var(--muted)">Primary</div>
+                </div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="flex:1;border-radius:8px;padding:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:#67E8F9">💾 PVC-0</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:2px">/data/mysql-0</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px;align-items:center">
+                <div style="flex:1;border-radius:9px;padding:8px;background:rgba(168,85,247,.1);border:1px solid var(--ssB);text-align:center">
+                  <div style="font-size:9px;font-weight:800;color:#DDD6FE">mysql-1</div>
+                  <div style="font-size:12px;margin:3px 0">🗄</div>
+                  <div style="font-size:7px;color:var(--muted)">Replica</div>
+                </div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="flex:1;border-radius:8px;padding:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:#67E8F9">💾 PVC-1</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:2px">/data/mysql-1</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px;align-items:center">
+                <div style="flex:1;border-radius:9px;padding:8px;background:rgba(168,85,247,.08);border:1px solid var(--ssB);text-align:center">
+                  <div style="font-size:9px;font-weight:800;color:#DDD6FE">mysql-2</div>
+                  <div style="font-size:12px;margin:3px 0">🗄</div>
+                  <div style="font-size:7px;color:var(--muted)">Replica</div>
+                </div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="flex:1;border-radius:8px;padding:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:#67E8F9">💾 PVC-2</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:2px">/data/mysql-2</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 STATELESS VS STATEFUL ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Key Concept First</div>
+      <div class="stitle">Stateless vs Stateful Applications</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- stateless -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--depD);border:2px solid var(--depB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Stateless App</div><div style="font-size:8px;color:var(--muted)">e.g., web servers, APIs, frontends</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1"><strong style="color:#BAE6FD">No memory between requests</strong> — each request is handled independently. The app doesn't remember previous interactions.</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:6px;align-items:center"><span>✅</span>Any Pod can handle any request</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:6px;align-items:center"><span>✅</span>Pods are interchangeable</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:6px;align-items:center"><span>✅</span>Easy to scale horizontally</div>
+          </div>
+          <div style="border-radius:9px;padding:9px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:5px">
+              <div class="dep-pod" style="width:52px;text-align:center"><div style="font-size:13px">🌐</div><div style="font-size:7px;color:#BAE6FD;font-weight:600">pod-abc</div></div>
+              <div class="dep-pod" style="width:52px;text-align:center"><div style="font-size:13px">🌐</div><div style="font-size:7px;color:#BAE6FD;font-weight:600">pod-xyz</div></div>
+              <div class="dep-pod" style="width:52px;text-align:center"><div style="font-size:13px">🌐</div><div style="font-size:7px;color:#BAE6FD;font-weight:600">pod-qrs</div></div>
+            </div>
+            <div style="text-align:center;font-size:8px;color:var(--muted)">Random names · fully interchangeable</div>
+          </div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#BAE6FD">Use Deployment ✓</div>
+        </div>
+        <!-- VS -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)">VS</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- stateful -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--ssD);border:2px solid var(--ssB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(168,85,247,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🗄</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Stateful App</div><div style="font-size:8px;color:var(--muted)">e.g., databases, message queues</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1"><strong style="color:#DDD6FE">Stores and remembers data</strong> — each instance has its own data. Losing the Pod means losing the data (without care).</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>⚠️</span>Each Pod has unique identity</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>⚠️</span>Needs persistent storage</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>⚠️</span>Ordered start/stop required</div>
+          </div>
+          <div style="border-radius:9px;padding:9px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:5px">
+              <div style="width:52px;border-radius:8px;padding:5px;background:var(--ssD);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:13px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:600">db-0</div></div>
+              <div style="width:52px;border-radius:8px;padding:5px;background:var(--ssD);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:13px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:600">db-1</div></div>
+              <div style="width:52px;border-radius:8px;padding:5px;background:var(--ssD);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:13px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:600">db-2</div></div>
+            </div>
+            <div style="text-align:center;font-size:8px;color:var(--muted)">Fixed names · unique identity</div>
+          </div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(168,85,247,.2);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">Use StatefulSet ✓</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 PROBLEM WITH DEPLOYMENT ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Deployment <span style="color:var(--red)">Fails</span> for Stateful Apps</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🎲</div><div class="bt"><strong>Pods are anonymous and interchangeable</strong> — pod-abc123 today, pod-xyz789 tomorrow. No stable identity.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🗑</div><div class="bt"><strong>Storage is not persistent by default</strong> — when a Pod is replaced, its data is gone unless you manually configure it</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🔀</div><div class="bt"><strong>Pods can start in any order</strong> — databases often need the primary to start before replicas. Deployment ignores this.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">💀</div><div class="bt"><strong>Databases would lose data</strong> — if a MySQL Pod is replaced by Deployment, all its data vanishes. That's catastrophic.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ssD);border:1px solid var(--ssB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">StatefulSet solves all three — stable identity, persistent storage, and ordered startup</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">❌ Deployment with Database</div>
+            <!-- before -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--muted);font-weight:600;margin-bottom:4px">Pod running with data</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="dep-pod" style="flex:1;padding:8px;text-align:center">
+                  <div style="font-size:14px">🗄</div>
+                  <div style="font-size:8px;font-weight:700;color:#BAE6FD">db-abc123</div>
+                  <div style="font-size:7px;color:#86EFAC;margin-top:2px">📊 1GB data</div>
+                </div>
+                <div style="font-size:10px;color:var(--muted)">→</div>
+                <div style="flex:1;padding:8px;border-radius:8px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.2);text-align:center">
+                  <div style="font-size:12px">💾</div>
+                  <div style="font-size:7px;color:#BAE6FD;font-weight:600">temp storage</div>
+                </div>
+              </div>
+            </div>
+            <!-- pod crashes -->
+            <div style="margin-bottom:7px;padding:6px 9px;border-radius:7px;background:rgba(239,68,68,.15);border:1px solid var(--failB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">💀 Pod crashes → Deployment replaces it</div>
+            </div>
+            <!-- after: data lost -->
+            <div>
+              <div style="font-size:8px;color:#FCA5A5;font-weight:600;margin-bottom:4px">New Pod — data is GONE! 😱</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div class="dep-pod" style="flex:1;padding:8px;text-align:center">
+                  <div style="font-size:14px">🗄</div>
+                  <div style="font-size:8px;font-weight:700;color:#BAE6FD">db-xyz789</div>
+                  <div style="font-size:7px;color:#FCA5A5;margin-top:2px">📊 0 data</div>
+                </div>
+                <div style="font-size:10px;color:var(--muted)">→</div>
+                <div style="flex:1;padding:8px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);text-align:center">
+                  <div style="font-size:12px">🗑</div>
+                  <div style="font-size:7px;color:#FCA5A5;font-weight:600">lost forever</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 WHAT IS STATEFULSET ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(168,85,247,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--ss)">StatefulSet?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🔮</div><div class="bt"><strong>Kubernetes object for stateful applications</strong> — designed specifically for apps that need memory across restarts</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🪪</div><div class="bt"><strong>Stable Pod identity</strong> — every Pod gets a fixed, predictable name (app-0, app-1) that survives restarts</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">💾</div><div class="bt"><strong>Persistent storage</strong> — each Pod has its own dedicated volume that is never deleted when the Pod restarts</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">📋</div><div class="bt"><strong>Ordered deployment</strong> — Pods start and stop in sequence (0→1→2 to start, 2→1→0 to stop)</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ssD);border:1px solid var(--ssB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Think of it as: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Deployment for stateless apps, StatefulSet for stateful apps. They are complementary.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:13px;padding:13px;background:var(--ssD);border:2px solid var(--ssB);box-shadow:0 0 26px rgba(168,85,247,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">🔮 StatefulSet — 3 guarantees</div>
+            <!-- identity -->
+            <div style="padding:9px 10px;border-radius:9px;background:rgba(168,85,247,.14);border:1px solid var(--ssB);margin-bottom:6px;display:flex;align-items:center;gap:9px">
+              <div style="width:30px;height:30px;border-radius:8px;background:rgba(168,85,247,.25);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🪪</div>
+              <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Stable Identity</div><div style="font-size:8px;color:var(--muted)">app-0, app-1, app-2 — always same name</div></div>
+            </div>
+            <!-- storage -->
+            <div style="padding:9px 10px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB);margin-bottom:6px;display:flex;align-items:center;gap:9px">
+              <div style="width:30px;height:30px;border-radius:8px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">💾</div>
+              <div><div style="font-size:9px;font-weight:700;color:#67E8F9">Persistent Storage</div><div style="font-size:8px;color:var(--muted)">Each pod gets its own PVC, survives restarts</div></div>
+            </div>
+            <!-- order -->
+            <div style="padding:9px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center;gap:9px">
+              <div style="width:30px;height:30px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">📋</div>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">Ordered Deployment</div><div style="font-size:8px;color:var(--muted)">Pods start 0→1→2, stop 2→1→0</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 STABLE IDENTITY ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(168,85,247,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Feature 1</div>
+        <div class="stitle">Stable Pod <span style="color:var(--ss)">Identity</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🪪</div><div class="bt"><strong>Each Pod gets a unique, predictable name</strong> — always <code style="background:rgba(168,85,247,.15);padding:1px 5px;border-radius:4px;font-size:10px;color:#DDD6FE">app-0</code>, <code style="background:rgba(168,85,247,.15);padding:1px 5px;border-radius:4px;font-size:10px;color:#DDD6FE">app-1</code>, <code style="background:rgba(168,85,247,.15);padding:1px 5px;border-radius:4px;font-size:10px;color:#DDD6FE">app-2</code> — never random</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🔁</div><div class="bt"><strong>Identity survives Pod restart</strong> — Pod replaced? New Pod gets the SAME name. Clients can always find it.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🌐</div><div class="bt"><strong>Stable network identity (DNS)</strong> — each Pod gets a stable DNS: <code style="font-size:10px;color:#DDD6FE">app-0.my-svc.namespace.svc.cluster.local</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--ssD)">🔗</div><div class="bt"><strong>Critical for clustered systems</strong> — MySQL primary needs a known address that replicas can always connect to</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Contrast with Deployment: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Deployment uses random names (pod-abc123). If replaced, the new name is also random. Unreliable.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--ssD);border:2px solid var(--ssB);box-shadow:0 0 24px rgba(168,85,247,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🪪 Stable Identity Comparison</div>
+            <!-- deployment row -->
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:5px;display:flex;align-items:center;gap:5px"><span style="padding:2px 6px;border-radius:6px;background:var(--depD);border:1px solid var(--depB)">Deployment</span></div>
+              <div style="display:flex;gap:5px;margin-bottom:4px">
+                <div class="dep-pod" style="flex:1;padding:6px;text-align:center"><div style="font-size:12px">📦</div><div style="font-size:7px;color:#94A3B8">pod-abc12</div></div>
+                <div class="dep-pod" style="flex:1;padding:6px;text-align:center"><div style="font-size:12px">📦</div><div style="font-size:7px;color:#94A3B8">pod-xyz78</div></div>
+                <div class="dep-pod" style="flex:1;padding:6px;text-align:center"><div style="font-size:12px">📦</div><div style="font-size:7px;color:#94A3B8">pod-qrs56</div></div>
+              </div>
+              <div style="text-align:center;font-size:8px;color:var(--muted)">Random names → changes on restart</div>
+            </div>
+            <div style="width:100%;height:1px;background:var(--border);margin-bottom:8px"></div>
+            <!-- statefulset row -->
+            <div>
+              <div style="font-size:8px;font-weight:700;color:#DDD6FE;margin-bottom:5px;display:flex;align-items:center;gap:5px"><span style="padding:2px 6px;border-radius:6px;background:var(--ssD);border:1px solid var(--ssB)">StatefulSet</span></div>
+              <div style="display:flex;gap:5px;margin-bottom:4px">
+                <div style="flex:1;border-radius:8px;padding:6px;background:rgba(168,85,247,.14);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:12px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:700">db-0</div></div>
+                <div style="flex:1;border-radius:8px;padding:6px;background:rgba(168,85,247,.14);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:12px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:700">db-1</div></div>
+                <div style="flex:1;border-radius:8px;padding:6px;background:rgba(168,85,247,.14);border:1.5px solid var(--ssB);text-align:center"><div style="font-size:12px">🗄</div><div style="font-size:7px;color:#DDD6FE;font-weight:700">db-2</div></div>
+              </div>
+              <div style="text-align:center;font-size:8px;color:#86EFAC;font-weight:600">Same names ALWAYS — even after restart ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 PERSISTENT STORAGE ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Feature 2</div>
+        <div class="stitle">Persistent <span style="color:var(--pv)">Storage</span> Per Pod</div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">💾</div><div class="bt"><strong>Each Pod gets its own dedicated storage</strong> — db-0 has its own PVC, db-1 has another. Completely isolated.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">♾</div><div class="bt"><strong>Data survives Pod restarts</strong> — Pod deleted and recreated? It reconnects to the SAME PVC with all data intact</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">📦</div><div class="bt"><strong>Uses PersistentVolumeClaim (PVC)</strong> — PVC is like a reserved disk in the cluster. It exists independently of the Pod.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🚨</div><div class="bt"><strong>PVCs are NOT deleted with Pods</strong> — even if you delete the StatefulSet, the PVCs remain, protecting your data</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Important: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">StatefulSet uses <code style="color:#67E8F9">volumeClaimTemplates</code> to automatically create a PVC for each Pod</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);box-shadow:0 0 24px rgba(0,212,255,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">💾 Each Pod → Own Storage</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <!-- pod-0 -->
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1;border-radius:8px;padding:8px;background:rgba(168,85,247,.14);border:1.5px solid var(--ssB);text-align:center">
+                  <div style="font-size:14px">🗄</div>
+                  <div style="font-size:8px;font-weight:700;color:#DDD6FE">db-0</div>
+                </div>
+                <div style="font-size:16px;color:var(--cyan)">⟷</div>
+                <div style="flex:1;border-radius:8px;padding:8px;background:rgba(0,212,255,.1);border:1.5px solid var(--pvB);text-align:center">
+                  <div style="font-size:14px">💾</div>
+                  <div style="font-size:8px;font-weight:700;color:#67E8F9">PVC-db-0</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:1px">10GB / db-data</div>
+                </div>
+              </div>
+              <!-- pod-1 -->
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="flex:1;border-radius:8px;padding:8px;background:rgba(168,85,247,.1);border:1px solid var(--ssB);text-align:center">
+                  <div style="font-size:14px">🗄</div>
+                  <div style="font-size:8px;font-weight:700;color:#DDD6FE">db-1</div>
+                </div>
+                <div style="font-size:16px;color:var(--cyan)">⟷</div>
+                <div style="flex:1;border-radius:8px;padding:8px;background:rgba(0,212,255,.1);border:1.5px solid var(--pvB);text-align:center">
+                  <div style="font-size:14px">💾</div>
+                  <div style="font-size:8px;font-weight:700;color:#67E8F9">PVC-db-1</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:1px">10GB / db-data</div>
+                </div>
+              </div>
+              <!-- pod 0 crash + recover -->
+              <div style="border-top:1px solid var(--border);padding-top:8px">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:5px">💀 db-0 crashes → recreated</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="flex:1;border-radius:8px;padding:8px;background:rgba(34,197,94,.1);border:1.5px solid var(--okB);text-align:center">
+                    <div style="font-size:14px">🗄</div>
+                    <div style="font-size:8px;font-weight:700;color:#86EFAC">db-0 ✨</div>
+                  </div>
+                  <div style="font-size:16px;color:var(--cyan)">⟷</div>
+                  <div style="flex:1;border-radius:8px;padding:8px;background:rgba(0,212,255,.1);border:1.5px solid var(--pvB);text-align:center">
+                    <div style="font-size:14px">💾</div>
+                    <div style="font-size:8px;font-weight:700;color:#86EFAC">PVC-db-0 ✅</div>
+                    <div style="font-size:7px;color:#86EFAC;margin-top:1px">Data safe!</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 ORDERED DEPLOYMENT ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.11) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Feature 3</div>
+      <div class="stitle">Ordered Deployment & Scaling</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- left: scale up sequence -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="padding:6px 10px;border-radius:8px;background:var(--okD);border:1px solid var(--okB);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">📈 Scale Up — Ordered Start (0 → 1 → 2)</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">1</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:700;color:#86EFAC">app-0 starts FIRST</div><div style="font-size:9px;color:#94A3B8">Must be Ready before app-1 begins</div></div>
+              <div style="border-radius:8px;padding:5px 10px;background:rgba(168,85,247,.14);border:1px solid var(--ssB);font-size:8px;font-weight:700;color:#DDD6FE">app-0 ✅ Ready</div>
+            </div>
+            <div style="padding-left:18px;font-size:12px;color:var(--green)">↓</div>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">2</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:700;color:#86EFAC">app-1 starts SECOND</div><div style="font-size:9px;color:#94A3B8">app-0 fully ready → now app-1 begins</div></div>
+              <div style="border-radius:8px;padding:5px 10px;background:rgba(168,85,247,.14);border:1px solid var(--ssB);font-size:8px;font-weight:700;color:#DDD6FE">app-1 ✅ Ready</div>
+            </div>
+            <div style="padding-left:18px;font-size:12px;color:var(--green)">↓</div>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.18)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">3</div>
+              <div style="flex:1"><div style="font-size:10px;font-weight:700;color:#86EFAC">app-2 starts LAST</div><div style="font-size:9px;color:#94A3B8">app-1 fully ready → now app-2 begins</div></div>
+              <div style="border-radius:8px;padding:5px 10px;background:rgba(168,85,247,.14);border:1px solid var(--ssB);font-size:8px;font-weight:700;color:#DDD6FE">app-2 ✅ Ready</div>
+            </div>
+          </div>
+        </div>
+        <!-- right: scale down + why it matters -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="padding:6px 10px;border-radius:8px;background:var(--failD);border:1px solid var(--failB);text-align:center;font-size:9px;font-weight:700;color:#FCA5A5">📉 Scale Down — Reverse Order (2 → 1 → 0)</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">1</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">app-2 terminates FIRST</div><div style="font-size:9px;color:#94A3B8">Last started → first to stop</div></div>
+            </div>
+            <div style="padding-left:18px;font-size:12px;color:var(--red)">↓</div>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">2</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">app-1 terminates</div><div style="font-size:9px;color:#94A3B8">Graceful shutdown in sequence</div></div>
+            </div>
+            <div style="padding-left:18px;font-size:12px;color:var(--red)">↓</div>
+            <div style="display:flex;gap:8px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.16)">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">3</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">app-0 terminates LAST</div><div style="font-size:9px;color:#94A3B8">Primary shuts down after all replicas are gone</div></div>
+            </div>
+          </div>
+          <!-- why it matters -->
+          <div style="padding:9px 12px;border-radius:9px;background:var(--ssD);border:1px solid var(--ssB)">
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE;margin-bottom:5px">🔑 Why ordering matters:</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">In a MySQL cluster — app-0 is the primary. Replicas (app-1, app-2) must connect to it first. If app-0 isn't ready, replicas can't join the cluster.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 USE CASES ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:20%;width:55%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World</div>
+      <div class="stitle">When to Use StatefulSet?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- databases -->
+        <div style="border-radius:12px;padding:13px;background:var(--dbD);border:2px solid var(--dbB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🗄</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FDE068">Databases</div><div style="font-size:8px;color:var(--muted)">Most common use case</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Any database needs persistent, named storage and ordered startup.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid var(--dbB);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🐬</span>MySQL / MariaDB</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid var(--dbB);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🍃</span>MongoDB</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid var(--dbB);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🐘</span>PostgreSQL</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid var(--dbB);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🔴</span>Redis Cluster</div>
+          </div>
+        </div>
+        <!-- message queues -->
+        <div style="border-radius:12px;padding:13px;background:var(--ssD);border:2px solid var(--ssB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(168,85,247,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📨</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Message Queues</div><div style="font-size:8px;color:var(--muted)">Distributed messaging</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Brokers need stable addresses so producers and consumers can always find them.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.12);border:1px solid var(--ssB);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>⚡</span>Apache Kafka</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.12);border:1px solid var(--ssB);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>🐰</span>RabbitMQ</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.12);border:1px solid var(--ssB);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>🌳</span>ZooKeeper</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.12);border:1px solid var(--ssB);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>📬</span>NATS JetStream</div>
+          </div>
+        </div>
+        <!-- distributed search / storage -->
+        <div style="border-radius:12px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔍</div>
+            <div><div style="font-size:11px;font-weight:800;color:#67E8F9">Distributed Systems</div><div style="font-size:8px;color:var(--muted)">Search & storage clusters</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Clustered systems where each node has a role and must be addressable by name.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid var(--pvB);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>🔍</span>Elasticsearch</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid var(--pvB);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>💚</span>etcd cluster</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid var(--pvB);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>📦</span>Cassandra</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid var(--pvB);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>🗂</span>Ceph / Rook</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:9px;padding:8px 14px;border-radius:9px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:#DDD6FE">General rule: </span>
+        <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">If your app stores data, needs a stable address, or must start/stop in order → use <strong style="color:#DDD6FE">StatefulSet</strong></span>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY + ANALOGY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(168,85,247,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">StatefulSet — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--depD);border:1.5px solid var(--depB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">🚚</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Deployment</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Temp Workers</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Interchangeable, any desk, data lost when they leave</div>
+              <div style="font-size:8px;padding:2px 8px;border-radius:8px;background:var(--depD);border:1px solid var(--depB);color:#BAE6FD;font-weight:600">Stateless ✓</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--ssD);border:1.5px solid var(--ssB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Use for databases</div>
+              <div style="font-size:26px;margin-top:4px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">StatefulSet</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Permanent Staff</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Fixed desk, fixed role, all their work is saved</div>
+              <div style="font-size:8px;padding:2px 8px;border-radius:8px;background:var(--ssD);border:1px solid var(--ssB);color:#DDD6FE;font-weight:600">Stateful ✓</div>
+            </div>
+          </div>
+          <!-- 3 guarantees recap -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;flex:1">
+            <div style="padding:10px;border-radius:10px;background:var(--ssD);border:1px solid var(--ssB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:20px">🪪</div>
+              <div style="font-size:9px;font-weight:700;color:#DDD6FE">Stable Identity</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.3">Fixed names — app-0, app-1 always the same</div>
+            </div>
+            <div style="padding:10px;border-radius:10px;background:var(--pvD);border:1px solid var(--pvB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:20px">💾</div>
+              <div style="font-size:9px;font-weight:700;color:#67E8F9">Persistent Storage</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.3">Own PVC per pod — data survives crashes</div>
+            </div>
+            <div style="padding:10px;border-radius:10px;background:var(--okD);border:1px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:20px">📋</div>
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">Ordered Deploy</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.3">0→1→2 start, 2→1→0 stop always</div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:var(--ss)">StatefulSet</span> is to stateful apps what Deployment is to stateless apps — the right tool for the right job"</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--ssD);border:1.5px solid var(--ssB)">
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ss)">◆</span>For stateful apps</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ss)">◆</span>Stable pod names</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ss)">◆</span>Own PVC per pod</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ss)">◆</span>Ordered start/stop</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ss)">◆</span>DBs, queues, clusters</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7EB3FF;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">DaemonSet</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Run a pod on every node — log collectors, monitoring agents</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--purple),var(--blue));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#DDD6FE;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

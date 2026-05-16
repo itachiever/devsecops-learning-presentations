@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --pv:#7C3AED;--pvD:rgba(124,58,237,.1);--pvB:rgba(124,58,237,.32);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --vol:#00D4FF;--volD:rgba(0,212,255,.09);--volB:rgba(0,212,255,.28);
+  --ctr:#22C55E;--ctrD:rgba(34,197,94,.09);--ctrB:rgba(34,197,94,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --aws:#F59E0B;--awsD:rgba(245,158,11,.09);--awsB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--pv);border-color:var(--pv);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--pv);color:var(--pv)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(124,58,237,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(124,58,237,.18);border-color:var(--pv)}
+.nbtn.pri{background:linear-gradient(135deg,var(--pv),var(--blue));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(124,58,237,.12)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(124,58,237,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(124,58,237,.16);transition:all .25s}
+.bi:hover{background:rgba(124,58,237,.07);border-color:rgba(124,58,237,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.pv-box{border-radius:10px;padding:9px 12px;background:var(--pvD);border:2px solid var(--pvB);text-align:center}
+.pv-title{font-size:10px;font-weight:800;color:#DDD6FE}
+.pod-box{border-radius:10px;padding:9px 12px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.pod-title{font-size:10px;font-weight:800;color:#BAE6FD}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purpleL);padding:3px 12px;border:1px solid rgba(124,58,237,.25);border-radius:20px;background:rgba(124,58,237,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--purpleL) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Persistent<br>Volume (PV)</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Persistent Storage in Kubernetes<br>— Storage that outlives your Pods</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--pvD);color:#DDD6FE;border:1px solid var(--pvB);padding:4px 11px;font-size:9px">🗄 Persistent</span>
+          <span class="tag" style="background:var(--podD);color:#BAE6FD;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📦 Pod-independent</span>
+          <span class="tag" style="background:var(--volD);color:#67E8F9;border:1px solid var(--volB);padding:4px 11px;font-size:9px">☁ Cloud-native</span>
+          <span class="tag" style="background:var(--awsD);color:#FDE068;border:1px solid var(--awsB);padding:4px 11px;font-size:9px">🏭 Production-ready</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(124,58,237,.25);border-radius:14px;padding:12px;background:rgba(124,58,237,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Cluster Storage Architecture</div>
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:6px">
+              <div class="pod-box" style="flex:1"><div class="pod-title">📦 Pod A</div><div style="font-size:7px;color:var(--muted)">app container</div></div>
+              <div class="pod-box" style="flex:1"><div class="pod-title">📦 Pod B</div><div style="font-size:7px;color:var(--muted)">db container</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--purpleL);margin-bottom:4px">↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕</div>
+            <div class="pv-box" style="margin-bottom:6px;box-shadow:0 0 18px rgba(124,58,237,.2)">
+              <div class="pv-title">🗄 Persistent Volume (PV)</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">exists independently from Pods</div>
+              <div style="display:flex;gap:4px;justify-content:center;margin-top:6px;flex-wrap:wrap">
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(124,58,237,.2);color:#DDD6FE;font-weight:600">AWS EBS</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(124,58,237,.2);color:#DDD6FE;font-weight:600">NFS</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(124,58,237,.2);color:#DDD6FE;font-weight:600">GCP Disk</span>
+              </div>
+            </div>
+            <div style="font-size:9px;color:var(--muted);text-align:center">Pods come and go — PV stays forever</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Regular Volumes <span style="color:var(--fail)">Aren't Enough</span></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚡</div><div class="bt"><strong>Containers are ephemeral</strong> — they start, run, and die. Their filesystem is wiped on every restart.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔗</div><div class="bt"><strong>Basic volumes are tied to the Pod</strong> — emptyDir disappears when the Pod is deleted. Not truly persistent.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🚚</div><div class="bt"><strong>Pods can move across nodes</strong> — Kubernetes may reschedule a Pod to a different node, leaving data behind</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🏭</div><div class="bt"><strong>Production apps need independent storage</strong> — databases cannot rely on storage that's destroyed with the Pod</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔄</div><div class="bt"><strong>Storage must outlive Pods</strong> — if a new Pod replaces an old one, it must connect to the same existing data</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Key gap: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">We need storage that lives <em style="color:#FDE068">outside</em> the Pod lifecycle — that's exactly what Persistent Volumes solve.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:275px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Without Persistent Volume</div>
+            <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:9px;font-weight:600;color:#BAE6FD">📦 Pod (with DB data)</div>
+              <div style="font-size:12px;color:var(--fail)">↓ deleted / rescheduled 💥</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);text-align:center;font-size:9px;font-weight:600;color:#FCA5A5">📦 New Pod — data = GONE 💀</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--pvD);border:1.5px solid var(--pvB)">
+            <div style="font-size:9px;font-weight:800;color:#DDD6FE;text-align:center;margin-bottom:8px">✅ With Persistent Volume</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:9px;font-weight:600;color:#BAE6FD">📦 Pod (running)</div>
+              <div style="font-size:10px;color:var(--purpleL)">↕ connected</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">🗄 PV — data safe</div>
+              <div style="font-size:10px;color:var(--fail)">↓ Pod deleted 💥</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">🗄 PV — STILL HERE ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS PV ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--purpleL)">Persistent Volume?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🗄</div><div class="bt"><strong>A storage resource in the Kubernetes cluster</strong> — provisioned by an admin or dynamically by Kubernetes itself</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🔓</div><div class="bt"><strong>Exists independently from Pods</strong> — PV has its own lifecycle. Pod dies, PV survives. Pod restarts, data is still there.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">⚙</div><div class="bt"><strong>Managed by the Kubernetes cluster</strong> — K8s tracks PV state (Available, Bound, Released). You don't manage disks manually.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">♻️</div><div class="bt"><strong>Can be reused by applications</strong> — when one application is done, the PV can be made available again for another</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🌐</div><div class="bt"><strong>Backed by real storage</strong> — cloud disk, NFS server, local SSD — PV is an abstraction over real physical or cloud storage</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Simple analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">PV = a permanent room in the building 🏢. Tenants (Pods) may come and go, but the room always stays.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);box-shadow:0 0 22px rgba(124,58,237,.18)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">PV in the Cluster</div>
+            <!-- Cluster container -->
+            <div style="border-radius:10px;padding:10px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD;text-align:center;margin-bottom:7px">☸ Kubernetes Cluster</div>
+              <div style="display:flex;gap:5px;margin-bottom:6px">
+                <div class="pod-box" style="flex:1;padding:5px"><div style="font-size:8px;font-weight:700;color:#BAE6FD">📦 Pod A</div><div style="font-size:7px;color:var(--muted)">MySQL</div></div>
+                <div class="pod-box" style="flex:1;padding:5px"><div style="font-size:8px;font-weight:700;color:#BAE6FD">📦 Pod B</div><div style="font-size:7px;color:var(--muted)">App</div></div>
+              </div>
+              <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--purpleL);margin-bottom:5px">↙ ↘</div>
+              <div class="pv-box" style="box-shadow:0 0 14px rgba(124,58,237,.22)">
+                <div class="pv-title">🗄 Persistent Volume</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">100 GB · RWO</div>
+                <div style="display:flex;gap:3px;justify-content:center;margin-top:5px">
+                  <span style="font-size:7px;padding:2px 5px;border-radius:6px;background:rgba(34,197,94,.15);color:#86EFAC;font-weight:600">Available</span>
+                  <span style="font-size:7px;padding:2px 5px;border-radius:6px;background:rgba(124,58,237,.2);color:#DDD6FE;font-weight:600">Bound</span>
+                  <span style="font-size:7px;padding:2px 5px;border-radius:6px;background:rgba(245,158,11,.15);color:#FDE068;font-weight:600">Released</span>
+                </div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ PV outlives any Pod or container</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 HOW PV WORKS ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">End-to-End Flow</div>
+      <div class="stitle">How Persistent Volume Works — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(50,108,229,.09);border:1px solid rgba(50,108,229,.25)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Admin creates a Persistent Volume</div><div style="font-size:9px;color:#94A3B8">PV is defined (size, type, access mode) — e.g. 50GB AWS EBS disk. Exists in cluster, status: Available</div></div>
+            <span style="margin-left:auto;font-size:13px">👨‍💼</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--purpleL)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Application requests storage via PVC</div><div style="font-size:9px;color:#94A3B8">App creates a PersistentVolumeClaim (PVC) — says "I need 20GB storage". K8s finds a matching PV.</div></div>
+            <span style="margin-left:auto;font-size:13px">📋</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--vol)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--volD);border:1px solid var(--volB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--vol),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Kubernetes binds PVC to PV</div><div style="font-size:9px;color:#94A3B8">K8s matches the claim to a suitable PV. PV status changes to Bound. Pod can now use the storage.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔗</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ctr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ctrD);border:1px solid var(--ctrB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ctr),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Pod mounts the PVC and uses storage</div><div style="font-size:9px;color:#94A3B8">Pod accesses /data path. Reads and writes data to the PV. Database stores records safely.</div></div>
+            <span style="margin-left:auto;font-size:13px">✏️</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--purpleL)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Pod restarts — PV data is untouched</div><div style="font-size:9px;color:#94A3B8">New Pod starts, re-mounts same PV via PVC — all data is intact. Zero data loss.</div></div>
+            <span style="margin-left:auto;font-size:13px">✅</span>
+          </div>
+        </div>
+        <div style="width:190px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(124,58,237,.04);border:1.5px dashed var(--pvB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Binding Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);text-align:center"><div style="font-size:9px;font-weight:600;color:#BAE6FD">👨‍💼 Admin</div><div style="font-size:7px;color:var(--muted)">creates PV</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center"><div style="font-size:9px;font-weight:700;color:#DDD6FE">🗄 PV (Available)</div></div>
+              <div style="font-size:10px;color:var(--vol)">↕ PVC binds</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--volD);border:1px solid var(--volB);text-align:center"><div style="font-size:9px;font-weight:600;color:#67E8F9">📋 PVC (Bound)</div></div>
+              <div style="font-size:10px;color:var(--ctr)">↓ mount</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px;font-weight:600;color:#BAE6FD">📦 Pod uses /data</div></div>
+              <div style="font-size:10px;color:var(--fail)">↓ 💥 crash</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center"><div style="font-size:9px;font-weight:600;color:#DDD6FE">🗄 PV data safe ✅</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 KEY FEATURES ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Capabilities</div>
+        <div class="stitle">Key Features of <span style="color:var(--purpleL)">Persistent Volumes</span></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🛡</div><div class="bt"><strong>Persistent data storage</strong> — data survives Pod deletions, crashes, and node rescheduling. Always available.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🔓</div><div class="bt"><strong>Independent from containers</strong> — PV has its own lifecycle. Deleting a Pod never deletes the PV or its data.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">☁</div><div class="bt"><strong>Supports many storage backends</strong> — local disk, NFS, AWS EBS, GCP Persistent Disk, Azure Disk, Ceph, and more</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">♻️</div><div class="bt"><strong>Reusable across applications</strong> — PV can be retained and reclaimed after one app is done, then rebound to another</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🏭</div><div class="bt"><strong>Essential for stateful applications</strong> — databases, queues, and file stores require PVs to function reliably in production</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Access modes: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">RWO (ReadWriteOnce) · ROX (ReadOnlyMany) · RWX (ReadWriteMany) — controls how many Pods can use a PV simultaneously.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);box-shadow:0 0 22px rgba(124,58,237,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">PV Feature Architecture</div>
+            <div class="pv-box" style="margin-bottom:7px;box-shadow:0 0 14px rgba(124,58,237,.2)">
+              <div class="pv-title">🗄 Persistent Volume</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:6px">
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.28);color:#67E8F9;font-weight:600">🛡 Persistent</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86EFAC;font-weight:600">🔓 Independent</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#FDE068;font-weight:600">☁ Multi-backend</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#DDD6FE;font-weight:600">♻ Reusable</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--purpleL);margin:3px 0">↕ accessed via PVC ↕</div>
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div class="pod-box" style="flex:1;padding:5px"><div style="font-size:8px;font-weight:700;color:#BAE6FD">📦 Pod A</div><div style="font-size:7px;color:var(--muted)">MySQL</div></div>
+              <div class="pod-box" style="flex:1;padding:5px"><div style="font-size:8px;font-weight:700;color:#BAE6FD">📦 Pod B</div><div style="font-size:7px;color:var(--muted)">App</div></div>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:5px">
+              <div style="flex:1;padding:5px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">RWO</div>
+                <div style="font-size:7px;color:var(--muted)">ReadWriteOnce</div>
+              </div>
+              <div style="flex:1;padding:5px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#67E8F9">ROX</div>
+                <div style="font-size:7px;color:var(--muted)">ReadOnlyMany</div>
+              </div>
+              <div style="flex:1;padding:5px;border-radius:7px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#DDD6FE">RWX</div>
+                <div style="font-size:7px;color:var(--muted)">ReadWriteMany</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 STORAGE BACKENDS ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Storage Backends</div>
+      <div class="stitle">Types of Storage Backends for Persistent Volumes</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- Local Disk -->
+        <div style="border-radius:12px;padding:13px;background:rgba(100,116,139,.1);border:2px solid rgba(100,116,139,.3);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💿</div>
+            <div><div style="font-size:12px;font-weight:800;color:#CBD5E1">Local Disk</div><div style="font-size:8px;color:var(--muted)">Node's own storage</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Direct storage on the node machine. Fast but tied to a specific node — if Pod moves, cannot follow.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:#CBD5E1">⚡ Fast · ⚠ Node-specific</div>
+        </div>
+        <!-- NFS -->
+        <div style="border-radius:12px;padding:13px;background:var(--volD);border:2px solid var(--volB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">NFS</div><div style="font-size:8px;color:var(--muted)">Network File System</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Shared network storage accessible by multiple Pods across different nodes simultaneously.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">🤝 Shareable · 🌐 Network-based</div>
+        </div>
+        <!-- AWS EBS -->
+        <div style="border-radius:12px;padding:13px;background:var(--awsD);border:2px solid var(--awsB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">AWS EBS</div><div style="font-size:8px;color:var(--muted)">Amazon Elastic Block Store</div></div>
+            <span class="tag" style="background:rgba(245,158,11,.2);color:#FDE068;border:1px solid rgba(245,158,11,.35);margin-left:auto;font-size:7px;padding:3px 8px">☁ Cloud</span>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">AWS-managed block storage. Durable, high-performance, automatically replicated within an availability zone.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">🔒 Durable · ⚡ High IOPS</div>
+        </div>
+        <!-- Azure Disk -->
+        <div style="border-radius:12px;padding:13px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔷</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Azure Disk</div><div style="font-size:8px;color:var(--muted)">Microsoft Azure storage</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Azure-managed block storage for AKS clusters. Supports Standard HDD, Premium SSD, and Ultra Disk tiers.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD">🔷 AKS-native · 📈 Scalable</div>
+        </div>
+        <!-- GCP Disk -->
+        <div style="border-radius:12px;padding:13px;background:var(--ctrD);border:2px solid var(--ctrB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🟢</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">GCP Persistent Disk</div><div style="font-size:8px;color:var(--muted)">Google Cloud storage</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Google-managed block storage for GKE clusters. Redundant, auto-encrypted, and globally available.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">🌍 Global · 🔐 Auto-encrypted</div>
+        </div>
+        <!-- Ceph / Other -->
+        <div style="border-radius:12px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🗄</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Ceph / Other</div><div style="font-size:8px;color:var(--muted)">Self-hosted distributed storage</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Open-source distributed storage (Ceph, GlusterFS, Longhorn). On-premise or hybrid cloud setups.</div>
+          <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">🏠 On-prem · 🔀 Distributed</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 REAL WORLD EXAMPLE ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Real-World Example</div>
+        <div class="stitle">Database Pod + <span style="color:var(--purpleL)">Persistent Volume</span></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🗄</div><div class="bt"><strong>Scenario:</strong> A PostgreSQL database Pod stores customer orders for an e-commerce platform</div></div>
+        <div class="bi"><div class="ico" style="background:var(--awsD)">☁</div><div class="bt"><strong>PV backed by AWS EBS</strong> — 100GB dedicated disk provisioned. Persists independently of any Pod.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💥</div><div class="bt"><strong>Pod crashes or gets rescheduled</strong> — Kubernetes deletes the Pod and starts a fresh one on another node</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ctrD)">🔄</div><div class="bt"><strong>New Pod reconnects to same PV</strong> — mounts the same PVC, finds all 50,000 orders exactly where they were</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">✅</div><div class="bt"><strong>Zero data loss</strong> — customers never notice the disruption. Business continuity maintained automatically.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">This is why: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Every production database in Kubernetes — MySQL, MongoDB, Postgres, Redis — requires a Persistent Volume.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);box-shadow:0 0 22px rgba(124,58,237,.18)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">E-Commerce DB Scenario</div>
+            <!-- Running state -->
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD;margin-bottom:5px">📦 PostgreSQL Pod — Node 1</div>
+              <div style="display:flex;gap:5px">
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">📱 PG<br>container</div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center;font-size:8px;color:#DDD6FE;font-weight:600">🗄 PVC<br>→ 100GB PV</div>
+              </div>
+              <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:4px">50,000 orders stored</div>
+            </div>
+            <!-- crash -->
+            <div style="text-align:center;font-size:12px;padding:4px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);color:#FCA5A5;font-weight:700;margin-bottom:5px">💥 Pod deleted — rescheduled to Node 2</div>
+            <!-- PV survives -->
+            <div style="border-radius:9px;padding:7px;background:var(--pvD);border:1.5px solid var(--pvB);margin-bottom:5px;text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#DDD6FE">🗄 AWS EBS — 100GB PV</div>
+              <div style="font-size:8px;color:#86EFAC;font-weight:600;margin-top:3px">50,000 orders — SAFE ✅</div>
+            </div>
+            <!-- new pod reconnects -->
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD;margin-bottom:5px">📦 New PostgreSQL Pod — Node 2</div>
+              <div style="display:flex;gap:5px">
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">📱 PG<br>container</div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center;font-size:8px;color:#DDD6FE;font-weight:600">🗄 same PVC<br>same PV ✅</div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ Zero data loss — business continues</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 PV LIFECYCLE ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(124,58,237,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Lifecycle</div>
+      <div class="stitle">PV Lifecycle — How Storage is Managed Over Time</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- 4 lifecycle stages -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px;flex:1">
+            <!-- Provisioning -->
+            <div style="flex:1;border-radius:12px;padding:12px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">1</div>
+                <div style="font-size:11px;font-weight:800;color:#BAE6FD">Provisioning</div>
+              </div>
+              <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.45">Admin creates PV manually (static) or Kubernetes creates it automatically via StorageClass (dynamic). PV becomes <strong style="color:#86EFAC">Available</strong>.</div>
+              <div style="padding:5px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">Status: Available 🟢</div>
+            </div>
+            <!-- Binding -->
+            <div style="flex:1;border-radius:12px;padding:12px;background:var(--pvD);border:2px solid var(--pvB);display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">2</div>
+                <div style="font-size:11px;font-weight:800;color:#DDD6FE">Binding</div>
+              </div>
+              <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.45">Application creates a PVC requesting storage. Kubernetes matches PVC to a suitable PV and binds them together. PV becomes <strong style="color:#67E8F9">Bound</strong>.</div>
+              <div style="padding:5px 8px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);text-align:center;font-size:8px;font-weight:700;color:#67E8F9">Status: Bound 🔵</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex:1">
+            <!-- Using -->
+            <div style="flex:1;border-radius:12px;padding:12px;background:var(--ctrD);border:2px solid var(--ctrB);display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--ctr),#16A34A);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000;flex-shrink:0">3</div>
+                <div style="font-size:11px;font-weight:800;color:#86EFAC">Using</div>
+              </div>
+              <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.45">Pod mounts the PVC and actively uses the PV. Data is read and written. Pod can restart multiple times — PV stays bound and data is preserved.</div>
+              <div style="padding:5px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">Data: Intact across restarts ✅</div>
+            </div>
+            <!-- Reclaiming -->
+            <div style="flex:1;border-radius:12px;padding:12px;background:var(--awsD);border:2px solid var(--awsB);display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--aws),#D97706);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#000;flex-shrink:0">4</div>
+                <div style="font-size:11px;font-weight:800;color:#FDE068">Reclaiming</div>
+              </div>
+              <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.45">When PVC is deleted, reclaim policy decides what happens: <strong style="color:#FDE068">Retain</strong> (keep data), <strong style="color:#FCA5A5">Delete</strong> (delete disk), or <strong style="color:#86EFAC">Recycle</strong> (wipe and reuse).</div>
+              <div style="padding:5px 8px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);text-align:center;font-size:8px;font-weight:700;color:#FDE068">Retain · Delete · Recycle ♻️</div>
+            </div>
+          </div>
+        </div>
+        <!-- right mini flow -->
+        <div style="width:165px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(124,58,237,.04);border:1.5px dashed var(--pvB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Lifecycle States</div>
+            <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center"><div style="font-size:9px;font-weight:700;color:#86EFAC">🟢 Available</div><div style="font-size:7px;color:var(--muted)">PV created, unbound</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);text-align:center"><div style="font-size:9px;font-weight:700;color:#67E8F9">🔵 Bound</div><div style="font-size:7px;color:var(--muted)">PVC matched &amp; bound</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center"><div style="font-size:9px;font-weight:700;color:#DDD6FE">🟣 Released</div><div style="font-size:7px;color:var(--muted)">PVC deleted, PV free</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--awsD);border:1px solid var(--awsB);text-align:center"><div style="font-size:9px;font-weight:700;color:#FDE068">♻ Reclaimed</div><div style="font-size:7px;color:var(--muted)">Retain / Delete / Recycle</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Persistent Volume — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy trio -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🧳</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Pod</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Tenant / Guest</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Comes and goes. Moves between nodes. Has no permanent belongings of its own.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--pvD);border:1.5px solid var(--pvB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--pv),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Solution</div>
+              <div style="font-size:28px;margin-top:4px">🏠</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Persistent Volume</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Permanent house/storage</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Always stays in place. Tenants change — house remains. Data is always safe inside.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--ctrD);border:1.5px solid var(--ctrB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Data always available</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">New Pod connects to same PV. All data is there. Zero disruption to business.</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🗄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">PV = Cluster resource</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Managed by K8s, independent from Pods</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--ctrD);border:1px solid var(--ctrB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🛡</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Data outlives Pods</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Pod deleted → PV stays with all data</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">☁</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Many backends</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">AWS · GCP · Azure · NFS · Local</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">4 lifecycle states</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Available → Bound → Released → Reclaimed</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">Pods are temporary tenants</span>. <span style="color:#DDD6FE">Persistent Volumes are the permanent house that keeps their data safe</span>."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--pvD);border:1.5px solid var(--pvB)">
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>PV is a cluster storage resource</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Exists beyond Pod lifecycle</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Backed by real storage</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>4 states: Available → Bound</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Essential for production DBs</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">PersistentVolume<br>Claim (PVC)</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">How apps request storage<br>from a PV</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--pv));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#DDD6FE;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

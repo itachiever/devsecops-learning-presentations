@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --ic:#22C55E;--icD:rgba(34,197,94,.1);--icB:rgba(34,197,94,.32);
+  --ing:#00D4FF;--ingD:rgba(0,212,255,.09);--ingB:rgba(0,212,255,.28);
+  --s1:#326CE5;--s1D:rgba(50,108,229,.11);--s1B:rgba(50,108,229,.35);
+  --s2:#7C3AED;--s2D:rgba(124,58,237,.11);--s2B:rgba(124,58,237,.35);
+  --nginx:#22C55E;--traefik:#326CE5;--haproxy:#EF4444;
+  --user:#EC4899;--userD:rgba(236,72,153,.1);--userB:rgba(236,72,153,.3);
+  --pod:#A855F7;--podD:rgba(168,85,247,.09);--podB:rgba(168,85,247,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--ic);border-color:var(--ic);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--ic);color:var(--ic)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(34,197,94,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(34,197,94,.18);border-color:var(--ic)}
+.nbtn.pri{background:linear-gradient(135deg,var(--ic),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(34,197,94,.12)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(34,197,94,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ic);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(34,197,94,.14);transition:all .25s}
+.bi:hover{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* IC box */
+.ic-box{border-radius:10px;padding:9px 12px;background:var(--icD);border:2px solid var(--icB);text-align:center}
+.ic-title{font-size:10px;font-weight:800;color:#86EFAC;letter-spacing:.5px}
+/* Ingress rules box */
+.ing-box{border-radius:10px;padding:9px 12px;background:var(--ingD);border:1.5px solid var(--ingB);text-align:center}
+.ing-title{font-size:10px;font-weight:800;color:#67E8F9}
+/* svc */
+.svc1{border-radius:8px;padding:7px;background:var(--s1D);border:1.5px solid var(--s1B);text-align:center}
+.svc2{border-radius:8px;padding:7px;background:var(--s2D);border:1.5px solid var(--s2B);text-align:center}
+/* pod chip */
+.pod-c{border-radius:7px;padding:5px 7px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:7px;font-weight:700;color:#DDD6FE}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ic);padding:3px 12px;border:1px solid rgba(34,197,94,.25);border-radius:20px;background:rgba(34,197,94,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--ic) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Ingress<br>Controller</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">How Kubernetes Ingress Actually Works<br>— The engine that executes your routing rules</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--icD);color:#86EFAC;border:1px solid var(--icB);padding:4px 11px;font-size:9px">⚙ nginx</span>
+          <span class="tag" style="background:var(--s1D);color:#BAE6FD;border:1px solid var(--s1B);padding:4px 11px;font-size:9px">🔀 traefik</span>
+          <span class="tag" style="background:var(--ingD);color:#67E8F9;border:1px solid var(--ingB);padding:4px 11px;font-size:9px">🌐 Routing</span>
+          <span class="tag" style="background:rgba(124,58,237,.12);color:#DDD6FE;border:1px solid rgba(124,58,237,.3);padding:4px 11px;font-size:9px">🔐 TLS</span>
+        </div>
+      </div>
+      <!-- right: title visual -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(34,197,94,.25);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Traffic entering cluster</div>
+            <!-- internet -->
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:5px">
+              <div style="padding:4px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">👤 User</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ic);margin-bottom:4px">↓</div>
+            <!-- IC -->
+            <div class="ic-box" style="margin-bottom:6px;box-shadow:0 0 18px rgba(34,197,94,.16)">
+              <div class="ic-title">⚙ Ingress Controller (nginx)</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">reads Ingress rules → routes traffic</div>
+            </div>
+            <!-- rules -->
+            <div class="ing-box" style="margin-bottom:6px">
+              <div class="ing-title">📋 Ingress Rules</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">/api → api-svc · /web → web-svc</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--ic);margin-bottom:5px">↙ ↘</div>
+            <div style="display:flex;gap:5px">
+              <div class="svc1" style="flex:1"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+              <div class="svc2" style="flex:1"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 RECAP INGRESS ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Quick Recap</div>
+        <div class="stitle">Ingress = <span style="color:var(--ing)">Rules Only</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">📋</div><div class="bt"><strong>Ingress defines routing rules</strong> — tells Kubernetes where to send traffic based on URL paths or hostnames</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">📝</div><div class="bt"><strong>It's just a configuration object</strong> — a YAML spec that says "if request matches X, send to Service Y"</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🚫</div><div class="bt"><strong>Ingress alone does NOTHING</strong> — creating an Ingress resource without a Controller = traffic rules that never execute</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">⚙️</div><div class="bt"><strong>Needs a Controller to actually work</strong> — the Controller is the component that reads those rules and enforces them</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Simple analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Ingress = a recipe 📖 · Ingress Controller = the chef who actually cooks the dish 👨‍🍳</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <!-- ingress alone = broken -->
+            <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+              <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Ingress WITHOUT Controller</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+                <div style="padding:5px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">👤 Request</div>
+                <div style="font-size:10px;color:var(--red)">→</div>
+                <div class="ing-box" style="flex:1"><div class="ing-title" style="font-size:8px">📋 Rules</div></div>
+                <div style="font-size:10px;color:var(--red)">→ ✗</div>
+              </div>
+              <div style="padding:6px;border-radius:7px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">Rules exist but nothing executes</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">Traffic goes nowhere 😱</div>
+              </div>
+            </div>
+            <!-- ingress + controller = works -->
+            <div style="border-radius:12px;padding:12px;background:var(--icD);border:1.5px solid var(--icB)">
+              <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:8px">✅ Ingress WITH Controller</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap">
+                <div style="padding:5px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">👤 Request</div>
+                <div style="font-size:10px;color:var(--ic)">→</div>
+                <div class="ic-box" style="flex:1;padding:6px"><div class="ic-title" style="font-size:8px">⚙ Controller</div></div>
+                <div style="font-size:10px;color:var(--ic)">→</div>
+                <div class="svc1" style="padding:5px"><div style="font-size:9px">⚙</div></div>
+              </div>
+              <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#86EFAC">Rules applied — traffic routed ✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS IC ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is an <span style="color:var(--ic)">Ingress Controller?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">⚙️</div><div class="bt"><strong>The component that implements Ingress rules</strong> — runs as a Pod inside your cluster, handling real traffic</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">👁</div><div class="bt"><strong>Watches Ingress resources continuously</strong> — uses the K8s API to detect when Ingress rules are added, changed, or removed</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">🔀</div><div class="bt"><strong>Manages external traffic routing</strong> — receives real HTTP/HTTPS packets and routes them to the right Service</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">🔧</div><div class="bt"><strong>Usually a reverse proxy</strong> — most controllers use nginx or a similar proven proxy under the hood</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--icD);border:1px solid var(--icB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Relationship: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">You write Ingress YAML rules → Controller auto-detects and applies them. No manual config files needed.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--icD);border:2px solid var(--icB);box-shadow:0 0 22px rgba(34,197,94,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Ingress Controller Role</div>
+            <!-- k8s api -->
+            <div style="padding:6px 9px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD">🔌 Kubernetes API</div>
+              <div style="font-size:8px;color:var(--muted)">stores Ingress resources</div>
+            </div>
+            <!-- watch arrow -->
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;justify-content:center">
+              <div style="font-size:10px;color:var(--ic)">⟷</div>
+              <div style="font-size:8px;color:var(--muted);padding:2px 8px;border-radius:10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22)">watches for changes</div>
+              <div style="font-size:10px;color:var(--ic)">⟷</div>
+            </div>
+            <!-- IC -->
+            <div class="ic-box" style="margin-bottom:6px;box-shadow:0 0 14px rgba(34,197,94,.18)">
+              <div class="ic-title">⚙ Ingress Controller</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">nginx Pod running in cluster</div>
+              <div style="display:flex;gap:4px;justify-content:center;margin-top:5px;flex-wrap:wrap">
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(34,197,94,.18);color:#86EFAC;font-weight:600">reads Ingress YAML</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(34,197,94,.18);color:#86EFAC;font-weight:600">configures routing</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(34,197,94,.18);color:#86EFAC;font-weight:600">handles real traffic</span>
+              </div>
+            </div>
+            <!-- accepts traffic -->
+            <div style="text-align:center;font-size:10px;color:var(--ic);margin-bottom:4px">↕ receives & routes traffic ↕</div>
+            <!-- services -->
+            <div style="display:flex;gap:5px">
+              <div class="svc1" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+              <div class="svc2" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 HOW IC WORKS ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">End-to-End Flow</div>
+      <div class="stitle">How Ingress Controller Routes Traffic</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.25)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pink),#DB2777);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#F9A8D4">User makes HTTPS request</div><div style="font-size:9px;color:#94A3B8">https://app.example.com/api/users — hits cloud LoadBalancer IP</div></div>
+            <span style="margin-left:auto;font-size:13px">👤</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--amber)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Reaches Ingress Controller Pod</div><div style="font-size:9px;color:#94A3B8">nginx controller Pod receives raw HTTP request in cluster</div></div>
+            <span style="margin-left:auto;font-size:13px">⚙</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ing)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Reads & matches Ingress rules</div><div style="font-size:9px;color:#94A3B8">Host: app.example.com + path: /api → matched! → api-service</div></div>
+            <span style="margin-left:auto;font-size:13px">📋</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--s1)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--s1D);border:1px solid var(--s1B)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Forwards to matched Service</div><div style="font-size:9px;color:#94A3B8">Proxies request to api-service ClusterIP — handles TLS termination</div></div>
+            <span style="margin-left:auto;font-size:13px">⚙</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ic)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--icD);border:1px solid var(--icB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ic),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Service routes to Pod — response returned</div><div style="font-size:9px;color:#94A3B8">Pod handles request, response flows back through same path</div></div>
+            <span style="margin-left:auto;font-size:13px">📦</span>
+          </div>
+        </div>
+        <!-- right: mini diagram -->
+        <div style="width:190px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(34,197,94,.04);border:1.5px dashed var(--icB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Request Path</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:9px;font-weight:600;color:#F9A8D4">👤 HTTPS Request</div></div>
+              <div style="font-size:10px;color:var(--amber)">↓ Cloud LB</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--icD);border:1.5px solid var(--icB);text-align:center"><div style="font-size:9px;font-weight:700;color:#86EFAC">⚙ IC Pod (nginx)</div><div style="font-size:7px;color:var(--muted)">TLS termination</div></div>
+              <div style="font-size:10px;color:var(--ing)">↓ reads rules</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--ingD);border:1px solid var(--ingB);text-align:center"><div style="font-size:9px;font-weight:600;color:#67E8F9">📋 Ingress Rules</div></div>
+              <div style="font-size:10px;color:var(--s1)">↓ matches</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--s1D);border:1px solid var(--s1B);text-align:center"><div style="font-size:9px;font-weight:600;color:#BAE6FD">⚙ api-service</div></div>
+              <div style="font-size:10px;color:var(--ic)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px;font-weight:600;color:#DDD6FE">📦 Pod ✅</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 WHY IC NEEDED ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Key Insight</div>
+        <div class="stitle">Why Is the Controller <span style="color:var(--ic)">Necessary?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">📋</div><div class="bt"><strong>Ingress is only a configuration spec</strong> — it's a Kubernetes object like a YAML document. It doesn't run any code.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">⚙️</div><div class="bt"><strong>Controller performs the real work</strong> — actual reverse proxy (nginx, traefik) running as a Pod in your cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🚫</div><div class="bt"><strong>Without controller = rules are dead</strong> — you can create 100 Ingress resources but without a Controller, not a single request is routed</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">🔄</div><div class="bt"><strong>Controller dynamically updates config</strong> — when you add/change Ingress rules, Controller auto-reconfigures. No restart needed.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--icD);border:1px solid var(--icB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Blueprint vs worker: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Ingress = architect's blueprint 📐 · Controller = the construction crew that builds it 👷</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:8px">
+          <!-- blueprint side -->
+          <div style="border-radius:12px;padding:12px;background:var(--ingD);border:1.5px solid var(--ingB)">
+            <div style="font-size:9px;font-weight:800;color:#67E8F9;text-align:center;margin-bottom:7px">📋 Ingress = Blueprint</div>
+            <div style="display:flex;flex-direction:column;gap:3px;font-family:monospace;font-size:8px">
+              <div><span style="color:var(--cyan)">rules:</span></div>
+              <div>&nbsp;<span style="color:var(--cyan)">- host:</span> <span style="color:#86EFAC">app.example.com</span></div>
+              <div>&nbsp;&nbsp;<span style="color:var(--cyan)">paths:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;<span style="color:var(--cyan)">- path:</span> <span style="color:#FDE068">/api</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--cyan)">backend:</span> <span style="color:#DDD6FE">api-svc</span></div>
+            </div>
+            <div style="margin-top:7px;text-align:center;font-size:8px;font-weight:600;color:#FCA5A5">❌ Alone — nothing happens</div>
+          </div>
+          <!-- plus -->
+          <div style="text-align:center;font-size:18px;color:var(--ic)">+</div>
+          <!-- worker side -->
+          <div class="ic-box">
+            <div style="font-size:10px;font-weight:800;color:#86EFAC;margin-bottom:5px">⚙ Controller = The Builder</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#94A3B8;padding:3px 7px;background:rgba(34,197,94,.1);border-radius:4px">👁 Watches Ingress objects</div>
+              <div style="font-size:8px;color:#94A3B8;padding:3px 7px;background:rgba(34,197,94,.1);border-radius:4px">🔧 Configures nginx/proxy</div>
+              <div style="font-size:8px;color:#94A3B8;padding:3px 7px;background:rgba(34,197,94,.1);border-radius:4px">🌐 Handles real traffic</div>
+            </div>
+          </div>
+          <!-- equals works -->
+          <div style="text-align:center;font-size:18px;color:var(--ic)">=</div>
+          <div style="padding:8px;border-radius:9px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:#86EFAC">✅ Traffic routed correctly!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 POPULAR ICs ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Ecosystem</div>
+      <div class="stitle">Popular Ingress Controllers</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- nginx -->
+        <div style="border-radius:12px;padding:13px;background:var(--icD);border:2px solid var(--icB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚙</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#86EFAC">NGINX Ingress Controller</div>
+              <div style="font-size:8px;color:var(--muted)">Most widely used · Official K8s project</div>
+            </div>
+            <span class="tag" style="background:rgba(34,197,94,.2);color:#86EFAC;border:1px solid var(--icB);margin-left:auto;font-size:7px;padding:3px 8px">⭐ Default</span>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Uses <strong style="color:#86EFAC">nginx</strong> as the reverse proxy. Battle-tested, highly configurable, huge community. Standard choice for most clusters.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px">✅ Path & host routing</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px">✅ TLS/SSL termination</div>
+          </div>
+        </div>
+        <!-- traefik -->
+        <div style="border-radius:12px;padding:13px;background:var(--s1D);border:2px solid var(--s1B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔀</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#BAE6FD">Traefik</div>
+              <div style="font-size:8px;color:var(--muted)">Cloud-native · Auto-discovery</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Built for microservices. Automatically discovers services and configures itself. Has a beautiful built-in dashboard UI.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px">✅ Auto Let's Encrypt SSL</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px">✅ Real-time dashboard</div>
+          </div>
+        </div>
+        <!-- haproxy -->
+        <div style="border-radius:12px;padding:13px;background:var(--failD);border:2px solid var(--failB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚡</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#FCA5A5">HAProxy</div>
+              <div style="font-size:8px;color:var(--muted)">High performance LB</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Known for extremely high performance and reliability. Great for large-scale traffic workloads requiring maximum throughput.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5;display:flex;gap:5px">✅ Ultra high performance</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5;display:flex;gap:5px">✅ Advanced LB algorithms</div>
+          </div>
+        </div>
+        <!-- cloud native -->
+        <div style="border-radius:12px;padding:13px;background:rgba(245,158,11,.09);border:2px solid rgba(245,158,11,.3);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#FDE068">Cloud-Native Controllers</div>
+              <div style="font-size:8px;color:var(--muted)">Managed by cloud providers</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Cloud providers offer their own controllers — AWS ALB, GCP GCE, Azure AGIC. Deep integration with cloud services.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068;display:flex;gap:5px">✅ AWS ALB · GCP GCE</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068;display:flex;gap:5px">✅ Native cloud integration</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 KEY FEATURES ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Capabilities</div>
+        <div class="stitle">Key Features of Ingress Controllers</div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">🔀</div><div class="bt"><strong>Traffic routing</strong> — path and host-based rules direct requests to the right Service in real-time</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">⚖️</div><div class="bt"><strong>Load balancing</strong> — distributes requests across multiple Pods behind a Service automatically</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">🔐</div><div class="bt"><strong>TLS/SSL termination</strong> — decrypts HTTPS at the edge so backend Pods can stay plain HTTP</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">↩️</div><div class="bt"><strong>Reverse proxy</strong> — sits between the internet and your services, hiding backend topology from users</div></div>
+        <div class="bi"><div class="ico" style="background:var(--icD)">⚡</div><div class="bt"><strong>Auto-reconfigures dynamically</strong> — new Ingress rule added → Controller updates routing in seconds, zero downtime</div></div>
+      </div>
+      <div class="lr">
+        <!-- feature architecture diagram -->
+        <div style="width:100%;max-width:275px">
+          <div style="border-radius:13px;padding:13px;background:var(--icD);border:2px solid var(--icB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Feature Architecture</div>
+            <!-- internet entry -->
+            <div style="padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:600;color:#F9A8D4">🌍 HTTPS Traffic</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--amber)">↓</div>
+            <!-- IC feature pills -->
+            <div style="border-radius:9px;padding:9px;background:rgba(34,197,94,.12);border:1.5px solid rgba(34,197,94,.38);margin:3px 0">
+              <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:5px">⚙ Ingress Controller</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center">
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.28);color:#67E8F9;font-weight:600">🔐 TLS decrypt</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD;font-weight:600">📍 Path match</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;font-weight:600">🏷 Host match</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#FDE068;font-weight:600">⚖ Load balance</span>
+                <span style="font-size:7px;padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86EFAC;font-weight:600">↩ Reverse proxy</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--ic)">↓ routes ↓</div>
+            <!-- services -->
+            <div style="display:flex;gap:5px;margin-top:4px">
+              <div class="svc1" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+              <div class="svc2" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--s1);margin-top:4px">↙ ↓ ↙ ↓</div>
+            <!-- pods -->
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <div class="pod-c" style="flex:1">📦<br>pod</div>
+              <div class="pod-c" style="flex:1">📦<br>pod</div>
+              <div class="pod-c" style="flex:1">📦<br>pod</div>
+              <div class="pod-c" style="flex:1">📦<br>pod</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 INGRESS vs IC ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">The Relationship</div>
+      <div class="stitle">Ingress vs Ingress Controller — Together They Work</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Ingress -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--ingD);border:2px solid var(--ingB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">Ingress</div><div style="font-size:8px;color:var(--muted)">Kubernetes resource (YAML object)</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>📝</span>Defines routing rules in YAML</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>🗺</span>Specifies path & host mappings</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>📁</span>Stored in etcd (K8s database)</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>⏸</span>Passive — runs no processes</div>
+          </div>
+          <!-- analogy -->
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">🗺</div>
+            <div style="font-size:9px;font-weight:700;color:#67E8F9">Google Maps Route</div>
+            <div style="font-size:8px;color:var(--muted)">Shows the path — doesn't drive</div>
+          </div>
+        </div>
+        <!-- = together -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 8px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:6px 10px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);font-size:9px;font-weight:700;color:#86EFAC;text-align:center">+<br>work<br>together</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- IC -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--icD);border:2px solid var(--icB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Ingress Controller</div><div style="font-size:8px;color:var(--muted)">Running Pod (nginx/traefik)</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>👁</span>Watches Ingress resources via API</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🔧</span>Configures nginx routing rules</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🌐</span>Handles actual HTTP packets</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>▶</span>Active — real running process</div>
+          </div>
+          <!-- analogy -->
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">🚗</div>
+            <div style="font-size:9px;font-weight:700;color:#86EFAC">The Driver</div>
+            <div style="font-size:8px;color:var(--muted)">Follows the route — does the driving</div>
+          </div>
+        </div>
+        <!-- result -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 8px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:6px 10px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);font-size:9px;font-weight:700;color:#86EFAC;text-align:center">=<br>smart<br>routing</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- outcome -->
+        <div style="width:130px;flex-shrink:0;border-radius:13px;padding:14px;background:rgba(34,197,94,.05);border:1.5px dashed var(--icB);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px">
+          <div style="font-size:30px">✅</div>
+          <div style="font-size:10px;font-weight:800;color:#86EFAC">External traffic routed!</div>
+          <div style="font-size:9px;color:#94A3B8;line-height:1.4">Right request → right Service → right Pod</div>
+          <div style="padding:5px 8px;border-radius:7px;background:rgba(34,197,94,.15);border:1px solid var(--icB);font-size:8px;font-weight:700;color:#86EFAC">Production ready</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Ingress Controller — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- nav analogy -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--ingD);border:1.5px solid var(--ingB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🗺</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Ingress</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Google Maps route</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Shows you the path and directions. Just a plan — doesn't move anything.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--icD);border:1.5px solid var(--icB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ic),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ Does the work</div>
+              <div style="font-size:28px;margin-top:4px">🚗</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Ingress Controller</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The driver</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Follows the route and drives the car. Actually moves packets from A to B.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(245,158,11,.09);border:1.5px solid rgba(245,158,11,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🏁</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">Result</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Arrival at destination</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Right request reaches the right Service and Pod — mission accomplished.</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">📋</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Ingress = Rules</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">YAML config — passive, no processes</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--icD);border:1px solid var(--icB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚙</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Controller = Engine</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Running Pod that executes the rules</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--s1D);border:1px solid var(--s1B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Dynamic config</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Auto-updates when rules change</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">nginx is default</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Most clusters use nginx IC</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#67E8F9">Ingress defines the rules</span>. <span style="color:#86EFAC">Ingress Controller executes them</span>. You need both."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--icD);border:1.5px solid var(--icB)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ic)">◆</span>Ingress = rules (passive)</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ic)">◆</span>Controller = execution</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ic)">◆</span>nginx most common</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ic)">◆</span>Watches K8s API live</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ic)">◆</span>TLS · LB · Reverse proxy</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Volumes</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">PV · PVC · StorageClass explained</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --hm:#0EA5E9;--hmD:rgba(14,165,233,.1);--hmB:rgba(14,165,233,.32);
+  --ch:#8B5CF6;--chD:rgba(139,92,246,.1);--chB:rgba(139,92,246,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --er:#EF4444;--erD:rgba(239,68,68,.1);--erB:rgba(239,68,68,.3);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --nd:#326CE5;--ndD:rgba(50,108,229,.1);--ndB:rgba(50,108,229,.32);
+  --tl:#06B6D4;--tlD:rgba(6,182,212,.1);--tlB:rgba(6,182,212,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--hm);border-color:var(--hm);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--hm);color:var(--hm)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(14,165,233,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(14,165,233,.18);border-color:var(--hm)}
+.nbtn.pri{background:linear-gradient(135deg,var(--hm),var(--ch));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(14,165,233,.08)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(14,165,233,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(14,165,233,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--hm);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(14,165,233,.13);transition:all .25s}
+.bi:hover{background:rgba(14,165,233,.05);border-color:rgba(14,165,233,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.cmd{border-radius:6px;padding:5px 9px;font-family:monospace;font-size:8px;background:rgba(6,10,16,.85);border:1px solid rgba(14,165,233,.18);color:#94A3B8;margin-bottom:4px}
+.yaml-line{font-family:monospace;font-size:7.5px;line-height:1.7;color:#94A3B8}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(14,165,233,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(139,92,246,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--hm);padding:3px 12px;border:1px solid rgba(14,165,233,.25);border-radius:20px;background:rgba(14,165,233,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--hm) 55%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Helm in<br>Kubernetes</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Kubernetes Package Manager Explained<br>— Deploy apps with a single command</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--hmD);color:#7DD3FC;border:1px solid var(--hmB);padding:4px 11px;font-size:9px">📦 Helm Charts</span>
+          <span class="tag" style="background:var(--chD);color:#DDD6FE;border:1px solid var(--chB);padding:4px 11px;font-size:9px">🔄 Releases</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">⏪ Rollbacks</span>
+          <span class="tag" style="background:var(--wnD);color:#FDE068;border:1px solid var(--wnB);padding:4px 11px;font-size:9px">📁 Repositories</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(14,165,233,.22);border-radius:14px;padding:13px;background:rgba(14,165,233,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Helm vs Manual — 1 App Deploy</div>
+          <div style="border-radius:9px;padding:9px;background:var(--erD);border:1px solid var(--erB);margin-bottom:6px">
+            <div style="font-size:8px;font-weight:800;color:#FCA5A5;margin-bottom:5px">❌ Manual YAML files needed</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">deployment.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">service.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">configmap.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">ingress.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">secret.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">rbac.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">pvc.yaml</span>
+              <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">hpa.yaml</span>
+            </div>
+            <div style="margin-top:4px;font-size:7.5px;color:#FCA5A5">8+ files, hundreds of lines 😩</div>
+          </div>
+          <div style="text-align:center;font-size:16px;color:var(--hm);margin:2px 0">↓</div>
+          <div style="border-radius:9px;padding:9px;background:var(--okD);border:1px solid var(--okB)">
+            <div style="font-size:8px;font-weight:800;color:#86EFAC;margin-bottom:4px">✅ With Helm — 1 command</div>
+            <div style="background:rgba(6,10,16,.7);border-radius:6px;padding:6px 8px;font-family:monospace;font-size:8px;color:#86EFAC;border:1px solid rgba(34,197,94,.2)">
+              helm install my-app ./my-chart
+            </div>
+            <div style="margin-top:4px;font-size:7.5px;color:#86EFAC">All resources created instantly ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 PROBLEM WITHOUT HELM -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Life <span style="color:#FCA5A5">Without Helm</span></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">📄</div><div class="bt"><strong>Every app needs dozens of YAML files</strong> — a single microservice requires Deployment, Service, ConfigMap, Secret, Ingress, HPA, RBAC, PVC. That's 8+ files before writing a line of code.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">🔁</div><div class="bt"><strong>Copy-paste hell across environments</strong> — dev, staging, prod each need slightly different values. Change an image tag? Update 8 files across 3 environments. One typo = production incident.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🔄</div><div class="bt"><strong>Upgrades are risky and manual</strong> — rolling back a bad deployment means manually re-applying old YAML files. No built-in version history. No rollback command.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🤝</div><div class="bt"><strong>Hard to share and reuse</strong> — want to give another team your app's deployment setup? Send them 15 YAML files and a README. Hope they don't miss a step.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--erD);border:1px solid var(--erB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Real pain: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Google's Kubernetes team built Helm because they were managing hundreds of internal apps this way. The YAML sprawl became completely unmanageable at scale.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:7px">😱 Deploying 1 App Manually</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>kubectl apply -f deployment.yaml</span><span>📄</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>kubectl apply -f service.yaml</span><span>📄</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>kubectl apply -f configmap.yaml</span><span>📄</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>kubectl apply -f ingress.yaml</span><span>📄</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>kubectl apply -f secret.yaml</span><span>📄</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>... 4 more files</span><span>😩</span></div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">✅ With Helm — 1 command</div>
+            <div style="border-radius:7px;padding:6px 8px;background:rgba(6,10,16,.8);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:8px;color:#86EFAC">
+              helm install my-app ./chart
+            </div>
+            <div style="margin-top:4px;font-size:7.5px;color:#86EFAC;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1)">All 8 resources created ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT IS HELM -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(14,165,233,.11) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is <span style="color:var(--hm)">Helm?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--hmD)">📦</div><div class="bt"><strong>Helm is the package manager for Kubernetes</strong> — just like <code style="color:#7DD3FC;background:rgba(14,165,233,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">apt</code> installs software on Ubuntu or <code style="color:#7DD3FC;background:rgba(14,165,233,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">npm</code> manages Node packages, Helm packages and deploys Kubernetes applications.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--chD)">📋</div><div class="bt"><strong>Applications are packaged as "Charts"</strong> — a Chart is a bundle of templates and default config. One Chart = one deployable application. Charts are versioned and shareable.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hmD)">🔄</div><div class="bt"><strong>Manages the full lifecycle</strong> — install, upgrade, rollback, and uninstall applications with single commands. Full version history preserved. Rollback is instant.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🌐</div><div class="bt"><strong>Huge public Chart library</strong> — <strong>Artifact Hub</strong> hosts thousands of production-ready Charts: Prometheus, Nginx, PostgreSQL, Redis, Kafka — install any of these in under 60 seconds.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--hmD);border:1px solid var(--hmB)">
+          <span style="font-size:10px;font-weight:700;color:#7DD3FC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Helm = <strong style="color:#fff">App Store for Kubernetes</strong> 📱. Just like you tap "Install" in the App Store and all files, permissions, and settings are handled — Helm does the same for Kubernetes apps.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--hmD);border:2px solid var(--hmB);box-shadow:0 0 22px rgba(14,165,233,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7DD3FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Helm = K8s Package Manager</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center">
+                <div style="border-radius:7px;padding:6px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.22)">
+                  <div style="font-size:11px">🐧</div>
+                  <div style="font-size:7px;color:#7DD3FC;font-weight:700;margin-top:1px">apt</div>
+                  <div style="font-size:6.5px;color:var(--muted)">Ubuntu pkgs</div>
+                </div>
+                <div style="border-radius:7px;padding:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22)">
+                  <div style="font-size:11px">📦</div>
+                  <div style="font-size:7px;color:#FDE068;font-weight:700;margin-top:1px">npm</div>
+                  <div style="font-size:6.5px;color:var(--muted)">Node pkgs</div>
+                </div>
+                <div style="border-radius:7px;padding:6px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.28)">
+                  <div style="font-size:11px">⎈</div>
+                  <div style="font-size:7px;color:#DDD6FE;font-weight:700;margin-top:1px">Helm</div>
+                  <div style="font-size:6.5px;color:var(--muted)">K8s apps</div>
+                </div>
+              </div>
+              <div style="border-radius:8px;padding:7px 9px;background:var(--chD);border:1.5px solid var(--chB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#DDD6FE">🌐 Artifact Hub</div>
+                <div style="font-size:7px;color:var(--muted)">Public Chart repository (like npm registry)</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--hm)">↓ helm install</div>
+              <div style="border-radius:8px;padding:7px;background:var(--okD);border:1px solid var(--okB)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:4px;text-align:center">Kubernetes Cluster</div>
+                <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap">
+                  <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Deploy</span>
+                  <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Service</span>
+                  <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">ConfigMap</span>
+                  <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">+more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 HELM CHART -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(139,92,246,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Core Concept</div>
+        <div class="stitle">What is a <span style="color:var(--purpleL)">Helm Chart?</span></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--chD)">📦</div><div class="bt"><strong>A Chart is a packaged Kubernetes application</strong> — it's a directory (or tarball) of files that define all the Kubernetes resources needed to run an application, bundled with sane defaults.</div></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--chD)">📋</div><div class="bt"><strong>Contains YAML templates, not static files</strong> — templates use Go template syntax with <code style="color:#DDD6FE;background:rgba(139,92,246,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">{{ .Values.image.tag }}</code> placeholders. Actual values injected at install time.</div></div>
+        <div class="bi" style="border-color:rgba(14,165,233,.2)"><div class="ico" style="background:var(--hmD)">⚙</div><div class="bt"><strong>values.yaml holds defaults</strong> — all configurable settings live here: replica count, image name, resource limits, enabled features. Override with <code style="color:#7DD3FC;background:rgba(14,165,233,.07);padding:1px 4px;border-radius:3px;font-size:8.5px">--set</code> or custom values file.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">🔄</div><div class="bt"><strong>Reusable across environments</strong> — same Chart, different values. <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">values-dev.yaml</code> vs <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">values-prod.yaml</code>. DRY principle applied to Kubernetes.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:275px">
+          <div style="border-radius:13px;padding:12px;background:var(--chD);border:2px solid var(--chB);box-shadow:0 0 22px rgba(139,92,246,.12)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Chart Directory Structure</div>
+            <div style="border-radius:8px;padding:9px;background:rgba(6,10,16,.85);border:1px solid rgba(139,92,246,.2);font-family:monospace;font-size:8px">
+              <div style="color:#DDD6FE;font-weight:700;margin-bottom:4px">📁 my-app/  <span style="color:#94A3B8;font-weight:400;font-size:7px">(Helm Chart)</span></div>
+              <div style="color:#7DD3FC;padding-left:12px">├─ 📄 Chart.yaml</div>
+              <div style="color:#94A3B8;padding-left:28px;font-size:7px">name, version, description</div>
+              <div style="color:#FDE068;padding-left:12px;margin-top:2px">├─ ⚙  values.yaml</div>
+              <div style="color:#94A3B8;padding-left:28px;font-size:7px">default config values</div>
+              <div style="color:#86EFAC;padding-left:12px;margin-top:2px">└─ 📁 templates/</div>
+              <div style="color:#86EFAC;padding-left:28px">├─ deployment.yaml</div>
+              <div style="color:#86EFAC;padding-left:28px">├─ service.yaml</div>
+              <div style="color:#86EFAC;padding-left:28px">├─ ingress.yaml</div>
+              <div style="color:#86EFAC;padding-left:28px">└─ _helpers.tpl</div>
+            </div>
+            <div style="margin-top:7px;border-radius:7px;padding:6px 9px;background:var(--wnD);border:1px solid var(--wnB)">
+              <div style="font-size:7.5px;color:#FDE068;font-weight:700;margin-bottom:3px">values.yaml example</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8">
+                <div><span style="color:#86EFAC">replicaCount</span>: <span style="color:#7DD3FC">3</span></div>
+                <div><span style="color:#86EFAC">image</span>:</div>
+                <div>&nbsp;&nbsp;<span style="color:#86EFAC">repository</span>: <span style="color:#FDE068">nginx</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#86EFAC">tag</span>: <span style="color:#FDE068">"1.21"</span></div>
+                <div><span style="color:#86EFAC">service</span>:</div>
+                <div>&nbsp;&nbsp;<span style="color:#86EFAC">type</span>: <span style="color:#FDE068">ClusterIP</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 HOW HELM WORKS -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(14,165,233,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Workflow</div>
+      <div class="stitle">How <span style="color:var(--hm)">Helm Works</span> — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--chD);border:1px solid var(--chB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ch),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Developer writes or downloads a Chart</div><div style="font-size:8.5px;color:#94A3B8">Either author your own Chart directory, or <code style="color:#DDD6FE;font-size:8px">helm pull repo/chart</code> to download a ready-made Chart from Artifact Hub.</div></div>
+            <span style="margin-left:auto;font-size:13px">📦</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hm)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--wnD);border:1px solid var(--wnB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--wn),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Customize values.yaml</div><div style="font-size:8.5px;color:#94A3B8">Override defaults for your environment: replica count, image tag, resource limits. Either edit values.yaml or pass <code style="color:#FDE068;font-size:8px">--set key=value</code> flags.</div></div>
+            <span style="margin-left:auto;font-size:13px">⚙</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hm)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--hmD);border:1px solid var(--hmB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--hm),#0284C7);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#7DD3FC">Run helm install</div><div style="font-size:8.5px;color:#94A3B8">Helm renders templates (merges values into YAML), validates them, and sends the final manifests to the Kubernetes API server.</div></div>
+            <span style="margin-left:auto;font-size:13px">🚀</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hm)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--nd),var(--hm));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Kubernetes deploys all resources</div><div style="font-size:8.5px;color:#94A3B8">K8s creates Pods, Services, ConfigMaps etc. Helm tracks this as a "Release" — a named installation with full version history.</div></div>
+            <span style="margin-left:auto;font-size:13px">⎈</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hm)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Manage: upgrade, rollback, uninstall</div><div style="font-size:8.5px;color:#94A3B8"><code style="color:#86EFAC;font-size:8px">helm upgrade</code> for updates, <code style="color:#86EFAC;font-size:8px">helm rollback</code> to revert, <code style="color:#86EFAC;font-size:8px">helm uninstall</code> to remove cleanly.</div></div>
+            <span style="margin-left:auto;font-size:13px">✅</span>
+          </div>
+        </div>
+        <div style="width:200px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:11px;background:rgba(14,165,233,.03);border:1.5px dashed var(--hmB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">Helm Commands</div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> install <span style="color:#FDE068">my-app</span> ./chart</div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> upgrade <span style="color:#FDE068">my-app</span> ./chart</div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> rollback <span style="color:#FDE068">my-app</span> <span style="color:#86EFAC">1</span></div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> uninstall <span style="color:#FDE068">my-app</span></div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> list</div>
+            <div class="cmd"><span style="color:#7DD3FC">helm</span> history <span style="color:#FDE068">my-app</span></div>
+            <div style="margin-top:5px;border-radius:6px;padding:4px 7px;background:var(--okD);border:1px solid var(--okB);font-size:7.5px;color:#86EFAC;text-align:center">Rollback is 1 command ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 KEY CONCEPTS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(14,165,233,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Key Concepts</div>
+      <div class="stitle">Helm <span style="color:var(--hm)">Ecosystem — 5 Core Concepts</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--chD);border:2px solid var(--chB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(139,92,246,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Chart</div><div style="font-size:7.5px;color:var(--muted)">The application package</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">A bundle of files that describe a K8s app. Like a <strong style="color:#DDD6FE">.dmg or .exe</strong> installer, but for Kubernetes. Versioned and shareable.</div>
+          <div style="border-radius:6px;padding:5px 8px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);font-family:monospace;font-size:7.5px;color:#DDD6FE">nginx/nginx, stable/prometheus</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--hmD);border:2px solid var(--hmB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(14,165,233,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚀</div>
+            <div><div style="font-size:12px;font-weight:800;color:#7DD3FC">Release</div><div style="font-size:7.5px;color:var(--muted)">A deployed Chart instance</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Every <code style="color:#7DD3FC;font-size:8px">helm install</code> creates a Release — a named, tracked deployment with a version number. You can have multiple releases of the same Chart.</div>
+          <div style="border-radius:6px;padding:5px 8px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.22);font-family:monospace;font-size:7.5px;color:#7DD3FC">my-prometheus (release 3)</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">Repository</div><div style="font-size:7.5px;color:var(--muted)">Where Charts live</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">A server hosting Chart packages — like npm registry but for Helm Charts. Add with <code style="color:#FDE068;font-size:8px">helm repo add</code>. Artifact Hub is the public one.</div>
+          <div style="border-radius:6px;padding:5px 8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);font-family:monospace;font-size:7.5px;color:#FDE068">helm repo add bitnami ...</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">values.yaml</div><div style="font-size:7.5px;color:var(--muted)">Configuration file</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Default settings for the Chart. Override per environment without touching templates. The "config dial" that makes one Chart work everywhere.</div>
+          <div style="border-radius:6px;padding:5px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-family:monospace;font-size:7.5px;color:#86EFAC">replicas: 3, image: nginx:1.21</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--tlD);border:2px solid var(--tlB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(6,182,212,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">Templates</div><div style="font-size:7.5px;color:var(--muted)">Dynamic YAML generators</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">YAML files with Go template placeholders. <code style="color:#67E8F9;font-size:8px">{{ .Values.image }}</code> is replaced with actual values at install time. Removes all hardcoding.</div>
+          <div style="border-radius:6px;padding:5px 8px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.22);font-family:monospace;font-size:7.5px;color:#67E8F9">image: {{ "{{" }} .Values.image {{ "}}" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 BENEFITS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits</div>
+        <div class="stitle">Why Use <span style="color:var(--hm)">Helm?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--hmD)">⚡</div><div class="bt"><strong>Dramatically faster deployments</strong> — what used to take 10 kubectl apply commands and 15 minutes now takes 1 command and 30 seconds. Install Prometheus in 60 seconds flat.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">⏪</div><div class="bt"><strong>Instant upgrades &amp; rollbacks</strong> — <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">helm upgrade</code> and <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">helm rollback</code>. Every change is versioned. If release 4 breaks production, one command reverts to release 3. Zero YAML archaeology required.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--chD)">♻</div><div class="bt"><strong>Reusable across environments</strong> — one Chart, three environments. Change only the values files. No copy-paste, no drift, no "why is staging different from prod?" debugging.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--wnD)">🤝</div><div class="bt"><strong>Easy sharing and collaboration</strong> — push your Chart to Artifact Hub or a private registry. Another team installs your app with one command. No documentation required.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🏢</div><div class="bt"><strong>Industry standard — used everywhere</strong> — Prometheus, Grafana, Nginx, PostgreSQL, Kafka all publish official Helm Charts. Every major enterprise Kubernetes platform uses Helm.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--hmD);border:1px solid var(--hmB)">
+          <span style="font-size:10px;font-weight:700;color:#7DD3FC">Bottom line: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Helm is to Kubernetes what <strong style="color:#fff">Docker Compose</strong> was to containers — it makes the complex manageable. No serious production K8s team skips Helm.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">✅ helm history my-app</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="display:grid;grid-template-columns:.5fr 1fr 1fr;gap:4px;margin-bottom:3px">
+                <div style="font-size:7px;color:var(--muted);font-weight:700">REV</div>
+                <div style="font-size:7px;color:var(--muted);font-weight:700">STATUS</div>
+                <div style="font-size:7px;color:var(--muted);font-weight:700">CHART</div>
+              </div>
+              <div style="display:grid;grid-template-columns:.5fr 1fr 1fr;gap:4px;border-radius:5px;padding:3px 5px;background:rgba(34,197,94,.1)">
+                <div style="font-size:7.5px;color:#86EFAC">1</div>
+                <div style="font-size:7.5px;color:#86EFAC">superseded</div>
+                <div style="font-size:7.5px;color:#94A3B8">my-app-1.0</div>
+              </div>
+              <div style="display:grid;grid-template-columns:.5fr 1fr 1fr;gap:4px;border-radius:5px;padding:3px 5px;background:rgba(34,197,94,.1)">
+                <div style="font-size:7.5px;color:#86EFAC">2</div>
+                <div style="font-size:7.5px;color:#86EFAC">superseded</div>
+                <div style="font-size:7.5px;color:#94A3B8">my-app-1.1</div>
+              </div>
+              <div style="display:grid;grid-template-columns:.5fr 1fr 1fr;gap:4px;border-radius:5px;padding:3px 5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)">
+                <div style="font-size:7.5px;color:#FCA5A5">3</div>
+                <div style="font-size:7.5px;color:#FCA5A5">failed 💥</div>
+                <div style="font-size:7.5px;color:#94A3B8">my-app-1.2</div>
+              </div>
+            </div>
+            <div style="margin-top:5px;border-radius:6px;padding:4px 7px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:8px;color:#86EFAC">helm rollback my-app 2</div>
+            <div style="font-size:7.5px;color:#86EFAC;margin-top:3px;text-align:center">← back to v1.1 in seconds ✅</div>
+          </div>
+          <div style="border-radius:11px;padding:10px;background:var(--hmD);border:1.5px solid var(--hmB)">
+            <div style="font-size:8.5px;font-weight:700;color:#7DD3FC;margin-bottom:5px">⏱ Time to deploy Prometheus</div>
+            <div style="display:flex;justify-content:space-between">
+              <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#FCA5A5">45min</div><div style="font-size:7px;color:var(--muted)">Manual YAML</div></div>
+              <div style="font-size:16px;color:var(--muted);display:flex;align-items:center">→</div>
+              <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#86EFAC">60s</div><div style="font-size:7px;color:var(--muted)">helm install</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(14,165,233,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Deploying <span style="color:var(--hm)">Prometheus Stack</span> with Helm</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:5px;width:60px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 1</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 2</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 3</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 4</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 5</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Result</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--wnD);border:1px solid var(--wnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FDE068;font-weight:600">📁 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--hmD);border:1px solid var(--hmB);display:flex;align-items:center"><div style="font-size:8.5px;color:#7DD3FC;font-weight:600">🔄 helm repo update — fetch latest Chart versions from repository</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--chD);border:1px solid var(--chB);display:flex;align-items:center"><div style="font-size:8.5px;color:#DDD6FE;font-weight:600">⚙ Edit values: set Grafana admin password, enable AlertManager</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--hmD);border:1px solid var(--hmB);display:flex;align-items:center;font-family:monospace"><div style="font-size:8.5px;color:#7DD3FC;font-weight:600">🚀 helm install monitoring prometheus-community/kube-prometheus-stack</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--wnD);border:1px solid var(--wnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FDE068;font-weight:600">⏳ Wait ~60 seconds for Pods to reach Running state</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ Full Prometheus + Grafana + AlertManager stack running — 60 seconds total</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:228px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--hmD);border:2px solid var(--hmB);box-shadow:0 0 18px rgba(14,165,233,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#7DD3FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Resources Created</div>
+            <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between"><span>📦 Prometheus Pod</span><span>Running ✅</span></div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between"><span>📊 Grafana Pod</span><span>Running ✅</span></div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between"><span>🔔 Alertmanager Pod</span><span>Running ✅</span></div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between"><span>🖥 node-exporter</span><span>Running ✅</span></div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between"><span>📡 kube-state-metrics</span><span>Running ✅</span></div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);font-size:7.5px;color:#7DD3FC;display:flex;justify-content:space-between"><span>+ Services, ConfigMaps, RBAC...</span><span>20+ ✅</span></div>
+            </div>
+            <div style="border-radius:7px;padding:5px 8px;background:var(--wnD);border:1px solid var(--wnB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#FDE068">Manual: 45 min · Helm: 60 sec</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Best Practices</div>
+        <div class="stitle">Helm <span style="color:var(--hm)">Best Practices</span></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">📌</div><div class="bt"><strong>Always pin Chart versions</strong> — use <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">helm install my-app chart --version 1.2.3</code>. Never use <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">latest</code> in production. Unexpected upstream changes break deployments.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hmD)">📁</div><div class="bt"><strong>Store values files in Git</strong> — <code style="color:#7DD3FC;background:rgba(14,165,233,.07);padding:1px 4px;border-radius:3px;font-size:8.5px">values-dev.yaml</code>, <code style="color:#7DD3FC;background:rgba(14,165,233,.07);padding:1px 4px;border-radius:3px;font-size:8.5px">values-prod.yaml</code> in version control. Treat Helm values as code — review changes, track history, revert when needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--chD)">🧪</div><div class="bt"><strong>Use helm template and --dry-run</strong> — <code style="color:#DDD6FE;background:rgba(139,92,246,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">helm template</code> renders manifests locally. <code style="color:#DDD6FE;background:rgba(139,92,246,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">--dry-run</code> validates against the cluster. Catch errors before they reach production.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--wnD)">🏪</div><div class="bt"><strong>Prefer trusted repositories</strong> — use official Charts from Bitnami, Artifact Hub, or vendor-maintained repos. Inspect Chart source before installing third-party Charts in sensitive clusters.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🔐</div><div class="bt"><strong>Never put secrets in values.yaml</strong> — use Kubernetes Secrets, Vault, or Sealed Secrets. Values files often end up in Git — a database password in values.yaml = security breach waiting to happen.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:11px;padding:11px;background:var(--hmD);border:1.5px solid var(--hmB)">
+            <div style="font-size:8.5px;font-weight:700;color:#7DD3FC;margin-bottom:6px">✅ Recommended Workflow</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm repo add + helm repo update</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm template → review YAML output</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm install --dry-run → validate</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm install → deploy to cluster</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm upgrade --atomic for safe updates</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>helm rollback if anything breaks</div>
+            </div>
+          </div>
+          <div style="border-radius:11px;padding:10px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FCA5A5;margin-bottom:5px">🚫 Common Mistakes</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Using --version latest in CI/CD</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Secrets in values.yaml → in Git</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap=5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Skipping --dry-run before install</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Installing untrusted Charts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(14,165,233,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(139,92,246,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Helm in Kubernetes — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--erD);border:1.5px solid var(--erB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">😩</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Without Helm</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Building IKEA furniture without instructions</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">100 YAML files. Different per env. Manual updates. No rollback. Hours of work. Constant drift.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--hmD);border:1.5px solid var(--hmB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--hm),var(--ch));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">📱</div>
+              <div style="font-size:10px;font-weight:800;color:#7DD3FC">Helm = App Store</div>
+              <div style="font-size:7.5px;color:var(--muted)">= One tap installs everything</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Browse chart. Install. Runs perfectly. Update with one command. Rollback in seconds. Done.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚀</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">With Helm</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Consistent, automated, fast</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">1 command deploys all. Same Chart across envs. Version history. Instant rollback. Shareable.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--chD);border:1px solid var(--chB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📦</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Chart</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Packaged app template</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--hmD);border:1px solid var(--hmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚀</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#7DD3FC">Release</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Named install instance</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--wnD);border:1px solid var(--wnB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Repository</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Chart registry / hub</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⚙</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">values.yaml</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Config per environment</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--tlD);border:1px solid var(--tlB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⏪</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#67E8F9">Rollback</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">helm rollback in 1 cmd</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--hmD);border:1px solid var(--hmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🏪</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#7DD3FC">Artifact Hub</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">1000s of ready Charts</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.2);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Kubernetes without Helm = compiling every app from source</span>. <span style="color:#86EFAC">Helm = the App Store that makes it one click</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--hmD);border:1.5px solid var(--hmB)">
+            <div style="font-size:8.5px;font-weight:700;color:#7DD3FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>Helm = K8s package manager</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>Charts bundle all manifests</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>values.yaml = config per env</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>1 command install/upgrade</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hm)">◆</span>Instant rollback with history</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kustomize in<br>Kubernetes</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">Config customization<br>without templates</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7DD3FC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --aws:#FF9900;--awsD:rgba(255,153,0,.1);--awsB:rgba(255,153,0,.32);
+  --gcp:#4285F4;--gcpD:rgba(66,133,244,.1);--gcpB:rgba(66,133,244,.32);
+  --az:#0078D4;--azD:rgba(0,120,212,.1);--azB:rgba(0,120,212,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --er:#EF4444;--erD:rgba(239,68,68,.1);--erB:rgba(239,68,68,.3);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --nd:#326CE5;--ndD:rgba(50,108,229,.1);--ndB:rgba(50,108,229,.32);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:8px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--aws);border-color:var(--aws);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--aws);color:var(--aws)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(255,153,0,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(255,153,0,.18);border-color:var(--aws)}
+.nbtn.pri{background:linear-gradient(135deg,var(--aws),var(--gcp));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(255,153,0,.07)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(255,153,0,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,153,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,153,0,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--aws);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(255,153,0,.13);transition:all .25s}
+.bi:hover{background:rgba(255,153,0,.05);border-color:rgba(255,153,0,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.svc-chip{font-size:7px;padding:2px 6px;border-radius:4px;font-weight:600;display:inline-block;margin:1px}
+.comp-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid rgba(255,255,255,.05)}
+.comp-cell{padding:7px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center}
+.comp-head{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(255,153,0,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(66,133,244,.14) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--aws);padding:3px 12px;border:1px solid rgba(255,153,0,.25);border-radius:20px;background:rgba(255,153,0,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--aws) 50%,var(--gcp) 80%,var(--az) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>on Cloud</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">EKS vs GKE vs AKS — Managed Kubernetes Explained<br>— Run Kubernetes without managing infrastructure</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--awsD);color:#FBBF24;border:1px solid var(--awsB);padding:4px 11px;font-size:9px">☁ AWS EKS</span>
+          <span class="tag" style="background:var(--gcpD);color:#93C5FD;border:1px solid var(--gcpB);padding:4px 11px;font-size:9px">☁ Google GKE</span>
+          <span class="tag" style="background:var(--azD);color:#BAE6FD;border:1px solid var(--azB);padding:4px 11px;font-size:9px">☁ Azure AKS</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">⎈ Managed K8s</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(255,153,0,.22);border-radius:14px;padding:12px;background:rgba(255,153,0,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">3 Clouds, 1 Kubernetes</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="border-radius:8px;padding:7px 10px;background:var(--awsD);border:1px solid var(--awsB);display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🟠</span>
+              <div><div style="font-size:9px;font-weight:800;color:#FBBF24">Amazon EKS</div><div style="font-size:7px;color:var(--muted)">Elastic Kubernetes Service · AWS</div></div>
+              <div style="margin-left:auto;font-size:7.5px;color:#FBBF24;padding:2px 6px;background:rgba(255,153,0,.12);border-radius:4px;border:1px solid rgba(255,153,0,.22)">Market Leader</div>
+            </div>
+            <div style="border-radius:8px;padding:7px 10px;background:var(--gcpD);border:1px solid var(--gcpB);display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🔵</span>
+              <div><div style="font-size:9px;font-weight:800;color:#93C5FD">Google GKE</div><div style="font-size:7px;color:var(--muted)">Kubernetes Engine · Google Cloud</div></div>
+              <div style="margin-left:auto;font-size:7.5px;color:#93C5FD;padding:2px 6px;background:rgba(66,133,244,.12);border-radius:4px;border:1px solid rgba(66,133,244,.22)">K8s Creators</div>
+            </div>
+            <div style="border-radius:8px;padding:7px 10px;background:var(--azD);border:1px solid var(--azB);display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🔷</span>
+              <div><div style="font-size:9px;font-weight:800;color:#BAE6FD">Azure AKS</div><div style="font-size:7px;color:var(--muted)">Kubernetes Service · Microsoft Azure</div></div>
+              <div style="margin-left:auto;font-size:7.5px;color:#BAE6FD;padding:2px 6px;background:rgba(0,120,212,.12);border-radius:4px;border:1px solid rgba(0,120,212,.22)">Enterprise</div>
+            </div>
+          </div>
+          <div style="margin-top:6px;border-radius:6px;padding:4px 8px;background:var(--okD);border:1px solid var(--okB);text-align:center;font-size:7.5px;color:#86EFAC">All run the same Kubernetes inside ⎈</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 11</span></div>
+  </div>
+
+  <!-- S2 WHY CLOUD -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Run Kubernetes <span style="color:var(--aws)">on Cloud?</span></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">😰</div><div class="bt"><strong>Self-managed Kubernetes is brutally complex</strong> — you must provision VMs, install Kubernetes components, configure networking, set up etcd, manage TLS certs, patch control plane nodes, and handle version upgrades. Full-time job for a dedicated team.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">💥</div><div class="bt"><strong>Control plane failures are your problem</strong> — if your self-managed etcd goes down, your cluster is dead. If the API server crashes during an upgrade, you're debugging at 3 AM. Managed K8s makes this the cloud provider's problem.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">⏱</div><div class="bt"><strong>Setup takes days, not minutes</strong> — a production-grade self-managed cluster with HA, monitoring, and networking takes 1–2 weeks to set up properly. EKS/GKE/AKS: 15 minutes from zero to running cluster.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">🚀</div><div class="bt"><strong>Cloud-native integrations are pre-built</strong> — managed K8s connects natively to cloud storage, load balancers, identity services, DNS, and monitoring. Zero extra configuration needed.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB)">
+          <span style="font-size:10px;font-weight:700;color:#FBBF24">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Self-managed K8s = <strong style="color:#fff">building and maintaining your own power plant</strong>. Managed K8s = <strong style="color:#fff">plugging into the national grid</strong>. Same electricity, zero infrastructure headaches.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:7px">😩 Self-Managed K8s — Your Responsibility</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">❌ Install &amp; configure control plane</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">❌ Manage etcd backups</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">❌ Handle version upgrades</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">❌ Set up HA &amp; failover</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">❌ Patch security vulnerabilities</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">✅ Managed K8s — Cloud Handles It</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">✅ Control plane fully managed</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">✅ Auto backups &amp; HA</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">✅ One-click upgrades</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">✅ SLA-backed availability</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">✅ Auto security patches</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 11</span></div>
+  </div>
+
+  <!-- S3 WHAT ARE MANAGED SERVICES -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(255,153,0,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Definition</div>
+      <div class="stitle">What are <span style="color:var(--aws)">Managed Kubernetes Services?</span></div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div class="bi"><div class="ico" style="background:var(--awsD)">☁</div><div class="bt"><strong>Cloud provider manages the control plane</strong> — the API server, scheduler, controller manager, and etcd run on cloud infrastructure you never touch. They're invisible to you, but fully operational 24/7.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--okD)">🔧</div><div class="bt"><strong>You only manage your worker nodes and apps</strong> — your responsibility starts at the node pool. Choose node type (CPU/RAM), set autoscaling limits, deploy your workloads. That's it.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--awsD)">⬆</div><div class="bt"><strong>Automatic upgrades and patching</strong> — the cloud provider releases new K8s versions and patches CVEs. You get a notification, click upgrade, nodes are updated with zero downtime using rolling upgrades.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--okD)">📊</div><div class="bt"><strong>Integrated monitoring and logging</strong> — CloudWatch (AWS), Cloud Monitoring (GCP), Azure Monitor are pre-connected to your cluster. No Prometheus setup required to get basic metrics.</div></div>
+          <div style="margin-top:6px;padding:9px 13px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB)">
+            <span style="font-size:10px;font-weight:700;color:#FBBF24">Shared Responsibility: </span>
+            <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Cloud = control plane + infrastructure. <strong style="color:#fff">You</strong> = worker nodes + workloads + networking policies + RBAC + application security.</span>
+          </div>
+        </div>
+        <div style="width:245px;flex-shrink:0">
+          <div style="height:100%;border-radius:13px;padding:12px;background:var(--awsD);border:2px solid var(--awsB);box-shadow:0 0 22px rgba(255,153,0,.1);display:flex;flex-direction:column;gap:6px">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FBBF24;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Responsibility Split</div>
+            <!-- Cloud manages -->
+            <div style="border-radius:8px;padding:8px;background:rgba(255,153,0,.08);border:1.5px solid rgba(255,153,0,.25)">
+              <div style="font-size:8px;font-weight:700;color:#FBBF24;margin-bottom:5px">☁ Cloud Provider Manages</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px">
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">API Server</span>
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">etcd</span>
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">Scheduler</span>
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">Controller Mgr</span>
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">HA &amp; Failover</span>
+                <span class="svc-chip" style="background:rgba(255,153,0,.12);color:#FBBF24;border:1px solid rgba(255,153,0,.22)">Security Patches</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:var(--aws)">↕ boundary</div>
+            <!-- You manage -->
+            <div style="border-radius:8px;padding:8px;background:var(--okD);border:1.5px solid var(--okB)">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:5px">👤 You Manage</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px">
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Node Pools</span>
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Deployments</span>
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">RBAC</span>
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Network Policy</span>
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Your Apps</span>
+                <span class="svc-chip" style="background:rgba(34,197,94,.12);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Scaling Rules</span>
+              </div>
+            </div>
+            <div style="border-radius:7px;padding:5px 8px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.18);font-size:7.5px;color:#FBBF24;text-align:center">Focus on apps, not infrastructure ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 11</span></div>
+  </div>
+
+  <!-- S4 EKS -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(255,153,0,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Amazon Web Services</div>
+        <div class="stitle">Amazon <span style="color:var(--aws)">EKS</span> — Elastic Kubernetes Service</div>
+        <div class="bi" style="border-color:rgba(255,153,0,.2)"><div class="ico" style="background:var(--awsD)">🟠</div><div class="bt"><strong>AWS-managed Kubernetes control plane</strong> — EKS runs a multi-AZ (Availability Zone) HA control plane. 99.95% SLA. You never SSH into control plane nodes. AWS handles everything.</div></div>
+        <div class="bi" style="border-color:rgba(255,153,0,.2)"><div class="ico" style="background:var(--awsD)">🔗</div><div class="bt"><strong>Deep AWS ecosystem integration</strong> — IAM for pod-level permissions (IRSA), VPC for networking, ELB for load balancers, ECR for container registry, CloudWatch for monitoring. All native.</div></div>
+        <div class="bi" style="border-color:rgba(255,153,0,.2)"><div class="ico" style="background:var(--awsD)">⚡</div><div class="bt"><strong>Fargate support — serverless nodes</strong> — run Pods without managing EC2 instances at all. AWS Fargate provisions the compute automatically. Pay per Pod, not per node.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">💼</div><div class="bt"><strong>Most adopted managed K8s globally</strong> — 33%+ of managed K8s workloads run on EKS. If your company is on AWS, EKS is the default choice.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB)">
+          <span style="font-size:10px;font-weight:700;color:#FBBF24">Note: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">EKS charges for the control plane ($0.10/hr) plus EC2/Fargate compute. Often the most expensive of the three but with the richest ecosystem.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:12px;background:var(--awsD);border:2px solid var(--awsB);box-shadow:0 0 22px rgba(255,153,0,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FBBF24;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">EKS AWS Integration</div>
+            <div style="text-align:center;border-radius:8px;padding:7px;background:rgba(255,153,0,.1);border:1.5px solid rgba(255,153,0,.3);margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#FBBF24">⎈ EKS Control Plane</div>
+              <div style="font-size:7px;color:var(--muted)">Multi-AZ · 99.95% SLA · Managed by AWS</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">🔐</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">IAM / IRSA</div>
+                <div style="font-size:6.5px;color:var(--muted)">Pod-level permissions</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">🌐</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">VPC</div>
+                <div style="font-size:6.5px;color:var(--muted)">Native networking</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">📦</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">ECR</div>
+                <div style="font-size:6.5px;color:var(--muted)">Container registry</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">📊</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">CloudWatch</div>
+                <div style="font-size:6.5px;color:var(--muted)">Monitoring</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">⚖</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">ELB / ALB</div>
+                <div style="font-size:6.5px;color:var(--muted)">Load balancing</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(255,153,0,.07);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:10px">🖥</div>
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700">Fargate</div>
+                <div style="font-size:6.5px;color:var(--muted)">Serverless nodes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 11</span></div>
+  </div>
+
+  <!-- S5 GKE -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(66,133,244,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Google Cloud Platform</div>
+        <div class="stitle">Google <span style="color:#93C5FD">GKE</span> — Kubernetes Engine</div>
+        <div class="bi" style="border-color:rgba(66,133,244,.2)"><div class="ico" style="background:var(--gcpD)">🔵</div><div class="bt"><strong>Built by the creators of Kubernetes</strong> — Google invented Kubernetes internally as "Borg" and open-sourced it. GKE has the deepest Kubernetes expertise and ships new features first.</div></div>
+        <div class="bi" style="border-color:rgba(66,133,244,.2)"><div class="ico" style="background:var(--gcpD)">🤖</div><div class="bt"><strong>Autopilot mode — fully managed nodes too</strong> — GKE Autopilot manages not just the control plane but also worker nodes. Pay only for Pods, not nodes. Google handles all node scaling and patching.</div></div>
+        <div class="bi" style="border-color:rgba(66,133,244,.2)"><div class="ico" style="background:var(--gcpD)">📈</div><div class="bt"><strong>Best-in-class autoscaling</strong> — Cluster Autoscaler, HPA, VPA, and Multidimensional Pod Autoscaling (MDPA) are all natively supported. Handles massive traffic spikes with ease.</div></div>
+        <div class="bi" style="border-color:rgba(66,133,244,.2)"><div class="ico" style="background:var(--gcpD)">🛡</div><div class="bt"><strong>Strongest security defaults</strong> — Binary Authorization, Workload Identity, private clusters, shielded nodes, and security posture dashboard built in. Top choice for security-conscious teams.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--gcpD);border:1px solid var(--gcpB)">
+          <span style="font-size:10px;font-weight:700;color:#93C5FD">Standout: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">GKE Autopilot = the most hands-off Kubernetes experience available. No node management, no capacity planning — just deploy Pods and pay for what you use.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:12px;background:var(--gcpD);border:2px solid var(--gcpB);box-shadow:0 0 22px rgba(66,133,244,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#93C5FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">GKE Google Cloud Integration</div>
+            <div style="text-align:center;border-radius:8px;padding:7px;background:rgba(66,133,244,.1);border:1.5px solid rgba(66,133,244,.3);margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#93C5FD">⎈ GKE Control Plane</div>
+              <div style="font-size:7px;color:var(--muted)">Zonal / Regional · 99.95% SLA · Autopilot</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">🔐</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">Workload Identity</div>
+                <div style="font-size:6.5px;color:var(--muted)">IAM for Pods</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">🌐</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">VPC-native</div>
+                <div style="font-size:6.5px;color:var(--muted)">Alias IP networking</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">📦</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">Artifact Registry</div>
+                <div style="font-size:6.5px;color:var(--muted)">Container registry</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">📊</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">Cloud Monitoring</div>
+                <div style="font-size:6.5px;color:var(--muted)">Metrics &amp; logs</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">🤖</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">Autopilot</div>
+                <div style="font-size:6.5px;color:var(--muted)">Fully managed nodes</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.2);text-align:center">
+                <div style="font-size:10px">🛡</div>
+                <div style="font-size:7.5px;color:#93C5FD;font-weight:700">Binary Auth</div>
+                <div style="font-size:6.5px;color:var(--muted)">Image signing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 11</span></div>
+  </div>
+
+  <!-- S6 AKS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,120,212,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Microsoft Azure</div>
+        <div class="stitle">Azure <span style="color:#BAE6FD">AKS</span> — Azure Kubernetes Service</div>
+        <div class="bi" style="border-color:rgba(0,120,212,.2)"><div class="ico" style="background:var(--azD)">🔷</div><div class="bt"><strong>Free control plane — most cost-effective</strong> — AKS does not charge for the control plane (unlike EKS at $0.10/hr). You pay only for VM compute, making it the cheapest option for small clusters.</div></div>
+        <div class="bi" style="border-color:rgba(0,120,212,.2)"><div class="ico" style="background:var(--azD)">🏢</div><div class="bt"><strong>Native Azure Active Directory integration</strong> — Azure AD for cluster authentication and RBAC is seamless. Windows containers, .NET apps, and SQL Server all work natively. Perfect for Microsoft-heavy enterprises.</div></div>
+        <div class="bi" style="border-color:rgba(0,120,212,.2)"><div class="ico" style="background:var(--azD)">🌍</div><div class="bt"><strong>Hybrid cloud with Azure Arc</strong> — Azure Arc lets you manage on-premises Kubernetes clusters from the same AKS control plane. Unique capability for enterprise hybrid deployments.</div></div>
+        <div class="bi" style="border-color:rgba(0,120,212,.2)"><div class="ico" style="background:var(--azD)">🔗</div><div class="bt"><strong>Deep Azure DevOps integration</strong> — Azure Pipelines, Azure Container Registry, Azure Monitor, Key Vault, and Log Analytics all connect to AKS without extra configuration.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--azD);border:1px solid var(--azB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Best for: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Companies already using Microsoft ecosystem (Azure DevOps, Azure AD, .NET, Windows). If your org is Microsoft-first, AKS is the natural choice with zero integration friction.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:12px;background:var(--azD);border:2px solid var(--azB);box-shadow:0 0 22px rgba(0,120,212,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">AKS Azure Integration</div>
+            <div style="text-align:center;border-radius:8px;padding:7px;background:rgba(0,120,212,.1);border:1.5px solid rgba(0,120,212,.3);margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">⎈ AKS Control Plane</div>
+              <div style="font-size:7px;color:var(--muted)">Free · Multi-zone · 99.95% SLA</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">🔐</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Azure AD</div>
+                <div style="font-size:6.5px;color:var(--muted)">SSO &amp; RBAC</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">📦</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">ACR</div>
+                <div style="font-size:6.5px;color:var(--muted)">Container registry</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">📊</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Azure Monitor</div>
+                <div style="font-size:6.5px;color:var(--muted)">Container insights</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">🔑</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Key Vault</div>
+                <div style="font-size:6.5px;color:var(--muted)">Secrets management</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">⚙</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Azure DevOps</div>
+                <div style="font-size:6.5px;color:var(--muted)">CI/CD pipelines</div>
+              </div>
+              <div style="border-radius:7px;padding:6px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.2);text-align:center">
+                <div style="font-size:10px">🌉</div>
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Azure Arc</div>
+                <div style="font-size:6.5px;color:var(--muted)">Hybrid cloud</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 11</span></div>
+  </div>
+
+  <!-- S7 COMPARISON TABLE -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(255,153,0,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Side-by-Side</div>
+      <div class="stitle"><span style="color:var(--aws)">EKS</span> vs <span style="color:#93C5FD">GKE</span> vs <span style="color:#BAE6FD">AKS</span> — Comparison</div>
+      <div style="flex:1;display:flex;flex-direction:column;padding-top:8px;gap:0;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)">
+          <div class="comp-cell comp-head">Feature</div>
+          <div class="comp-cell comp-head" style="color:#FBBF24">🟠 EKS (AWS)</div>
+          <div class="comp-cell comp-head" style="color:#93C5FD">🔵 GKE (Google)</div>
+          <div class="comp-cell comp-head" style="color:#BAE6FD">🔷 AKS (Azure)</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Control Plane Cost</div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(239,68,68,.1);color:#FCA5A5;border:1px solid rgba(239,68,68,.2)">$0.10/hr</span></div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.1);color:#FDE068;border:1px solid rgba(245,158,11,.2)">$0.10/hr (standard)</span></div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">FREE ✅</span></div>
+        </div>
+        <div class="comp-row" style="background:rgba(255,255,255,.02)">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Ease of Setup</div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.1);color:#FDE068;border:1px solid rgba(245,158,11,.2)">Medium</span></div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Easiest ✅</span></div>
+          <div class="comp-cell"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">Easy</span></div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">K8s Expertise</div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">Strong</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#86EFAC;font-weight:700">Deepest (creators) ✅</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">Strong</span></div>
+        </div>
+        <div class="comp-row" style="background:rgba(255,255,255,.02)">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Serverless Nodes</div>
+          <div class="comp-cell"><span style="font-size:8px;color:#FBBF24">Fargate</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#86EFAC;font-weight:700">Autopilot ✅</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#BAE6FD">Virtual Nodes</span></div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Windows Containers</div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">Yes</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">Limited</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#86EFAC;font-weight:700">Best support ✅</span></div>
+        </div>
+        <div class="comp-row" style="background:rgba(255,255,255,.02)">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Hybrid Cloud</div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">EKS Anywhere</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#CBD5E1">Anthos</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#86EFAC;font-weight:700">Azure Arc ✅</span></div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Best for</div>
+          <div class="comp-cell" style="font-size:8px;color:#FBBF24">AWS-native teams</div>
+          <div class="comp-cell" style="font-size:8px;color:#93C5FD">Cloud-native / ML</div>
+          <div class="comp-cell" style="font-size:8px;color:#BAE6FD">Microsoft enterprise</div>
+        </div>
+        <div class="comp-row" style="background:rgba(255,255,255,.02)">
+          <div class="comp-cell" style="color:var(--muted);font-size:8px;font-weight:700">Market Share</div>
+          <div class="comp-cell"><span style="font-size:8px;color:#FBBF24;font-weight:700">~33% 🏆</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#93C5FD;font-weight:700">~26%</span></div>
+          <div class="comp-cell"><span style="font-size:8px;color:#BAE6FD;font-weight:700">~22%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 11</span></div>
+  </div>
+
+  <!-- S8 COMMON FEATURES -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Shared Capabilities</div>
+      <div class="stitle">Common Features <span style="color:var(--ok)">Across All Three</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📈</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Auto Scaling</div><div style="font-size:7.5px;color:var(--muted)">Nodes and Pods</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">All three support Cluster Autoscaler (adds/removes nodes) and HPA (scales Pods). Handles traffic spikes automatically with no manual intervention.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">EKS: Karpenter · GKE: Autopilot · AKS: VMSS</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--awsD);border:2px solid var(--awsB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(255,153,0,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">⎈</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FBBF24">Managed Control Plane</div><div style="font-size:7.5px;color:var(--muted)">Zero ops overhead</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">All three provide SLA-backed, highly available control planes across multiple availability zones. No manual etcd or API server management required.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(255,153,0,.1);border:1px solid rgba(255,153,0,.2);color:#FBBF24;text-align:center">99.95% uptime SLA guaranteed</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--gcpD);border:2px solid var(--gcpB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(66,133,244,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📊</div>
+            <div><div style="font-size:11px;font-weight:800;color:#93C5FD">Monitoring</div><div style="font-size:7.5px;color:var(--muted)">Native observability</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Each platform integrates natively with its cloud monitoring service. Container insights, metrics, logs, and dashboards available out of the box.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.2);color:#93C5FD;text-align:center">CloudWatch · Cloud Monitor · Azure Monitor</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--azD);border:2px solid var(--azB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(0,120,212,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#BAE6FD">Security</div><div style="font-size:7.5px;color:var(--muted)">Enterprise-grade</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">All three offer private clusters, network policies, RBAC, secrets management, vulnerability scanning, and compliance certifications (SOC2, PCI, HIPAA).</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(0,120,212,.1);border:1px solid rgba(0,120,212,.2);color:#BAE6FD;text-align:center">IAM · Binary Auth · Azure Defender</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:rgba(124,58,237,.08);border:2px solid rgba(124,58,237,.25);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🌍</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">High Availability</div><div style="font-size:7.5px;color:var(--muted)">Multi-zone &amp; region</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">All support multi-AZ node pools and regional clusters. Your workloads survive entire data center failures automatically with load balancing across zones.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22);color:#DDD6FE;text-align:center">Multi-AZ · Auto failover · LB</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 11</span></div>
+  </div>
+
+  <!-- S9 REAL WORLD -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(255,153,0,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Global E-Commerce on <span style="color:var(--aws)">EKS</span> — Production Story</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:5px;width:62px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Challenge</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Solution</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Setup</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Traffic</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Black Friday</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Result</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--erD);border:1px solid var(--erB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">🌍 Serve 2M users globally across US, EU, APAC with 99.99% uptime</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--awsD);border:1px solid var(--awsB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FBBF24;font-weight:600">☁ EKS clusters in us-east-1, eu-west-1, ap-southeast-1 — 3 regions</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--awsD);border:1px solid var(--awsB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FBBF24;font-weight:600">⚙ IAM roles, ALB ingress, ECR registry, CloudWatch monitoring, Karpenter autoscaler</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">📈 Normal load: 40 Pods · HPA configured for target CPU 70%</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">🛒 Traffic 10× spike → Karpenter adds nodes → HPA scales to 400 Pods automatically</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ Zero outages · Zero DevOps intervention · $2M revenue during sale period</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:225px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--awsD);border:2px solid var(--awsB);box-shadow:0 0 18px rgba(255,153,0,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FBBF24;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Global Architecture</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="text-align:center;font-size:8px;font-weight:700;color:#FBBF24;margin-bottom:2px">Route 53 (Global DNS)</div>
+              <div style="display:flex;gap:4px">
+                <div style="flex:1;border-radius:6px;padding:5px;background:rgba(255,153,0,.1);border:1px solid rgba(255,153,0,.2);text-align:center">
+                  <div style="font-size:7px;color:#FBBF24;font-weight:700">🟠 us-east-1</div>
+                  <div style="font-size:6.5px;color:#94A3B8">EKS · 3 AZ</div>
+                  <div style="font-size:6.5px;color:#86EFAC">40→400 Pods</div>
+                </div>
+                <div style="flex:1;border-radius:6px;padding:5px;background:rgba(255,153,0,.1);border:1px solid rgba(255,153,0,.2);text-align:center">
+                  <div style="font-size:7px;color:#FBBF24;font-weight:700">🟠 eu-west-1</div>
+                  <div style="font-size:6.5px;color:#94A3B8">EKS · 3 AZ</div>
+                  <div style="font-size:6.5px;color:#86EFAC">20→180 Pods</div>
+                </div>
+              </div>
+              <div style="border-radius:6px;padding:5px;background:rgba(255,153,0,.1);border:1px solid rgba(255,153,0,.2);text-align:center">
+                <div style="font-size:7px;color:#FBBF24;font-weight:700">🟠 ap-southeast-1</div>
+                <div style="font-size:6.5px;color:#94A3B8">EKS · 3 AZ · 15→90 Pods</div>
+              </div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(255,153,0,.08);border:1px solid rgba(255,153,0,.18)">
+                <div style="font-size:7.5px;color:#FBBF24;font-weight:700;margin-bottom:2px">Shared Services</div>
+                <div style="font-size:7px;color:#94A3B8">ECR · IAM · CloudWatch · ALB</div>
+              </div>
+              <div style="border-radius:6px;padding:4px 8px;background:var(--okD);border:1px solid var(--okB);text-align:center;font-size:7.5px;color:#86EFAC;font-weight:700">99.99% uptime ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 11</span></div>
+  </div>
+
+  <!-- S10 BENEFITS & BEST PRACTICES -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits &amp; Best Practices</div>
+        <div class="stitle">Cloud K8s <span style="color:var(--ok)">Best Practices</span></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🚀</div><div class="bt"><strong>Deploy clusters in multiple availability zones</strong> — always spread node pools across 3 AZs minimum. A single AZ outage should never take down your application. All three services support this natively.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--awsD)">🔐</div><div class="bt"><strong>Use cloud-native IAM for Pod permissions</strong> — IRSA (EKS), Workload Identity (GKE), and Managed Identity (AKS) give individual Pods cloud permissions without storing credentials. Never put cloud keys in Pods.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--gcpD)">📈</div><div class="bt"><strong>Configure autoscaling from day one</strong> — set up Cluster Autoscaler and HPA before going to production, not after. Traffic spikes come without warning. Autoscaling must already be in place.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--azD)">🏷</div><div class="bt"><strong>Tag resources and set up cost monitoring</strong> — cloud K8s costs grow fast. Use labels to attribute costs per team/app. Set billing alerts. Review Spot/Preemptible instances for non-critical nodes.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🔒</div><div class="bt"><strong>Use private clusters for production</strong> — disable public API server endpoint. All three support private clusters where the API server is only reachable from your VPN/VPC. Never expose K8s API to the internet.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:11px;padding:11px;background:var(--awsD);border:1.5px solid var(--awsB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FBBF24;margin-bottom:6px">🗺 How to Choose</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(255,153,0,.08);border:1px solid rgba(255,153,0,.18)">
+                <div style="font-size:8px;font-weight:700;color:#FBBF24">Already on AWS?</div>
+                <div style="font-size:7.5px;color:#94A3B8">→ Use EKS. Native integrations win.</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(66,133,244,.07);border:1px solid rgba(66,133,244,.18)">
+                <div style="font-size:8px;font-weight:700;color:#93C5FD">Cloud-native / ML workloads?</div>
+                <div style="font-size:7.5px;color:#94A3B8">→ Use GKE. Best K8s + AI/ML stack.</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(0,120,212,.07);border:1px solid rgba(0,120,212,.18)">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">Microsoft enterprise / .NET?</div>
+                <div style="font-size:7.5px;color:#94A3B8">→ Use AKS. Free control plane wins.</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:var(--okD);border:1px solid var(--okB)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">New to cloud / just learning?</div>
+                <div style="font-size:7.5px;color:#94A3B8">→ Start with GKE Autopilot. Easiest.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 11</span></div>
+  </div>
+
+  <!-- S11 SUMMARY -->
+  <div class="slide" data-s="11">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(255,153,0,.13) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(66,133,244,.13) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes on Cloud — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--erD);border:1.5px solid var(--erB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🏗</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Self-Managed K8s</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Building your own house</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Buy land. Lay foundation. Wire electricity. Install plumbing. Maintain everything yourself. Full control, massive effort.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--awsD);border:1.5px solid var(--awsB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--aws),var(--gcp));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#FBBF24">Managed K8s = Apartment</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Fully managed rental</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Move in immediately. Building management handles maintenance, security, utilities. You just live and work there.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚀</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Focus on your apps</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">15-min cluster setup. No infra ops. Scale globally. Team ships features instead of managing servers.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🟠</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FBBF24">EKS (AWS)</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Richest ecosystem</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--gcpD);border:1px solid var(--gcpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔵</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#93C5FD">GKE (Google)</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Best automation</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--azD);border:1px solid var(--azB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔷</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">AKS (Azure)</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Free control plane</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">☁</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Managed CP</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">99.95% SLA all three</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📈</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FBBF24">Auto Scaling</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Nodes + Pods</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--gcpD);border:1px solid var(--gcpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#93C5FD">Cloud IAM</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">No keys in Pods</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(255,153,0,.05);border:1px solid rgba(255,153,0,.2);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Self-managed K8s = building &amp; maintaining your own building</span>. <span style="color:#86EFAC">EKS/GKE/AKS = renting a fully managed apartment and just focusing on your work</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--awsD);border:1.5px solid var(--awsB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FBBF24;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--aws)">◆</span>Managed K8s = cloud handles CP</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--aws)">◆</span>EKS = AWS ecosystem king</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--aws)">◆</span>GKE = best automation</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--aws)">◆</span>AKS = free CP, MS enterprise</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--aws)">◆</span>Choose based on your cloud</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes<br>Best Practices</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">Security · Reliability<br>Production-grade K8s</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(255,153,0,.05);border:1px solid rgba(255,153,0,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#FBBF24;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>11 / 11</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=11;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

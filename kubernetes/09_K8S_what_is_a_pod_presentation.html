@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --pod:#00D4FF;--podD:rgba(0,212,255,.1);--podB:rgba(0,212,255,.3);
+  --con:#326CE5;--conD:rgba(50,108,229,.12);--conB:rgba(50,108,229,.36);
+  --net:#7C3AED;--netD:rgba(124,58,237,.11);--netB:rgba(124,58,237,.34);
+  --vol:#22C55E;--volD:rgba(34,197,94,.1);--volB:rgba(34,197,94,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* Pod visual blocks */
+.pod-box{border-radius:14px;padding:10px;border:2px solid var(--podB);background:var(--podD);position:relative}
+.pod-label{font-size:8px;font-weight:800;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:8px}
+.con-box{border-radius:8px;padding:8px 10px;background:var(--conD);border:1.5px solid var(--conB);text-align:center}
+.con-label{font-size:9px;font-weight:700;color:#BAE6FD}
+.net-pill{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;background:rgba(124,58,237,.15);border:1px solid var(--netB);font-size:8px;font-weight:700;color:#DDD6FE}
+.vol-pill{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;background:var(--volD);border:1px solid var(--volB);font-size:8px;font-weight:700;color:#86EFAC}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(24px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,var(--purple) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">What is<br>a Pod?</div>
+        <div style="font-size:clamp(11px,1.7vw,16px);color:var(--muted);margin-bottom:20px;line-height:1.5">The Smallest Unit in Kubernetes<br>— Understanding the building block of every K8s app</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--podD);color:#67E8F9;border:1px solid var(--podB);padding:4px 12px;font-size:9px">📦 Pod</span>
+          <span class="tag" style="background:var(--conD);color:#BAE6FD;border:1px solid var(--conB);padding:4px 12px;font-size:9px">🐳 Container</span>
+          <span class="tag" style="background:var(--netD);color:#DDD6FE;border:1px solid var(--netB);padding:4px 12px;font-size:9px">🌐 Networking</span>
+          <span class="tag" style="background:var(--volD);color:#86EFAC;border:1px solid var(--volB);padding:4px 12px;font-size:9px">💾 Storage</span>
+        </div>
+      </div>
+      <!-- right: hero pod illustration -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:270px">
+          <!-- worker node outer -->
+          <div style="border:1.5px dashed rgba(34,197,94,.3);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+            <div style="font-size:8px;font-weight:700;color:rgba(34,197,94,.6);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:8px">💪 Worker Node</div>
+            <!-- pod -->
+            <div class="pod-box" style="box-shadow:0 0 24px rgba(0,212,255,.15)">
+              <div class="pod-label">📦 Pod</div>
+              <!-- container inside -->
+              <div class="con-box" style="margin-bottom:7px">
+                <div style="font-size:20px;margin-bottom:4px">🐳</div>
+                <div class="con-label">Your App Container</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">nginx:1.25 · port 80</div>
+              </div>
+              <!-- shared resources -->
+              <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap">
+                <div class="net-pill"><span>🌐</span>IP: 10.0.0.5</div>
+                <div class="vol-pill"><span>💾</span>Volume</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:8px;color:var(--muted);margin-top:6px">Kubernetes manages the Pod, not the container directly</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 08</span></div>
+  </div>
+
+  <!-- ══ S2 DEFINITION ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Simple Definition</div>
+        <div class="stitle">What is a <span style="color:var(--cyan)">Pod?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🏆</div><div class="bt"><strong>Smallest deployable unit in Kubernetes</strong> — you don't deploy containers directly; you deploy Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--conD)">🐳</div><div class="bt"><strong>Wraps one or more containers</strong> — think of it as a logical host that holds your containers together</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">🖥</div><div class="bt"><strong>Runs on a Worker Node</strong> — the Scheduler decides which node gets the Pod</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.18)">⚙️</div><div class="bt"><strong>Kubernetes manages Pods, not containers</strong> — K8s sees Pods as its basic unit of management</div></div>
+        <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:var(--podD);border:1px solid var(--podB)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">Simple analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Pod = a box 📦. Container = the item inside 🥫. Kubernetes manages the box, not individual items.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:240px;display:flex;flex-direction:column;gap:8px">
+          <!-- container alone (K8s doesn't do this) -->
+          <div style="border-radius:11px;padding:11px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.28);position:relative">
+            <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:rgba(239,68,68,.3);border:1px solid rgba(239,68,68,.5);padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#FCA5A5;white-space:nowrap">❌ K8s doesn't do this</div>
+            <div style="text-align:center;margin-top:6px">
+              <div style="font-size:22px;margin-bottom:4px">🐳</div>
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">Bare Container</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">No network, no scheduling, no management</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:20px;color:var(--cyan)">↓</div>
+          <!-- pod wrapping container (K8s does this) -->
+          <div class="pod-box" style="box-shadow:0 0 20px rgba(0,212,255,.12)">
+            <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">✅ K8s manages this</div>
+            <div class="pod-label" style="margin-top:4px">📦 Pod</div>
+            <div class="con-box">
+              <div style="font-size:18px;margin-bottom:2px">🐳</div>
+              <div class="con-label">Container</div>
+            </div>
+            <div style="display:flex;gap:4px;justify-content:center;margin-top:6px;flex-wrap:wrap">
+              <div class="net-pill"><span>🌐</span>Network</div>
+              <div class="vol-pill"><span>💾</span>Storage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 08</span></div>
+  </div>
+
+  <!-- ══ S3 WHY PODS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Purpose</div>
+        <div class="stitle">Why are <span style="color:var(--cyan)">Pods</span> Needed?</div>
+        <div class="bi"><div class="ico" style="background:rgba(239,68,68,.18)">🚫</div><div class="bt"><strong>Kubernetes does not manage containers directly</strong> — it needs a higher-level abstraction to work with</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">📦</div><div class="bt"><strong>Pods act as a wrapper around containers</strong> — giving Kubernetes a consistent unit to schedule & manage</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🌐</div><div class="bt"><strong>Provide networking to containers</strong> — each Pod gets a unique IP; containers inside share it</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">💾</div><div class="bt"><strong>Provide storage to containers</strong> — volumes are attached to Pods and shared between containers inside</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.18)">🤝</div><div class="bt"><strong>Makes management simple</strong> — K8s schedules, scales, and heals Pods — not individual processes</div></div>
+      </div>
+      <div class="lr">
+        <!-- container vs pod comparison -->
+        <div style="width:100%;max-width:260px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:11px;padding:12px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.25)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">🐳 Container alone</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>No IP address management</div>
+              <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>No storage coordination</div>
+              <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>Kubernetes can't schedule it</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:14px;color:var(--cyan);font-weight:700">vs</div>
+          <div class="pod-box" style="box-shadow:0 0 18px rgba(0,212,255,.12)">
+            <div class="pod-label">📦 Pod (K8s unit)</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(0,212,255,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Gets its own IP address</div>
+              <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(0,212,255,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Shares volumes with containers</div>
+              <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(0,212,255,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Kubernetes can schedule it</div>
+              <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(0,212,255,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Can be healed / restarted</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 08</span></div>
+  </div>
+
+  <!-- ══ S4 POD STRUCTURE ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Inside a Pod</div>
+      <div class="stitle">Pod Structure — What's Inside?</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- left: single container (common) -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div style="padding:6px 10px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Most Common Pattern</div>
+          <div class="pod-box" style="flex:1;box-shadow:0 0 20px rgba(0,212,255,.12)">
+            <div class="pod-label">📦 Single-Container Pod</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:7px;padding:8px 0">
+              <div class="con-box" style="width:130px">
+                <div style="font-size:22px;margin-bottom:4px">🐳</div>
+                <div class="con-label">Web App Container</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">nginx · port 80</div>
+              </div>
+              <!-- shared resources -->
+              <div style="width:100%;padding:8px;border-radius:8px;background:rgba(0,0,0,.2);border:1px dashed rgba(0,212,255,.2)">
+                <div style="font-size:8px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">Shared Resources</div>
+                <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap">
+                  <div class="net-pill"><span>🌐</span>IP: 10.1.2.3</div>
+                  <div class="vol-pill"><span>💾</span>/data volume</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- center divider -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:2px">OR</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- right: multi-container (sidecar) -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div style="padding:6px 10px;border-radius:8px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">Advanced Pattern (Sidecar)</div>
+          <div class="pod-box" style="flex:1;border-color:rgba(124,58,237,.35);background:rgba(124,58,237,.07);box-shadow:0 0 20px rgba(124,58,237,.12)">
+            <div class="pod-label" style="color:#DDD6FE">📦 Multi-Container Pod</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0">
+              <div style="display:flex;gap:6px;width:100%">
+                <div class="con-box" style="flex:1">
+                  <div style="font-size:16px;margin-bottom:2px">🐳</div>
+                  <div class="con-label" style="font-size:8px">Main App</div>
+                </div>
+                <div class="con-box" style="flex:1;background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.35)">
+                  <div style="font-size:16px;margin-bottom:2px">🔧</div>
+                  <div class="con-label" style="font-size:8px;color:#DDD6FE">Sidecar</div>
+                </div>
+              </div>
+              <!-- communication -->
+              <div style="padding:5px 8px;border-radius:7px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);width:100%">
+                <div style="font-size:8px;font-weight:700;color:#DDD6FE;text-align:center;margin-bottom:3px">Talk via localhost</div>
+                <div style="display:flex;justify-content:center;gap:5px;align-items:center">
+                  <div style="font-size:8px;color:#94A3B8">Main</div>
+                  <div style="font-size:10px;color:var(--cyan)">⟷</div>
+                  <div style="font-size:8px;color:#94A3B8">Sidecar</div>
+                </div>
+              </div>
+              <!-- shared -->
+              <div style="width:100%;padding:6px;border-radius:8px;background:rgba(0,0,0,.2);border:1px dashed rgba(124,58,237,.2)">
+                <div style="font-size:8px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase">Shared by both</div>
+                <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">
+                  <div class="net-pill" style="font-size:7px"><span>🌐</span>Same IP</div>
+                  <div class="vol-pill" style="font-size:7px"><span>💾</span>Same Volume</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 08</span></div>
+  </div>
+
+  <!-- ══ S5 NETWORKING ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Networking</div>
+        <div class="stitle">Pod <span style="color:#DDD6FE">Networking</span> Explained</div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🌐</div><div class="bt"><strong>Each Pod gets its own unique IP address</strong> — assigned by Kubernetes automatically when the Pod starts</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🔁</div><div class="bt"><strong>Containers inside a Pod share the same IP</strong> — they communicate with each other via <code style="background:rgba(124,58,237,.2);padding:1px 5px;border-radius:4px;font-size:10px;color:#DDD6FE">localhost</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">📡</div><div class="bt"><strong>Pods communicate with each other via the cluster network</strong> — using their Pod IPs (or via Services)</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(245,158,11,.15)">⚠️</div><div class="bt"><strong>Pod IPs are temporary</strong> — when a Pod restarts, it gets a new IP. Use Services for stable access.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--netD);border:1px solid var(--netB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Key rule: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Inside Pod → use <code style="color:#DDD6FE">localhost</code>. Outside Pod → use <code style="color:var(--cyan)">Pod IP</code> or a <code style="color:var(--cyan)">Service</code></span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--netD);border:1.5px solid var(--netB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Pod Networking Diagram</div>
+            <!-- pod A -->
+            <div class="pod-box" style="margin-bottom:6px">
+              <div class="pod-label">📦 Pod A — IP: 10.0.0.1</div>
+              <div style="display:flex;gap:5px">
+                <div class="con-box" style="flex:1">
+                  <div style="font-size:11px">🐳</div><div class="con-label" style="font-size:8px">App</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px">
+                  <div style="font-size:9px;color:var(--cyan)">⟷</div>
+                  <div style="font-size:7px;color:var(--muted)">localhost</div>
+                </div>
+                <div class="con-box" style="flex:1">
+                  <div style="font-size:11px">🔧</div><div class="con-label" style="font-size:8px">Logger</div>
+                </div>
+              </div>
+            </div>
+            <!-- network arrow -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:4px">
+              <div style="font-size:10px;color:var(--net)">↕</div>
+              <div style="font-size:8px;color:var(--muted);padding:2px 10px;border-radius:10px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25)">Cluster Network</div>
+              <div style="font-size:10px;color:var(--net)">↕</div>
+            </div>
+            <!-- pod B -->
+            <div class="pod-box">
+              <div class="pod-label">📦 Pod B — IP: 10.0.0.2</div>
+              <div class="con-box">
+                <div style="font-size:11px">🐳</div><div class="con-label" style="font-size:8px">API Server</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;padding:6px 8px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);font-size:8px;color:#FDE068;text-align:center">
+              ⚠️ Pod IPs change on restart → use Services for stable DNS
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 08</span></div>
+  </div>
+
+  <!-- ══ S6 LIFECYCLE ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Pod Lifecycle</div>
+      <div class="stitle">How a Pod Lives & Dies</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- lifecycle steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <!-- step cards -->
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28)">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">1</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#DDD6FE">Pending</div>
+              <div style="font-size:9px;color:#94A3B8">Pod created, waiting for a node. Image being pulled.</div>
+            </div>
+            <div style="margin-left:auto;padding:3px 9px;border-radius:12px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.35);font-size:8px;font-weight:700;color:#DDD6FE">⏳ Pending</div>
+          </div>
+          <div style="padding-left:20px;font-size:12px;color:var(--cyan)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.28)">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#86EFAC">Running</div>
+              <div style="font-size:9px;color:#94A3B8">At least one container is running. App is serving traffic.</div>
+            </div>
+            <div style="margin-left:auto;padding:3px 9px;border-radius:12px;background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.35);font-size:8px;font-weight:700;color:#86EFAC">✅ Running</div>
+          </div>
+          <div style="padding-left:20px;display:flex;gap:16px">
+            <div style="font-size:12px;color:var(--green)">↓ success</div>
+            <div style="font-size:12px;color:var(--red)">↓ failure</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;display:flex;gap:8px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(50,108,229,.09);border:1px solid rgba(50,108,229,.28)">
+              <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">3a</div>
+              <div>
+                <div style="font-size:9px;font-weight:700;color:#7EB3FF">Succeeded</div>
+                <div style="font-size:8px;color:#94A3B8">All containers exited successfully. Job done.</div>
+              </div>
+              <div style="margin-left:auto;padding:3px 7px;border-radius:10px;background:rgba(50,108,229,.18);font-size:8px;font-weight:700;color:#BAE6FD;white-space:nowrap">✅ Done</div>
+            </div>
+            <div style="flex:1;display:flex;gap:8px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25)">
+              <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">3b</div>
+              <div>
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">Failed</div>
+                <div style="font-size:8px;color:#94A3B8">Container exited with error code.</div>
+              </div>
+              <div style="margin-left:auto;padding:3px 7px;border-radius:10px;background:rgba(239,68,68,.18);font-size:8px;font-weight:700;color:#FCA5A5;white-space:nowrap">💀 Failed</div>
+            </div>
+          </div>
+          <!-- key insight -->
+          <div style="padding:9px 13px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);display:flex;gap:10px;align-items:center">
+            <div style="font-size:18px;flex-shrink:0">🔁</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#FDE068">Pods are ephemeral (temporary)</div>
+              <div style="font-size:9px;color:#94A3B8">If a Pod fails, Kubernetes creates a brand new one to replace it — it never repairs the old Pod</div>
+            </div>
+          </div>
+        </div>
+        <!-- right: lifecycle visual -->
+        <div style="width:180px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(50,108,229,.05);border:1.5px dashed rgba(50,108,229,.25)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Lifecycle at a Glance</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div style="width:100%;padding:7px;border-radius:7px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);text-align:center"><div style="font-size:12px">⏳</div><div style="font-size:8px;font-weight:700;color:#DDD6FE">Pending</div></div>
+              <div style="font-size:11px;color:var(--cyan)">↓</div>
+              <div style="width:100%;padding:7px;border-radius:7px;background:rgba(34,197,94,.12);border:1.5px solid rgba(34,197,94,.35);text-align:center"><div style="font-size:12px">🟢</div><div style="font-size:8px;font-weight:700;color:#86EFAC">Running</div></div>
+              <div style="display:flex;gap:8px;width:100%">
+                <div style="font-size:9px;color:var(--green);flex:1;text-align:center">↙</div>
+                <div style="font-size:9px;color:var(--red);flex:1;text-align:center">↘</div>
+              </div>
+              <div style="display:flex;gap:5px;width:100%">
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);text-align:center"><div style="font-size:10px">✅</div><div style="font-size:7px;color:#BAE6FD;font-weight:600">Success</div></div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);text-align:center"><div style="font-size:10px">💀</div><div style="font-size:7px;color:#FCA5A5;font-weight:600">Failed</div></div>
+              </div>
+              <div style="font-size:9px;color:var(--amber)">↓ K8s recreates</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);text-align:center"><div style="font-size:8px;font-weight:700;color:#FDE068">🔁 New Pod</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 08</span></div>
+  </div>
+
+  <!-- ══ S7 ANALOGY ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Analogy</div>
+      <div class="stitle">Think of it this way...</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:stretch">
+        <!-- analogy cards -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <!-- 3 analogy row -->
+          <div style="display:flex;gap:8px;flex:1">
+            <div style="flex:1;border-radius:12px;padding:13px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+              <div style="font-size:32px">📦</div>
+              <div style="font-size:11px;font-weight:800;color:#FDE068">Pod</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The Box / Container Unit</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.4">A self-contained box with its own address label and internal storage</div>
+              <div style="width:100%;height:1px;background:rgba(245,158,11,.2)"></div>
+              <div style="font-size:9px;color:#FDE068">Gets its own IP, can hold storage, is the unit being shipped</div>
+            </div>
+            <div style="flex:1;border-radius:12px;padding:13px;background:rgba(50,108,229,.09);border:1.5px solid rgba(50,108,229,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+              <div style="font-size:32px">🥫</div>
+              <div style="font-size:11px;font-weight:800;color:#7EB3FF">Container</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Item inside the Box</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.4">The actual product — your running application code</div>
+              <div style="width:100%;height:1px;background:rgba(50,108,229,.2)"></div>
+              <div style="font-size:9px;color:#BAE6FD">Multiple items can fit in one box and share the same label</div>
+            </div>
+            <div style="flex:1;border-radius:12px;padding:13px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Manager</div>
+              <div style="font-size:32px;margin-top:6px">🤖</div>
+              <div style="font-size:11px;font-weight:800;color:var(--cyan)">Kubernetes</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Logistics System</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.4">Manages, tracks, and moves boxes — never deals with individual items</div>
+              <div style="width:100%;height:1px;background:rgba(0,212,255,.2)"></div>
+              <div style="font-size:9px;color:#67E8F9">Schedules boxes, heals broken ones, scales when demand grows</div>
+            </div>
+          </div>
+          <!-- bottom insight -->
+          <div style="padding:10px 14px;border-radius:10px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.4vw,13px);font-weight:700;color:var(--white);line-height:1.5">
+              "Kubernetes manages <span style="color:var(--cyan)">Pods</span> (boxes), not <span style="color:#7EB3FF">containers</span> (items) — this abstraction is what makes orchestration scalable"
+            </div>
+          </div>
+        </div>
+        <!-- right: visual mini summary -->
+        <div style="width:165px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:12px;border-radius:11px;background:var(--card);border:1px solid var(--border)">
+            <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🔑 Key Mapping</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#CBD5E1"><span style="font-size:14px">📦</span>Pod = Box</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#CBD5E1"><span style="font-size:14px">🥫</span>Container = Item</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#CBD5E1"><span style="font-size:14px">🌐</span>IP = Address label</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#CBD5E1"><span style="font-size:14px">💾</span>Volume = Shared compartment</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:#CBD5E1"><span style="font-size:14px">🤖</span>K8s = Logistics manager</div>
+            </div>
+          </div>
+          <div style="padding:10px 12px;border-radius:10px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:18px;margin-bottom:4px">💡</div>
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;margin-bottom:3px">The Big Insight</div>
+            <div style="font-size:8px;color:#94A3B8;line-height:1.4">Managing boxes (Pods) is far easier than managing individual items (containers)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 08</span></div>
+  </div>
+
+  <!-- ══ S8 SUMMARY ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary</div>
+      <div class="stitle">Pod — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- left: key points + summary diagram -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- 4 key point cards -->
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
+              <div style="font-size:20px">📦</div>
+              <div style="font-size:10px;font-weight:800;color:var(--cyan)">Smallest Unit</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.3">You deploy Pods, not containers directly</div>
+            </div>
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--conD);border:1.5px solid var(--conB);display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
+              <div style="font-size:20px">🐳</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Wraps Containers</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.3">1 container (common) or more (sidecar)</div>
+            </div>
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--netD);border:1.5px solid var(--netB);display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
+              <div style="font-size:20px">🌐</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Shared Network</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.3">One IP per Pod, localhost inside</div>
+            </div>
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--volD);border:1.5px solid var(--volB);display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center">
+              <div style="font-size:20px">⚙️</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Auto-Managed</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.3">K8s heals & restarts automatically</div>
+            </div>
+          </div>
+          <!-- summary diagram -->
+          <div style="flex:1;border-radius:11px;padding:12px;background:rgba(255,255,255,.02);border:1px solid var(--border)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">How it all fits together</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
+              <!-- K8s -->
+              <div style="padding:7px 11px;border-radius:9px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);text-align:center">
+                <div style="font-size:13px">☸</div><div style="font-size:8px;font-weight:700;color:#7EB3FF">Kubernetes</div>
+                <div style="font-size:7px;color:var(--muted)">manages</div>
+              </div>
+              <div style="font-size:14px;color:var(--cyan)">→</div>
+              <!-- pod -->
+              <div class="pod-box" style="padding:8px 12px;text-align:center">
+                <div style="font-size:13px">📦</div><div style="font-size:8px;font-weight:700;color:var(--cyan)">Pod</div>
+                <div style="font-size:7px;color:var(--muted)">wraps</div>
+              </div>
+              <div style="font-size:14px;color:var(--blue)">→</div>
+              <!-- container -->
+              <div class="con-box" style="padding:8px 12px;text-align:center">
+                <div style="font-size:13px">🐳</div><div style="font-size:8px;font-weight:700;color:#BAE6FD">Container</div>
+                <div style="font-size:7px;color:var(--muted)">runs</div>
+              </div>
+              <div style="font-size:14px;color:var(--green)">→</div>
+              <!-- app -->
+              <div style="padding:8px 12px;border-radius:9px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:13px">🚀</div><div style="font-size:8px;font-weight:700;color:#86EFAC">Your App</div>
+                <div style="font-size:7px;color:var(--muted)">serves users</div>
+              </div>
+            </div>
+          </div>
+          <!-- closing quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"A <span style="color:var(--cyan)">Pod</span> is the atom of Kubernetes — everything builds on top of this simple, powerful concept"</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--podD);border:1.5px solid var(--podB)">
+            <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Smallest K8s unit</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Wraps container(s)</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Shared IP & storage</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Ephemeral — can restart</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>K8s manages, not you</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Multi-Container Pods</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Sidecar · Init containers · Patterns</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 08</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --hp:#F59E0B;--hpD:rgba(245,158,11,.09);--hpB:rgba(245,158,11,.3);
+  --up:#22C55E;--upD:rgba(34,197,94,.09);--upB:rgba(34,197,94,.28);
+  --dn:#326CE5;--dnD:rgba(50,108,229,.1);--dnB:rgba(50,108,229,.32);
+  --met:#7C3AED;--metD:rgba(124,58,237,.1);--metB:rgba(124,58,237,.32);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--hp);border-color:var(--hp);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--hp);color:var(--hp)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(245,158,11,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(245,158,11,.18);border-color:var(--hp)}
+.nbtn.pri{background:linear-gradient(135deg,var(--hp),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(245,158,11,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(245,158,11,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(245,158,11,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--hp);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(245,158,11,.14);transition:all .25s}
+.bi:hover{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.hp-box{border-radius:10px;padding:9px 12px;background:var(--hpD);border:2px solid var(--hpB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.pod-chip{border-radius:7px;padding:5px 8px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:8px;font-weight:700;color:#67E8F9}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(245,158,11,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--hp);padding:3px 12px;border:1px solid rgba(245,158,11,.25);border-radius:20px;background:rgba(245,158,11,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--hp) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Horizontal Pod<br>Autoscaler (HPA)</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Automatic Scaling in Kubernetes<br>— Right number of Pods, at the right time</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--hpD);color:#FDE068;border:1px solid var(--hpB);padding:4px 11px;font-size:9px">⚡ Auto-scale</span>
+          <span class="tag" style="background:var(--upD);color:#86EFAC;border:1px solid var(--upB);padding:4px 11px;font-size:9px">📈 Scale Up</span>
+          <span class="tag" style="background:var(--dnD);color:#BAE6FD;border:1px solid var(--dnB);padding:4px 11px;font-size:9px">📉 Scale Down</span>
+          <span class="tag" style="background:var(--metD);color:#DDD6FE;border:1px solid var(--metB);padding:4px 11px;font-size:9px">📊 CPU / Memory</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(245,158,11,.25);border-radius:14px;padding:12px;background:rgba(245,158,11,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">HPA in Action</div>
+          <!-- Traffic low -->
+          <div style="border-radius:8px;padding:8px;background:var(--dnD);border:1px solid var(--dnB);margin-bottom:5px">
+            <div style="font-size:8px;font-weight:600;color:#BAE6FD;margin-bottom:4px">📉 Low traffic → 2 Pods</div>
+            <div style="display:flex;gap:4px">
+              <div class="pod-chip">📦 P1</div>
+              <div class="pod-chip">📦 P2</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--hp);margin:3px 0">↕ CPU spikes → HPA scales</div>
+          <!-- Traffic high -->
+          <div style="border-radius:8px;padding:8px;background:var(--upD);border:1px solid var(--upB)">
+            <div style="font-size:8px;font-weight:600;color:#86EFAC;margin-bottom:4px">📈 High traffic → 5 Pods</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <div class="pod-chip">📦 P1</div>
+              <div class="pod-chip">📦 P2</div>
+              <div class="pod-chip" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:#FDE068">📦 P3 ✨</div>
+              <div class="pod-chip" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:#FDE068">📦 P4 ✨</div>
+              <div class="pod-chip" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.35);color:#FDE068">📦 P5 ✨</div>
+            </div>
+          </div>
+          <div style="font-size:8.5px;color:var(--muted);text-align:center;margin-top:6px">Zero human intervention needed</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Static Scaling <span style="color:var(--fail)">Doesn't Work</span></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">📊</div><div class="bt"><strong>Traffic is never constant</strong> — an e-commerce app gets 100 req/s at 2 AM and 50,000 req/s on Black Friday. Static Pod counts fail both scenarios.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🐢</div><div class="bt"><strong>Too few Pods = overloaded app</strong> — 2 Pods handling 10,000 requests → CPU maxes out → response times spike → users see timeouts and errors</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💸</div><div class="bt"><strong>Too many Pods = wasted money</strong> — running 50 Pods at 3 AM when you need 2 is pure waste. Cloud resources cost money even when idle.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">👷</div><div class="bt"><strong>Manual scaling is slow and reactive</strong> — by the time a human notices the spike, opens kubectl, and scales up — users have already experienced degraded performance</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">🤖</div><div class="bt"><strong>HPA solves this automatically</strong> — continuously monitors metrics and adjusts Pod count in seconds. No human needed. Right size, right time, every time.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">The goal: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Always run exactly the right number of Pods — enough to handle load, not so many that money is wasted. HPA does this automatically.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">😱 Fixed 2 Pods — Traffic Spike</div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#FCA5A5">CPU</span><span style="font-size:7.5px;color:#FCA5A5">98% 🔥</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:11px"><div style="height:100%;width:98%;background:var(--fail);border-radius:4px"></div></div>
+            </div>
+            <div style="font-size:7.5px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">Users: timeout errors 😱</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--hpD);border:1.5px solid var(--hpB)">
+            <div style="font-size:9px;font-weight:800;color:#FDE068;text-align:center;margin-bottom:8px">✅ HPA — Auto Scaled to 8 Pods</div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#FDE068">CPU</span><span style="font-size:7.5px;color:#86EFAC">52% ✅</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:11px"><div style="height:100%;width:52%;background:var(--up);border-radius:4px"></div></div>
+            </div>
+            <div style="font-size:7.5px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">Users: fast responses 🎉</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--dnD);border:1.5px solid var(--dnB)">
+            <div style="font-size:9px;font-weight:800;color:#BAE6FD;text-align:center;margin-bottom:6px">💡 HPA — Scaled Down to 2 Pods (off-peak)</div>
+            <div style="font-size:7.5px;color:#BAE6FD;padding:3px 8px;background:rgba(50,108,229,.1);border-radius:4px">Resources freed → cost saved 💰</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT IS HPA -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is <span style="color:var(--hp)">HPA?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">📏</div><div class="bt"><strong>Horizontal Pod Autoscaler</strong> — a Kubernetes controller that automatically adjusts the number of Pod replicas in a Deployment or StatefulSet based on observed metrics</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">↔</div><div class="bt"><strong>"Horizontal" = more/fewer Pods</strong> — horizontal scaling means adding or removing instances (Pods) of the same container. Vertical = making one Pod bigger.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">📊</div><div class="bt"><strong>Monitors resource metrics continuously</strong> — checks CPU utilization, memory usage, or custom metrics every 15 seconds. Compares actual vs target.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">🔢</div><div class="bt"><strong>Adjusts replica count automatically</strong> — if usage is above target → scale up. Below target → scale down. Respects minReplicas and maxReplicas bounds.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">🤖</div><div class="bt"><strong>Works with Deployments, ReplicaSets, StatefulSets</strong> — attach an HPA to any scalable workload. HPA controls the replica count on your behalf.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">HPA = supermarket manager 🛒. Sees long checkout queues → opens more cashier lanes. Quiet store → closes extra lanes. Automatic, always optimal.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--hpD);border:2px solid var(--hpB);box-shadow:0 0 22px rgba(245,158,11,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">HPA YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(245,158,11,.2);font-family:monospace;font-size:7.5px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">HorizontalPodAutoscaler</span></div>
+              <div><span style="color:#7C3AED">spec:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">scaleTargetRef:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">Deployment</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#FDE068">web-app</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">minReplicas:</span> <span style="color:#86EFAC">2</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#F59E0B">maxReplicas:</span> <span style="color:#86EFAC">10</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">metrics:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">- type:</span> <span style="color:#67E8F9">Resource</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">resource:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#86EFAC">cpu</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">target:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#F59E0B">averageUtilization:</span> <span style="color:#FDE068">70</span></div>
+            </div>
+            <div style="font-size:7.5px;color:#FDE068;padding:2px 8px;background:rgba(245,158,11,.1);border-radius:4px;margin-bottom:3px">📊 Scale when CPU avg > 70%</div>
+            <div style="font-size:7.5px;color:#86EFAC;padding:2px 8px;background:rgba(34,197,94,.1);border-radius:4px">🔢 Min 2 Pods · Max 10 Pods</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 HOW HPA WORKS -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Control Loop</div>
+      <div class="stitle">How HPA Works — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--metD);border:1px solid var(--metB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--met),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Metrics Server collects Pod metrics</div><div style="font-size:9px;color:#94A3B8">Every 15s, Metrics Server scrapes CPU/memory from kubelet on each node. Aggregates per Pod.</div></div>
+            <span style="margin-left:auto;font-size:13px">📊</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hp)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--hp),#D97706);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">HPA controller reads metrics from API server</div><div style="font-size:9px;color:#94A3B8">HPA queries metrics.k8s.io for current CPU utilization across all Pods in the Deployment.</div></div>
+            <span style="margin-left:auto;font-size:13px">⚡</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hp)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--dnD);border:1px solid var(--dnB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--dn),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Compare actual vs target utilization</div><div style="font-size:9px;color:#94A3B8">Formula: desiredReplicas = ceil(current × (actual / target)). E.g. 3 Pods × (90% / 70%) = 4 Pods needed.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔢</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hp)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--upD);border:1px solid var(--upB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--up),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">HPA updates Deployment replica count</div><div style="font-size:9px;color:#94A3B8">HPA patches the Deployment's spec.replicas field. Kubernetes scheduler creates or removes Pods automatically.</div></div>
+            <span style="margin-left:auto;font-size:13px">📈</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--hp)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--hp),var(--up));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Repeat every 15 seconds — continuously</div><div style="font-size:9px;color:#94A3B8">HPA loop runs forever. Cooldown periods prevent rapid flapping (default: 5min down, 3min up).</div></div>
+            <span style="margin-left:auto;font-size:13px">🔄</span>
+          </div>
+        </div>
+        <div style="width:185px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(245,158,11,.03);border:1.5px dashed var(--hpB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">HPA Formula</div>
+            <div style="border-radius:8px;padding:9px;background:rgba(6,10,16,.7);border:1px solid rgba(245,158,11,.18);font-family:monospace;font-size:7.5px;margin-bottom:7px">
+              <div style="color:#FDE068;margin-bottom:3px">desiredReplicas =</div>
+              <div style="color:#94A3B8">&nbsp;ceil(currentReplicas</div>
+              <div style="color:#94A3B8">&nbsp;&nbsp;* (currentUtil</div>
+              <div style="color:#94A3B8">&nbsp;&nbsp;/ desiredUtil))</div>
+              <br/>
+              <div style="color:#86EFAC;margin-bottom:2px"># Example:</div>
+              <div style="color:#94A3B8">ceil(3 * (90/70))</div>
+              <div style="color:#FDE068">= ceil(3.86) = 4</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">⬆ actual > target → scale up</div>
+              <div style="font-size:7.5px;color:#BAE6FD;padding:2px 7px;background:rgba(50,108,229,.1);border-radius:4px">⬇ actual &lt; target → scale down</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 SCALE UP DOWN -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(245,158,11,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Scaling Directions</div>
+      <div class="stitle">Scale Up &amp; Scale Down — Automatically</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Scale Up -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--upD);border:2px solid var(--upB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📈</div>
+            <div><div style="font-size:13px;font-weight:800;color:#86EFAC">Scale Up</div><div style="font-size:8px;color:var(--muted)">Add more Pods — handle more load</div></div>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">When <strong style="color:#86EFAC">CPU / memory usage exceeds the target</strong>, HPA calculates how many Pods are needed and creates them. Happens quickly (within seconds).</div>
+          <!-- Visual pod increase -->
+          <div style="border-radius:8px;padding:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2)">
+            <div style="font-size:8px;color:#86EFAC;margin-bottom:5px">Before: CPU avg 85% (target 70%)</div>
+            <div style="display:flex;gap:3px;margin-bottom:4px">
+              <div class="pod-chip" style="flex:1">📦</div>
+              <div class="pod-chip" style="flex:1">📦</div>
+              <div style="flex:1;border-radius:7px;padding:5px 8px;background:rgba(245,158,11,.15);border:1px dashed rgba(245,158,11,.4);text-align:center;font-size:8px;font-weight:700;color:#FDE068">📦 +</div>
+              <div style="flex:1;border-radius:7px;padding:5px 8px;background:rgba(245,158,11,.15);border:1px dashed rgba(245,158,11,.4);text-align:center;font-size:8px;font-weight:700;color:#FDE068">📦 +</div>
+            </div>
+            <div style="font-size:7.5px;color:#86EFAC">After: 4 Pods → CPU avg 48% ✅</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8.5px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">⚡ Fast: 3 min stabilization window</div>
+            <div style="font-size:8.5px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">🔢 Bounded by maxReplicas</div>
+          </div>
+        </div>
+        <!-- vs -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:var(--hpD);border:1px solid var(--hpB);font-size:9px;font-weight:700;color:#FDE068">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Scale Down -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--dnD);border:2px solid var(--dnB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📉</div>
+            <div><div style="font-size:13px;font-weight:800;color:#BAE6FD">Scale Down</div><div style="font-size:8px;color:var(--muted)">Remove Pods — save resources</div></div>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">When <strong style="color:#BAE6FD">CPU / memory usage drops below target</strong>, HPA gradually removes Pods. Done slowly (5-min window) to avoid thrashing.</div>
+          <!-- Visual pod decrease -->
+          <div style="border-radius:8px;padding:8px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.2)">
+            <div style="font-size:8px;color:#BAE6FD;margin-bottom:5px">Before: CPU avg 15% (target 70%)</div>
+            <div style="display:flex;gap:3px;margin-bottom:4px">
+              <div class="pod-chip" style="flex:1">📦</div>
+              <div class="pod-chip" style="flex:1">📦</div>
+              <div style="flex:1;border-radius:7px;padding:5px 8px;background:rgba(239,68,68,.1);border:1px dashed rgba(239,68,68,.4);text-align:center;font-size:8px;font-weight:700;color:#FCA5A5">📦 ×</div>
+              <div style="flex:1;border-radius:7px;padding:5px 8px;background:rgba(239,68,68,.1);border:1px dashed rgba(239,68,68,.4);text-align:center;font-size:8px;font-weight:700;color:#FCA5A5">📦 ×</div>
+            </div>
+            <div style="font-size:7.5px;color:#BAE6FD">After: 2 Pods → cost saved 💰</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8.5px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD">🐢 Slow: 5 min stabilization window</div>
+            <div style="font-size:8.5px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD">🔢 Bounded by minReplicas</div>
+          </div>
+        </div>
+        <!-- Key note -->
+        <div style="width:155px;flex-shrink:0;border-radius:12px;padding:11px;background:var(--hpD);border:1.5px solid var(--hpB);display:flex;flex-direction:column;gap:6px;justify-content:center">
+          <div style="font-size:8.5px;font-weight:700;color:#FDE068;text-align:center;margin-bottom:3px">⏱ Cooldown Windows</div>
+          <div style="border-radius:7px;padding:6px;background:var(--upD);border:1px solid var(--upB)">
+            <div style="font-size:7.5px;font-weight:700;color:#86EFAC">Scale Up: 3 min</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">Fast — performance matters</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:var(--dnD);border:1px solid var(--dnB)">
+            <div style="font-size:7.5px;font-weight:700;color:#BAE6FD">Scale Down: 5 min</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">Slow — avoid flapping</div>
+          </div>
+          <div style="border-radius:7px;padding:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28)">
+            <div style="font-size:7px;color:#FDE068;line-height:1.4">Prevents thrashing if traffic oscillates frequently</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 METRICS SERVER -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Critical Dependency</div>
+        <div class="stitle">Metrics Server — <span style="color:#DDD6FE">HPA's Data Source</span></div>
+        <div class="bi"><div class="ico" style="background:var(--metD)">📡</div><div class="bt"><strong>HPA needs metrics to make decisions</strong> — without real CPU/memory data, HPA is blind. It cannot scale what it cannot measure.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--metD)">📦</div><div class="bt"><strong>Metrics Server is a cluster add-on</strong> — not installed by default. Must be deployed separately. Collects resource metrics from kubelet on each node.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--metD)">🌐</div><div class="bt"><strong>Exposes metrics via API</strong> — makes data available at <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 4px;border-radius:3px">metrics.k8s.io</code>. HPA queries this every 15 seconds. <code style="color:#DDD6FE">kubectl top pods</code> also uses this API.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--metD)">📊</div><div class="bt"><strong>Also supports custom &amp; external metrics</strong> — HPA v2 can use Prometheus metrics, request rate, queue depth, or any custom metric via custom.metrics.k8s.io</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>HPA without Metrics Server = non-functional</strong> — HPA will show <code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 4px;border-radius:3px">unknown</code> metrics and won't scale. Install Metrics Server first.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--metD);border:1px solid var(--metB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Install: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1"><code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">kubectl apply -f metrics-server.yaml</code> — required before HPA can function.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--metD);border:2px solid var(--metB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Metrics Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--dnD);border:1px solid var(--dnB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#BAE6FD">📦 Pod (kubelet)</div>
+                <div style="font-size:7px;color:var(--muted)">CPU: 85% · Mem: 340Mi</div>
+              </div>
+              <div style="font-size:10px;color:var(--met)">↓ scrapes every 60s</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--metD);border:1.5px solid var(--metB);text-align:center;box-shadow:0 0 10px rgba(124,58,237,.2)">
+                <div style="font-size:8.5px;font-weight:700;color:#DDD6FE">📊 Metrics Server</div>
+                <div style="font-size:7px;color:var(--muted)">aggregates + exposes</div>
+              </div>
+              <div style="font-size:10px;color:var(--met)">↓ queries every 15s</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--hpD);border:1.5px solid var(--hpB);text-align:center;box-shadow:0 0 10px rgba(245,158,11,.14)">
+                <div style="font-size:8.5px;font-weight:700;color:#FDE068">⚡ HPA Controller</div>
+                <div style="font-size:7px;color:var(--muted)">calculates desired replicas</div>
+              </div>
+              <div style="font-size:10px;color:var(--up)">↓ updates</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--upD);border:1px solid var(--upB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">📦 Deployment replicas: 5</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 REAL WORLD -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(245,158,11,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">E-Commerce — Black Friday Traffic Surge</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <!-- Timeline -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:6px;width:48px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">10:00</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">10:05</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">10:08</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">10:20</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:00</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">02:00</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--dnD);border:1px solid var(--dnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">📦 2 Pods running · CPU avg 12% · Traffic normal</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">📈 Sale starts! Traffic spikes · CPU jumps to 88%</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--hpD);border:1px solid var(--hpB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FDE068;font-weight:600">⚡ HPA detects CPU > 70% target → scales to 8 Pods</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--upD);border:1px solid var(--upB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ 8 Pods running · CPU avg 55% · All orders served</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--dnD);border:1px solid var(--dnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">📉 Afternoon lull · CPU drops · HPA scales back to 4</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--upD);border:1px solid var(--upB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">💰 Off-peak: 2 Pods · Resources freed · $$ saved</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Pod count visual -->
+        <div style="width:220px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--hpD);border:2px solid var(--hpB);box-shadow:0 0 18px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Pod Count Timeline</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:40px">10:00</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:20%;background:var(--dn);border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#BAE6FD;width:28px">2 Pods</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:40px">10:08</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:80%;background:var(--hp);border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#FDE068;width:28px">8 Pods</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:40px">Peak</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:100%;background:var(--fail);border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#FCA5A5;width:28px">10 Pods</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:40px">14:00</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:40%;background:var(--dn);border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#BAE6FD;width:28px">4 Pods</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:40px">02:00</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:20%;background:var(--up);border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#86EFAC;width:28px">2 Pods</div>
+              </div>
+            </div>
+            <div style="margin-top:7px;border-radius:7px;padding:6px;background:var(--upD);border:1px solid var(--upB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC">Zero downtime · Zero manual ops ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 BENEFITS -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits</div>
+        <div class="stitle">Why Use <span style="color:var(--hp)">HPA?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--upD)">📈</div><div class="bt"><strong>Better application availability</strong> — traffic spikes no longer cause outages. HPA adds capacity before the app becomes overloaded. Users always get fast responses.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">🤖</div><div class="bt"><strong>Automatic — zero human intervention</strong> — on-call engineers don't need to wake up at 3 AM to manually scale. HPA handles it automatically 24/7.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--upD)">💰</div><div class="bt"><strong>Cost efficiency</strong> — scale down during off-peak hours. Don't pay for 50 idle Pods overnight when 2 are enough. Cloud costs reduced significantly.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--hpD)">⚡</div><div class="bt"><strong>Optimized resource usage</strong> — keeps CPU utilization near the target (e.g. 70%). Not too high (overloaded), not too low (wasteful). Right-sized always.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dnD)">🔄</div><div class="bt"><strong>Works with rolling deployments</strong> — during a deployment update, HPA continues to scale based on traffic. New and old Pods both count toward the target.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Key result: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">HPA is standard in production Kubernetes. Without it, you either over-provision (waste) or under-provision (outages). HPA solves both.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--hpD);border:2px solid var(--hpB);box-shadow:0 0 22px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Without vs With HPA</div>
+            <div style="border-radius:8px;padding:9px;background:var(--failD);border:1px solid var(--failB);margin-bottom:6px">
+              <div style="font-size:8.5px;font-weight:700;color:#FCA5A5;margin-bottom:5px">❌ Static 10 Pods (always)</div>
+              <div style="display:flex;justify-content:space-between;font-size:7.5px;color:#94A3B8">
+                <span>Peak: 10 Pods ✓</span>
+                <span>Off-peak: 10 Pods 💸</span>
+              </div>
+              <div style="font-size:7.5px;color:#FCA5A5;margin-top:3px">Paying for 8 idle Pods overnight</div>
+            </div>
+            <div style="border-radius:8px;padding:9px;background:var(--upD);border:1px solid var(--upB)">
+              <div style="font-size:8.5px;font-weight:700;color:#86EFAC;margin-bottom:5px">✅ HPA (min 2, max 10)</div>
+              <div style="display:flex;justify-content:space-between;font-size:7.5px;color:#94A3B8">
+                <span>Peak: 10 Pods ✓</span>
+                <span>Off-peak: 2 Pods ✓</span>
+              </div>
+              <div style="font-size:7.5px;color:#86EFAC;margin-top:3px">80% cost saved off-peak 💰</div>
+            </div>
+            <div style="margin-top:6px;border-radius:7px;padding:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">Performance + Cost + Automation ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 LIMITATIONS & BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(245,158,11,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Limitations &amp; Best Practices</div>
+      <div class="stitle">HPA Limitations &amp; Best Practices</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;padding-top:8px">
+        <div style="border-radius:12px;padding:12px;background:var(--failD);border:2px solid var(--failB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚠</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FCA5A5;margin-bottom:4px">Metrics Server Required</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">HPA needs Metrics Server installed. In managed clusters (EKS, GKE, AKS) it's often pre-installed. Verify with <code style="color:#FDE068;font-size:7.5px">kubectl top pods</code>.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--hpD);border:2px solid var(--hpB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎯</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Set Realistic Targets</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Don't set CPU target at 50% or 95%. 50% = wasteful over-scaling. 95% = too late to scale before users suffer. Start at 70-80%.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--metD);border:2px solid var(--metB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#DDD6FE;margin-bottom:4px">Always Set Resource Requests</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">HPA calculates utilization as <code style="color:#DDD6FE;font-size:7.5px">actual/requested</code>. Without requests, HPA cannot compute anything. Always set CPU requests on your Pods.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--upD);border:2px solid var(--upB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔢</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Set Sensible Min/Max</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">minReplicas ≥ 2 for HA (one Pod failure shouldn't kill the app). maxReplicas = max your cluster can handle. Review budget constraints.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--dnD);border:2px solid var(--dnB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#BAE6FD;margin-bottom:4px">Monitor Scaling Events</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Run <code style="color:#BAE6FD;font-size:7.5px">kubectl describe hpa</code> to see events, current replicas, and scaling decisions. Set alerts for max replicas reached.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--hpD);border:2px solid var(--hpB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚀</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Combine with Readiness Probes</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">New Pods only receive traffic once readiness probe passes. Pair HPA with readiness probes to ensure new Pods are truly ready before getting traffic.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">HPA — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--failD);border:1.5px solid var(--failB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">🛒 😰</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Without HPA</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Fixed cashiers</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Always 3 cashiers. Black Friday: huge queue. 2 AM: 3 idle staff wasting salary.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--hpD);border:1.5px solid var(--hpB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--hp),var(--dn));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Solution</div>
+              <div style="font-size:26px;margin-top:4px">🛒 👨‍💼</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">HPA</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Smart manager</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Opens more cashiers when queues grow. Closes extras when store is quiet. Always optimal.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--upD);border:1.5px solid var(--upB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✅ 💰</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Happy users + savings</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">No queues during peak. No wasted staff off-peak. Automated and optimal.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">↔</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Horizontal scale</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">More/fewer Pod replicas</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--metD);border:1px solid var(--metB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Metrics-driven</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">CPU · Memory · Custom</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--upD);border:1px solid var(--upB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🤖</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Fully automatic</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Every 15s decision cycle</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--dnD);border:1px solid var(--dnB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔢</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Min/Max bounds</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Never under/over-scale</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Needs Metrics Server</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Install before using HPA</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--hpD);border:1px solid var(--hpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">💰</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Cost optimization</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Scale down off-peak</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Without HPA = fixed cashiers</span>. <span style="color:#FDE068">With HPA = smart manager who opens/closes lanes based on demand</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--hpD);border:1.5px solid var(--hpB)">
+            <div style="font-size:9px;font-weight:700;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hp)">◆</span>Scales Pod count automatically</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hp)">◆</span>Based on CPU/memory metrics</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hp)">◆</span>Needs Metrics Server</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hp)">◆</span>Set min/max replicas</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--hp)">◆</span>Zero human intervention</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Scheduling<br>NodeSelector · Affinity<br>Taints &amp; Tolerations</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Control where your<br>Pods get scheduled</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#FDE068;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

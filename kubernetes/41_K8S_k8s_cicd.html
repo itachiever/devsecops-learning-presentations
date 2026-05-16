@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --ci:#F97316;--ciD:rgba(249,115,22,.1);--ciB:rgba(249,115,22,.32);
+  --cd:#8B5CF6;--cdD:rgba(139,92,246,.1);--cdB:rgba(139,92,246,.32);
+  --gt:#22C55E;--gtD:rgba(34,197,94,.09);--gtB:rgba(34,197,94,.28);
+  --dk:#2563EB;--dkD:rgba(37,99,235,.1);--dkB:rgba(37,99,235,.3);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --er:#EF4444;--erD:rgba(239,68,68,.1);--erB:rgba(239,68,68,.3);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --nd:#326CE5;--ndD:rgba(50,108,229,.1);--ndB:rgba(50,108,229,.32);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:8px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--ci);border-color:var(--ci);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--ci);color:var(--ci)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(249,115,22,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(249,115,22,.18);border-color:var(--ci)}
+.nbtn.pri{background:linear-gradient(135deg,var(--ci),var(--cd));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(249,115,22,.07)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(249,115,22,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(249,115,22,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ci);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(249,115,22,.13);transition:all .25s}
+.bi:hover{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.pipe-step{border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:8px;flex:1}
+.pipe-arrow{font-size:14px;color:var(--ci);flex-shrink:0;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(249,115,22,.15) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(139,92,246,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ci);padding:3px 12px;border:1px solid rgba(249,115,22,.25);border-radius:20px;background:rgba(249,115,22,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--ci) 55%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">CI/CD with<br>Kubernetes</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Automating Application Delivery<br>— Code to production in minutes, not days</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--ciD);color:#FED7AA;border:1px solid var(--ciB);padding:4px 11px;font-size:9px">🔁 CI Pipeline</span>
+          <span class="tag" style="background:var(--cdD);color:#DDD6FE;border:1px solid var(--cdB);padding:4px 11px;font-size:9px">🚀 CD Pipeline</span>
+          <span class="tag" style="background:var(--gtD);color:#86EFAC;border:1px solid var(--gtB);padding:4px 11px;font-size:9px">🌿 GitOps</span>
+          <span class="tag" style="background:var(--dkD);color:#BAE6FD;border:1px solid var(--dkB);padding:4px 11px;font-size:9px">🐳 Docker + K8s</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(249,115,22,.22);border-radius:14px;padding:12px;background:rgba(249,115,22,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Complete CI/CD Pipeline</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:6px;border-radius:7px;padding:5px 8px;background:var(--gtD);border:1px solid var(--gtB)">
+              <span style="font-size:12px">💻</span><span style="font-size:8px;color:#86EFAC;font-weight:700">git push → GitHub</span>
+              <span style="margin-left:auto;font-size:8px;color:#86EFAC">trigger</span>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--ci)">↓</div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;border-radius:7px;padding:5px 7px;background:var(--ciD);border:1px solid var(--ciB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#FED7AA">🔨 Build</div>
+                <div style="font-size:6.5px;color:var(--muted)">compile app</div>
+              </div>
+              <div style="flex:1;border-radius:7px;padding:5px 7px;background:var(--ciD);border:1px solid var(--ciB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#FED7AA">🧪 Test</div>
+                <div style="font-size:6.5px;color:var(--muted)">unit + int</div>
+              </div>
+              <div style="flex:1;border-radius:7px;padding:5px 7px;background:var(--dkD);border:1px solid var(--dkB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">🐳 Image</div>
+                <div style="font-size:6.5px;color:var(--muted)">docker push</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--ci)">↓</div>
+            <div style="border-radius:7px;padding:5px 8px;background:var(--cdD);border:1px solid var(--cdB);display:flex;align-items:center;gap:7px">
+              <span style="font-size:12px">⎈</span><span style="font-size:8px;color:#DDD6FE;font-weight:700">Kubernetes → rolling deploy</span>
+              <span style="margin-left:auto;font-size:8px;color:#86EFAC">✅ live</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 11</span></div>
+  </div>
+
+  <!-- S2 WHY CI/CD -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why <span style="color:var(--ci)">CI/CD</span> is Important</div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">🐢</div><div class="bt"><strong>Manual deployments are painfully slow</strong> — a developer finishes a feature on Monday. After code review, manual testing, staging, sign-off, and manual deploy, it reaches users on Friday. CI/CD cuts this to hours.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">💥</div><div class="bt"><strong>Human error causes production incidents</strong> — "I forgot to restart the service." "I deployed to the wrong environment." CI/CD removes humans from the deploy path, eliminating these classes of mistakes entirely.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">📅</div><div class="bt"><strong>Modern teams ship multiple times per day</strong> — Netflix deploys thousands of times a day. Amazon deploys every 11 seconds. This velocity is only possible with fully automated pipelines.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">🤖</div><div class="bt"><strong>Automation = consistency</strong> — every deploy follows the exact same steps. Tests always run. Image always gets scanned. Kubernetes always does a rolling update. No shortcuts, no skipped steps.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ciD);border:1px solid var(--ciB)">
+          <span style="font-size:10px;font-weight:700;color:#FED7AA">Bottom line: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Without CI/CD, software delivery is a bottleneck. With CI/CD + Kubernetes, it becomes a <strong style="color:#fff">competitive advantage</strong> — ship faster, break less, recover instantly.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:7px">😩 Manual Deployment</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>Code review</span><span>2 days</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>Manual QA testing</span><span>1 day</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>Deploy to staging</span><span>3 hours</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5;display:flex;justify-content:space-between"><span>Manual prod deploy</span><span>1 hour</span></div>
+            </div>
+            <div style="margin-top:5px;font-size:8px;color:#FCA5A5;text-align:center;font-weight:700">Total: 3–5 days 😱</div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">🚀 Automated CI/CD</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC;display:flex;justify-content:space-between"><span>Build + test</span><span>4 min</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC;display:flex;justify-content:space-between"><span>Docker build + push</span><span>2 min</span></div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC;display:flex;justify-content:space-between"><span>K8s rolling update</span><span>1 min</span></div>
+            </div>
+            <div style="margin-top:5px;font-size:8px;color:#86EFAC;text-align:center;font-weight:700">Total: 7 minutes ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 11</span></div>
+  </div>
+
+  <!-- S3 WHAT IS CI/CD -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(249,115,22,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Definition</div>
+      <div class="stitle">What is <span style="color:var(--ci)">CI</span> / <span style="color:var(--cd)">CD</span>?</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--ciD);border:2px solid var(--ciB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(249,115,22,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔁</div>
+            <div><div style="font-size:13px;font-weight:800;color:#FED7AA">CI — Continuous Integration</div><div style="font-size:8px;color:var(--muted)">Automate build + test on every commit</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.5;flex:1">Every time a developer pushes code, CI automatically builds the app and runs all tests. If anything breaks, the team is notified <em style="color:#FED7AA">immediately</em> — before bad code reaches other developers or production.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">💻 Code push → trigger pipeline</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">🔨 Build application automatically</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">🧪 Run unit &amp; integration tests</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">🐳 Build &amp; push Docker image</div>
+          </div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--cdD);border:2px solid var(--cdB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(139,92,246,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🚀</div>
+            <div><div style="font-size:13px;font-weight:800;color:#DDD6FE">CD — Continuous Delivery/Deployment</div><div style="font-size:8px;color:var(--muted)">Automate release to Kubernetes</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.5;flex:1">After CI succeeds, CD automatically delivers the new Docker image to Kubernetes. The cluster performs a rolling update — new Pods come up, old ones go down. Zero human intervention required.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);color:#DDD6FE">📦 Image pulled by Kubernetes</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);color:#DDD6FE">🔄 Rolling update deployed</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);color:#DDD6FE">✅ Zero-downtime release</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);color:#DDD6FE">⏪ Auto rollback on failure</div>
+          </div>
+        </div>
+        <div style="width:200px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:11px;background:rgba(249,115,22,.03);border:1.5px dashed var(--ciB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Full Lifecycle</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="border-radius:6px;padding:5px 8px;background:var(--gtD);border:1px solid var(--gtB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">💻</span><span style="font-size:8px;color:#86EFAC;font-weight:600">Code Push</span></div>
+              <div style="text-align:center;font-size:9px;color:var(--ci)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--ciD);border:1px solid var(--ciB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">🔨</span><span style="font-size:8px;color:#FED7AA;font-weight:600">Build</span></div>
+              <div style="text-align:center;font-size:9px;color:var(--ci)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--ciD);border:1px solid var(--ciB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">🧪</span><span style="font-size:8px;color:#FED7AA;font-weight:600">Test</span></div>
+              <div style="text-align:center;font-size:9px;color:var(--ci)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--dkD);border:1px solid var(--dkB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">🐳</span><span style="font-size:8px;color:#BAE6FD;font-weight:600">Docker Push</span></div>
+              <div style="text-align:center;font-size:9px;color:var(--ci)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--cdD);border:1px solid var(--cdB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">⎈</span><span style="font-size:8px;color:#DDD6FE;font-weight:600">K8s Deploy</span></div>
+              <div style="text-align:center;font-size:9px;color:var(--ci)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center;gap:6px"><span style="font-size:10px">✅</span><span style="font-size:8px;color:#86EFAC;font-weight:600">Live in Production</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 11</span></div>
+  </div>
+
+  <!-- S4 CI PIPELINE -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(249,115,22,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">CI Pipeline</div>
+      <div class="stitle">CI Pipeline — <span style="color:var(--ci)">Code to Docker Image</span></div>
+      <div style="display:flex;gap:6px;align-items:stretch;flex:1;padding-top:8px">
+        <div class="pipe-step" style="background:var(--gtD);border:2px solid var(--gtB);flex-direction:column;text-align:center;gap:5px;justify-content:center">
+          <div style="font-size:24px">💻</div>
+          <div style="font-size:10px;font-weight:800;color:#86EFAC">Git Push</div>
+          <div style="font-size:7.5px;color:#94A3B8;line-height:1.4">Developer pushes code to GitHub / GitLab / Bitbucket on a feature branch</div>
+          <div style="margin-top:4px;font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(34,197,94,.1);color:#86EFAC;border:1px solid rgba(34,197,94,.2)">git push origin main</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="background:var(--ciD);border:2px solid var(--ciB);flex-direction:column;text-align:center;gap:5px;justify-content:center">
+          <div style="font-size:24px">🔨</div>
+          <div style="font-size:10px;font-weight:800;color:#FED7AA">Build</div>
+          <div style="font-size:7.5px;color:#94A3B8;line-height:1.4">CI tool (GitHub Actions, Jenkins) compiles source code. Maven, Gradle, npm build, etc.</div>
+          <div style="margin-top:4px;font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(249,115,22,.1);color:#FED7AA;border:1px solid rgba(249,115,22,.2)">mvn package / npm build</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="background:var(--ciD);border:2px solid var(--ciB);flex-direction:column;text-align:center;gap:5px;justify-content:center">
+          <div style="font-size:24px">🧪</div>
+          <div style="font-size:10px;font-weight:800;color:#FED7AA">Test</div>
+          <div style="font-size:7.5px;color:#94A3B8;line-height:1.4">Unit tests, integration tests, linting, security scanning. Fail fast — stop pipeline if tests fail.</div>
+          <div style="margin-top:4px;font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(249,115,22,.1);color:#FED7AA;border:1px solid rgba(249,115,22,.2)">pytest / jest / go test</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="background:var(--dkD);border:2px solid var(--dkB);flex-direction:column;text-align:center;gap:5px;justify-content:center">
+          <div style="font-size:24px">🐳</div>
+          <div style="font-size:10px;font-weight:800;color:#BAE6FD">Build Image</div>
+          <div style="font-size:7.5px;color:#94A3B8;line-height:1.4">Docker builds a container image from the Dockerfile. Tagged with git commit SHA or version number.</div>
+          <div style="margin-top:4px;font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(37,99,235,.1);color:#BAE6FD;border:1px solid rgba(37,99,235,.2)">docker build -t app:v1.2</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="background:rgba(37,99,235,.08);border:2px solid rgba(37,99,235,.25);flex-direction:column;text-align:center;gap:5px;justify-content:center">
+          <div style="font-size:24px">📤</div>
+          <div style="font-size:10px;font-weight:800;color:#BAE6FD">Push Registry</div>
+          <div style="font-size:7.5px;color:#94A3B8;line-height:1.4">Image pushed to Docker Hub, ECR, GCR, or private registry. Kubernetes will pull from here.</div>
+          <div style="margin-top:4px;font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(37,99,235,.1);color:#BAE6FD;border:1px solid rgba(37,99,235,.2)">docker push registry/app:v1.2</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:8px 14px;border-radius:9px;background:var(--ciD);border:1px solid var(--ciB);text-align:center">
+        <div style="font-size:11px;font-weight:700;color:#FED7AA">✅ CI complete — image <code style="color:#86EFAC;font-size:10px">myapp:v1.2-abc123</code> ready in registry. Time: ~5 minutes. Zero human involvement.</div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 11</span></div>
+  </div>
+
+  <!-- S5 CD WITH KUBERNETES -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(139,92,246,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">CD Pipeline</div>
+        <div class="stitle">CD Pipeline with <span style="color:var(--cd)">Kubernetes</span></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--cdD)">📦</div><div class="bt"><strong>Kubernetes pulls the new image</strong> — after CI pushes to the registry, CD updates the Deployment manifest (<code style="color:#DDD6FE;background:rgba(139,92,246,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">image: myapp:v1.2</code>) and applies it to the cluster.</div></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--cdD)">🔄</div><div class="bt"><strong>Rolling update — zero downtime</strong> — Kubernetes brings up new Pods with the new image, one at a time. Only when a new Pod is healthy does the old one get terminated. Users never see interruption.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">📈</div><div class="bt"><strong>Automatic scaling handles traffic spikes</strong> — HPA watches the new deployment. As traffic grows, more Pods are added automatically. No manual intervention needed after deploy.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">⏪</div><div class="bt"><strong>Instant rollback if anything goes wrong</strong> — if the new version causes errors, <code style="color:#FCA5A5;background:rgba(239,68,68,.07);padding:1px 4px;border-radius:3px;font-size:8.5px">kubectl rollout undo deployment/myapp</code> reverts to the previous version in seconds.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cdD);border:1px solid var(--cdB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">CD with Kubernetes = <strong style="color:#fff">airport runway change mid-flight ✈</strong>. Planes (users) keep landing on Runway A while Runway B (new version) is being prepared. Switch is instant and invisible.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--cdD);border:2px solid var(--cdB);box-shadow:0 0 22px rgba(139,92,246,.12)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">CD → K8s Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.25);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">📦 Registry</div>
+                <div style="font-size:7px;color:var(--muted)">myapp:v1.2 available</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cd)">↓ CD updates manifest</div>
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#DDD6FE">⎈ K8s Rolling Update</div>
+                <div style="font-size:7px;color:var(--muted)">kubectl apply -f deployment.yaml</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cd)">↓</div>
+              <div style="display:flex;gap:3px">
+                <div style="flex:1;border-radius:6px;padding:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);text-align:center">
+                  <div style="font-size:7px;color:#86EFAC;font-weight:700">Pod v1.2 ✅</div>
+                  <div style="font-size:6.5px;color:#94A3B8">new · healthy</div>
+                </div>
+                <div style="flex:1;border-radius:6px;padding:5px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);text-align:center">
+                  <div style="font-size:7px;color:#FCA5A5;font-weight:700">Pod v1.1 ↓</div>
+                  <div style="font-size:6.5px;color:#94A3B8">terminating</div>
+                </div>
+              </div>
+              <div style="border-radius:7px;padding:5px 9px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">✅ v1.2 live — zero downtime</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 9px;background:var(--erD);border:1px solid var(--erB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5">⏪ kubectl rollout undo → v1.1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 11</span></div>
+  </div>
+
+  <!-- S6 TOOLS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(249,115,22,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Ecosystem</div>
+      <div class="stitle">Popular <span style="color:var(--ci)">CI/CD Tools</span> for Kubernetes</div>
+      <div style="display:flex;gap:8px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:11px;background:rgba(30,30,30,.5);border:2px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(210,105,0,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏗</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FED7AA">Jenkins</div><div style="font-size:7.5px;color:var(--muted)">The veteran CI/CD server</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Open-source, highly customizable via plugins. Self-hosted. The most widely used CI tool in enterprise. Steep learning curve but extremely powerful.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(210,105,0,.1);border:1px solid rgba(210,105,0,.25);color:#FED7AA;text-align:center">💡 Best for: enterprise, complex pipelines</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:rgba(30,30,30,.5);border:2px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,50,50,.5);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙</div>
+            <div><div style="font-size:12px;font-weight:800;color:#f0f0f0">GitHub Actions</div><div style="font-size:7.5px;color:var(--muted)">Native to GitHub repos</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">YAML-based workflows that live in your repo. Free for public repos. Huge marketplace of actions. Zero infrastructure to manage. Industry favorite.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(50,50,50,.3);border:1px solid rgba(255,255,255,.15);color:#f0f0f0;text-align:center">💡 Best for: GitHub users, fast start</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:rgba(252,109,38,.07);border:2px solid rgba(252,109,38,.25);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(252,109,38,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🦊</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FC6D26">GitLab CI/CD</div><div style="font-size:7.5px;color:var(--muted)">All-in-one DevOps platform</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Built into GitLab. YAML-based <code style="color:#FC6D26;font-size:8px">.gitlab-ci.yml</code>. Integrated registry, security scanning, environments. Popular in organizations using GitLab.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(252,109,38,.1);border:1px solid rgba(252,109,38,.22);color:#FC6D26;text-align:center">💡 Best for: GitLab users, full platform</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--cdD);border:2px solid var(--cdB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(139,92,246,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🐙</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Argo CD</div><div style="font-size:7.5px;color:var(--muted)">GitOps for Kubernetes</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Watches your Git repo and automatically syncs changes to Kubernetes. Declarative GitOps. Visualizes deployment status. The CD tool of choice for K8s.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.22);color:#DDD6FE;text-align:center">💡 Best for: K8s GitOps, declarative CD</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--ndD);border:2px solid var(--ndB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⎈</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Tekton</div><div style="font-size:7.5px;color:var(--muted)">Cloud-native K8s pipelines</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Kubernetes-native CI/CD framework. Pipelines are K8s custom resources (CRDs). Runs directly in your cluster. CNCF project. Highly composable.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD;text-align:center">💡 Best for: K8s-native, cloud teams</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 11</span></div>
+  </div>
+
+  <!-- S7 DEPLOYMENT STRATEGIES -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Deployment Strategies</div>
+      <div class="stitle">Kubernetes <span style="color:var(--ci)">Deployment Strategies</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- Rolling -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔄</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Rolling Update</div><div style="font-size:7.5px;color:var(--muted)">Default K8s strategy</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Replace Pods one at a time. Always some v1 and some v2 running simultaneously. Zero downtime. Default Kubernetes behavior.</div>
+          <svg viewBox="0 0 170 55" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="35" height="20" rx="5" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.35)" stroke-width="1"/>
+            <text x="19" y="18" text-anchor="middle" fill="#86EFAC" font-size="8" font-weight="700" font-family="Segoe UI">v2 ✅</text>
+            <rect x="42" y="5" width="35" height="20" rx="5" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.35)" stroke-width="1"/>
+            <text x="59" y="18" text-anchor="middle" fill="#86EFAC" font-size="8" font-weight="700" font-family="Segoe UI">v2 ✅</text>
+            <rect x="82" y="5" width="35" height="20" rx="5" fill="rgba(245,158,11,.12)" stroke="rgba(245,158,11,.3)" stroke-width="1" stroke-dasharray="3 2"/>
+            <text x="99" y="18" text-anchor="middle" fill="#FDE068" font-size="8" font-weight="700" font-family="Segoe UI">↑ v2</text>
+            <rect x="122" y="5" width="35" height="20" rx="5" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.25)" stroke-width="1"/>
+            <text x="139" y="18" text-anchor="middle" fill="#FCA5A5" font-size="8" font-weight="700" font-family="Segoe UI">v1 ↓</text>
+            <text x="85" y="45" text-anchor="middle" fill="#94A3B8" font-size="7.5" font-family="Segoe UI">Gradual — always healthy Pods</text>
+          </svg>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">✅ Zero downtime · Simple</div>
+        </div>
+        <!-- Blue-Green -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--dkD);border:2px solid var(--dkB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(37,99,235,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔵🟢</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Blue-Green</div><div style="font-size:7.5px;color:var(--muted)">Two full environments</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Run two identical environments (Blue=current, Green=new). When Green is ready, switch traffic instantly. Instant rollback by switching back.</div>
+          <svg viewBox="0 0 170 55" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="75" height="20" rx="5" fill="rgba(37,99,235,.12)" stroke="rgba(37,99,235,.3)" stroke-width="1"/>
+            <text x="39" y="18" text-anchor="middle" fill="#BAE6FD" font-size="8" font-weight="700" font-family="Segoe UI">🔵 BLUE (v1)</text>
+            <rect x="83" y="5" width="85" height="20" rx="5" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.38)" stroke-width="1.5"/>
+            <text x="125" y="18" text-anchor="middle" fill="#86EFAC" font-size="8" font-weight="700" font-family="Segoe UI">🟢 GREEN (v2) ← live</text>
+            <text x="85" y="45" text-anchor="middle" fill="#94A3B8" font-size="7.5" font-family="Segoe UI">Traffic switched instantly via Service</text>
+          </svg>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);color:#BAE6FD;text-align:center">✅ Instant switch · Easy rollback</div>
+        </div>
+        <!-- Canary -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🐤</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">Canary</div><div style="font-size:7.5px;color:var(--muted)">Gradual traffic shift</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Send 5–10% of traffic to the new version first. Watch for errors. If good, gradually shift more. If bad, rollback quickly with minimal user impact.</div>
+          <svg viewBox="0 0 170 55" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="110" height="20" rx="5" fill="rgba(37,99,235,.12)" stroke="rgba(37,99,235,.25)" stroke-width="1"/>
+            <text x="57" y="18" text-anchor="middle" fill="#BAE6FD" font-size="8" font-weight="700" font-family="Segoe UI">v1 — 90% traffic</text>
+            <rect x="118" y="5" width="50" height="20" rx="5" fill="rgba(245,158,11,.15)" stroke="rgba(245,158,11,.38)" stroke-width="1.5"/>
+            <text x="143" y="18" text-anchor="middle" fill="#FDE068" font-size="8" font-weight="700" font-family="Segoe UI">v2 10%</text>
+            <text x="85" y="45" text-anchor="middle" fill="#94A3B8" font-size="7.5" font-family="Segoe UI">Test on real users safely</text>
+          </svg>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#FDE068;text-align:center">✅ Low risk · Real-world testing</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 11</span></div>
+  </div>
+
+  <!-- S8 GITOPS -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(139,92,246,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">GitOps</div>
+        <div class="stitle">GitOps — <span style="color:var(--cd)">Git as the Source of Truth</span></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--cdD)">🌿</div><div class="bt"><strong>Git repo is the single source of truth</strong> — every Kubernetes resource (Deployments, Services, ConfigMaps) is defined in Git. The cluster state must always match Git. No manual kubectl in prod.</div></div>
+        <div class="bi" style="border-color:rgba(139,92,246,.2)"><div class="ico" style="background:var(--cdD)">🔄</div><div class="bt"><strong>Kubernetes auto-syncs from Git</strong> — tools like Argo CD or Flux watch your Git repo. When you merge a PR, they automatically apply changes to the cluster. Git merge = production deploy.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">🔍</div><div class="bt"><strong>Full audit trail for every change</strong> — every infrastructure change is a Git commit. Who changed it? When? Why? Full history, reviewable via PRs, rollback via git revert. Compliance-friendly.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">⚡</div><div class="bt"><strong>Drift detection and auto-healing</strong> — if someone manually changes a resource in K8s (bypassing Git), Argo CD detects the drift and automatically reverts it back to the Git state. Cluster is always in sync.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cdD);border:1px solid var(--cdB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Tools: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1"><strong style="color:#fff">Argo CD</strong> (UI + sync) and <strong style="color:#fff">Flux</strong> (lightweight, CLI) are the two leading GitOps tools. Both are CNCF projects and native to Kubernetes.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--cdD);border:2px solid var(--cdB);box-shadow:0 0 22px rgba(139,92,246,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">GitOps Loop</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:7px;padding:6px 9px;background:var(--gtD);border:1px solid var(--gtB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">👤 Developer opens PR</div>
+                <div style="font-size:7px;color:var(--muted)">changes deployment.yaml in Git</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cd)">↓ PR merged</div>
+              <div style="border-radius:7px;padding:6px 9px;background:var(--gtD);border:1px solid var(--gtB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">📁 Git repo updated</div>
+                <div style="font-size:7px;color:var(--muted)">replicas: 5, image: v2.1</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cd)">↓ Argo CD detects</div>
+              <div style="border-radius:7px;padding:6px 9px;background:var(--cdD);border:1.5px solid var(--cdB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#DDD6FE">🐙 Argo CD syncs</div>
+                <div style="font-size:7px;color:var(--muted)">applies diff to cluster</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cd)">↓</div>
+              <div style="border-radius:7px;padding:6px 9px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">✅ Cluster matches Git</div>
+                <div style="font-size:7px;color:var(--muted)">5 replicas · v2.1 · live</div>
+              </div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);font-size:7.5px;color:#FDE068;text-align:center">Zero kubectl in production ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 11</span></div>
+  </div>
+
+  <!-- S9 REAL WORLD -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(249,115,22,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Code to <span style="color:var(--ci)">Production</span> — Complete Workflow</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:4px;width:58px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:00 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:01 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:03 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:05 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:06 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:07 AM</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">09:08 AM</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--gtD);border:1px solid var(--gtB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">💻 Developer merges PR: "Add user search feature" to main branch</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--ciD);border:1px solid var(--ciB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FED7AA;font-weight:600">⚙ GitHub Actions triggered → runs: npm install + npm build</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--ciD);border:1px solid var(--ciB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FED7AA;font-weight:600">🧪 47 unit tests run → all pass · 0 failures · coverage: 89%</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--dkD);border:1px solid var(--dkB);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">🐳 Docker build → push myapp:v2.5-abc123 to ECR registry</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--cdD);border:1px solid var(--cdB);display:flex;align-items:center"><div style="font-size:8.5px;color:#DDD6FE;font-weight:600">🐙 Argo CD detects new image → updates deployment.yaml in Git</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--cdD);border:1px solid var(--cdB);display:flex;align-items:center"><div style="font-size:8.5px;color:#DDD6FE;font-weight:600">⎈ Kubernetes rolling update begins → 3 new Pods, 3 old Pods terminating</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ v2.5 live in production · Zero downtime · Total time: 8 minutes</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:222px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--ciD);border:2px solid var(--ciB);box-shadow:0 0 18px rgba(249,115,22,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Pipeline Summary</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#86EFAC">🔨 Build</span><span style="font-size:8px;color:#86EFAC;font-weight:700">1m 12s ✅</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#86EFAC">🧪 Tests (47)</span><span style="font-size:8px;color:#86EFAC;font-weight:700">2m 08s ✅</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#86EFAC">🐳 Docker push</span><span style="font-size:8px;color:#86EFAC;font-weight:700">1m 45s ✅</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#86EFAC">⎈ K8s rollout</span><span style="font-size:8px;color:#86EFAC;font-weight:700">1m 30s ✅</span>
+              </div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--okD);border:1px solid var(--okB);text-align:center;margin-top:3px">
+                <div style="font-size:9px;font-weight:800;color:#86EFAC">Total: 8 min</div>
+                <div style="font-size:7px;color:#86EFAC">vs 3–5 days manual 🎉</div>
+              </div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);text-align:center">
+                <div style="font-size:7.5px;color:#FED7AA">0 humans in deploy path ✅</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 11</span></div>
+  </div>
+
+  <!-- S10 BENEFITS -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits &amp; Best Practices</div>
+        <div class="stitle">Benefits &amp; <span style="color:var(--ci)">Best Practices</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ciD)">⚡</div><div class="bt"><strong>10× faster releases</strong> — what took days now takes minutes. Teams that practice CI/CD ship features faster, respond to bugs quicker, and get feedback from users sooner. Speed = competitive advantage.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🤖</div><div class="bt"><strong>Automation eliminates human error</strong> — every deploy follows the exact same tested steps. No "oops, forgot to update the config" moments. The pipeline is consistent every single time.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cdD)">🧪</div><div class="bt"><strong>Always test before deploy</strong> — broken code never reaches production. Make CI fail on test failures, security scans, or coverage drops. The pipeline is your quality gate.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dkD)">🐳</div><div class="bt"><strong>Use immutable container images</strong> — tag every image with the git SHA (<code style="color:#BAE6FD;background:rgba(37,99,235,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">app:abc1234</code>). Never use <code style="color:#FCA5A5;background:rgba(239,68,68,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">latest</code> tag in production — you can't audit or rollback it.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--wnD)">📊</div><div class="bt"><strong>Monitor every deployment</strong> — hook Prometheus alerts into your CD pipeline. If error rate spikes after deploy, trigger automatic rollback. Pipeline + monitoring = self-healing system.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:700;color:#86EFAC;margin-bottom:6px">✅ CI/CD Best Practices</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Keep pipelines fast (&lt;10 min)</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Fail fast — stop on first error</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Never deploy without tests passing</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Use immutable image tags</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Separate CI and CD pipelines</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Store secrets in Vault/K8s Secrets</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ok)">◆</span>Monitor deploys with Prometheus</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--ciD);border:1.5px solid var(--ciB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FED7AA;margin-bottom:6px">📊 Impact at Scale</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;justify-content:space-between;font-size:8px">
+                <span style="color:#94A3B8">Deploy frequency</span>
+                <span style="color:#86EFAC;font-weight:700">weekly → daily</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:8px">
+                <span style="color:#94A3B8">Lead time</span>
+                <span style="color:#86EFAC;font-weight:700">days → hours</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:8px">
+                <span style="color:#94A3B8">Change failure rate</span>
+                <span style="color:#86EFAC;font-weight:700">15% → 3%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:8px">
+                <span style="color:#94A3B8">MTTR</span>
+                <span style="color:#86EFAC;font-weight:700">hours → minutes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 11</span></div>
+  </div>
+
+  <!-- S11 SUMMARY -->
+  <div class="slide" data-s="11">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(249,115,22,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(139,92,246,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">CI/CD + Kubernetes — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--erD);border:1.5px solid var(--erB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🏭</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Without CI/CD</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Handmade cars, one at a time</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Manual steps. Slow. Error-prone. 1 car per week. Every car slightly different. Quality inconsistent.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--ciD);border:1.5px solid var(--ciB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ci),var(--cd));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">🤖</div>
+              <div style="font-size:10px;font-weight:800;color:#FED7AA">CI/CD = Assembly Line</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Automated factory for software</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Code enters one end. Tested, built, containerized, deployed at the other. 1000 releases per day. Identical quality every time.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚀</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">With CI/CD + K8s</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Software at factory speed</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">8 min code to production. Zero downtime deploys. Auto rollback. Scales automatically. Team ships 10× faster.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--ciD);border:1px solid var(--ciB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔁</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FED7AA">CI</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Build + test every commit</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--cdD);border:1px solid var(--cdB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚀</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">CD</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Auto deploy to Kubernetes</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--gtD);border:1px solid var(--gtB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🌿</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">GitOps</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Git = cluster truth</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--dkD);border:1px solid var(--dkB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🐳</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Containers</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Immutable, portable images</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Rolling Update</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Zero-downtime deploys</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--wnD);border:1px solid var(--wnB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🐙</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Argo CD / Flux</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">GitOps sync engine</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.2);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Manual deploys = handmade cars</span>. <span style="color:#86EFAC">CI/CD + Kubernetes = assembly line that ships perfect software every 8 minutes</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--ciD);border:1.5px solid var(--ciB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ci)">◆</span>CI = build + test automation</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ci)">◆</span>CD = auto deploy to K8s</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ci)">◆</span>Rolling update = zero downtime</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ci)">◆</span>GitOps = Git drives cluster</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ci)">◆</span>Argo CD for K8s GitOps</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes<br>on Cloud</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">EKS · GKE · AKS<br>Managed K8s platforms</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#FED7AA;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>11 / 11</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=11;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

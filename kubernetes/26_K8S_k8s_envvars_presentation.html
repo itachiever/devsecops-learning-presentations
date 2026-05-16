@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --ev:#00D4FF;--evD:rgba(0,212,255,.09);--evB:rgba(0,212,255,.3);
+  --cm:#F59E0B;--cmD:rgba(245,158,11,.09);--cmB:rgba(245,158,11,.28);
+  --sec:#EC4899;--secD:rgba(236,72,153,.09);--secB:rgba(236,72,153,.28);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --env:#22C55E;--envD:rgba(34,197,94,.09);--envB:rgba(34,197,94,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --pv:#7C3AED;--pvD:rgba(124,58,237,.1);--pvB:rgba(124,58,237,.32);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--ev);border-color:var(--ev);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--ev);color:var(--ev)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(0,212,255,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(0,212,255,.18);border-color:var(--ev)}
+.nbtn.pri{background:linear-gradient(135deg,var(--ev),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(0,212,255,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(0,212,255,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ev);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(0,212,255,.14);transition:all .25s}
+.bi:hover{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.ev-box{border-radius:10px;padding:9px 12px;background:var(--evD);border:2px solid var(--evB);text-align:center}
+.ev-title{font-size:10px;font-weight:800;color:#67E8F9}
+.pod-box{border-radius:10px;padding:9px 12px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.pod-title{font-size:10px;font-weight:800;color:#BAE6FD}
+.cm-box{border-radius:8px;padding:7px 10px;background:var(--cmD);border:1.5px solid var(--cmB);text-align:center}
+.sec-box{border-radius:8px;padding:7px 10px;background:var(--secD);border:1.5px solid var(--secB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ev);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.8vw,38px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--ev) 55%,var(--blue) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Environment<br>Variables</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Passing Configuration to Applications<br>— Dynamic settings injected at runtime</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--evD);color:#67E8F9;border:1px solid var(--evB);padding:4px 11px;font-size:9px">⚡ KEY=VALUE pairs</span>
+          <span class="tag" style="background:var(--cmD);color:#FDE068;border:1px solid var(--cmB);padding:4px 11px;font-size:9px">⚙ ConfigMap source</span>
+          <span class="tag" style="background:var(--secD);color:#F9A8D4;border:1px solid var(--secB);padding:4px 11px;font-size:9px">🔐 Secret source</span>
+          <span class="tag" style="background:var(--envD);color:#86EFAC;border:1px solid var(--envB);padding:4px 11px;font-size:9px">🔀 Multi-env ready</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px;border:1.5px dashed rgba(0,212,255,.25);border-radius:14px;padding:12px;background:rgba(0,212,255,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Config Injection Flow</div>
+          <div style="display:flex;gap:5px;margin-bottom:5px">
+            <div class="cm-box" style="flex:1"><div style="font-size:9px;font-weight:700;color:#FDE068">⚙ ConfigMap</div><div style="font-family:monospace;font-size:7px;color:var(--muted);margin-top:3px">DB_HOST=prod-db</div></div>
+            <div class="sec-box" style="flex:1"><div style="font-size:9px;font-weight:700;color:#F9A8D4">🔐 Secret</div><div style="font-family:monospace;font-size:7px;color:var(--muted);margin-top:3px">DB_PASS=•••••</div></div>
+          </div>
+          <div style="text-align:center;font-size:10px;color:var(--ev);margin:4px 0">↓ injected as env vars</div>
+          <div class="pod-box" style="margin-bottom:5px">
+            <div class="pod-title">📦 Pod</div>
+            <div style="display:flex;flex-direction:column;gap:3px;margin-top:5px;font-family:monospace;font-size:7.5px;text-align:left;padding:0 6px">
+              <div><span style="color:#00D4FF">DB_HOST</span>=<span style="color:#86EFAC">prod-db</span></div>
+              <div><span style="color:#00D4FF">DB_PORT</span>=<span style="color:#86EFAC">5432</span></div>
+              <div><span style="color:#00D4FF">DB_PASS</span>=<span style="color:#F9A8D4">decoded✅</span></div>
+            </div>
+          </div>
+          <div style="font-size:9px;color:var(--muted);text-align:center">App reads via process.env.DB_HOST</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- S2 PROBLEM -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why <span style="color:var(--fail)">Hardcoded Values</span> Don't Work</div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔒</div><div class="bt"><strong>Hardcoding config makes apps inflexible</strong> — database URLs, API endpoints, ports baked into code. Changing one value means changing the code.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🌍</div><div class="bt"><strong>Different environments need different settings</strong> — dev uses localhost, staging uses test DB, prod uses cloud DB. Same code cannot serve all three.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔄</div><div class="bt"><strong>Every config change = rebuild + redeploy</strong> — update a single URL, rebuild the Docker image, re-push to registry, redeploy. Slow and error-prone.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🐛</div><div class="bt"><strong>Wrong values go to wrong environments</strong> — a dev accidentally points to the production database. Config buried in code is easy to get wrong.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔐</div><div class="bt"><strong>Sensitive values exposed in code</strong> — passwords and tokens hardcoded in source files get committed to Git and shared with the whole team</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Environment Variables inject configuration at runtime. Change settings without touching the code or rebuilding the image.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:278px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Hardcoded — Inflexible</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(239,68,68,.2);font-family:monospace;font-size:8px;margin-bottom:6px">
+              <div style="color:#FCA5A5">// app.js — HARDCODED ❌</div>
+              <div><span style="color:#67E8F9">const</span> <span style="color:#FDE068">DB</span> = <span style="color:#FCA5A5">"localhost:5432"</span>;</div>
+              <div><span style="color:#67E8F9">const</span> <span style="color:#FDE068">PORT</span> = <span style="color:#FCA5A5">8080</span>;</div>
+            </div>
+            <div style="font-size:8px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:4px;text-align:center">Change env? Rebuild image 🔄</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--evD);border:1.5px solid var(--evB)">
+            <div style="font-size:9px;font-weight:800;color:#67E8F9;text-align:center;margin-bottom:8px">✅ Env Vars — Flexible</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(0,212,255,.2);font-family:monospace;font-size:8px;margin-bottom:6px">
+              <div style="color:#67E8F9">// reads from environment</div>
+              <div><span style="color:#67E8F9">const</span> <span style="color:#FDE068">DB</span> = <span style="color:#86EFAC">process.env.DB_URL</span>;</div>
+              <div><span style="color:#67E8F9">const</span> <span style="color:#FDE068">PORT</span> = <span style="color:#86EFAC">process.env.PORT</span>;</div>
+            </div>
+            <div style="font-size:8px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:4px;text-align:center">Change env? Update YAML only ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- S3 WHAT ARE ENV VARS -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What are <span style="color:var(--ev)">Environment Variables?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">⚡</div><div class="bt"><strong>Key-value pairs passed to applications</strong> — each variable has a NAME and a VALUE. e.g. <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">DB_HOST=postgres.svc</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">💉</div><div class="bt"><strong>Configuration injected dynamically at runtime</strong> — your container starts and receives its settings through env vars. No rebuild needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">📖</div><div class="bt"><strong>Application reads values during execution</strong> — via <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">process.env</code> (Node), <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">os.getenv()</code> (Python), <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">System.getenv()</code> (Java)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🌍</div><div class="bt"><strong>Universal pattern across all languages</strong> — every programming language supports reading environment variables. Industry-standard approach.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🔗</div><div class="bt"><strong>Can come from multiple sources</strong> — defined directly in YAML, loaded from ConfigMaps, or injected securely from Kubernetes Secrets</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Env vars = a briefing given to an employee before they start work 📋. Same employee, different briefings for different jobs.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--evD);border:2px solid var(--evB);box-shadow:0 0 22px rgba(0,212,255,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">KEY = VALUE Format</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(0,212,255,.2);font-family:monospace;font-size:8.5px;margin-bottom:8px">
+              <div><span style="color:#00D4FF">DB_HOST</span>=<span style="color:#86EFAC">postgres.prod.svc</span></div>
+              <div><span style="color:#00D4FF">DB_PORT</span>=<span style="color:#86EFAC">5432</span></div>
+              <div><span style="color:#00D4FF">LOG_LEVEL</span>=<span style="color:#86EFAC">info</span></div>
+              <div><span style="color:#00D4FF">APP_ENV</span>=<span style="color:#86EFAC">production</span></div>
+              <div><span style="color:#00D4FF">MAX_CONN</span>=<span style="color:#86EFAC">100</span></div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--ev);margin-bottom:5px">↓ read by app at startup</div>
+            <div style="border-radius:7px;padding:7px;background:var(--podD);border:1px solid var(--podB)">
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:3px">📱 App reads:</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8">
+                <div><span style="color:#86EFAC">process.env</span>.DB_HOST</div>
+                <div><span style="color:#86EFAC">os.getenv</span>("LOG_LEVEL")</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">✅ No hardcoding anywhere</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- S4 HOW ENV VARS WORK IN K8S -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Kubernetes Injection Flow</div>
+      <div class="stitle">How Environment Variables Work in Kubernetes</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ev),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Env vars defined in Pod YAML spec</div><div style="font-size:9px;color:#94A3B8">Under the <code style="color:#86EFAC;font-size:8px">env:</code> or <code style="color:#86EFAC;font-size:8px">envFrom:</code> field in the container spec. Written once, applied every time Pod starts.</div></div>
+            <span style="margin-left:auto;font-size:13px">📄</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ev)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--podD);border:1px solid var(--podB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pod),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Kubernetes schedules the Pod</div><div style="font-size:9px;color:#94A3B8">K8s scheduler selects a node. Kubelet on that node receives the Pod spec including all env var definitions.</div></div>
+            <span style="margin-left:auto;font-size:13px">☸</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ev)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ev),var(--pv));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">K8s resolves ConfigMap and Secret sources</div><div style="font-size:9px;color:#94A3B8">If env vars come from ConfigMap or Secret references, Kubernetes fetches and decodes those values automatically.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔗</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--env)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--envD);border:1px solid var(--envB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--env),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Container starts with env vars injected</div><div style="font-size:9px;color:#94A3B8">Container process starts with all env vars set. App reads them instantly from the process environment. No extra setup.</div></div>
+            <span style="margin-left:auto;font-size:13px">📦</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ev)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ev),var(--env));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Application uses config dynamically</div><div style="font-size:9px;color:#94A3B8">App connects to the correct DB, uses the right API endpoint, runs at the correct log level — all from env vars. ✅</div></div>
+            <span style="margin-left:auto;font-size:13px">✅</span>
+          </div>
+        </div>
+        <div style="width:192px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(0,212,255,.03);border:1.5px dashed var(--evB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Pod YAML Example</div>
+            <div style="border-radius:7px;padding:9px;background:rgba(6,10,16,.7);border:1px solid rgba(0,212,255,.18);font-family:monospace;font-size:7.5px">
+              <div><span style="color:#7C3AED">spec:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">containers:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">- name:</span> <span style="color:#FDE068">my-app</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">env:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">- name:</span> <span style="color:#00D4FF">DB_HOST</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">value:</span> <span style="color:#86EFAC">"db.svc"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">- name:</span> <span style="color:#00D4FF">LOG</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">valueFrom:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">configMapKeyRef:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#FDE068">app-cfg</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">key:</span> <span style="color:#86EFAC">LOG_LEVEL</span></div>
+            </div>
+            <div style="margin-top:6px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:7.5px;font-weight:700;color:#86EFAC">Container gets all vars at start ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- S5 SOURCES -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Configuration Sources</div>
+      <div class="stitle">Where Do Environment Variables Come From?</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:stretch">
+        <!-- 4 sources -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <!-- Direct YAML -->
+          <div style="flex:1;border-radius:12px;padding:11px;background:var(--evD);border:2px solid var(--evB);display:flex;gap:10px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#67E8F9">Source 1 — Direct in YAML</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(0,212,255,.18);color:#67E8F9;font-weight:700;border:1px solid var(--evB)">Simplest</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;margin-bottom:4px">Hard-coded in the Pod spec. Good for static values that don't change between envs.</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8;background:rgba(6,10,16,.5);border-radius:5px;padding:4px 6px"><span style="color:#00D4FF">name:</span> PORT &nbsp; <span style="color:#00D4FF">value:</span> <span style="color:#86EFAC">"8080"</span></div>
+            </div>
+          </div>
+          <!-- ConfigMap -->
+          <div style="flex:1;border-radius:12px;padding:11px;background:var(--cmD);border:2px solid var(--cmB);display:flex;gap:10px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚙</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#FDE068">Source 2 — ConfigMap</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.2);color:#FDE068;font-weight:700;border:1px solid var(--cmB)">⭐ Popular</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;margin-bottom:4px">Non-sensitive settings stored externally. Reusable across multiple Pods and environments.</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8;background:rgba(6,10,16,.5);border-radius:5px;padding:4px 6px"><span style="color:#F59E0B">configMapKeyRef:</span> <span style="color:#FDE068">app-config</span></div>
+            </div>
+          </div>
+          <!-- Secret -->
+          <div style="flex:1;border-radius:12px;padding:11px;background:var(--secD);border:2px solid var(--secB);display:flex;gap:10px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(236,72,153,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔐</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#F9A8D4">Source 3 — Secret</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(236,72,153,.2);color:#F9A8D4;font-weight:700;border:1px solid var(--secB)">Secure</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;margin-bottom:4px">Sensitive credentials injected securely. Decoded automatically. Access controlled via RBAC.</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8;background:rgba(6,10,16,.5);border-radius:5px;padding:4px 6px"><span style="color:#EC4899">secretKeyRef:</span> <span style="color:#F9A8D4">db-secret</span></div>
+            </div>
+          </div>
+          <!-- K8s auto vars -->
+          <div style="flex:1;border-radius:12px;padding:11px;background:var(--pvD);border:2px solid var(--pvB);display:flex;gap:10px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☸</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#DDD6FE">Source 4 — K8s Auto-Generated</div>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;margin-bottom:4px">Kubernetes automatically injects cluster info — Service IPs, ports, namespace, node name — into every Pod.</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8;background:rgba(6,10,16,.5);border-radius:5px;padding:4px 6px"><span style="color:#A855F7">MY_SVC_SERVICE_HOST</span>=<span style="color:#DDD6FE">10.0.0.1</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: flow diagram -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:13px;background:rgba(0,212,255,.03);border:1.5px dashed var(--evB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">All Sources → Pod</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="padding:5px 8px;border-radius:7px;background:var(--evD);border:1px solid var(--evB);font-size:8px;font-weight:600;color:#67E8F9;text-align:center">📄 Direct YAML value</div>
+              <div style="padding:5px 8px;border-radius:7px;background:var(--cmD);border:1px solid var(--cmB);font-size:8px;font-weight:600;color:#FDE068;text-align:center">⚙ ConfigMap ref</div>
+              <div style="padding:5px 8px;border-radius:7px;background:var(--secD);border:1px solid var(--secB);font-size:8px;font-weight:600;color:#F9A8D4;text-align:center">🔐 Secret ref</div>
+              <div style="padding:5px 8px;border-radius:7px;background:var(--pvD);border:1px solid var(--pvB);font-size:8px;font-weight:600;color:#DDD6FE;text-align:center">☸ K8s auto vars</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ev);margin:6px 0">↓ all merged</div>
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);text-align:center">
+              <div style="font-size:9px;font-weight:800;color:#BAE6FD">📦 Container</div>
+              <div style="font-family:monospace;font-size:7px;color:#94A3B8;margin-top:4px;text-align:left">
+                <div><span style="color:#00D4FF">PORT</span>=8080</div>
+                <div><span style="color:#F59E0B">LOG</span>=info</div>
+                <div><span style="color:#EC4899">DB_PASS</span>=•••</div>
+                <div><span style="color:#A855F7">SVC_IP</span>=10.0.0.1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- S6 CONFIGMAP + SECRET INTEGRATION -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Integration</div>
+        <div class="stitle">ConfigMap + Secret <span style="color:var(--ev)">→ Env Variables</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">⚙</div><div class="bt"><strong>ConfigMap provides non-sensitive settings</strong> — database host, port, log level, API URLs, feature flags — all safe to expose</div></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">🔐</div><div class="bt"><strong>Secret provides sensitive credentials</strong> — database password, API tokens, TLS keys — encoded and RBAC-controlled</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">💉</div><div class="bt"><strong>Both injected as environment variables</strong> — application sees a unified set of env vars. It doesn't know or care where they came from.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--envD)">🎯</div><div class="bt"><strong>Centralized configuration management</strong> — change one ConfigMap or Secret → all Pods using it get the update. One source of truth.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🔄</div><div class="bt"><strong>Works across all environments</strong> — dev uses dev-configmap + dev-secret, prod uses prod versions. Same app, same YAML structure.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Best practice: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Always use ConfigMap for non-sensitive and Secret for sensitive data. Never mix credentials into ConfigMap.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--evD);border:2px solid var(--evB);box-shadow:0 0 22px rgba(0,212,255,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Integration Architecture</div>
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div class="cm-box" style="flex:1">
+                <div style="font-size:9px;font-weight:800;color:#FDE068">⚙ ConfigMap</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8;margin-top:4px;text-align:left">
+                  <div><span style="color:#F59E0B">DB_HOST:</span> db.svc</div>
+                  <div><span style="color:#F59E0B">DB_PORT:</span> 5432</div>
+                  <div><span style="color:#F59E0B">LOG:</span> info</div>
+                </div>
+              </div>
+              <div class="sec-box" style="flex:1">
+                <div style="font-size:9px;font-weight:800;color:#F9A8D4">🔐 Secret</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8;margin-top:4px;text-align:left">
+                  <div><span style="color:#EC4899">DB_PASS:</span> •••</div>
+                  <div><span style="color:#EC4899">API_KEY:</span> •••</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:12px;color:var(--ev);margin-bottom:4px">↙ &nbsp;&nbsp; ↘</div>
+            <div style="border-radius:8px;padding:8px;background:var(--evD);border:1.5px solid var(--evB);margin-bottom:5px;text-align:center">
+              <div style="font-size:9px;font-weight:800;color:#67E8F9">⚡ Environment Variables</div>
+              <div style="font-family:monospace;font-size:7px;color:#94A3B8;margin-top:4px;text-align:left">
+                <div><span style="color:#00D4FF">DB_HOST</span>=db.svc</div>
+                <div><span style="color:#00D4FF">DB_PORT</span>=5432</div>
+                <div><span style="color:#00D4FF">LOG</span>=info</div>
+                <div><span style="color:#EC4899">DB_PASS</span>=decoded✅</div>
+                <div><span style="color:#EC4899">API_KEY</span>=decoded✅</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--env);margin-bottom:4px">↓ injected into</div>
+            <div class="pod-box">
+              <div class="pod-title">📦 Pod → 📱 Application</div>
+              <div style="font-size:8px;color:#86EFAC;margin-top:3px">Reads all vars via process.env ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- S7 BENEFITS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits</div>
+        <div class="stitle">Why Use <span style="color:var(--ev)">Environment Variables?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🔓</div><div class="bt"><strong>Flexible configuration without code changes</strong> — change DB host, port, log level — all without modifying a single line of application code</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🌍</div><div class="bt"><strong>Easy multi-environment management</strong> — same Docker image, different env vars per environment. Dev → Test → Prod without rebuilding.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🚀</div><div class="bt"><strong>No image rebuild required</strong> — update a ConfigMap or env var YAML, restart the Pod — new config is live in seconds. No CI/CD pipeline run needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🚢</div><div class="bt"><strong>Better application portability</strong> — bring your container to any cluster, any cloud provider — just set the right env vars. Works everywhere.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--evD)">🎯</div><div class="bt"><strong>Simplifies deployments and rollbacks</strong> — configuration lives in version-controlled YAML files. Roll back config = roll back YAML. Simple and auditable.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--evD);border:1px solid var(--evB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">12-Factor App: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Storing config in environment variables is factor III of the 12-Factor App methodology — the industry standard for modern cloud-native applications.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--evD);border:2px solid var(--evB);box-shadow:0 0 22px rgba(0,212,255,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Same Image · 3 Environments</div>
+            <div style="padding:7px;border-radius:8px;background:var(--podD);border:1.5px solid var(--podB);text-align:center;margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD">🐳 myapp:v3.0 — built once</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:12px;color:var(--ev);margin-bottom:5px">↙ ↓ ↘</div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border-radius:8px;padding:7px;background:var(--envD);border:1px solid var(--envB)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:4px">🔬 Dev</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8">
+                  <div><span style="color:#00D4FF">DB</span>=localhost</div>
+                  <div><span style="color:#00D4FF">LOG</span>=debug</div>
+                </div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:var(--cmD);border:1px solid var(--cmB)">
+                <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:4px">🧪 Test</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8">
+                  <div><span style="color:#00D4FF">DB</span>=test-db</div>
+                  <div><span style="color:#00D4FF">LOG</span>=warn</div>
+                </div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:var(--secD);border:1px solid var(--secB)">
+                <div style="font-size:8px;font-weight:700;color:#F9A8D4;margin-bottom:4px">🏭 Prod</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8">
+                  <div><span style="color:#00D4FF">DB</span>=rds.aws</div>
+                  <div><span style="color:#00D4FF">LOG</span>=info</div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:7px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">✅ Zero rebuilds across environments</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD EXAMPLE -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Full Config Flow — App Connecting to Database</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <!-- Steps list -->
+        <div style="flex:1.2;display:flex;flex-direction:column;gap:6px">
+          <div class="bi"><div class="ico" style="background:var(--cmD)">⚙</div><div class="bt"><strong>ConfigMap stores non-sensitive DB settings:</strong> <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">DB_HOST=postgres.prod.svc</code>, <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">DB_PORT=5432</code>, <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">DB_NAME=orders</code></div></div>
+          <div class="bi"><div class="ico" style="background:var(--secD)">🔐</div><div class="bt"><strong>Secret stores credentials:</strong> <code style="color:#F9A8D4;background:rgba(236,72,153,.1);padding:1px 5px;border-radius:4px">DB_USER=admin</code> and <code style="color:#F9A8D4;background:rgba(236,72,153,.1);padding:1px 5px;border-radius:4px">DB_PASS=•••</code> — base64 encoded, RBAC protected</div></div>
+          <div class="bi"><div class="ico" style="background:var(--evD)">💉</div><div class="bt"><strong>Pod YAML references both:</strong> <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">envFrom: configMapRef + secretRef</code> — K8s merges all vars into container</div></div>
+          <div class="bi"><div class="ico" style="background:var(--envD)">📱</div><div class="bt"><strong>App builds DB connection string at runtime:</strong> reads all five vars, constructs <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">postgres://admin:pass@host:5432/orders</code></div></div>
+          <div class="bi"><div class="ico" style="background:var(--envD)">✅</div><div class="bt"><strong>Switch to production:</strong> swap to prod-configmap + prod-secret → new DB, same app, zero code changes, zero rebuilds</div></div>
+        </div>
+        <!-- Full flow diagram -->
+        <div style="width:235px;flex-shrink:0">
+          <div style="border-radius:13px;padding:13px;background:var(--evD);border:2px solid var(--evB);box-shadow:0 0 22px rgba(0,212,255,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Full Config Flow</div>
+            <!-- Sources -->
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div class="cm-box" style="flex:1;padding:7px">
+                <div style="font-size:8px;font-weight:800;color:#FDE068">⚙ ConfigMap</div>
+                <div style="font-family:monospace;font-size:6.5px;color:#94A3B8;margin-top:3px;text-align:left">
+                  <div>DB_HOST: db.svc</div>
+                  <div>DB_PORT: 5432</div>
+                  <div>DB_NAME: orders</div>
+                </div>
+              </div>
+              <div class="sec-box" style="flex:1;padding:7px">
+                <div style="font-size:8px;font-weight:800;color:#F9A8D4">🔐 Secret</div>
+                <div style="font-family:monospace;font-size:6.5px;color:#94A3B8;margin-top:3px;text-align:left">
+                  <div>DB_USER: admin</div>
+                  <div>DB_PASS: •••••</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--ev);margin-bottom:4px">↙ ↘</div>
+            <!-- Env vars merged -->
+            <div style="border-radius:7px;padding:7px;background:rgba(6,10,16,.6);border:1px solid rgba(0,212,255,.2);font-family:monospace;font-size:7px;margin-bottom:5px">
+              <div style="color:#67E8F9;margin-bottom:2px">⚡ Container Environment:</div>
+              <div><span style="color:#00D4FF">DB_HOST</span>=db.svc</div>
+              <div><span style="color:#00D4FF">DB_PORT</span>=5432</div>
+              <div><span style="color:#00D4FF">DB_NAME</span>=orders</div>
+              <div><span style="color:#EC4899">DB_USER</span>=admin</div>
+              <div><span style="color:#EC4899">DB_PASS</span>=decoded✅</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--env);margin-bottom:4px">↓ app reads &amp; connects</div>
+            <div style="border-radius:7px;padding:7px;background:var(--podD);border:1.5px solid var(--podB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD">🗄 PostgreSQL</div>
+              <div style="font-size:7px;color:#86EFAC;margin-top:2px">Connected securely ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- S9 SUMMARY -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Environment Variables — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">👷</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Application</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The employee</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Does the work. Same skills, same code. But needs instructions on what to do today.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--evD);border:1.5px solid var(--evB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ev),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Bridge</div>
+              <div style="font-size:28px;margin-top:4px">📋</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Env Variables</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Daily briefing / instructions</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Given before work starts. Change the briefing, change the behavior. Worker doesn't change.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--envD);border:1.5px solid var(--envB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Flexible, reusable app</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Same image, any environment. Config changes without code changes. Deploy fast.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--evD);border:1px solid var(--evB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">KEY=VALUE at runtime</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Injected when container starts</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚙</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">ConfigMap source</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Non-sensitive settings</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--secD);border:1px solid var(--secB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔐</div>
+              <div><div style="font-size:10px;font-weight:700;color:#F9A8D4">Secret source</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Sensitive credentials, decoded</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--envD);border:1px solid var(--envB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🚀</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">No rebuild needed</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Change YAML → restart Pod</div></div>
+            </div>
+          </div>
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">App = employee</span>. <span style="color:#67E8F9">Env vars = daily briefing</span>. Same worker, different instructions, different behavior."</div>
+          </div>
+        </div>
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--evD);border:1.5px solid var(--evB)">
+            <div style="font-size:9px;font-weight:700;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ev)">◆</span>KEY=VALUE pairs for apps</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ev)">◆</span>Injected at container start</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ev)">◆</span>3 sources: YAML · CM · Secret</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ev)">◆</span>No rebuild to change config</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ev)">◆</span>Works across all environments</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#FCA5A5;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Security<br>Overview</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">RBAC · Network Policies<br>· Pod Security</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--red),var(--pv));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#67E8F9;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

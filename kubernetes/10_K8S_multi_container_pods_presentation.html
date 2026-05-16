@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.3);
+  --c1:#326CE5;--c1D:rgba(50,108,229,.12);--c1B:rgba(50,108,229,.36);
+  --c2:#7C3AED;--c2D:rgba(124,58,237,.12);--c2B:rgba(124,58,237,.36);
+  --c3:#22C55E;--c3D:rgba(34,197,94,.1);--c3B:rgba(34,197,94,.3);
+  --c4:#F59E0B;--c4D:rgba(245,158,11,.1);--c4B:rgba(245,158,11,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Pod box */
+.pod{border-radius:13px;padding:11px;border:2px solid var(--podB);background:var(--podD);position:relative}
+.pod-lbl{font-size:8px;font-weight:800;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:7px}
+/* Container blocks */
+.cb{border-radius:8px;padding:8px 10px;text-align:center;border:1.5px solid}
+.cb1{background:var(--c1D);border-color:var(--c1B)}
+.cb2{background:var(--c2D);border-color:var(--c2B)}
+.cb3{background:var(--c3D);border-color:var(--c3B)}
+.cb4{background:var(--c4D);border-color:var(--c4B)}
+.cl1{color:#BAE6FD;font-size:9px;font-weight:700}
+.cl2{color:#DDD6FE;font-size:9px;font-weight:700}
+.cl3{color:#86EFAC;font-size:9px;font-weight:700}
+.cl4{color:#FDE068;font-size:9px;font-weight:700}
+/* shared band */
+.shared{border-radius:7px;padding:5px 8px;background:rgba(0,0,0,.25);border:1px dashed rgba(0,212,255,.2);font-size:8px;font-weight:700;color:var(--muted);display:flex;gap:6px;justify-content:center;align-items:center}
+/* localhost line */
+.lhpill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);font-size:8px;font-weight:700;color:#67E8F9}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* arrow */
+.arr{text-align:center;font-size:12px;color:var(--cyan);line-height:1;padding:2px 0}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,var(--purple) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Multi-Container<br>Pods</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Running Multiple Containers in a Single Pod<br>— Sidecar, Helper & Adapter Patterns Explained</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--c1D);color:#BAE6FD;border:1px solid var(--c1B);padding:4px 11px;font-size:9px">🚀 Main App</span>
+          <span class="tag" style="background:var(--c2D);color:#DDD6FE;border:1px solid var(--c2B);padding:4px 11px;font-size:9px">📋 Sidecar</span>
+          <span class="tag" style="background:var(--c3D);color:#86EFAC;border:1px solid var(--c3B);padding:4px 11px;font-size:9px">🔧 Helper</span>
+          <span class="tag" style="background:var(--podD);color:#67E8F9;border:1px solid var(--podB);padding:4px 11px;font-size:9px">🌐 localhost</span>
+        </div>
+      </div>
+      <!-- right: multi-container pod hero -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:290px">
+          <div style="border:1.5px dashed rgba(34,197,94,.3);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+            <div style="font-size:8px;font-weight:700;color:rgba(34,197,94,.6);text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💪 Worker Node</div>
+            <div class="pod" style="box-shadow:0 0 26px rgba(0,212,255,.15)">
+              <div class="pod-lbl">📦 Multi-Container Pod · IP: 10.0.0.5</div>
+              <div style="display:flex;gap:6px;margin-bottom:7px">
+                <div class="cb cb1" style="flex:1">
+                  <div style="font-size:18px;margin-bottom:3px">🚀</div>
+                  <div class="cl1">Main App</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:1px">nginx · :80</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                  <div style="font-size:10px;color:var(--cyan)">⟷</div>
+                  <div style="font-size:7px;color:var(--muted);writing-mode:vertical-lr;transform:rotate(180deg);letter-spacing:1px">localhost</div>
+                </div>
+                <div class="cb cb2" style="flex:1">
+                  <div style="font-size:18px;margin-bottom:3px">📋</div>
+                  <div class="cl2">Log Sidecar</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:1px">fluentd</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                  <div style="font-size:10px;color:var(--cyan)">⟷</div>
+                  <div style="font-size:7px;color:var(--muted);writing-mode:vertical-lr;transform:rotate(180deg);letter-spacing:1px">localhost</div>
+                </div>
+                <div class="cb cb3" style="flex:1">
+                  <div style="font-size:18px;margin-bottom:3px">📊</div>
+                  <div class="cl3">Monitor</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:1px">prometheus</div>
+                </div>
+              </div>
+              <div class="shared"><span style="color:#67E8F9">🌐 Shared IP</span><span style="color:var(--muted)">·</span><span style="color:#86EFAC">💾 Shared Volume</span><span style="color:var(--muted)">·</span><span style="color:#DDD6FE">🏠 localhost</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 08</span></div>
+  </div>
+
+  <!-- ══ S2 RECAP ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.13) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Quick Recap</div>
+      <div class="stitle">Single vs Multi-Container Pod</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- single container -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="padding:6px 10px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Most Common — ~90% of cases</div>
+          <div class="pod" style="flex:1;box-shadow:0 0 18px rgba(0,212,255,.1)">
+            <div class="pod-lbl">📦 Single-Container Pod</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0">
+              <div class="cb cb1" style="width:130px;padding:12px 10px">
+                <div style="font-size:26px;margin-bottom:5px">🐳</div>
+                <div class="cl1">One Container</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">Your main app</div>
+              </div>
+              <div class="shared" style="width:100%">
+                <span style="color:#67E8F9">🌐 IP: 10.0.0.1</span>
+                <span style="color:var(--muted)">·</span>
+                <span style="color:#86EFAC">💾 Volume</span>
+              </div>
+            </div>
+            <div style="margin-top:6px;padding:7px 10px;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+              <div style="font-size:9px;color:#86EFAC;font-weight:700;margin-bottom:4px">✅ Best for:</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Simple standalone apps</div>
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Microservices</div>
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Most production workloads</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- VS -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 6px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)">VS</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- multi container -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="padding:6px 10px;border-radius:8px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:9px;font-weight:700;color:var(--cyan)">Advanced — Tightly-Coupled Helpers</div>
+          <div class="pod" style="flex:1;box-shadow:0 0 18px rgba(0,212,255,.12)">
+            <div class="pod-lbl">📦 Multi-Container Pod</div>
+            <div style="display:flex;gap:5px;margin-bottom:7px">
+              <div class="cb cb1" style="flex:1">
+                <div style="font-size:18px;margin-bottom:3px">🚀</div>
+                <div class="cl1" style="font-size:8px">Main App</div>
+              </div>
+              <div style="display:flex;align-items:center;font-size:10px;color:var(--cyan)">⟷</div>
+              <div class="cb cb2" style="flex:1">
+                <div style="font-size:18px;margin-bottom:3px">📋</div>
+                <div class="cl2" style="font-size:8px">Sidecar</div>
+              </div>
+              <div style="display:flex;align-items:center;font-size:10px;color:var(--cyan)">⟷</div>
+              <div class="cb cb3" style="flex:1">
+                <div style="font-size:18px;margin-bottom:3px">🔧</div>
+                <div class="cl3" style="font-size:8px">Helper</div>
+              </div>
+            </div>
+            <div class="shared" style="margin-bottom:7px">
+              <span style="color:#67E8F9">🌐 One shared IP</span>
+              <span style="color:#86EFAC">💾 Shared volumes</span>
+            </div>
+            <div style="padding:7px 10px;border-radius:8px;background:var(--podD);border:1px solid var(--podB)">
+              <div style="font-size:9px;color:var(--cyan);font-weight:700;margin-bottom:4px">✅ Best for:</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Logging sidecars</div>
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Monitoring agents</div>
+                <div style="font-size:9px;color:#94A3B8;display:flex;gap:5px;align-items:center"><span>·</span>Data init helpers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 08</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS MULTI-CONTAINER ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a Multi-Container <span style="color:var(--cyan)">Pod?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">📦</div><div class="bt"><strong>A Pod with more than one container</strong> — they run together on the same node, always co-located</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c1D)">🤝</div><div class="bt"><strong>Containers run as a single unit</strong> — they are started and stopped together, never split</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c2D)">🎯</div><div class="bt"><strong>Designed to support ONE main application</strong> — not two separate apps running side-by-side</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c3D)">🔧</div><div class="bt"><strong>Helper containers support the main app</strong> — logging, monitoring, config loading, data sync</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">⚠️ Common mistake: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> Don't put two separate applications in one Pod. They should be tightly coupled to one purpose.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:250px">
+          <!-- correct usage -->
+          <div style="margin-bottom:8px;border-radius:11px;padding:10px;background:rgba(34,197,94,.07);border:1.5px solid rgba(34,197,94,.25)">
+            <div style="font-size:8px;font-weight:800;color:#86EFAC;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Correct — one purpose</div>
+            <div class="pod">
+              <div class="pod-lbl">📦 Web Server Pod</div>
+              <div style="display:flex;gap:5px">
+                <div class="cb cb1" style="flex:1">
+                  <div style="font-size:14px">🌐</div>
+                  <div class="cl1" style="font-size:8px">nginx</div>
+                  <div style="font-size:7px;color:var(--muted)">serves web</div>
+                </div>
+                <div style="display:flex;align-items:center;font-size:10px;color:var(--cyan)">⟷</div>
+                <div class="cb cb2" style="flex:1">
+                  <div style="font-size:14px">📋</div>
+                  <div class="cl2" style="font-size:8px">log-agent</div>
+                  <div style="font-size:7px;color:var(--muted)">ships logs</div>
+                </div>
+              </div>
+              <div style="font-size:8px;color:#86EFAC;text-align:center;margin-top:6px;font-weight:600">Both serve the web app goal ✓</div>
+            </div>
+          </div>
+          <!-- wrong usage -->
+          <div style="border-radius:11px;padding:10px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.25)">
+            <div style="font-size:8px;font-weight:800;color:#FCA5A5;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">❌ Wrong — two unrelated apps</div>
+            <div class="pod" style="border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.06)">
+              <div class="pod-lbl" style="color:#FCA5A5">📦 Mixed Pod</div>
+              <div style="display:flex;gap:5px">
+                <div class="cb" style="flex:1;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35)">
+                  <div style="font-size:14px">🌐</div>
+                  <div style="font-size:8px;font-weight:700;color:#FCA5A5">nginx</div>
+                  <div style="font-size:7px;color:var(--muted)">web app</div>
+                </div>
+                <div style="display:flex;align-items:center;font-size:10px;color:#FCA5A5">≠</div>
+                <div class="cb" style="flex:1;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35)">
+                  <div style="font-size:14px">🗄</div>
+                  <div style="font-size:8px;font-weight:700;color:#FCA5A5">MySQL</div>
+                  <div style="font-size:7px;color:var(--muted)">database</div>
+                </div>
+              </div>
+              <div style="font-size:8px;color:#FCA5A5;text-align:center;margin-top:6px;font-weight:600">Unrelated! Use separate Pods ✗</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 08</span></div>
+  </div>
+
+  <!-- ══ S4 WHY USE THEM ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Reason</div>
+        <div class="stitle">Why Use Multi-Container Pods?</div>
+        <div class="bi"><div class="ico" style="background:var(--c2D)">🤝</div><div class="bt"><strong>Containers work together very closely</strong> — too tightly coupled to be in separate Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🌐</div><div class="bt"><strong>Share the same network (one IP)</strong> — talk via <code style="background:rgba(0,212,255,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#67E8F9">localhost</code> with zero latency — no network overhead</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c3D)">💾</div><div class="bt"><strong>Share volumes (storage)</strong> — one container writes a file, another reads it instantly — no copying needed</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c4D)">⚡</div><div class="bt"><strong>Extremely fast & efficient communication</strong> — localhost is faster than any network call between Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c1D)">🔧</div><div class="bt"><strong>Offload helper tasks</strong> — keep your main app clean; let sidecars handle logging, metrics, config</div></div>
+      </div>
+      <div class="lr">
+        <!-- shared resources visual -->
+        <div style="width:100%;max-width:260px">
+          <div class="pod" style="box-shadow:0 0 24px rgba(0,212,255,.14)">
+            <div class="pod-lbl">📦 Pod — Shared Resources</div>
+            <!-- containers -->
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <div class="cb cb1" style="flex:1">
+                <div style="font-size:20px;margin-bottom:3px">🚀</div>
+                <div class="cl1">Main App</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">writes logs</div>
+              </div>
+              <div class="cb cb2" style="flex:1">
+                <div style="font-size:20px;margin-bottom:3px">📋</div>
+                <div class="cl2">Log Shipper</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">reads & sends</div>
+              </div>
+            </div>
+            <!-- shared net -->
+            <div style="border-radius:8px;padding:8px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;text-align:center;margin-bottom:5px">🌐 Shared Network</div>
+              <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                <div style="font-size:8px;color:#94A3B8">Main App :3000</div>
+                <div style="font-size:10px;color:var(--cyan)">⟷</div>
+                <div style="font-size:8px;color:#94A3B8">Logger :8080</div>
+              </div>
+              <div style="text-align:center;margin-top:4px"><span class="lhpill">🏠 via localhost</span></div>
+            </div>
+            <!-- shared volume -->
+            <div style="border-radius:8px;padding:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;text-align:center;margin-bottom:5px">💾 Shared Volume — /var/logs</div>
+              <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                <div style="font-size:8px;color:#94A3B8">Main App ✍ writes</div>
+                <div style="font-size:10px;color:var(--green)">→</div>
+                <div style="font-size:8px;color:#94A3B8;padding:3px 7px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.25)">log file</div>
+                <div style="font-size:10px;color:var(--green)">→</div>
+                <div style="font-size:8px;color:#94A3B8">Sidecar 👁 reads</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 08</span></div>
+  </div>
+
+  <!-- ══ S5 USE CASES ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Patterns</div>
+      <div class="stitle">Common Multi-Container Patterns</div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- sidecar -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--c2D);border:2px solid var(--c2B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(124,58,237,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📋</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Sidecar Pattern</div><div style="font-size:8px;color:var(--muted)">Most common pattern</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Adds <strong style="color:#DDD6FE">extra capability</strong> to the main app without modifying it. Runs alongside and enhances.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>📋</span>Log shipping (Fluentd, Filebeat)</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>📊</span>Metrics collection (Prometheus agent)</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;display:flex;gap:6px;align-items:center"><span>🔐</span>TLS proxy (Envoy, Istio)</div>
+          </div>
+          <div style="border-radius:8px;padding:7px;background:rgba(0,0,0,.2)">
+            <div style="display:flex;gap:5px">
+              <div class="cb cb1" style="flex:1"><div style="font-size:11px">🚀</div><div class="cl1" style="font-size:7px">Main App</div></div>
+              <div style="display:flex;align-items:center;font-size:9px;color:var(--cyan)">⟷</div>
+              <div class="cb cb2" style="flex:1"><div style="font-size:11px">📋</div><div class="cl2" style="font-size:7px">Sidecar</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- init container -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--c3D);border:2px solid var(--c3B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔧</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Init Container</div><div style="font-size:8px;color:var(--muted)">Runs before main app</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Runs to <strong style="color:#86EFAC">completion first</strong> before the main container starts. Great for setup tasks.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86EFAC;display:flex;gap:6px;align-items:center"><span>🗄</span>Wait for DB to be ready</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86EFAC;display:flex;gap:6px;align-items:center"><span>📥</span>Download config files</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);color:#86EFAC;display:flex;gap:6px;align-items:center"><span>🔑</span>Set up secrets / tokens</div>
+          </div>
+          <div style="border-radius:8px;padding:7px;background:rgba(0,0,0,.2)">
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="cb cb3" style="flex:1"><div style="font-size:11px">🔧</div><div class="cl3" style="font-size:7px">Init (runs first)</div></div>
+              <div style="font-size:9px;color:var(--green)">→ done →</div>
+              <div class="cb cb1" style="flex:1"><div style="font-size:11px">🚀</div><div class="cl1" style="font-size:7px">Main starts</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- adapter -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--c4D);border:2px solid var(--c4B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔄</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FDE068">Adapter Pattern</div><div style="font-size:8px;color:var(--muted)">Translate & standardise</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Adapts the <strong style="color:#FDE068">output of the main app</strong> to a standard format that other systems can consume.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:6px;align-items:center"><span>📊</span>Format metrics for Prometheus</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:6px;align-items:center"><span>🔀</span>Convert log formats</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:6px;align-items:center"><span>🌐</span>Translate API responses</div>
+          </div>
+          <div style="border-radius:8px;padding:7px;background:rgba(0,0,0,.2)">
+            <div style="display:flex;align-items:center;gap:5px">
+              <div class="cb cb1" style="flex:1"><div style="font-size:11px">🚀</div><div class="cl1" style="font-size:7px">App output</div></div>
+              <div style="font-size:9px;color:var(--amber)">→</div>
+              <div class="cb cb4" style="flex:1"><div style="font-size:11px">🔄</div><div class="cl4" style="font-size:7px">Adapter</div></div>
+              <div style="font-size:9px;color:var(--amber)">→</div>
+              <div style="padding:4px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);font-size:8px;color:#FDE068;flex:1;text-align:center">Standard</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 08</span></div>
+  </div>
+
+  <!-- ══ S6 COMMUNICATION ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Communication</div>
+        <div class="stitle">How Containers Talk Inside a Pod</div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🏠</div><div class="bt"><strong>Same Pod = same localhost</strong> — containers communicate using <code style="background:rgba(0,212,255,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#67E8F9">localhost:port</code> — like programs on the same machine</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">⚡</div><div class="bt"><strong>Fastest possible communication</strong> — no network hop, no DNS lookup, no overhead. Pure speed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c3D)">💾</div><div class="bt"><strong>Share volumes for data exchange</strong> — one container writes a file, the other reads it. Zero copying needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c2D)">🌐</div><div class="bt"><strong>Different ports within same IP</strong> — Main app on :3000, sidecar on :8080, monitor on :9090</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--podD);border:1px solid var(--podB)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">Simple rule: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Inside Pod → <code style="color:#67E8F9">localhost</code> &nbsp;|&nbsp; Between Pods → <code style="color:var(--cyan)">Pod IP</code> or <code style="color:var(--cyan)">Service name</code></span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div class="pod" style="box-shadow:0 0 24px rgba(0,212,255,.14)">
+            <div class="pod-lbl">📦 Pod IP: 10.0.0.5</div>
+            <!-- containers with ports -->
+            <div style="display:flex;gap:5px;margin-bottom:8px">
+              <div class="cb cb1" style="flex:1">
+                <div style="font-size:16px;margin-bottom:3px">🚀</div>
+                <div class="cl1" style="font-size:8px">Main App</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:2px;padding:2px 5px;background:rgba(50,108,229,.15);border-radius:4px">:3000</div>
+              </div>
+              <div class="cb cb2" style="flex:1">
+                <div style="font-size:16px;margin-bottom:3px">📋</div>
+                <div class="cl2" style="font-size:8px">Log Sidecar</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:2px;padding:2px 5px;background:rgba(124,58,237,.15);border-radius:4px">:8080</div>
+              </div>
+              <div class="cb cb3" style="flex:1">
+                <div style="font-size:16px;margin-bottom:3px">📊</div>
+                <div class="cl3" style="font-size:8px">Monitor</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:2px;padding:2px 5px;background:rgba(34,197,94,.15);border-radius:4px">:9090</div>
+              </div>
+            </div>
+            <!-- localhost comms -->
+            <div style="border-radius:8px;padding:8px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;text-align:center;margin-bottom:5px">🏠 localhost communication</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:8px;color:#94A3B8;text-align:center">Main → Sidecar: <code style="color:#67E8F9">localhost:8080</code></div>
+                <div style="font-size:8px;color:#94A3B8;text-align:center">Main → Monitor: <code style="color:#67E8F9">localhost:9090</code></div>
+              </div>
+            </div>
+            <!-- shared volume -->
+            <div style="border-radius:8px;padding:7px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;text-align:center;margin-bottom:4px">💾 Shared Volume: /var/log</div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:5px">
+                <span style="font-size:8px;color:#94A3B8">Main writes</span>
+                <span style="font-size:10px;color:var(--green)">✍→</span>
+                <span style="font-size:8px;padding:2px 7px;background:rgba(34,197,94,.12);border-radius:5px;border:1px solid rgba(34,197,94,.25);color:#86EFAC">app.log</span>
+                <span style="font-size:10px;color:var(--green)">→👁</span>
+                <span style="font-size:8px;color:#94A3B8">Sidecar reads</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 08</span></div>
+  </div>
+
+  <!-- ══ S7 CONSIDERATIONS ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Important Notes</div>
+        <div class="stitle">Things to Know & Watch Out For</div>
+        <div class="bi"><div class="ico" style="background:rgba(245,158,11,.18)">🔗</div><div class="bt"><strong>All containers share the same lifecycle</strong> — they are created, started, and stopped together as one unit</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(239,68,68,.18)">🔁</div><div class="bt"><strong>Pod restarts = all containers restart</strong> — if the Pod is killed, every container inside starts fresh together</div></div>
+        <div class="bi"><div class="ico" style="background:var(--c2D)">🎯</div><div class="bt"><strong>Keep containers tightly related</strong> — they should all serve a single application purpose, not multiple ones</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">✅</div><div class="bt"><strong>Use init containers for setup tasks</strong> — init containers run first and finish before the main app starts</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(239,68,68,.15)">⚠️</div><div class="bt"><strong>Avoid unrelated applications</strong> — a web server and a database should NOT be in the same Pod</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:8px">
+          <!-- shared lifecycle diagram -->
+          <div style="border-radius:12px;padding:13px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.3)">
+            <div style="font-size:9px;font-weight:800;color:#FDE068;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">🔗 Shared Lifecycle</div>
+            <!-- pod created -->
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);text-align:center;font-size:8px;font-weight:700;color:#DDD6FE">Pod Created by Kubernetes</div>
+              <div style="text-align:center;font-size:10px;color:var(--cyan)">↓ all start together ↓</div>
+              <div style="display:flex;gap:4px">
+                <div class="cb cb1" style="flex:1"><div style="font-size:10px">🚀</div><div class="cl1" style="font-size:7px">Starts</div></div>
+                <div class="cb cb2" style="flex:1"><div style="font-size:10px">📋</div><div class="cl2" style="font-size:7px">Starts</div></div>
+                <div class="cb cb3" style="flex:1"><div style="font-size:10px">📊</div><div class="cl3" style="font-size:7px">Starts</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--amber)">↓ if Pod fails ↓</div>
+              <div style="display:flex;gap:4px">
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);text-align:center"><div style="font-size:10px">💀</div><div style="font-size:7px;color:#FCA5A5">Stops</div></div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);text-align:center"><div style="font-size:10px">💀</div><div style="font-size:7px;color:#FCA5A5">Stops</div></div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.28);text-align:center"><div style="font-size:10px">💀</div><div style="font-size:7px;color:#FCA5A5">Stops</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--green)">↓ K8s recreates Pod ↓</div>
+              <div style="display:flex;gap:4px">
+                <div class="cb cb1" style="flex:1"><div style="font-size:10px">🔁</div><div class="cl1" style="font-size:7px">Restarts</div></div>
+                <div class="cb cb2" style="flex:1"><div style="font-size:10px">🔁</div><div class="cl2" style="font-size:7px">Restarts</div></div>
+                <div class="cb cb3" style="flex:1"><div style="font-size:10px">🔁</div><div class="cl3" style="font-size:7px">Restarts</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:9px 12px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22);text-align:center">
+            <div style="font-size:9px;font-weight:700;color:#FCA5A5;margin-bottom:3px">⚠️ Key Rule</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.4">If containers aren't tightly related → use <strong style="color:#FCA5A5">separate Pods</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 08</span></div>
+  </div>
+
+  <!-- ══ S8 SUMMARY ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Multi-Container Pods — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy row -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">Office (Pod)</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Shared Workspace</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Same building, same phone network, same filing cabinets</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--c1D);border:1.5px solid var(--c1B);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">👷</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Main Dev (Main App)</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Core worker</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Does the primary work — builds the product</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--c2D);border:1.5px solid var(--c2B);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--purple),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">Sidecar pattern</div>
+              <div style="font-size:28px;margin-top:6px">🗂</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Logger (Sidecar)</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Support staff</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Documents everything, doesn't build — just supports</div>
+            </div>
+          </div>
+          <!-- key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">📦</div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--cyan)">One Pod</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Multiple containers, one IP, one lifecycle</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--c2D);border:1px solid var(--c2B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">One Purpose</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">All containers serve the same application goal</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--c3D);border:1px solid var(--c3B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🏠</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">localhost</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Fastest inter-container communication</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--c4D);border:1px solid var(--c4B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚙️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">K8s manages</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Pod is the unit — all containers come with it</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"Multi-container Pods are a <span style="color:var(--cyan)">team in a shared office</span> — each person has a specific role, but they all work on <span style="color:var(--cyan)">one project</span>"</div>
+          </div>
+        </div>
+        <!-- right -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--podD);border:1.5px solid var(--podB)">
+            <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Multiple containers, one Pod</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Sidecar / Init / Adapter</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Talk via localhost</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Share volumes</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Shared lifecycle</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">ReplicaSet</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Keep your pods always running — auto-healing & scaling</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 08</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

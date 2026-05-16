@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --req:#22C55E;--reqD:rgba(34,197,94,.09);--reqB:rgba(34,197,94,.3);
+  --lim:#F59E0B;--limD:rgba(245,158,11,.09);--limB:rgba(245,158,11,.3);
+  --cpu:#326CE5;--cpuD:rgba(50,108,229,.1);--cpuB:rgba(50,108,229,.32);
+  --mem:#7C3AED;--memD:rgba(124,58,237,.1);--memB:rgba(124,58,237,.32);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--req);border-color:var(--req);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--req);color:var(--req)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(34,197,94,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(34,197,94,.18);border-color:var(--req)}
+.nbtn.pri{background:linear-gradient(135deg,var(--req),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(34,197,94,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(34,197,94,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--req);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(34,197,94,.14);transition:all .25s}
+.bi:hover{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.req-box{border-radius:10px;padding:9px 12px;background:var(--reqD);border:2px solid var(--reqB);text-align:center}
+.lim-box{border-radius:10px;padding:9px 12px;background:var(--limD);border:2px solid var(--limB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* Resource bar */
+.rbar{height:14px;border-radius:7px;position:relative;overflow:hidden}
+.rbar-fill{height:100%;border-radius:7px;transition:width .3s}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--req);padding:3px 12px;border:1px solid rgba(34,197,94,.25);border-radius:20px;background:rgba(34,197,94,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.6vw,36px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--req) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Resource Requests<br>&amp; Limits</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Managing CPU and Memory in Kubernetes<br>— Fair resource allocation for every workload</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--reqD);color:#86EFAC;border:1px solid var(--reqB);padding:4px 11px;font-size:9px">📋 Requests</span>
+          <span class="tag" style="background:var(--limD);color:#FDE068;border:1px solid var(--limB);padding:4px 11px;font-size:9px">🔒 Limits</span>
+          <span class="tag" style="background:var(--cpuD);color:#BAE6FD;border:1px solid var(--cpuB);padding:4px 11px;font-size:9px">⚡ CPU (millicores)</span>
+          <span class="tag" style="background:var(--memD);color:#DDD6FE;border:1px solid var(--memB);padding:4px 11px;font-size:9px">🧠 Memory (MiB)</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(34,197,94,.25);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Request vs Limit</div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+              <div style="font-size:8px;color:#86EFAC;font-weight:700">⚡ CPU</div>
+              <div style="font-size:8px;color:var(--muted)">200m req / 500m limit</div>
+            </div>
+            <div style="background:rgba(255,255,255,.07);border-radius:7px;height:16px;position:relative;overflow:hidden">
+              <div style="position:absolute;left:0;top:0;height:100%;width:40%;background:linear-gradient(90deg,#22C55E,#16A34A);border-radius:7px;display:flex;align-items:center;padding-left:5px"><span style="font-size:7px;color:#000;font-weight:700">Request</span></div>
+              <div style="position:absolute;left:40%;top:0;height:100%;width:60%;background:rgba(245,158,11,.35);border-radius:0 7px 7px 0;display:flex;align-items:center;justify-content:center"><span style="font-size:7px;color:#FDE068;font-weight:700">Burst zone</span></div>
+              <div style="position:absolute;right:0;top:-1px;bottom:-1px;width:2px;background:#F59E0B;border-radius:1px"></div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+              <div style="font-size:8px;color:#DDD6FE;font-weight:700">🧠 Memory</div>
+              <div style="font-size:8px;color:var(--muted)">256Mi req / 512Mi limit</div>
+            </div>
+            <div style="background:rgba(255,255,255,.07);border-radius:7px;height:16px;position:relative;overflow:hidden">
+              <div style="position:absolute;left:0;top:0;height:100%;width:50%;background:linear-gradient(90deg,#7C3AED,#6D28D9);border-radius:7px;display:flex;align-items:center;padding-left:5px"><span style="font-size:7px;color:#fff;font-weight:700">Request</span></div>
+              <div style="position:absolute;left:50%;top:0;height:100%;width:50%;background:rgba(245,158,11,.35);border-radius:0 7px 7px 0;display:flex;align-items:center;justify-content:center"><span style="font-size:7px;color:#FDE068;font-weight:700">Burst zone</span></div>
+              <div style="position:absolute;right:0;top:-1px;bottom:-1px;width:2px;background:#F59E0B;border-radius:1px"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:#22C55E"></div><div style="font-size:7.5px;color:#86EFAC">Request (guaranteed)</div></div>
+            <div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,.5)"></div><div style="font-size:7.5px;color:#FDE068">Limit (max)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Resource Management <span style="color:var(--fail)">Matters</span></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">🤝</div><div class="bt"><strong>Multiple Pods share the same node resources</strong> — CPU, memory, and disk are finite. Without rules, workloads compete aggressively with each other.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💣</div><div class="bt"><strong>One greedy app starves others</strong> — a memory leak or CPU spike in one Pod can exhaust node resources and cause other Pods to crash or become unresponsive</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🎯</div><div class="bt"><strong>Scheduler needs resource hints</strong> — without requests, the Kubernetes scheduler cannot make intelligent placement decisions. Pods may land on overloaded nodes.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">⚖</div><div class="bt"><strong>Resource requests = fair allocation</strong> — each Pod declares what it needs. Scheduler places it on a node with enough capacity. No starvation.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">🔒</div><div class="bt"><strong>Resource limits = protection boundaries</strong> — prevents any single container from consuming unbounded resources. Cluster stability guaranteed.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Without limits: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">One buggy app with a memory leak can OOMKill every other Pod on the node. The whole node goes down. Resources = first-class concern.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:8px">
+          <div class="fail-box" style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Node Without Limits</div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#FCA5A5">📦 greedy-app CPU</span><span style="font-size:7.5px;color:#FCA5A5">92%</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:10px"><div style="height:100%;width:92%;background:var(--fail);border-radius:4px"></div></div>
+            </div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#FCA5A5">📦 web-app CPU</span><span style="font-size:7.5px;color:#FCA5A5">3%</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:10px"><div style="height:100%;width:3%;background:rgba(239,68,68,.5);border-radius:4px"></div></div>
+            </div>
+            <div style="font-size:7.5px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:4px;text-align:center">web-app starved — greedy-app monopolized 😱</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--reqD);border:1.5px solid var(--reqB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:8px">✅ Node With Requests &amp; Limits</div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#86EFAC">📦 greedy-app CPU</span><span style="font-size:7.5px;color:#FDE068">capped 50%</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:10px"><div style="height:100%;width:50%;background:var(--lim);border-radius:4px"></div></div>
+            </div>
+            <div style="margin-bottom:5px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#86EFAC">📦 web-app CPU</span><span style="font-size:7.5px;color:#86EFAC">guaranteed 40%</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:10px"><div style="height:100%;width:40%;background:var(--req);border-radius:4px"></div></div>
+            </div>
+            <div style="font-size:7.5px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:4px;text-align:center">Both apps running smoothly ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 REQUESTS -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Resource Requests</div>
+        <div class="stitle">What are <span style="color:var(--req)">Resource Requests?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">📋</div><div class="bt"><strong>Minimum resources a container needs</strong> — "I need at least 200m CPU and 256Mi memory to run properly." Kubernetes guarantees this much.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">🗺</div><div class="bt"><strong>Used by the scheduler for Pod placement</strong> — Kubernetes finds a node with enough free capacity to satisfy the request. Pod only lands where it fits.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">🛡</div><div class="bt"><strong>Guaranteed allocation on the node</strong> — the requested CPU and memory are reserved for the container. Other Pods cannot take them away.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">🔍</div><div class="bt"><strong>Scheduler compares requests vs available</strong> — a node with 4 CPU and 3 already-requested will only accept new Pods requesting ≤1 CPU</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">✅</div><div class="bt"><strong>Not a hard cap</strong> — containers CAN use more than the request if resources are available on the node. The request is the floor, not the ceiling.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--reqD);border:1px solid var(--reqB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Request = reserved seat on a flight ✈. Kubernetes guarantees you have a place. You won't be bumped off even if the plane is full.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--reqD);border:2px solid var(--reqB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Request in Pod YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:8px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">resources:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">requests:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">cpu:</span> <span style="color:#86EFAC">"200m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">memory:</span> <span style="color:#86EFAC">"256Mi"</span></div>
+            </div>
+            <!-- Scheduler flow -->
+            <div style="border-radius:8px;padding:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.25);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:5px">☸ Scheduler Decision</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:7.5px;color:#94A3B8;padding:2px 7px;background:rgba(50,108,229,.1);border-radius:4px">📦 Pod needs: 200m CPU, 256Mi mem</div>
+                <div style="font-size:7.5px;color:#94A3B8;padding:2px 7px;background:rgba(50,108,229,.1);border-radius:4px">🖥 Node A: 150m free → ❌ skip</div>
+                <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">🖥 Node B: 800m free → ✅ schedule here</div>
+              </div>
+            </div>
+            <div style="padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">200m CPU guaranteed on Node B ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 LIMITS -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Resource Limits</div>
+        <div class="stitle">What are <span style="color:var(--lim)">Resource Limits?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">🔒</div><div class="bt"><strong>Maximum resources a container can consume</strong> — "You can use at most 500m CPU and 512Mi memory." Hard ceiling enforced by the kernel.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">🛡</div><div class="bt"><strong>Protects the node and other Pods</strong> — even if an app has a memory leak or CPU bug, it cannot consume resources beyond the limit. Others stay safe.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">⚡</div><div class="bt"><strong>CPU is throttled at the limit</strong> — if a container tries to use more CPU than its limit, the kernel throttles it. Performance drops but it keeps running.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">💀</div><div class="bt"><strong>Memory limit violations = OOMKill</strong> — if a container exceeds its memory limit, the kernel sends SIGKILL immediately. No warning, instant termination.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">⚖</div><div class="bt"><strong>Limit ≥ Request always</strong> — the limit must be equal to or greater than the request. Setting limit lower than request is an error.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--limD);border:1px solid var(--limB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Limit = luggage weight allowance on a flight ✈. You can bring up to 23kg. Try to bring more — the airline will refuse (OOMKill) or charge you (throttle).</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--limD);border:2px solid var(--limB);box-shadow:0 0 22px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Limit in Pod YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(245,158,11,.2);font-family:monospace;font-size:8px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">resources:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">requests:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">cpu:</span> <span style="color:#86EFAC">"200m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">memory:</span> <span style="color:#86EFAC">"256Mi"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">limits:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#F59E0B">cpu:</span> <span style="color:#FDE068">"500m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#F59E0B">memory:</span> <span style="color:#FDE068">"512Mi"</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;color:#FDE068;padding:4px 8px;background:rgba(245,158,11,.1);border-radius:4px">⚡ CPU > 500m → kernel throttles</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:4px">💀 Memory > 512Mi → OOMKill!</div>
+              <div style="font-size:8px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Other Pods stay protected</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 REQUESTS vs LIMITS -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle">Requests vs Limits — Side by Side</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Request -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--reqD);border:2px solid var(--reqB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
+            <div><div style="font-size:13px;font-weight:800;color:#86EFAC">Request</div><div style="font-size:8px;color:var(--muted)">Minimum guaranteed</div></div>
+            <span class="tag" style="background:rgba(34,197,94,.2);color:#86EFAC;border:1px solid var(--reqB);margin-left:auto;font-size:7px;padding:3px 7px">Floor</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Sets the <strong style="color:#86EFAC">minimum</strong> resource the container is guaranteed. Used by the scheduler to find a suitable node. Container can exceed request if node has spare capacity.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Scheduling decision basis</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Guaranteed on the node</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Can exceed if node has spare</div>
+          </div>
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">✈ 🪑</div>
+            <div style="font-size:9px;font-weight:700;color:#86EFAC">Reserved seat</div>
+            <div style="font-size:8px;color:var(--muted)">Your spot is guaranteed</div>
+          </div>
+        </div>
+        <!-- vs -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:var(--reqD);border:1px solid var(--reqB);font-size:9px;font-weight:700;color:#86EFAC">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Limit -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--limD);border:2px solid var(--limB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🔒</div>
+            <div><div style="font-size:13px;font-weight:800;color:#FDE068">Limit</div><div style="font-size:8px;color:var(--muted)">Maximum allowed</div></div>
+            <span class="tag" style="background:rgba(245,158,11,.2);color:#FDE068;border:1px solid var(--limB);margin-left:auto;font-size:7px;padding:3px 7px">Ceiling</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Sets the <strong style="color:#FDE068">maximum</strong> resource the container can consume. Enforced by the kernel. CPU is throttled, memory violations cause OOMKill.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">⚡ CPU: throttled at limit</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">💀 Memory: OOMKilled at limit</div>
+            <div style="font-size:8.5px;padding:4px 8px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">🛡 Protects node &amp; other Pods</div>
+          </div>
+          <div style="padding:8px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">✈ 🧳</div>
+            <div style="font-size:9px;font-weight:700;color:#FDE068">Max luggage 23kg</div>
+            <div style="font-size:8px;color:var(--muted)">Exceed it = penalty</div>
+          </div>
+        </div>
+        <!-- Summary table -->
+        <div style="width:165px;flex-shrink:0;border-radius:12px;padding:11px;background:rgba(50,108,229,.1);border:1.5px solid rgba(50,108,229,.28);display:flex;flex-direction:column;gap:6px;justify-content:center">
+          <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;text-align:center;margin-bottom:3px">Quick Reference</div>
+          <div style="border-radius:7px;padding:6px 8px;background:var(--reqD);border:1px solid var(--reqB)">
+            <div style="font-size:7.5px;font-weight:700;color:#86EFAC">📋 Request</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">For scheduling + guarantee</div>
+          </div>
+          <div style="border-radius:7px;padding:6px 8px;background:var(--limD);border:1px solid var(--limB)">
+            <div style="font-size:7.5px;font-weight:700;color:#FDE068">🔒 Limit</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">For protection + fairness</div>
+          </div>
+          <div style="border-radius:7px;padding:6px 8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.28)">
+            <div style="font-size:7.5px;font-weight:700;color:#BAE6FD">⚖ Rule</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">Limit ≥ Request always</div>
+          </div>
+          <div style="border-radius:7px;padding:6px 8px;background:var(--memD);border:1px solid var(--memB)">
+            <div style="font-size:7.5px;font-weight:700;color:#DDD6FE">⭐ Best practice</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">Always set both for every container</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 CPU AND MEMORY -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Resource Units</div>
+      <div class="stitle">CPU &amp; Memory — How They're Measured</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- CPU -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--cpuD);border:2px solid var(--cpuB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚡</div>
+            <div><div style="font-size:13px;font-weight:800;color:#BAE6FD">CPU</div><div style="font-size:8px;color:var(--muted)">Measured in cores or millicores</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="border-radius:7px;padding:7px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22)">
+              <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;margin-bottom:3px">1 CPU = 1000 millicores (m)</div>
+              <div style="font-size:8px;color:#94A3B8">1 full CPU core = 1000m. So 500m = half a core, 250m = quarter core.</div>
+            </div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--reqD);border:1px solid var(--reqB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#86EFAC">100m</div>
+                <div style="font-size:7px;color:var(--muted)">light app</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--limD);border:1px solid var(--limB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#FDE068">500m</div>
+                <div style="font-size:7px;color:var(--muted)">medium app</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--memD);border:1px solid var(--memB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#DDD6FE">2000m / 2</div>
+                <div style="font-size:7px;color:var(--muted)">heavy app</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:6px;border-radius:6px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.2);font-size:8px;color:#BAE6FD;text-align:center">⚡ CPU is compressible — throttled, not killed</div>
+        </div>
+        <!-- Memory -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--memD);border:2px solid var(--memB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🧠</div>
+            <div><div style="font-size:13px;font-weight:800;color:#DDD6FE">Memory</div><div style="font-size:8px;color:var(--muted)">Measured in MiB, GiB, or bytes</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="border-radius:7px;padding:7px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22)">
+              <div style="font-size:8.5px;font-weight:700;color:#DDD6FE;margin-bottom:3px">Memory units</div>
+              <div style="font-size:8px;color:#94A3B8">Mi = Mebibyte (1024 KiB), Gi = Gibibyte. Use <code style="color:#DDD6FE">Mi</code> or <code style="color:#DDD6FE">Gi</code>, not MB or GB.</div>
+            </div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--reqD);border:1px solid var(--reqB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#86EFAC">128Mi</div>
+                <div style="font-size:7px;color:var(--muted)">light svc</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--limD);border:1px solid var(--limB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#FDE068">512Mi</div>
+                <div style="font-size:7px;color:var(--muted)">web app</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:6px;background:var(--memD);border:1px solid var(--memB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#DDD6FE">2Gi</div>
+                <div style="font-size:7px;color:var(--muted)">database</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:6px;border-radius:6px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);font-size:8px;color:#FCA5A5;text-align:center">💀 Memory is incompressible — exceeding limit = OOMKill</div>
+        </div>
+        <!-- QoS Classes -->
+        <div style="width:168px;flex-shrink:0;border-radius:12px;padding:11px;background:rgba(34,197,94,.07);border:1.5px solid rgba(34,197,94,.22);display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:8.5px;font-weight:700;color:#86EFAC;text-align:center;margin-bottom:3px">QoS Classes</div>
+          <div style="border-radius:7px;padding:7px;background:var(--reqD);border:1px solid var(--reqB)">
+            <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:2px">⭐ Guaranteed</div>
+            <div style="font-size:7px;color:#94A3B8">Request = Limit for both CPU &amp; mem. Highest priority, never evicted.</div>
+          </div>
+          <div style="border-radius:7px;padding:7px;background:var(--limD);border:1px solid var(--limB)">
+            <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:2px">🔶 Burstable</div>
+            <div style="font-size:7px;color:#94A3B8">Request &lt; Limit. Can burst. Evicted if node is under pressure.</div>
+          </div>
+          <div style="border-radius:7px;padding:7px;background:var(--failD);border:1px solid var(--failB)">
+            <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:2px">⚠ BestEffort</div>
+            <div style="font-size:7px;color:#94A3B8">No requests or limits set. Evicted first under pressure.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 EXCEEDING LIMITS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Limit Enforcement</div>
+        <div class="stitle">What Happens When <span style="color:var(--fail)">Limits are Exceeded?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cpuD)">⚡</div><div class="bt"><strong>CPU Throttling</strong> — when a container tries to use more CPU than its limit, the Linux CFS scheduler throttles it. App runs slower but stays alive. No crash.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💀</div><div class="bt"><strong>Memory OOMKill</strong> — when a container exceeds its memory limit, the Linux OOM killer sends SIGKILL immediately. Pod shows <code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 5px;border-radius:4px">OOMKilled</code> in status.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">🔄</div><div class="bt"><strong>Pod may restart (CrashLoopBackOff)</strong> — if a Pod keeps OOMKilling on startup, Kubernetes enters CrashLoopBackOff with exponential backoff delays</div></div>
+        <div class="bi"><div class="ico" style="background:var(--limD)">📊</div><div class="bt"><strong>Monitor kubectl describe pod</strong> — <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">kubectl describe pod &lt;name&gt;</code> shows OOMKilled reason and exit code 137 (killed by signal 9)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--reqD)">✅</div><div class="bt"><strong>Fix by increasing limits or optimizing app</strong> — check actual usage with <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">kubectl top pods</code>, then adjust limits based on real data</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--limD);border:1px solid var(--limB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Key difference: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">CPU over-limit → throttled (slow but running). Memory over-limit → killed immediately (OOMKilled). Memory is unforgiving.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:8px">
+          <!-- CPU throttle -->
+          <div style="border-radius:12px;padding:11px;background:var(--cpuD);border:1.5px solid var(--cpuB)">
+            <div style="font-size:8.5px;font-weight:800;color:#BAE6FD;margin-bottom:6px">⚡ CPU — Throttled (stays alive)</div>
+            <div style="margin-bottom:4px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#BAE6FD">Usage</span><span style="font-size:7.5px;color:#FDE068">800m trying → capped at 500m</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:12px;position:relative;overflow:hidden">
+                <div style="height:100%;width:50%;background:var(--cpu);border-radius:4px"></div>
+                <div style="position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--lim)"></div>
+                <div style="position:absolute;left:50%;top:0;bottom:0;right:0;background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(245,158,11,.2) 3px,rgba(245,158,11,.2) 6px);border-radius:0 4px 4px 0"></div>
+              </div>
+            </div>
+            <div style="font-size:7.5px;color:#BAE6FD;padding:3px 8px;background:rgba(50,108,229,.1);border-radius:4px">App still runs, just slower</div>
+          </div>
+          <!-- Memory OOMKill -->
+          <div style="border-radius:12px;padding:11px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:6px">💀 Memory — OOMKilled (instant)</div>
+            <div style="margin-bottom:4px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:7.5px;color:#FCA5A5">Usage</span><span style="font-size:7.5px;color:#FCA5A5">600Mi → limit 512Mi → KILL</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:4px;height:12px;position:relative;overflow:hidden">
+                <div style="height:100%;width:85%;background:var(--fail);border-radius:4px"></div>
+                <div style="position:absolute;left:85%;top:-2px;bottom:-2px;width:3px;background:#fff;box-shadow:0 0 6px #fff"></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 8px;background:rgba(239,68,68,.1);border-radius:4px">Container status: OOMKilled</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 8px;background:rgba(239,68,68,.1);border-radius:4px">Exit code: 137 (SIGKILL)</div>
+            </div>
+          </div>
+          <div style="border-radius:8px;padding:8px;background:var(--reqD);border:1px solid var(--reqB);text-align:center">
+            <div style="font-size:8px;font-weight:700;color:#86EFAC">kubectl top pods — check real usage</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">Web App Resource Configuration Dashboard</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.2;display:flex;flex-direction:column;gap:6px">
+          <div class="bi"><div class="ico" style="background:var(--reqD)">🌐</div><div class="bt"><strong>Scenario:</strong> Node.js web API serving 500 req/s. Average usage: 180m CPU, 220Mi memory. Peak: 420m CPU, 450Mi memory.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--cpuD)">⚡</div><div class="bt"><strong>CPU Request 200m:</strong> Scheduler finds a node with at least 200m free. API is guaranteed this much CPU even under cluster load.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--limD)">🔒</div><div class="bt"><strong>CPU Limit 500m:</strong> During traffic spikes, the app can burst up to 500m. Exceeding 500m causes throttling — degraded but alive.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--memD)">🧠</div><div class="bt"><strong>Memory Request 256Mi:</strong> Guaranteed on node. App comfortably runs at 220Mi. Has headroom before hitting the limit.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>Memory Limit 512Mi:</strong> If a memory leak causes usage to reach 512Mi, the container is killed. K8s restarts it. Protects the node.</div></div>
+        </div>
+        <!-- Dashboard -->
+        <div style="width:245px;flex-shrink:0">
+          <div style="border-radius:13px;padding:13px;background:rgba(34,197,94,.05);border:2px solid rgba(34,197,94,.22);box-shadow:0 0 18px rgba(34,197,94,.1)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Resource Config</div>
+            <div style="border-radius:8px;padding:9px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.18);font-family:monospace;font-size:7.5px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">resources:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">requests:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">cpu:</span> <span style="color:#86EFAC">"200m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22C55E">memory:</span> <span style="color:#86EFAC">"256Mi"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">limits:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#F59E0B">cpu:</span> <span style="color:#FDE068">"500m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#F59E0B">memory:</span> <span style="color:#FDE068">"512Mi"</span></div>
+            </div>
+            <!-- CPU bar -->
+            <div style="margin-bottom:7px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:8px;font-weight:600;color:#BAE6FD">⚡ CPU</span><span style="font-size:7.5px;color:var(--muted)">current: ~180m</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:6px;height:14px;position:relative;overflow:hidden">
+                <div style="height:100%;width:36%;background:linear-gradient(90deg,var(--req),#16A34A);border-radius:6px"></div>
+                <div style="position:absolute;left:40%;top:-1px;bottom:-1px;width:1.5px;background:#86EFAC;opacity:.6"></div>
+                <div style="position:absolute;right:0;top:-1px;bottom:-1px;width:2px;background:var(--lim)"></div>
+                <div style="position:absolute;left:38%;top:2px;font-size:7px;color:#86EFAC;font-weight:600">req</div>
+                <div style="position:absolute;right:3px;top:2px;font-size:7px;color:#FDE068;font-weight:600">lim</div>
+              </div>
+            </div>
+            <!-- Memory bar -->
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:8px;font-weight:600;color:#DDD6FE">🧠 Memory</span><span style="font-size:7.5px;color:var(--muted)">current: ~220Mi</span></div>
+              <div style="background:rgba(255,255,255,.07);border-radius:6px;height:14px;position:relative;overflow:hidden">
+                <div style="height:100%;width:43%;background:linear-gradient(90deg,var(--mem),#6D28D9);border-radius:6px"></div>
+                <div style="position:absolute;left:50%;top:-1px;bottom:-1px;width:1.5px;background:#DDD6FE;opacity:.6"></div>
+                <div style="position:absolute;right:0;top:-1px;bottom:-1px;width:2px;background:var(--lim)"></div>
+                <div style="position:absolute;left:48%;top:2px;font-size:7px;color:#DDD6FE;font-weight:600">req</div>
+                <div style="position:absolute;right:3px;top:2px;font-size:7px;color:#FDE068;font-weight:600">lim</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;padding:5px;border-radius:6px;background:var(--reqD);border:1px solid var(--reqB);text-align:center"><div style="font-size:8px;font-weight:700;color:#86EFAC">QoS: Burstable</div></div>
+              <div style="flex:1;padding:5px;border-radius:6px;background:var(--reqD);border:1px solid var(--reqB);text-align:center"><div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Healthy</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Best Practices</div>
+      <div class="stitle">Resource Requests &amp; Limits — Best Practices</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;padding-top:8px">
+        <div style="border-radius:12px;padding:12px;background:var(--reqD);border:2px solid var(--reqB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Always Set Both Request &amp; Limit</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Never leave them blank. No requests = poor scheduling. No limits = BestEffort QoS, evicted first under pressure.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--cpuD);border:2px solid var(--cpuB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#BAE6FD;margin-bottom:4px">Monitor Real Usage First</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Use <code style="color:#BAE6FD;background:rgba(50,108,229,.1);padding:1px 4px;border-radius:3px">kubectl top pods</code> or Prometheus. Set requests near p50 usage, limits near p99. Don't guess.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--limD);border:2px solid var(--limB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚖</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Don't Set Limits Too Tight</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Overly tight memory limits cause constant OOMKills. Allow at least 50-100% headroom above typical usage for burst capacity.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--memD);border:2px solid var(--memB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏭</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#DDD6FE;margin-bottom:4px">Use LimitRange for Defaults</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Create a <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 4px;border-radius:3px">LimitRange</code> object in each namespace to set default requests/limits. Pods without specs inherit these.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--failD);border:2px solid var(--failB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚫</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FCA5A5;margin-bottom:4px">Avoid Extremely High Limits</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Setting <code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 4px;border-radius:3px">limits.cpu: "100"</code> won't help. It just reduces scheduling efficiency and allows node exhaustion.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--reqD);border:2px solid var(--reqB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔍</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Use VPA for Auto-Tuning</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Vertical Pod Autoscaler (VPA) analyzes usage patterns and automatically recommends or updates requests/limits. Great for production.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Resource Requests &amp; Limits — Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--reqD);border:1.5px solid var(--reqB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✈ 🪑</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Request</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Reserved seat</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Your spot is guaranteed. You'll fly even if the plane is full of other passengers.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--limD);border:1.5px solid var(--limB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--lim),var(--req));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ Hard Cap</div>
+              <div style="font-size:26px;margin-top:4px">✈ 🧳</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">Limit</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Max luggage allowance</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Try to bring more than allowed — airline refuses to board you (OOMKill).</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--cpuD);border:1.5px solid var(--cpuB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Stable, fair cluster</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Every app gets what it needs. No starvation. No runaway consumers.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--reqD);border:1px solid var(--reqB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📋</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Request = floor</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Scheduling + guarantee</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--limD);border:1px solid var(--limB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔒</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Limit = ceiling</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">CPU throttle / mem kill</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--cpuD);border:1px solid var(--cpuB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">CPU throttled</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Stays alive, runs slower</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">💀</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Mem OOMKilled</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Instant kill, exit code 137</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--memD);border:1px solid var(--memB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🏷</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">QoS classes</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Guaranteed/Burstable/BestEffort</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--reqD);border:1px solid var(--reqB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">kubectl top</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Monitor before setting values</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#86EFAC">Request = reserved seat</span>. <span style="color:#FDE068">Limit = max luggage</span>. Fly within your allowance and everyone has a good trip."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--reqD);border:1.5px solid var(--reqB)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--req)">◆</span>Request = scheduler + guarantee</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--req)">◆</span>Limit = maximum enforced</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--req)">◆</span>CPU throttled at limit</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--req)">◆</span>Memory OOMKilled at limit</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--req)">◆</span>Always set both per container</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Health Checks<br>Liveness &amp; Readiness<br>Probes</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Keep Pods healthy<br>automatically</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

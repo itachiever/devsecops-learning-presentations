@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --bp:#6366F1;--bpD:rgba(99,102,241,.1);--bpB:rgba(99,102,241,.32);
+  --sc:#22C55E;--scD:rgba(34,197,94,.09);--scB:rgba(34,197,94,.28);
+  --mn:#0EA5E9;--mnD:rgba(14,165,233,.09);--mnB:rgba(14,165,233,.28);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --er:#EF4444;--erD:rgba(239,68,68,.1);--erB:rgba(239,68,68,.3);
+  --nd:#326CE5;--ndD:rgba(50,108,229,.1);--ndB:rgba(50,108,229,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:8px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--bp);border-color:var(--bp);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--bp);color:var(--bp)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(99,102,241,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(99,102,241,.18);border-color:var(--bp)}
+.nbtn.pri{background:linear-gradient(135deg,var(--bp),var(--purple));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(99,102,241,.08)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(99,102,241,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--bp);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(99,102,241,.13);transition:all .25s}
+.bi:hover{background:rgba(99,102,241,.05);border-color:rgba(99,102,241,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.pr-card{border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
+.check{display:flex;align-items:flex-start;gap:7px;font-size:8px;color:#CBD5E1;line-height:1.4}
+.yaml{border-radius:6px;padding:7px 9px;background:rgba(6,10,16,.85);border:1px solid rgba(99,102,241,.18);font-family:monospace;font-size:7.5px;line-height:1.7;color:#94A3B8}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(99,102,241,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--bp);padding:3px 12px;border:1px solid rgba(99,102,241,.25);border-radius:20px;background:rgba(99,102,241,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--bp) 55%,var(--sc) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Best Practices</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Building Secure &amp; Reliable Kubernetes Environments<br>— Production-grade patterns every DevOps engineer must know</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--erD);color:#FCA5A5;border:1px solid var(--erB);padding:4px 11px;font-size:9px">🔐 Security</span>
+          <span class="tag" style="background:var(--scD);color:#86EFAC;border:1px solid var(--scB);padding:4px 11px;font-size:9px">📈 Reliability</span>
+          <span class="tag" style="background:var(--mnD);color:#7DD3FC;border:1px solid var(--mnB);padding:4px 11px;font-size:9px">📊 Observability</span>
+          <span class="tag" style="background:var(--bpD);color:#C7D2FE;border:1px solid var(--bpB);padding:4px 11px;font-size:9px">🚀 Automation</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(99,102,241,.22);border-radius:14px;padding:12px;background:rgba(99,102,241,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Production Readiness Score</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#86EFAC;min-width:80px">Resource Limits</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:92%;background:linear-gradient(90deg,#22C55E,#6EE7B7);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#86EFAC;min-width:25px">92%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#C7D2FE;min-width:80px">Security RBAC</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:88%;background:linear-gradient(90deg,#6366F1,#A78BFA);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#C7D2FE;min-width:25px">88%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#7DD3FC;min-width:80px">Observability</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:95%;background:linear-gradient(90deg,#0EA5E9,#38BDF8);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#7DD3FC;min-width:25px">95%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#FDE068;min-width:80px">Health Probes</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:85%;background:linear-gradient(90deg,#F59E0B,#FCD34D);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#FDE068;min-width:25px">85%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#FCA5A5;min-width:80px">Backup/DR</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:78%;background:linear-gradient(90deg,#EF4444,#F87171);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#FCA5A5;min-width:25px">78%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:8px;color:#86EFAC;min-width:80px">CI/CD Auto</span>
+              <div style="flex:1;height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden"><div style="height:100%;width:97%;background:linear-gradient(90deg,#22C55E,#6EE7B7);border-radius:5px"></div></div>
+              <span style="font-size:7.5px;color:#86EFAC;min-width:25px">97%</span>
+            </div>
+          </div>
+          <div style="margin-top:7px;border-radius:6px;padding:4px 8px;background:var(--bpD);border:1px solid var(--bpB);text-align:center;font-size:7.5px;color:#C7D2FE">Overall Score: 89% — Production Ready ✅</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 11</span></div>
+  </div>
+
+  <!-- S2 WHY BEST PRACTICES -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Foundation</div>
+        <div class="stitle">Why Best Practices <span style="color:var(--bp)">Matter</span></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">💥</div><div class="bt"><strong>Poor configuration directly causes outages</strong> — a container with no memory limit hogs a node, starving other Pods. No liveness probe means a deadlocked app keeps running. Small config mistakes = production incidents.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">🔓</div><div class="bt"><strong>Misconfiguration is the #1 Kubernetes security risk</strong> — running containers as root, overly permissive RBAC, exposed secrets in env vars. Most K8s breaches aren't zero-days — they're configuration mistakes.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">📈</div><div class="bt"><strong>Production workloads demand reliability</strong> — a cluster serving millions of requests needs liveness probes, resource limits, multi-AZ scheduling, and rolling deployments. None of these are optional in prod.</div></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🏆</div><div class="bt"><strong>Best practices are interview essentials</strong> — "How do you secure a K8s cluster?" and "What's the difference between liveness and readiness probes?" are top DevOps interview questions. Know these cold.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--bpD);border:1px solid var(--bpB)">
+          <span style="font-size:10px;font-weight:700;color:#C7D2FE">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">K8s best practices = <strong style="color:#fff">building codes for a skyscraper</strong> 🏙. You can build without them, but one structural oversight can bring the whole thing down. Follow the codes.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:7px">❌ Without Best Practices</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">💥 OOM kills take down nodes</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">🔓 Root containers exploited</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">🚫 Dead app serves 502 errors</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);color:#FCA5A5">😵 No alerts — blind to failures</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--scD);border:1.5px solid var(--scB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">✅ With Best Practices</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">🛡 Stable nodes, fair scheduling</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">🔐 Least-privilege containers</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">♻ Auto-restart unhealthy Pods</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);color:#86EFAC">🔔 Alerted before users notice</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 11</span></div>
+  </div>
+
+  <!-- S3 RESOURCE REQUESTS & LIMITS -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Practice #1</div>
+        <div class="stitle">Always Set <span style="color:var(--sc)">Resource Requests &amp; Limits</span></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">📊</div><div class="bt"><strong>Requests = guaranteed resources for the scheduler</strong> — Kubernetes uses requests to decide which node has enough capacity for a Pod. Without requests, the scheduler can't make good placement decisions.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">🚧</div><div class="bt"><strong>Limits = maximum — protects other Pods</strong> — without limits, one runaway container can consume all node RAM, causing OOMKills of innocent neighboring Pods. Limits are your blast radius control.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">⚖</div><div class="bt"><strong>Set limits 2–3× above average usage</strong> — too tight = constant OOMKills. Too loose = poor bin packing. Profile your app under load, then set limits at 2× p95 memory usage.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">⚠</div><div class="bt"><strong>No limits = Burstable QoS class</strong> — Kubernetes has 3 QoS classes: Guaranteed (req=limit), Burstable (partial), BestEffort (none). BestEffort Pods are evicted first under pressure. Don't be BestEffort in prod.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(34,197,94,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Correct YAML Example</div>
+            <div class="yaml" style="margin-bottom:8px">
+              <div><span style="color:#86EFAC">resources:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#6EE7B7">requests:</span> <span style="color:#94A3B8"># Scheduler uses this</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">cpu:</span> <span style="color:#FDE068">"250m"</span> <span style="color:#94A3B8"># 0.25 core</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">memory:</span> <span style="color:#FDE068">"256Mi"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#6EE7B7">limits:</span> <span style="color:#94A3B8"># Max allowed</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">cpu:</span> <span style="color:#FDE068">"500m"</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">memory:</span> <span style="color:#FDE068">"512Mi"</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Guaranteed QoS</div>
+                <div style="font-size:7px;color:#94A3B8">request = limit → highest priority · never evicted first</div>
+              </div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:8px;font-weight:700;color:#FDE068">⚠ Burstable QoS</div>
+                <div style="font-size:7px;color:#94A3B8">request &lt; limit → ok for dev, risky for prod</div>
+              </div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5">❌ BestEffort QoS</div>
+                <div style="font-size:7px;color:#94A3B8">no requests or limits → evicted FIRST under pressure</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 11</span></div>
+  </div>
+
+  <!-- S4 SECURITY -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Practice #2</div>
+      <div class="stitle">Secure Kubernetes <span style="color:#FCA5A5">Workloads</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--erD);border:2px solid var(--erB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(239,68,68,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FCA5A5">RBAC</div><div style="font-size:7.5px;color:var(--muted)">Least privilege access</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Grant only the permissions each service account needs. A web app shouldn't have cluster-admin. Use separate ServiceAccounts per application. Audit RBAC regularly.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;text-align:center">verbs: ["get","list"] — not ["*"]</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:rgba(124,58,237,.08);border:2px solid rgba(124,58,237,.25);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🚫</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Non-root Containers</div><div style="font-size:7.5px;color:var(--muted)">Never run as root</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">If a container running as root is compromised, the attacker has root on the node. Set <code style="color:#DDD6FE;font-size:8px">runAsNonRoot: true</code> and <code style="color:#DDD6FE;font-size:8px">runAsUser: 1000</code> in securityContext.</div>
+          <div class="yaml" style="font-size:7px">securityContext:<br>&nbsp;&nbsp;runAsNonRoot: <span style="color:#86EFAC">true</span><br>&nbsp;&nbsp;runAsUser: <span style="color:#FDE068">1000</span><br>&nbsp;&nbsp;readOnlyRootFilesystem: <span style="color:#86EFAC">true</span></div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔑</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FDE068">Secrets Management</div><div style="font-size:7.5px;color:var(--muted)">Never in env vars or YAML</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Never put passwords in Deployment YAML or env vars committed to Git. Use K8s Secrets (base64 ≠ encryption!), and ideally Vault, Sealed Secrets, or cloud KMS for true encryption.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#FDE068;text-align:center">Base64 is NOT encryption ⚠</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--mnD);border:2px solid var(--mnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(14,165,233,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#7DD3FC">Network Policies</div><div style="font-size:7.5px;color:var(--muted)">Default deny all</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">By default, all Pods can talk to all other Pods. Use NetworkPolicies to implement a deny-all baseline, then explicitly allow only required traffic flows between services.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);color:#7DD3FC;text-align:center">Micro-segmentation = zero-trust</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--scD);border:2px solid var(--scB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔍</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Image Scanning</div><div style="font-size:7.5px;color:var(--muted)">Block vulnerable images</div></div>
+          </div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Scan images in CI with Trivy, Snyk, or Grype before pushing to registry. Use Binary Authorization or ImagePolicyWebhook to block unscanned or high-severity images in production.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">trivy image myapp:v1.2 ✅</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 11</span></div>
+  </div>
+
+  <!-- S5 HEALTH CHECKS -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Practice #3</div>
+        <div class="stitle">Always Configure <span style="color:var(--sc)">Health Probes</span></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">❤</div><div class="bt"><strong>Liveness Probe — "Is this container alive?"</strong> — Checks if the app is still running. If the probe fails, Kubernetes <strong>restarts</strong> the container. Catches deadlocks, infinite loops, and zombie processes.</div></div>
+        <div class="bi" style="border-color:rgba(14,165,233,.2)"><div class="ico" style="background:var(--mnD)">✅</div><div class="bt"><strong>Readiness Probe — "Is this container ready for traffic?"</strong> — Checks if the app can serve requests. If the probe fails, Kubernetes <strong>removes it from the load balancer</strong> without restarting. Catches slow startup and overload.</div></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🚀</div><div class="bt"><strong>Startup Probe — "Has the app finished starting?"</strong> — For apps with slow initialization. Delays liveness checks until startup completes. Prevents restart loops during initial boot of Java/Spring apps.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">⚠</div><div class="bt"><strong>Never skip probes in production</strong> — without probes, Kubernetes sends traffic to containers that crashed or are deadlocked. Users get errors until a human notices. Probes = automatic self-healing.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Rule of thumb: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Liveness = "should I restart this?" · Readiness = "should I send traffic to this?" · Startup = "has this finished booting?" All three serve different purposes.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(34,197,94,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Probe YAML</div>
+            <div class="yaml" style="margin-bottom:7px">
+              <div><span style="color:#86EFAC">livenessProbe:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#6EE7B7">httpGet:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">path:</span> <span style="color:#FDE068">/health</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">port:</span> <span style="color:#FDE068">8080</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">failureThreshold:</span> <span style="color:#FDE068">3</span></div>
+              <div style="margin-top:4px"><span style="color:#7DD3FC">readinessProbe:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#6EE7B7">httpGet:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">path:</span> <span style="color:#FDE068">/ready</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">port:</span> <span style="color:#FDE068">8080</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">initialDelaySeconds:</span> <span style="color:#FDE068">10</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);font-size:7.5px;color:#86EFAC">❤ Liveness fails → restart container</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);font-size:7.5px;color:#7DD3FC">✅ Readiness fails → remove from LB</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);font-size:7.5px;color:#C7D2FE">🚀 Startup probe → delay liveness</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 11</span></div>
+  </div>
+
+  <!-- S6 MONITOR & LOG -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(14,165,233,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Practice #4</div>
+        <div class="stitle">Monitor &amp; Log <span style="color:var(--mn)">Everything</span></div>
+        <div class="bi" style="border-color:rgba(14,165,233,.2)"><div class="ico" style="background:var(--mnD)">📊</div><div class="bt"><strong>Metrics — the pulse of your cluster</strong> — Prometheus scrapes CPU, memory, request rates, error rates, and latency every 15 seconds. Grafana dashboards make these visible. You cannot optimize what you don't measure.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">📋</div><div class="bt"><strong>Centralized logging is non-negotiable</strong> — Pods die, logs disappear. Deploy Fluent Bit as a DaemonSet to ship all logs to Elasticsearch/Loki before Pods terminate. Centralized = searchable across all Pods.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🔔</div><div class="bt"><strong>Alerts must be actionable</strong> — alert on the Four Golden Signals: Latency, Traffic, Errors, Saturation. Every alert should require human action. Alert fatigue kills on-call culture. Quality over quantity.</div></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🔗</div><div class="bt"><strong>Correlate metrics + logs + traces</strong> — when an alert fires, link from Grafana directly to the relevant Kibana/Loki logs. Implement distributed tracing (Jaeger, Zipkin) for microservice debugging.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--mnD);border:1px solid var(--mnB)">
+          <span style="font-size:10px;font-weight:700;color:#7DD3FC">Stack: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1"><strong style="color:#fff">Prometheus + Grafana</strong> for metrics &amp; alerts. <strong style="color:#fff">Fluent Bit + Loki/EFK</strong> for logs. <strong style="color:#fff">Jaeger/Tempo</strong> for distributed tracing. The three pillars of observability.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--mnD);border:2px solid var(--mnB);box-shadow:0 0 22px rgba(14,165,233,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#7DD3FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Observability Stack</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.22)">
+                <div style="font-size:8px;font-weight:700;color:#7DD3FC;margin-bottom:3px">📊 Metrics</div>
+                <div style="font-size:7px;color:#94A3B8">Prometheus scrapes → Grafana visualizes → Alertmanager notifies</div>
+              </div>
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:3px">📋 Logs</div>
+                <div style="font-size:7px;color:#94A3B8">Fluent Bit (DaemonSet) → Loki / Elasticsearch → Kibana / Grafana</div>
+              </div>
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2)">
+                <div style="font-size:8px;font-weight:700;color:#C7D2FE;margin-bottom:3px">🔗 Traces</div>
+                <div style="font-size:7px;color:#94A3B8">OpenTelemetry → Jaeger / Tempo → end-to-end request tracing</div>
+              </div>
+              <div style="border-radius:7px;padding:6px 9px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:2px">🔔 Alert Rules (example)</div>
+                <div style="font-family:monospace;font-size:7px;color:#94A3B8">CPU &gt; 80% for 5m → page<br>Error rate &gt; 1% → Slack<br>Pod restarts &gt; 3 → warn</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 11</span></div>
+  </div>
+
+  <!-- S7 CI/CD & AUTOMATION -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(99,102,241,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Practice #5</div>
+        <div class="stitle">Use CI/CD &amp; <span style="color:var(--bp)">Automation</span></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🤖</div><div class="bt"><strong>Automate everything — zero manual kubectl in prod</strong> — manual kubectl apply is the enemy of reliability. Every production change should go through a CI/CD pipeline with tests, review, and automated rollback capability.</div></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🌿</div><div class="bt"><strong>GitOps = Git as the single source of truth</strong> — all Kubernetes manifests live in Git. Argo CD or Flux watches the repo and auto-syncs the cluster. Every change is auditable, reviewable, and reversible.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">📋</div><div class="bt"><strong>Infrastructure as Code — Helm or Kustomize</strong> — never manage clusters by hand. Use Helm Charts or Kustomize overlays so your entire infrastructure is version-controlled, reproducible, and testable.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🧪</div><div class="bt"><strong>Test before every deployment</strong> — unit tests, integration tests, image scanning, policy checks (OPA/Kyverno). A deployment pipeline that skips tests is not a pipeline — it's a gamble.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--bpD);border:1px solid var(--bpB)">
+          <span style="font-size:10px;font-weight:700;color:#C7D2FE">Automation goal: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">From git push to production without a human touching a keyboard. The pipeline builds, tests, scans, deploys, and validates. Humans set policy — machines execute it.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--bpD);border:2px solid var(--bpB);box-shadow:0 0 22px rgba(99,102,241,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#C7D2FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">GitOps Pipeline</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">💻 git push → PR → Review</div>
+              <div style="text-align:center;font-size:9px;color:var(--bp)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);text-align:center;font-size:8px;color:#C7D2FE;font-weight:600">🔨 Build + Test + Scan</div>
+              <div style="text-align:center;font-size:9px;color:var(--bp)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.2);text-align:center;font-size:8px;color:#7DD3FC;font-weight:600">🐳 Push Image (tagged SHA)</div>
+              <div style="text-align:center;font-size:9px;color:var(--bp)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);text-align:center;font-size:8px;color:#C7D2FE;font-weight:600">🐙 Argo CD detects change</div>
+              <div style="text-align:center;font-size:9px;color:var(--bp)">↓</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">✅ K8s rolling deploy</div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);text-align:center;font-size:7.5px;color:#FDE068;margin-top:2px">Auto rollback on failure ⏪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 11</span></div>
+  </div>
+
+  <!-- S8 NAMESPACES & LABELS -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Practice #6</div>
+      <div class="stitle">Use Namespaces &amp; <span style="color:var(--wn)">Labels</span> Properly</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">📁</div><div class="bt"><strong>Namespaces = logical isolation boundaries</strong> — separate teams, environments, and applications. Namespaces enable RBAC per team, resource quotas per env, and NetworkPolicies between groups. Default namespace = bad practice in prod.</div></div>
+          <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🔒</div><div class="bt"><strong>Set ResourceQuotas per namespace</strong> — prevent one team from consuming all cluster resources. Define max CPU, memory, Pod count, and PVC count per namespace. Enforced automatically by the scheduler.</div></div>
+          <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🏷</div><div class="bt"><strong>Label everything consistently</strong> — use standard labels: <code style="color:#C7D2FE;background:rgba(99,102,241,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">app</code>, <code style="color:#C7D2FE;background:rgba(99,102,241,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">env</code>, <code style="color:#C7D2FE;background:rgba(99,102,241,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">team</code>, <code style="color:#C7D2FE;background:rgba(99,102,241,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">version</code>. Labels enable cost attribution, monitoring queries, NetworkPolicies, and Service selectors.</div></div>
+          <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">🏗</div><div class="bt"><strong>Recommended namespace structure</strong> — <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">kube-system</code> (K8s components), <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">monitoring</code> (Prometheus/Grafana), <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">production</code>, <code style="color:#86EFAC;background:rgba(34,197,94,.06);padding:1px 4px;border-radius:3px;font-size:8.5px">staging</code>, one per team.</div></div>
+        </div>
+        <div style="width:245px;flex-shrink:0">
+          <div style="height:100%;border-radius:13px;padding:11px;background:var(--wnD);border:2px solid var(--wnB);box-shadow:0 0 20px rgba(245,158,11,.08);display:flex;flex-direction:column;gap:5px">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Namespace Structure</div>
+            <svg viewBox="0 0 210 190" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs><marker id="na" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+              <rect x="60" y="4" width="90" height="22" rx="6" fill="rgba(245,158,11,.12)" stroke="rgba(245,158,11,.38)" stroke-width="1.5"/>
+              <text x="105" y="18" text-anchor="middle" fill="#FDE068" font-size="8.5" font-weight="700" font-family="Segoe UI">⎈ Cluster</text>
+              <line x1="75" y1="26" x2="35" y2="55" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#na)"/>
+              <line x1="105" y1="26" x2="105" y2="55" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#na)"/>
+              <line x1="135" y1="26" x2="175" y2="55" stroke="#F59E0B" stroke-width="1" stroke-dasharray="3 2" marker-end="url(#na)"/>
+              <rect x="4" y="56" width="62" height="34" rx="6" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.3)" stroke-width="1"/>
+              <text x="35" y="69" text-anchor="middle" fill="#FCA5A5" font-size="7.5" font-weight="700" font-family="Segoe UI">production</text>
+              <text x="35" y="82" text-anchor="middle" fill="#94A3B8" font-size="6.5" font-family="Segoe UI">web · api · db</text>
+              <rect x="74" y="56" width="62" height="34" rx="6" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.3)" stroke-width="1"/>
+              <text x="105" y="69" text-anchor="middle" fill="#FDE068" font-size="7.5" font-weight="700" font-family="Segoe UI">staging</text>
+              <text x="105" y="82" text-anchor="middle" fill="#94A3B8" font-size="6.5" font-family="Segoe UI">web · api · db</text>
+              <rect x="144" y="56" width="62" height="34" rx="6" fill="rgba(14,165,233,.08)" stroke="rgba(14,165,233,.25)" stroke-width="1"/>
+              <text x="175" y="69" text-anchor="middle" fill="#7DD3FC" font-size="7.5" font-weight="700" font-family="Segoe UI">monitoring</text>
+              <text x="175" y="82" text-anchor="middle" fill="#94A3B8" font-size="6.5" font-family="Segoe UI">prometheus · grafana</text>
+              <text x="105" y="110" text-anchor="middle" fill="#94A3B8" font-size="7.5" font-family="Segoe UI">Standard labels on all resources:</text>
+              <rect x="14" y="116" width="182" height="65" rx="7" fill="rgba(99,102,241,.07)" stroke="rgba(99,102,241,.2)" stroke-width="1"/>
+              <text x="22" y="130" fill="#C7D2FE" font-size="7" font-family="monospace">labels:</text>
+              <text x="30" y="142" fill="#86EFAC" font-size="7" font-family="monospace">app: <text fill="#FDE068">web-service</text></text>
+              <text x="30" y="153" fill="#86EFAC" font-size="7" font-family="monospace">env: <text fill="#FDE068">production</text></text>
+              <text x="30" y="164" fill="#86EFAC" font-size="7" font-family="monospace">team: <text fill="#FDE068">platform</text></text>
+              <text x="30" y="175" fill="#86EFAC" font-size="7" font-family="monospace">version: <text fill="#FDE068">v2.1.0</text></text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 11</span></div>
+  </div>
+
+  <!-- S9 BACKUP & DR -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(99,102,241,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Practice #7</div>
+        <div class="stitle">Backup &amp; <span style="color:var(--bp)">Disaster Recovery</span></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">💾</div><div class="bt"><strong>Back up etcd — your cluster's brain</strong> — etcd stores all cluster state. If it's lost without a backup, your entire cluster configuration, deployments, and resources are gone permanently. Snapshot etcd daily at minimum.</div></div>
+        <div class="bi" style="border-color:rgba(99,102,241,.2)"><div class="ico" style="background:var(--bpD)">🗄</div><div class="bt"><strong>Use Velero for full cluster backups</strong> — Velero backs up Kubernetes resources (YAML manifests) and Persistent Volumes to cloud object storage (S3, GCS, Azure Blob). Restores entire namespaces or clusters.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--scD)">📋</div><div class="bt"><strong>Persistent Volume backups are critical</strong> — stateful apps (databases, file storage) write to PVs. Back up PVs using Velero with restic/kopia, cloud snapshots, or application-native tools (pg_dump, mysqldump).</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">🧪</div><div class="bt"><strong>Test restoration regularly — not just backups</strong> — an untested backup is not a backup. Schedule quarterly disaster recovery drills. Restore to a test cluster. Validate data integrity. Document the RTO and RPO achieved.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--bpD);border:1px solid var(--bpB)">
+          <span style="font-size:10px;font-weight:700;color:#C7D2FE">Key terms: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1"><strong style="color:#fff">RPO</strong> (Recovery Point Objective) = how much data you can lose. <strong style="color:#fff">RTO</strong> (Recovery Time Objective) = how long to recover. Both must be defined before a disaster, not during.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--bpD);border:2px solid var(--bpB);box-shadow:0 0 22px rgba(99,102,241,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#C7D2FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Backup Strategy</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:7px;padding:7px 9px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25)">
+                <div style="font-size:8px;font-weight:700;color:#C7D2FE;margin-bottom:3px">⎈ etcd Backup</div>
+                <div style="font-size:7px;color:#94A3B8">Daily snapshot → S3/GCS. Retain 30 days. Test restore monthly.</div>
+              </div>
+              <div style="border-radius:7px;padding:7px 9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:3px">📦 Velero Cluster Backup</div>
+                <div style="font-size:7px;color:#94A3B8">All K8s resources + PV snapshots to object storage. Schedule: */6h.</div>
+              </div>
+              <div style="border-radius:7px;padding:7px 9px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.2)">
+                <div style="font-size:8px;font-weight:700;color:#7DD3FC;margin-bottom:3px">🗄 Database Backup</div>
+                <div style="font-size:7px;color:#94A3B8">pg_dump/mysqldump to S3 daily. Point-in-time recovery (PITR) enabled.</div>
+              </div>
+              <div style="border-radius:7px;padding:7px 9px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18)">
+                <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:2px">🧪 DR Test Schedule</div>
+                <div style="font-size:7px;color:#94A3B8">Quarterly: restore full cluster to staging · measure RTO/RPO · document findings</div>
+              </div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:7.5px;color:#86EFAC;font-weight:700">velero backup create my-backup --include-namespaces production</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 11</span></div>
+  </div>
+
+  <!-- S10 PRODUCTION PRACTICES -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Practice #8</div>
+      <div class="stitle">Real-World <span style="color:var(--sc)">Production Practices</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--scD);border:2px solid var(--scB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">☁</div><div style="font-size:11px;font-weight:800;color:#86EFAC">Managed K8s</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Use EKS, GKE, or AKS instead of self-managed. Cloud providers handle control plane HA, upgrades, and patches. Focus engineering time on apps, not infra ops.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">Self-managed only when necessary</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--bpD);border:2px solid var(--bpB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(99,102,241,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⬆</div><div style="font-size:11px;font-weight:800;color:#C7D2FE">Regular Upgrades</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">K8s N-2 support policy — only last 3 versions receive security patches. Clusters 2+ versions behind become security liabilities. Upgrade every 3–4 months using rolling node group upgrades.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);color:#C7D2FE;text-align:center">Stay within N-2 versions always</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--erD);border:2px solid var(--erB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔍</div><div style="font-size:11px;font-weight:800;color:#FCA5A5">Image Scanning</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Scan every image in CI/CD before deploy. Use Trivy, Grype, or Snyk. Block images with CRITICAL/HIGH CVEs. Re-scan images in registry weekly as new CVEs are disclosed.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;text-align:center">trivy image --exit-code 1 app:latest</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--mnD);border:2px solid var(--mnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(14,165,233,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div><div style="font-size:11px;font-weight:800;color:#7DD3FC">Smart Autoscaling</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Configure HPA (Pod scaling), VPA (right-sizing), and Cluster Autoscaler (node scaling). Use Spot/Preemptible instances for non-critical workloads to cut costs by 60–80%.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);color:#7DD3FC;text-align:center">Spot nodes = 70% cost reduction</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📖</div><div style="font-size:11px;font-weight:800;color:#FDE068">Documentation</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Document runbooks for every alert, architecture decisions, onboarding guides, and incident postmortems. A cluster only your senior engineer understands is a single point of failure.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#FDE068;text-align:center">Every alert needs a runbook</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 11</span></div>
+  </div>
+
+  <!-- S11 SUMMARY -->
+  <div class="slide" data-s="11">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(99,102,241,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes Best Practices — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--erD);border:1.5px solid var(--erB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🏙</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Without Practices</div>
+              <div style="font-size:7.5px;color:var(--muted)">= City with no building codes</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Random structures. No fire codes. No zoning. Looks functional until one building collapses and takes down the block.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--bpD);border:1.5px solid var(--bpB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--bp),var(--sc));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">🏙✨</div>
+              <div style="font-size:10px;font-weight:800;color:#C7D2FE">Best Practices</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Smart city with codes</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Building codes. Fire safety. Zoning. Emergency services. Every district optimized. The whole city stays reliable and safe.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--scD);border:1.5px solid var(--scB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚀</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Production-grade K8s</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Secure. Observable. Scalable. Self-healing. Teams ship fast without fear. Outages are rare and brief.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--scD);border:1px solid var(--scB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Resource Limits</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Request + Limit always</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--erD);border:1px solid var(--erB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Security</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">RBAC · non-root · scan</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--scD);border:1px solid var(--scB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">❤</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Health Probes</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Liveness + Readiness</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--mnD);border:1px solid var(--mnB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#7DD3FC">Observability</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Metrics · Logs · Traces</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--bpD);border:1px solid var(--bpB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🤖</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#C7D2FE">CI/CD + GitOps</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Zero manual deploys</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--bpD);border:1px solid var(--bpB);display:flex;gap=6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">💾</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#C7D2FE">Backup &amp; DR</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">etcd + Velero tested</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.2);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">K8s without best practices = city without building codes</span>. <span style="color:#86EFAC">K8s best practices = the operational rulebook that keeps your smart city running reliably 24/7</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--bpD);border:1.5px solid var(--bpB)">
+            <div style="font-size:8.5px;font-weight:700;color:#C7D2FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bp)">◆</span>Always set resource limits</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bp)">◆</span>RBAC + non-root + scan</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bp)">◆</span>Liveness + Readiness probes</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bp)">◆</span>Centralized logs + metrics</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bp)">◆</span>GitOps + CI/CD automation</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Docker → K8s<br>Migration</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">Migrating containerized<br>apps to Kubernetes</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#C7D2FE;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>11 / 11</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=11;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --vol:#00D4FF;--volD:rgba(0,212,255,.09);--volB:rgba(0,212,255,.28);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --per:#7C3AED;--perD:rgba(124,58,237,.11);--perB:rgba(124,58,237,.35);
+  --tmp:#F59E0B;--tmpD:rgba(245,158,11,.09);--tmpB:rgba(245,158,11,.28);
+  --ctr:#22C55E;--ctrD:rgba(34,197,94,.09);--ctrB:rgba(34,197,94,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--vol);border-color:var(--vol);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--vol);color:var(--vol)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(0,212,255,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(0,212,255,.18);border-color:var(--vol)}
+.nbtn.pri{background:linear-gradient(135deg,var(--vol),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(0,212,255,.12)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(0,212,255,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--vol);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(0,212,255,.14);transition:all .25s}
+.bi:hover{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.vol-box{border-radius:10px;padding:9px 12px;background:var(--volD);border:2px solid var(--volB);text-align:center}
+.vol-title{font-size:10px;font-weight:800;color:#67E8F9}
+.pod-box{border-radius:10px;padding:9px 12px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.pod-title{font-size:10px;font-weight:800;color:#BAE6FD}
+.ctr-box{border-radius:8px;padding:7px;background:var(--ctrD);border:1.5px solid var(--ctrB);text-align:center}
+.per-box{border-radius:8px;padding:7px;background:var(--perD);border:1.5px solid var(--perB);text-align:center}
+.tmp-box{border-radius:8px;padding:7px;background:var(--tmpD);border:1.5px solid var(--tmpB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--vol);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--vol) 55%,var(--blue) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Volumes</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Understanding Persistent Storage in Kubernetes<br>— Keep your data safe across container restarts</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--volD);color:#67E8F9;border:1px solid var(--volB);padding:4px 11px;font-size:9px">💾 Storage</span>
+          <span class="tag" style="background:var(--podD);color:#BAE6FD;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📦 Pods</span>
+          <span class="tag" style="background:var(--perD);color:#DDD6FE;border:1px solid var(--perB);padding:4px 11px;font-size:9px">🔒 Persistence</span>
+          <span class="tag" style="background:var(--tmpD);color:#FDE068;border:1px solid var(--tmpB);padding:4px 11px;font-size:9px">⚡ emptyDir · hostPath</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(0,212,255,.25);border-radius:14px;padding:12px;background:rgba(0,212,255,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Storage in a Pod</div>
+            <div class="pod-box" style="margin-bottom:6px;box-shadow:0 0 18px rgba(50,108,229,.16)">
+              <div class="pod-title">📦 Pod</div>
+              <div style="display:flex;gap:5px;justify-content:center;margin-top:7px">
+                <div class="ctr-box" style="flex:1"><div style="font-size:9px;font-weight:700;color:#86EFAC">📱 Container A</div></div>
+                <div class="ctr-box" style="flex:1"><div style="font-size:9px;font-weight:700;color:#86EFAC">📱 Container B</div></div>
+              </div>
+              <div style="font-size:11px;color:var(--vol);margin:5px 0">↕ shared access ↕</div>
+              <div class="vol-box" style="box-shadow:0 0 14px rgba(0,212,255,.2)">
+                <div class="vol-title">💾 Volume</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">/data · persists across restarts</div>
+              </div>
+            </div>
+            <div style="font-size:9px;color:var(--muted);text-align:center;margin-top:6px">Data survives even if container dies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">What Happens <span style="color:var(--fail)">Without Volumes?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚡</div><div class="bt"><strong>Containers are ephemeral</strong> — they are designed to start, run, and stop. Temporary by nature.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💀</div><div class="bt"><strong>Container crash → data lost forever</strong> — anything written inside the container filesystem vanishes on restart</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🗄</div><div class="bt"><strong>Databases need persistence</strong> — customer records, logs, uploaded files all disappear without storage</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔗</div><div class="bt"><strong>Containers can't share data</strong> — two containers in the same Pod cannot exchange data without a volume</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Real-world analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Imagine writing notes on a whiteboard 📝 — and someone erases everything every time you leave the room. That's a container without a volume.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:280px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+              <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Container WITHOUT Volume</div>
+              <div style="display:flex;gap:5px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+                <div style="flex:1;padding:5px 8px;border-radius:7px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);font-size:8px;color:#BAE6FD;font-weight:600;text-align:center">📦 Pod running<br><span style="color:#86EFAC;font-size:7px">data inside = ✓</span></div>
+                <div style="font-size:14px;color:var(--fail)">→ 💥 →</div>
+                <div style="flex:1;padding:5px 8px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);font-size:8px;color:#FCA5A5;font-weight:600;text-align:center">📦 Pod restarted<br><span style="font-size:7px">data = gone 💀</span></div>
+              </div>
+              <div style="padding:6px;border-radius:7px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">Container filesystem wiped clean</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">DB files · logs · uploads — all gone 😱</div>
+              </div>
+            </div>
+            <div style="border-radius:11px;padding:11px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.25)">
+              <div style="font-size:9px;font-weight:700;color:#FDE068;margin-bottom:6px">⚠ What gets lost without volumes:</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:8px;color:#CBD5E1;padding:3px 8px;background:rgba(245,158,11,.1);border-radius:4px">🗄 Database records & tables</div>
+                <div style="font-size:8px;color:#CBD5E1;padding:3px 8px;background:rgba(245,158,11,.1);border-radius:4px">📄 Application log files</div>
+                <div style="font-size:8px;color:#CBD5E1;padding:3px 8px;background:rgba(245,158,11,.1);border-radius:4px">📁 User uploaded files</div>
+                <div style="font-size:8px;color:#CBD5E1;padding:3px 8px;background:rgba(245,158,11,.1);border-radius:4px">⚙ Config files written at runtime</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS A VOLUME ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--vol)">Kubernetes Volume?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">💾</div><div class="bt"><strong>Storage attached to a Pod</strong> — not to a container. Lives at the Pod level, accessible by all containers inside it.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🔗</div><div class="bt"><strong>Data exists outside the container filesystem</strong> — survives when container crashes or restarts inside the Pod</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🤝</div><div class="bt"><strong>Shared between containers in same Pod</strong> — Container A writes, Container B reads — same data location</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">📂</div><div class="bt"><strong>Mounted at a specific path</strong> — declared in the Pod spec, e.g. <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">/data</code> or <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">/var/logs</code></div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--volD);border:1px solid var(--volB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Key insight: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Container dies → Volume survives. The data outlives the container process. That's the entire idea.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--volD);border:2px solid var(--volB);box-shadow:0 0 22px rgba(0,212,255,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Volume Inside a Pod</div>
+            <div class="pod-box" style="margin-bottom:6px">
+              <div class="pod-title">📦 Pod</div>
+              <div style="display:flex;gap:5px;margin-top:8px">
+                <div style="flex:1;padding:6px;border-radius:7px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center">
+                  <div style="font-size:9px;font-weight:700;color:#86EFAC">📱 Container A</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:2px">App logic</div>
+                </div>
+                <div style="flex:1;padding:6px;border-radius:7px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center">
+                  <div style="font-size:9px;font-weight:700;color:#86EFAC">📱 Container B</div>
+                  <div style="font-size:7px;color:var(--muted);margin-top:2px">Sidecar</div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--vol);margin:5px 0">↙ ↘</div>
+              <div class="vol-box" style="box-shadow:0 0 14px rgba(0,212,255,.2)">
+                <div class="vol-title">💾 Shared Volume</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">mounted at /data</div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ Data survives container restarts</div>
+            </div>
+            <div style="margin-top:6px;font-size:8px;color:var(--muted);text-align:center">Volume lifecycle = Pod lifecycle (basic types)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 HOW VOLUMES WORK ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">End-to-End Flow</div>
+      <div class="stitle">How Volumes Work — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(50,108,229,.09);border:1px solid rgba(50,108,229,.25)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Pod is created with a Volume declared</div><div style="font-size:9px;color:#94A3B8">Pod spec defines volume name, type (emptyDir/hostPath/PV) and mount path</div></div>
+            <span style="margin-left:auto;font-size:13px">📦</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--vol)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--volD);border:1px solid var(--volB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--vol),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Kubernetes mounts Volume into container</div><div style="font-size:9px;color:#94A3B8">Volume appears as a folder inside the container at the specified path (e.g. /data)</div></div>
+            <span style="margin-left:auto;font-size:13px">💾</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ctr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ctrD);border:1px solid var(--ctrB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ctr),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Container reads and writes data to Volume</div><div style="font-size:9px;color:#94A3B8">App writes DB records, logs, files — all go into the Volume, not the container layer</div></div>
+            <span style="margin-left:auto;font-size:13px">✏️</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--fail)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--fail),#B91C1C);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">Container crashes or restarts</div><div style="font-size:9px;color:#94A3B8">Container filesystem is wiped — but the Volume data is untouched and still safe</div></div>
+            <span style="margin-left:auto;font-size:13px">💥</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ctr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ctrD);border:1px solid var(--ctrB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ctr),var(--vol));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">New container starts — Volume remounted</div><div style="font-size:9px;color:#94A3B8">Container restarts and Volume is reattached at same path — all data is still there ✅</div></div>
+            <span style="margin-left:auto;font-size:13px">🔄</span>
+          </div>
+        </div>
+        <div style="width:190px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(0,212,255,.04);border:1.5px dashed var(--volB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Data Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px;font-weight:600;color:#BAE6FD">📦 Pod Created</div></div>
+              <div style="font-size:10px;color:var(--vol)">↓ declares volume</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--volD);border:1.5px solid var(--volB);text-align:center"><div style="font-size:9px;font-weight:700;color:#67E8F9">💾 Volume Mounted</div><div style="font-size:7px;color:var(--muted)">at /data path</div></div>
+              <div style="font-size:10px;color:var(--ctr)">↓ write data</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center"><div style="font-size:9px;font-weight:600;color:#86EFAC">📱 Container works</div></div>
+              <div style="font-size:10px;color:var(--fail)">↓ 💥 crash</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--volD);border:1px solid var(--volB);text-align:center"><div style="font-size:9px;font-weight:600;color:#67E8F9">💾 Volume safe ✅</div></div>
+              <div style="font-size:10px;color:var(--ctr)">↓ restart</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center"><div style="font-size:9px;font-weight:600;color:#86EFAC">🔄 Data intact ✅</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 WHY VOLUMES MATTER ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Key Insight</div>
+        <div class="stitle">Why Volumes are <span style="color:var(--vol)">Essential</span></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🛡</div><div class="bt"><strong>Prevent data loss</strong> — application data is never tied to the container lifecycle. Restarts are safe.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🤝</div><div class="bt"><strong>Enable data sharing</strong> — multiple containers in a Pod can read and write to the same volume simultaneously</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🗄</div><div class="bt"><strong>Required for stateful applications</strong> — databases (MySQL, MongoDB, Postgres) cannot function without persistent storage</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">📋</div><div class="bt"><strong>Store logs and files reliably</strong> — log files, config files, and user uploads are kept safe across restarts</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">⚡</div><div class="bt"><strong>Improve application reliability</strong> — production-grade apps depend on volumes for consistent, predictable storage</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--volD);border:1px solid var(--volB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Without volumes: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">You can't run a real database in Kubernetes. Every restart destroys all your data. 💀</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:7px">❌ Without Volume</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="flex:1;padding:6px;border-radius:7px;background:rgba(50,108,229,.12);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#BAE6FD">🗄 DB Pod</div>
+                <div style="font-size:7px;color:var(--muted)">1000 records</div>
+              </div>
+              <div style="font-size:13px;color:var(--fail)">→💥→</div>
+              <div style="flex:1;padding:6px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">🗄 DB Pod</div>
+                <div style="font-size:7px;color:#FCA5A5">0 records 💀</div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:18px;color:var(--vol)">vs</div>
+          <div style="border-radius:12px;padding:12px;background:var(--volD);border:1.5px solid var(--volB)">
+            <div style="font-size:9px;font-weight:800;color:#67E8F9;text-align:center;margin-bottom:7px">✅ With Volume</div>
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+              <div style="flex:1;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#BAE6FD">🗄 DB Pod</div>
+                <div style="font-size:7px;color:var(--muted)">writing data</div>
+              </div>
+              <div style="font-size:10px;color:var(--vol)">→💥→</div>
+              <div style="flex:1;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#BAE6FD">🗄 DB Pod</div>
+                <div style="font-size:7px;color:#86EFAC">data safe ✅</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;text-align:center;font-size:10px;color:var(--vol)">↕</div>
+            <div class="vol-box" style="margin-top:4px">
+              <div class="vol-title">💾 Persistent Volume</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">1000 records — always safe</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 VOLUME TYPES ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Volume Types</div>
+      <div class="stitle">Common Volume Types — High Level Overview</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- emptyDir -->
+        <div style="border-radius:12px;padding:13px;background:var(--tmpD);border:2px solid var(--tmpB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📁</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#FDE068">emptyDir</div>
+              <div style="font-size:8px;color:var(--muted)">Temporary shared storage</div>
+            </div>
+            <span class="tag" style="background:rgba(245,158,11,.2);color:#FDE068;border:1px solid rgba(245,158,11,.35);margin-left:auto;font-size:7px;padding:3px 8px">⏱ Temporary</span>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Created when Pod starts. Exists as long as the Pod runs. Deleted when the Pod is removed. Perfect for sharing temp files between containers.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">✅ Shared between containers in Pod</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">❌ Deleted when Pod is removed</div>
+          </div>
+        </div>
+        <!-- hostPath -->
+        <div style="border-radius:12px;padding:13px;background:var(--perD);border:2px solid var(--perB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🖥</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#DDD6FE">hostPath</div>
+              <div style="font-size:8px;color:var(--muted)">Node filesystem access</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Mounts a directory from the host node's filesystem into the Pod. Useful for accessing node-level logs or testing. Not recommended for production.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">✅ Good for dev/testing</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">⚠ Not portable across nodes</div>
+          </div>
+        </div>
+        <!-- PV -->
+        <div style="border-radius:12px;padding:13px;background:var(--volD);border:2px solid var(--volB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(0,212,255,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💾</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#67E8F9">Persistent Volumes (PV/PVC)</div>
+              <div style="font-size:8px;color:var(--muted)">Long-term durable storage</div>
+            </div>
+            <span class="tag" style="background:rgba(0,212,255,.2);color:#67E8F9;border:1px solid var(--volB);margin-left:auto;font-size:7px;padding:3px 8px">⭐ Production</span>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Survives beyond the Pod lifecycle. Used for databases and production workloads. Requested using PersistentVolumeClaims (PVC).</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">✅ Survives Pod deletion</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">✅ Production databases</div>
+          </div>
+        </div>
+        <!-- cloud -->
+        <div style="border-radius:12px;padding:13px;background:rgba(34,197,94,.09);border:2px solid rgba(34,197,94,.3);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:#86EFAC">Cloud Storage Types</div>
+              <div style="font-size:8px;color:var(--muted)">Managed by cloud provider</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Cloud providers offer native storage integrations — AWS EBS, GCP Persistent Disk, Azure Disk. Managed, scalable, and highly durable.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ AWS EBS · GCP Disk · Azure Disk</div>
+            <div style="font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Fully managed & scalable</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 REAL WORLD EXAMPLE ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Real-World Example</div>
+        <div class="stitle">Database Pod + <span style="color:var(--vol)">Persistent Volume</span></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">🗄</div><div class="bt"><strong>Scenario:</strong> A MySQL database Pod stores customer orders for an e-commerce app</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">❌</div><div class="bt"><strong>Without volume:</strong> Database Pod crashes → all customer orders, records, and user data are permanently deleted</div></div>
+        <div class="bi"><div class="ico" style="background:var(--volD)">✅</div><div class="bt"><strong>With volume:</strong> Database Pod crashes → restarts → Volume is remounted → all data is intact and safe</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ctrD)">🏭</div><div class="bt"><strong>Essential in production</strong> — any real application (banking, shopping, social media) requires persistent volumes</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--volD);border:1px solid var(--volB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Bottom line: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">No volume = no production database. It's that simple. Every stateful app needs volumes.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--volD);border:2px solid var(--volB);box-shadow:0 0 22px rgba(0,212,255,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">E-Commerce Database Pod</div>
+            <!-- before crash -->
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD;margin-bottom:5px">📦 MySQL Pod (running)</div>
+              <div style="display:flex;gap:5px;margin-bottom:5px">
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--ctrD);border:1px solid var(--ctrB);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">📱 MySQL<br>Container</div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--volD);border:1px solid var(--volB);text-align:center;font-size:8px;color:#67E8F9;font-weight:600">💾 Volume<br>/var/lib/mysql</div>
+              </div>
+              <div style="font-size:8px;color:var(--muted);text-align:center">50,000 customer orders stored</div>
+            </div>
+            <!-- crash -->
+            <div style="text-align:center;font-size:13px;padding:4px;border-radius:7px;background:var(--failD);border:1px solid var(--failB);color:#FCA5A5;font-weight:700;margin-bottom:6px">💥 Pod crashes &amp; restarts</div>
+            <!-- after crash -->
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD;margin-bottom:5px">📦 MySQL Pod (restarted)</div>
+              <div style="display:flex;gap:5px;margin-bottom:5px">
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);text-align:center;font-size:8px;color:#FCA5A5;font-weight:600">📱 Container<br>fresh start</div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--volD);border:1px solid var(--volB);text-align:center;font-size:8px;color:#67E8F9;font-weight:600">💾 Volume<br>unchanged ✅</div>
+              </div>
+              <div style="font-size:8px;color:#86EFAC;text-align:center;font-weight:700">50,000 orders — still safe ✅</div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">Zero data loss — business continues</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 IMPORTANT CONCEPTS ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Important Concepts</div>
+      <div class="stitle">Key Volume Concepts — What You Must Know</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Concept 1 -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--volD);border:2px solid var(--volB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📂</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">Volume Mounting</div><div style="font-size:8px;color:var(--muted)">How storage connects to containers</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">📌 Volume declared in Pod spec YAML</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">📌 Container specifies mount path (/data)</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">📌 K8s mounts volume at that path automatically</div>
+          </div>
+          <div style="padding:7px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">🔌</div>
+            <div style="font-size:9px;font-weight:700;color:#67E8F9">Like plugging in a USB drive</div>
+            <div style="font-size:8px;color:var(--muted)">Data appears at specified path</div>
+          </div>
+        </div>
+        <!-- separator -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 6px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);font-size:8px;font-weight:700;color:#67E8F9;text-align:center">+<br>also</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Concept 2 -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--ctrD);border:2px solid var(--ctrB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤝</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Shared Storage</div><div style="font-size:8px;color:var(--muted)">Multiple containers, one volume</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">📌 All containers in Pod share the volume</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">📌 One writes logs → another processes them</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">📌 Classic sidecar pattern in Kubernetes</div>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:auto">
+            <div style="flex:1;padding:6px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">📱 App<br>container</div>
+              <div style="font-size:8px;color:var(--muted)">writes logs</div>
+            </div>
+            <div style="display:flex;align-items:center;font-size:14px;color:var(--ctr)">⟷</div>
+            <div style="flex:1;padding:6px;border-radius:7px;background:var(--volD);border:1px solid var(--volB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#67E8F9">💾 Shared<br>Volume</div>
+            </div>
+            <div style="display:flex;align-items:center;font-size:14px;color:var(--ctr)">⟷</div>
+            <div style="flex:1;padding:6px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.28);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">📱 Sidecar<br>container</div>
+              <div style="font-size:8px;color:var(--muted)">reads logs</div>
+            </div>
+          </div>
+        </div>
+        <!-- separator -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 6px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);font-size:8px;font-weight:700;color:#67E8F9;text-align:center">+<br>key</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Concept 3 -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--perD);border:2px solid var(--perB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚖</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Temp vs Persistent</div><div style="font-size:8px;color:var(--muted)">Choose based on your need</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">⏱ emptyDir → temporary, deleted with Pod</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">🔒 PV/PVC → persistent, outlives Pod</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">🏭 Stateful apps always need persistent</div>
+          </div>
+          <div style="padding:7px;border-radius:8px;background:rgba(0,0,0,.25);border:1px solid var(--border);text-align:center">
+            <div style="font-size:20px;margin-bottom:3px">🗄</div>
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE">DB = always persistent</div>
+            <div style="font-size:8px;color:var(--muted)">Cache = temp is fine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes Volumes — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy trio -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--failD);border:1.5px solid var(--failB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">👷</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Container</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Temporary worker</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Does the work. Can be replaced anytime. Has no permanent storage of its own.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--volD);border:1.5px solid var(--volB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--vol),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Solution</div>
+              <div style="font-size:28px;margin-top:4px">🗄</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Volume</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Storage locker</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Keeps all files safe. Worker can come and go — locker always holds the data.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--ctrD);border:1.5px solid var(--ctrB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Reliable application</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Restarts don't cause data loss. Production systems run safely and reliably.</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">💀</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">No volume = data loss</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Container restart wipes everything</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--volD);border:1px solid var(--volB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">💾</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Volume = safe storage</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Persists across container restarts</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--ctrD);border:1px solid var(--ctrB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🤝</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Shared in same Pod</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">All containers can access same volume</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--tmpD);border:1px solid var(--tmpB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚖</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Temp or Persistent</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">emptyDir (temp) vs PV (permanent)</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Container = temporary worker</span>. <span style="color:#67E8F9">Volume = the locker that keeps files safe</span>. Always use volumes for real data."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--volD);border:1.5px solid var(--volB)">
+            <div style="font-size:9px;font-weight:700;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--vol)">◆</span>Volumes attach to Pods</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--vol)">◆</span>Survive container restarts</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--vol)">◆</span>Shared between containers</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--vol)">◆</span>emptyDir · hostPath · PV</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--vol)">◆</span>Must-have for databases</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Persistent Volumes (PV)</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">PV · PVC · StorageClass<br>explained in depth</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#67E8F9;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

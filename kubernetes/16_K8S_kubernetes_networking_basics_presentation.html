@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --pod:#326CE5;--podD:rgba(50,108,229,.12);--podB:rgba(50,108,229,.36);
+  --svc:#7C3AED;--svcD:rgba(124,58,237,.11);--svcB:rgba(124,58,237,.35);
+  --net:#00D4FF;--netD:rgba(0,212,255,.09);--netB:rgba(0,212,255,.28);
+  --dns:#F59E0B;--dnsD:rgba(245,158,11,.1);--dnsB:rgba(245,158,11,.3);
+  --ok:#22C55E;--okD:rgba(34,197,94,.1);--okB:rgba(34,197,94,.3);
+  --user:#EC4899;--userD:rgba(236,72,153,.1);--userB:rgba(236,72,153,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--cyan);color:var(--cyan)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(0,212,255,.15);transition:all .25s}
+.bi:hover{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Pod block */
+.pod-blk{border-radius:9px;padding:7px 10px;border:1.5px solid var(--podB);background:var(--podD);text-align:center}
+.pod-name{font-size:8px;font-weight:700;color:#7EB3FF;margin-bottom:2px}
+.pod-ip{font-size:7px;color:var(--muted);margin-top:2px}
+/* Service block */
+.svc-blk{border-radius:9px;padding:7px 10px;border:1.5px solid var(--svcB);background:var(--svcD);text-align:center}
+/* arrow */
+.arr-h{height:2px;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.3));border-radius:1px;position:relative}
+.arr-h::after{content:'▶';position:absolute;right:-6px;top:-6px;font-size:10px;color:var(--cyan)}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* node wrapper */
+.node-wr{border-radius:11px;padding:10px;border:1.5px solid rgba(14,165,233,.28);background:rgba(14,165,233,.06)}
+.node-lbl{font-size:8px;font-weight:700;color:#38BDF8;margin-bottom:7px;letter-spacing:.5px;text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,3.8vw,38px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,var(--blue) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Networking<br>Basics</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">How Communication Works in Kubernetes<br>— Pod IPs, Services, DNS & cluster networking explained simply</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--podD);color:#7EB3FF;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📦 Pod IPs</span>
+          <span class="tag" style="background:var(--svcD);color:#DDD6FE;border:1px solid var(--svcB);padding:4px 11px;font-size:9px">⚙ Services</span>
+          <span class="tag" style="background:var(--dnsD);color:#FDE068;border:1px solid var(--dnsB);padding:4px 11px;font-size:9px">🌐 DNS</span>
+          <span class="tag" style="background:var(--netD);color:#67E8F9;border:1px solid var(--netB);padding:4px 11px;font-size:9px">🔗 Flat Network</span>
+        </div>
+      </div>
+      <!-- right: pods connected across nodes -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(0,212,255,.25);border-radius:14px;padding:12px;background:rgba(0,212,255,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">☸ Kubernetes Cluster Network</div>
+            <div style="display:flex;gap:7px;margin-bottom:8px">
+              <div class="node-wr" style="flex:1">
+                <div class="node-lbl">🖥 Node 1</div>
+                <div class="pod-blk" style="margin-bottom:4px"><div style="font-size:12px">📦</div><div class="pod-name">web-pod</div><div class="pod-ip">10.0.1.2</div></div>
+                <div class="pod-blk"><div style="font-size:12px">📦</div><div class="pod-name">api-pod</div><div class="pod-ip">10.0.1.3</div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:0 4px">
+                <div style="font-size:9px;color:var(--cyan)">⟷</div>
+                <div style="font-size:7px;color:var(--muted);text-align:center;writing-mode:vertical-lr;transform:rotate(180deg)">cluster network</div>
+                <div style="font-size:9px;color:var(--cyan)">⟷</div>
+              </div>
+              <div class="node-wr" style="flex:1">
+                <div class="node-lbl">🖥 Node 2</div>
+                <div class="pod-blk" style="margin-bottom:4px"><div style="font-size:12px">📦</div><div class="pod-name">db-pod</div><div class="pod-ip">10.0.2.4</div></div>
+                <div class="pod-blk"><div style="font-size:12px">📦</div><div class="pod-name">cache-pod</div><div class="pod-ip">10.0.2.5</div></div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);text-align:center;font-size:9px;font-weight:700;color:#67E8F9">All Pods can reach each other directly ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 WHY NETWORKING ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Foundation</div>
+        <div class="stitle">Why Networking <span style="color:var(--cyan)">Matters</span> in K8s?</div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">📦</div><div class="bt"><strong>Your app is split across many Pods</strong> — frontend, backend, database all in separate Pods that need to talk</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🗣</div><div class="bt"><strong>Pods must communicate reliably</strong> — the web Pod needs to call the API Pod, which calls the database Pod</div></div>
+        <div class="bi"><div class="ico" style="background:var(--userD)">👤</div><div class="bt"><strong>Users need to reach your app</strong> — external traffic from browsers and mobile apps must get in to your Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🔗</div><div class="bt"><strong>Networking connects everything</strong> — without it, your microservices are islands that can't work together</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--netD);border:1px solid var(--netB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Think of it: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Networking = the roads in a city. Without roads (network), nothing reaches anyone.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--netD);border:1.5px solid var(--netB);box-shadow:0 0 22px rgba(0,212,255,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Communication Needs</div>
+            <!-- user → frontend -->
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;padding:8px 10px;border-radius:8px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.28)">
+              <span style="font-size:16px">👤</span>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--pink),var(--cyan));border-radius:1px"></div>
+              <span style="font-size:16px">🌐</span>
+              <div style="font-size:8px;font-weight:700;color:#F9A8D4">User → Frontend</div>
+            </div>
+            <!-- frontend → backend -->
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;padding:8px 10px;border-radius:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.28)">
+              <span style="font-size:14px">📦</span>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:1px"></div>
+              <span style="font-size:14px">📦</span>
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD">Pod → Pod</div>
+            </div>
+            <!-- backend → db -->
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;padding:8px 10px;border-radius:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28)">
+              <span style="font-size:14px">📦</span>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:1px"></div>
+              <span style="font-size:14px">🗄</span>
+              <div style="font-size:8px;font-weight:700;color:#DDD6FE">Pod → DB Pod</div>
+            </div>
+            <!-- via service -->
+            <div style="padding:7px;border-radius:8px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25)">
+              <div style="font-size:8px;font-weight:700;color:#DDD6FE;text-align:center;margin-bottom:4px">⚙ Services sit in between</div>
+              <div style="font-size:8px;color:var(--muted);text-align:center">Stable access point for all of the above</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 POD-TO-POD ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Key Concept</div>
+        <div class="stitle">Pod-to-Pod <span style="color:var(--cyan)">Communication</span></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🪪</div><div class="bt"><strong>Every Pod gets a unique IP address</strong> — automatically assigned when the Pod starts. No manual config.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🤝</div><div class="bt"><strong>Pods communicate directly</strong> — any Pod can send a request to any other Pod using its IP address</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🚫</div><div class="bt"><strong>No NAT required</strong> — NAT = Network Address Translation. K8s doesn't hide Pod IPs. Direct routing.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🌐</div><div class="bt"><strong>Works across nodes</strong> — Pod on Node 1 can directly reach Pod on Node 2 as if they're on the same machine</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">⚠ But: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Pod IPs change when Pods restart. That's why we need <strong style="color:#DDD6FE">Services</strong> for stable access.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:290px">
+          <div style="border-radius:13px;padding:13px;background:var(--podD);border:2px solid var(--podB);box-shadow:0 0 22px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7EB3FF;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Pod-to-Pod Direct Communication</div>
+            <!-- two nodes with pods -->
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <div class="node-wr" style="flex:1">
+                <div class="node-lbl">🖥 Node 1</div>
+                <div class="pod-blk">
+                  <div style="font-size:16px;margin-bottom:2px">📦</div>
+                  <div class="pod-name">web-pod</div>
+                  <div class="pod-ip">IP: 10.0.1.2</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px">
+                <div style="font-size:9px;color:var(--cyan)">⟷</div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">direct<br>route</div>
+              </div>
+              <div class="node-wr" style="flex:1">
+                <div class="node-lbl">🖥 Node 2</div>
+                <div class="pod-blk">
+                  <div style="font-size:16px;margin-bottom:2px">📦</div>
+                  <div class="pod-name">api-pod</div>
+                  <div class="pod-ip">IP: 10.0.2.5</div>
+                </div>
+              </div>
+            </div>
+            <!-- request flow -->
+            <div style="border-radius:8px;padding:8px;background:rgba(0,0,0,.25);border:1px solid var(--border)">
+              <div style="font-size:8px;font-weight:700;color:#7EB3FF;margin-bottom:5px">Request flow:</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+                <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:var(--podD);border:1px solid var(--podB);color:#BAE6FD;font-weight:600">web-pod</div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="font-family:monospace;font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#86EFAC">10.0.2.5:8080</div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:var(--podD);border:1px solid var(--podB);color:#BAE6FD;font-weight:600">api-pod</div>
+              </div>
+              <div style="font-size:8px;color:#86EFAC;font-weight:600">✅ No NAT. Direct communication.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 FLAT NETWORK ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Networking Model</div>
+      <div class="stitle">The Flat Network Model</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="bi"><div class="ico" style="background:var(--netD)">📐</div><div class="bt"><strong>All Pods live in one flat network</strong> — regardless of which node they're on, they share the same virtual network space</div></div>
+          <div class="bi"><div class="ico" style="background:var(--netD)">📡</div><div class="bt"><strong>Any Pod can reach any other Pod</strong> — using its IP directly, no firewalls, no NAT between them by default</div></div>
+          <div class="bi"><div class="ico" style="background:var(--netD)">⚙️</div><div class="bt"><strong>No manual routing config needed</strong> — the CNI plugin (e.g., Calico, Flannel) handles all of this automatically</div></div>
+          <div class="bi"><div class="ico" style="background:var(--netD)">🏠</div><div class="bt"><strong>Like one giant LAN</strong> — Local Area Network. All Pods behave as if they're plugged into the same switch</div></div>
+          <!-- key point box -->
+          <div style="padding:9px 13px;border-radius:9px;background:var(--netD);border:1px solid var(--netB)">
+            <span style="font-size:10px;font-weight:700;color:#67E8F9">K8s networking rule: </span>
+            <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Every Pod can communicate with every other Pod without NAT — this is guaranteed by the Kubernetes networking model</span>
+          </div>
+        </div>
+        <!-- right: flat network visual -->
+        <div style="width:280px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:13px;padding:13px;background:var(--netD);border:2px solid var(--netB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">🔗 Flat Network</div>
+            <!-- big flat network space -->
+            <div style="border-radius:10px;padding:10px;background:rgba(0,212,255,.05);border:1px dashed rgba(0,212,255,.2);margin-bottom:7px">
+              <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);margin-bottom:7px">Cluster Virtual Network (e.g. 10.0.0.0/16)</div>
+              <!-- pods grid -->
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">web</div><div class="pod-ip">10.0.1.2</div></div>
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">api</div><div class="pod-ip">10.0.1.3</div></div>
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">db</div><div class="pod-ip">10.0.2.4</div></div>
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">cache</div><div class="pod-ip">10.0.2.5</div></div>
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">auth</div><div class="pod-ip">10.0.3.6</div></div>
+                <div class="pod-blk"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">queue</div><div class="pod-ip">10.0.3.7</div></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>web (10.0.1.2) → db (10.0.2.4) ✓</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>api (10.0.1.3) → cache (10.0.2.5) ✓</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>All pairs can communicate ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 COMMUNICATION TYPES ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Traffic Flows</div>
+      <div class="stitle">Three Types of Communication</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Pod to Pod -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:10px;font-weight:800;color:#7EB3FF;display:flex;align-items:center;gap:7px"><span style="padding:2px 8px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid var(--podB)">Type 1</span>Pod → Pod</div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Internal communication between microservices — web server calling the API, API calling the database</div>
+          <div style="border-radius:9px;padding:9px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+              <div class="pod-blk" style="flex:1;padding:5px"><div style="font-size:12px">📦</div><div class="pod-name" style="font-size:7px">web-pod</div><div class="pod-ip">10.0.1.2</div></div>
+              <div style="display:flex;flex-direction:column;align-items:center">
+                <div style="width:35px;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+                <div style="font-size:7px;color:var(--cyan)">→</div>
+              </div>
+              <div class="pod-blk" style="flex:1;padding:5px"><div style="font-size:12px">📦</div><div class="pod-name" style="font-size:7px">api-pod</div><div class="pod-ip">10.0.2.5</div></div>
+            </div>
+            <div style="font-size:8px;color:var(--muted);text-align:center">via Pod IP directly</div>
+          </div>
+        </div>
+        <!-- Pod to Service -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--svcD);border:2px solid var(--svcB);display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:10px;font-weight:800;color:#DDD6FE;display:flex;align-items:center;gap:7px"><span style="padding:2px 8px;border-radius:6px;background:rgba(124,58,237,.2);border:1px solid var(--svcB)">Type 2</span>Pod → Service</div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Use a stable Service name instead of Pod IP. Service routes traffic to the right Pods automatically</div>
+          <div style="border-radius:9px;padding:9px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+              <div class="pod-blk" style="flex:1;padding:5px"><div style="font-size:12px">📦</div><div class="pod-name" style="font-size:7px">web-pod</div></div>
+              <div style="font-size:8px;color:var(--cyan)">→</div>
+              <div class="svc-blk" style="flex:1;padding:5px;text-align:center"><div style="font-size:12px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">api-svc</div></div>
+              <div style="font-size:8px;color:var(--cyan)">→</div>
+              <div class="pod-blk" style="flex:1;padding:5px"><div style="font-size:12px">📦</div><div class="pod-name" style="font-size:7px">api-pod</div></div>
+            </div>
+            <div style="font-size:8px;color:var(--muted);text-align:center">via stable Service name</div>
+          </div>
+        </div>
+        <!-- External to Service -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--userD);border:2px solid var(--userB);display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:10px;font-weight:800;color:#F9A8D4;display:flex;align-items:center;gap:7px"><span style="padding:2px 8px;border-radius:6px;background:rgba(236,72,153,.2);border:1px solid var(--userB)">Type 3</span>External → Service</div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">External users (browsers, mobile apps) access your application through an exposed Service endpoint</div>
+          <div style="border-radius:9px;padding:9px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+              <div style="flex:1;padding:5px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);text-align:center"><div style="font-size:12px">👤</div><div style="font-size:7px;font-weight:700;color:#F9A8D4">User</div></div>
+              <div style="font-size:8px;color:var(--pink)">→</div>
+              <div class="svc-blk" style="flex:1;padding:5px;text-align:center"><div style="font-size:12px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">LoadBalancer</div></div>
+              <div style="font-size:8px;color:var(--cyan)">→</div>
+              <div class="pod-blk" style="flex:1;padding:5px"><div style="font-size:12px">📦</div><div class="pod-name" style="font-size:7px">web-pod</div></div>
+            </div>
+            <div style="font-size:8px;color:var(--muted);text-align:center">via external IP or domain</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:9px;padding:8px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:var(--cyan)">Summary: </span>
+        <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Internal = use Pod IPs directly. Stable access = use Services. External access = use exposed Services</span>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 SERVICES ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Abstraction Layer</div>
+        <div class="stitle">Role of <span style="color:#DDD6FE">Services</span> in Networking</div>
+        <div class="bi"><div class="ico" style="background:var(--svcD)">⏳</div><div class="bt"><strong>Pods are temporary — IPs change</strong> — every time a Pod restarts it gets a new IP. You can't hardcode Pod IPs.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--svcD)">🏷</div><div class="bt"><strong>Services provide a stable address</strong> — Services get a fixed IP (ClusterIP) and DNS name that never changes</div></div>
+        <div class="bi"><div class="ico" style="background:var(--svcD)">🎯</div><div class="bt"><strong>Fixed entry point to your Pods</strong> — other services always call the Service, never the Pod IP directly</div></div>
+        <div class="bi"><div class="ico" style="background:var(--svcD)">⚖️</div><div class="bt"><strong>Load balances traffic</strong> — if there are 3 Pods behind a Service, traffic is spread evenly across all 3</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--svcD);border:1px solid var(--svcB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Service = a reception desk 🏢. You call reception (stable), they connect you to the right employee (Pod).</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--svcD);border:2px solid var(--svcB);box-shadow:0 0 22px rgba(124,58,237,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚙ Service as Stable Front</div>
+            <!-- caller -->
+            <div style="display:flex;justify-content:center;margin-bottom:5px">
+              <div class="pod-blk" style="width:110px"><div style="font-size:14px">📦</div><div class="pod-name">web-pod</div><div class="pod-ip">always calls "api-svc"</div></div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--svc);margin-bottom:3px">↓</div>
+            <!-- service -->
+            <div style="border-radius:10px;padding:9px;background:rgba(124,58,237,.18);border:2px solid rgba(124,58,237,.45);margin-bottom:5px;text-align:center">
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">⚙ api-service</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">ClusterIP: 10.96.0.10 (stable)</div>
+              <div style="font-size:8px;color:#DDD6FE;margin-top:2px">DNS: api-svc.default.svc.cluster.local</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--purple)">↙ ↓ ↘</div>
+            <!-- 3 pods behind -->
+            <div style="display:flex;gap:5px;margin-top:4px">
+              <div class="pod-blk" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">api-pod-1</div><div class="pod-ip">10.0.1.5</div></div>
+              <div class="pod-blk" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">api-pod-2</div><div class="pod-ip">10.0.2.6</div></div>
+              <div class="pod-blk" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name" style="font-size:7px">api-pod-3</div><div class="pod-ip">10.0.3.7</div></div>
+            </div>
+            <div style="margin-top:7px;font-size:8px;color:#86EFAC;font-weight:600;text-align:center">Load balanced evenly across all 3 ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 DNS ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Name Resolution</div>
+        <div class="stitle">DNS in <span style="color:var(--dns)">Kubernetes</span></div>
+        <div class="bi"><div class="ico" style="background:var(--dnsD)">🌐</div><div class="bt"><strong>Kubernetes has built-in DNS</strong> — automatically runs CoreDNS inside the cluster so Pods can use names</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dnsD)">📛</div><div class="bt"><strong>Pods can use Service names</strong> — instead of <code style="background:rgba(245,158,11,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#FDE068">10.96.0.10</code>, just write <code style="background:rgba(245,158,11,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#FDE068">api-svc</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--dnsD)">🧠</div><div class="bt"><strong>No need to remember IPs</strong> — DNS resolves names to IPs automatically. Apps use names, DNS does the work.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dnsD)">📍</div><div class="bt"><strong>Full DNS format</strong> — <code style="font-size:10px;color:#FDE068">service-name.namespace.svc.cluster.local</code> — but short names also work</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--dnsD);border:1px solid var(--dnsB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">K8s DNS = phonebook 📖. You look up "api-svc" and get back 10.96.0.10. You use the name, not the number.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--dnsD);border:2px solid var(--dnsB);box-shadow:0 0 22px rgba(245,158,11,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🌐 DNS Resolution Flow</div>
+            <!-- step 1: pod asks -->
+            <div style="padding:7px 10px;border-radius:8px;background:var(--podD);border:1px solid var(--podB);margin-bottom:5px;display:flex;align-items:center;gap:8px">
+              <span style="font-size:14px">📦</span>
+              <div><div style="font-size:9px;font-weight:700;color:#7EB3FF">web-pod asks:</div><div style="font-family:monospace;font-size:9px;color:#86EFAC;margin-top:1px">"where is api-svc?"</div></div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--dns)">↓ DNS query</div>
+            <!-- step 2: CoreDNS answers -->
+            <div style="padding:7px 10px;border-radius:8px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);margin:4px 0;display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">🌐</span>
+              <div><div style="font-size:9px;font-weight:700;color:#FDE068">CoreDNS replies:</div><div style="font-family:monospace;font-size:9px;color:#86EFAC;margin-top:1px">api-svc → 10.96.0.10</div></div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ok)">↓ IP resolved</div>
+            <!-- step 3: connects -->
+            <div style="padding:7px 10px;border-radius:8px;background:var(--okD);border:1px solid var(--okB);margin-top:4px;display:flex;align-items:center;gap:8px">
+              <span style="font-size:14px">📦</span>
+              <div style="font-size:10px;color:var(--cyan)">→</div>
+              <span style="font-size:14px">⚙</span>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">Connected!</div><div style="font-size:8px;color:var(--muted)">Request sent to 10.96.0.10</div></div>
+            </div>
+            <!-- full dns name -->
+            <div style="margin-top:8px;padding:7px;border-radius:7px;background:rgba(0,0,0,.3);border:1px solid var(--border)">
+              <div style="font-size:8px;font-weight:700;color:var(--muted);margin-bottom:4px">Full DNS name format:</div>
+              <div style="font-family:monospace;font-size:8px;color:#FDE068">api-svc.default.svc.cluster.local</div>
+              <div style="display:flex;gap:3px;margin-top:3px;flex-wrap:wrap">
+                <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(245,158,11,.12);color:#FDE068">api-svc</span>
+                <span style="font-size:7px;color:var(--muted)">.</span>
+                <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(50,108,229,.12);color:#BAE6FD">default</span>
+                <span style="font-size:7px;color:var(--muted)">.</span>
+                <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(124,58,237,.12);color:#DDD6FE">svc</span>
+                <span style="font-size:7px;color:var(--muted)">.</span>
+                <span style="font-size:7px;padding:2px 5px;border-radius:4px;background:rgba(34,197,94,.1);color:#86EFAC">cluster.local</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 NETWORKING COMPONENTS ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Under the Hood</div>
+      <div class="stitle">Networking Components (High-Level)</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="bi"><div class="ico" style="background:var(--podD)">🔀</div><div class="bt"><strong>kube-proxy</strong> — runs on every node, maintains iptables/IPVS rules so traffic is routed to the correct Pod via Service</div></div>
+          <div class="bi"><div class="ico" style="background:var(--netD)">🔌</div><div class="bt"><strong>CNI (Container Network Interface)</strong> — plugin that actually creates the network for Pods (e.g., Calico, Flannel, Cilium)</div></div>
+          <div class="bi"><div class="ico" style="background:var(--dnsD)">🌐</div><div class="bt"><strong>CoreDNS</strong> — the internal DNS server in K8s. Watches Services and keeps DNS records up to date</div></div>
+          <div class="bi"><div class="ico" style="background:var(--svcD)">⚙️</div><div class="bt"><strong>Services</strong> — virtual IP abstraction. Not a real process, just an IP/DNS entry + routing rules</div></div>
+          <div style="padding:9px 13px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2)">
+            <span style="font-size:10px;font-weight:700;color:var(--cyan)">You don't configure these manually </span>
+            <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">— they're set up when you create a Kubernetes cluster. As a user, you interact with Services and DNS names.</span>
+          </div>
+        </div>
+        <!-- right: component diagram -->
+        <div style="width:260px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:13px;padding:12px;background:rgba(50,108,229,.05);border:1.5px solid rgba(50,108,229,.22)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7EB3FF;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Networking Stack</div>
+            <!-- stack layers -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <!-- user layer -->
+              <div style="padding:7px 10px;border-radius:8px;background:var(--userD);border:1px solid var(--userB);display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px">👤</span>
+                <div><div style="font-size:9px;font-weight:700;color:#F9A8D4">User / App</div><div style="font-size:8px;color:var(--muted)">Calls service name or IP</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--muted)">↓</div>
+              <!-- coreDNS -->
+              <div style="padding:7px 10px;border-radius:8px;background:var(--dnsD);border:1px solid var(--dnsB);display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px">🌐</span>
+                <div><div style="font-size:9px;font-weight:700;color:#FDE068">CoreDNS</div><div style="font-size:8px;color:var(--muted)">Resolves name → IP</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--muted)">↓</div>
+              <!-- service + kube-proxy -->
+              <div style="padding:7px 10px;border-radius:8px;background:var(--svcD);border:1px solid var(--svcB);display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px">⚙</span>
+                <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Service + kube-proxy</div><div style="font-size:8px;color:var(--muted)">Routes to correct Pod</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--muted)">↓</div>
+              <!-- CNI -->
+              <div style="padding:7px 10px;border-radius:8px;background:var(--netD);border:1px solid var(--netB);display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px">🔌</span>
+                <div><div style="font-size:9px;font-weight:700;color:#67E8F9">CNI Plugin</div><div style="font-size:8px;color:var(--muted)">Physical packet delivery</div></div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--muted)">↓</div>
+              <!-- Pod -->
+              <div style="padding:7px 10px;border-radius:8px;background:var(--podD);border:1px solid var(--podB);display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px">📦</span>
+                <div><div style="font-size:9px;font-weight:700;color:#7EB3FF">Destination Pod</div><div style="font-size:8px;color:#86EFAC">Receives the request ✓</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Kubernetes Networking — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- city analogy -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--netD);border:1.5px solid var(--netB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🛣</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Network</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Roads in a city</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Infrastructure that connects everything. Without roads, nothing moves.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🏠</div>
+              <div style="font-size:10px;font-weight:800;color:#7EB3FF">Pods</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Houses</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Each has its own address (IP). Can receive visitors (traffic) from the road.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--svcD);border:1.5px solid var(--svcB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--purple));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Stable access</div>
+              <div style="font-size:28px;margin-top:4px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Services</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Main entry gates</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Stable entrance to the building. You call the gate, it routes you to the right room (Pod).</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--dnsD);border:1.5px solid var(--dnsB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">📖</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">DNS</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Directory / Phonebook</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Look up "api-svc" → get the IP. No need to memorise addresses.</div>
+            </div>
+          </div>
+          <!-- key recap -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--netD);border:1px solid var(--netB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔗</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Flat Network</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">All Pods on same virtual network — direct IP-based comms</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--svcD);border:1px solid var(--svcB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚙</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Services</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Stable IPs and load balancing — essential for reliability</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--dnsD);border:1px solid var(--dnsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">CoreDNS</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Name-based discovery — call services by name, not IP</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔀</div>
+              <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">kube-proxy + CNI</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Handle actual packet routing — you don't configure these</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"In Kubernetes, <span style="color:var(--cyan)">every Pod has an IP</span>, <span style="color:#DDD6FE">Services add stability</span>, and <span style="color:#FDE068">DNS adds simplicity</span> — all automatic."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--netD);border:1.5px solid var(--netB)">
+            <div style="font-size:9px;font-weight:700;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Every Pod gets a unique IP</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Flat network — direct access</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Services = stable endpoints</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>DNS = use names not IPs</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>kube-proxy + CNI handle routing</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Services</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">ClusterIP · NodePort · LoadBalancer</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

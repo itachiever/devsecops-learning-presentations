@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --sx:#EF4444;--sxD:rgba(239,68,68,.09);--sxB:rgba(239,68,68,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --net:#7C3AED;--netD:rgba(124,58,237,.1);--netB:rgba(124,58,237,.32);
+  --sec:#EC4899;--secD:rgba(236,72,153,.09);--secB:rgba(236,72,153,.28);
+  --cm:#F59E0B;--cmD:rgba(245,158,11,.09);--cmB:rgba(245,158,11,.28);
+  --ev:#00D4FF;--evD:rgba(0,212,255,.09);--evB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--sx);border-color:var(--sx);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--sx);color:var(--sx)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(239,68,68,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(239,68,68,.18);border-color:var(--sx)}
+.nbtn.pri{background:linear-gradient(135deg,var(--sx),var(--purple));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(239,68,68,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(239,68,68,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(239,68,68,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(239,68,68,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--sx);margin-bottom:7px}
+.stitle{font-size:clamp(14px,2.6vw,24px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(239,68,68,.14);transition:all .25s}
+.bi:hover{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.sx-box{border-radius:10px;padding:9px 12px;background:var(--sxD);border:2px solid var(--sxB);text-align:center}
+.ok-box{border-radius:10px;padding:9px 12px;background:var(--okD);border:2px solid var(--okB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(239,68,68,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sx);padding:3px 12px;border:1px solid rgba(239,68,68,.25);border-radius:20px;background:rgba(239,68,68,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,4vw,40px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--sx) 55%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Security Overview</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Understanding Security in Kubernetes<br>— Protect every layer of your cluster</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--sxD);color:#FCA5A5;border:1px solid var(--sxB);padding:4px 11px;font-size:9px">🔐 Auth &amp; RBAC</span>
+          <span class="tag" style="background:var(--netD);color:#DDD6FE;border:1px solid var(--netB);padding:4px 11px;font-size:9px">🌐 Network Policies</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">🛡 Pod Security</span>
+          <span class="tag" style="background:var(--cmD);color:#FDE068;border:1px solid var(--cmB);padding:4px 11px;font-size:9px">🏗 Supply Chain</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(239,68,68,.25);border-radius:14px;padding:12px;background:rgba(239,68,68,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Security Layers</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:5px 10px;border-radius:7px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);font-size:8.5px;font-weight:600;color:#FCA5A5;display:flex;gap:7px;align-items:center"><span>🔐</span>Authentication &amp; Authorization (RBAC)</div>
+            <div style="padding:5px 10px;border-radius:7px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.28);font-size:8.5px;font-weight:600;color:#BAE6FD;display:flex;gap:7px;align-items:center"><span>🛡</span>Pod &amp; Container Security</div>
+            <div style="padding:5px 10px;border-radius:7px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);font-size:8.5px;font-weight:600;color:#DDD6FE;display:flex;gap:7px;align-items:center"><span>🌐</span>Network Security &amp; Policies</div>
+            <div style="padding:5px 10px;border-radius:7px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.28);font-size:8.5px;font-weight:600;color:#F9A8D4;display:flex;gap:7px;align-items:center"><span>🔒</span>Secrets &amp; Config Protection</div>
+            <div style="padding:5px 10px;border-radius:7px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);font-size:8.5px;font-weight:600;color:#FDE068;display:flex;gap:7px;align-items:center"><span>🏗</span>Image &amp; Supply Chain Security</div>
+          </div>
+          <div style="margin-top:7px;font-size:8px;color:var(--muted);text-align:center">Security must exist at every layer</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY SECURITY MATTERS -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Why It Matters</div>
+        <div class="stitle">Why Kubernetes Security <span style="color:var(--sx)">Cannot Be Ignored</span></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">🏭</div><div class="bt"><strong>Kubernetes runs critical production systems</strong> — databases, payment APIs, user data — a breach doesn't just take down a server. It can take down the whole business.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">👥</div><div class="bt"><strong>Multiple users share cluster resources</strong> — developers, operators, CI/CD pipelines all access the same cluster. Without controls, anyone can do anything.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">💀</div><div class="bt"><strong>One breach can compromise everything</strong> — a vulnerable container can be used to attack other Pods, access Secrets, or take over the entire cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">⚙</div><div class="bt"><strong>Misconfigurations are the #1 risk</strong> — most K8s breaches happen due to wrong RBAC, open ports, or exposed dashboards — not advanced hacks</div></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">🏗</div><div class="bt"><strong>Security must be built-in, not bolted on</strong> — adding security after deployment is expensive and incomplete. Secure every layer from the start.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--sxD);border:1px solid var(--sxB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">Shift left: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Security must be considered at design time, not added after production. Every Kubernetes practitioner must understand security basics.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:272px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--sxD);border:1.5px solid var(--sxB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">💀 Unsecured Cluster</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Anyone can create/delete Pods</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Containers run as root</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Secrets visible to all</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ All Pods talk to each other</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ No image scanning</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:8px">🛡 Secured Cluster</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ RBAC — least privilege access</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Non-root containers</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Secrets encrypted + RBAC</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Network Policies enforced</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Images scanned &amp; verified</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 MAIN SECURITY AREAS -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(239,68,68,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Security Architecture</div>
+      <div class="stitle">5 Main Areas of Kubernetes Security</div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- Auth -->
+        <div style="flex:1;border-radius:12px;padding:12px;background:var(--sxD);border:2px solid var(--sxB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;font-size:22px;margin-bottom:2px">🔐</div>
+          <div style="font-size:11px;font-weight:800;color:#FCA5A5;text-align:center">Auth &amp; Access</div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Control <strong style="color:#FCA5A5">who</strong> can access the cluster and <strong style="color:#FCA5A5">what</strong> they can do. RBAC, service accounts, kubeconfig.</div>
+          <div style="font-size:7.5px;padding:3px 6px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;text-align:center">RBAC · Service Accounts</div>
+        </div>
+        <!-- Pod Security -->
+        <div style="flex:1;border-radius:12px;padding:12px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;font-size:22px;margin-bottom:2px">🛡</div>
+          <div style="font-size:11px;font-weight:800;color:#BAE6FD;text-align:center">Pod Security</div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Restrict container capabilities. Run as <strong style="color:#BAE6FD">non-root</strong>. Apply security contexts and Pod Security Standards.</div>
+          <div style="font-size:7.5px;padding:3px 6px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);color:#BAE6FD;text-align:center">SecurityContext · PSA</div>
+        </div>
+        <!-- Network -->
+        <div style="flex:1;border-radius:12px;padding:12px;background:var(--netD);border:2px solid var(--netB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;font-size:22px;margin-bottom:2px">🌐</div>
+          <div style="font-size:11px;font-weight:800;color:#DDD6FE;text-align:center">Network Security</div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Control Pod-to-Pod traffic. Block unauthorized connections. Enforce <strong style="color:#DDD6FE">least network access</strong> between services.</div>
+          <div style="font-size:7.5px;padding:3px 6px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;text-align:center">NetworkPolicy · TLS</div>
+        </div>
+        <!-- Secrets -->
+        <div style="flex:1;border-radius:12px;padding:12px;background:var(--secD);border:2px solid var(--secB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;font-size:22px;margin-bottom:2px">🔒</div>
+          <div style="font-size:11px;font-weight:800;color:#F9A8D4;text-align:center">Secrets &amp; Config</div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Store sensitive data <strong style="color:#F9A8D4">securely</strong>. Never hardcode. Use Kubernetes Secrets with encryption-at-rest.</div>
+          <div style="font-size:7.5px;padding:3px 6px;border-radius:5px;background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.28);color:#F9A8D4;text-align:center">K8s Secrets · Vault</div>
+        </div>
+        <!-- Image Security -->
+        <div style="flex:1;border-radius:12px;padding:12px;background:var(--cmD);border:2px solid var(--cmB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;font-size:22px;margin-bottom:2px">🏗</div>
+          <div style="font-size:11px;font-weight:800;color:#FDE068;text-align:center">Image Security</div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Use <strong style="color:#FDE068">trusted, scanned</strong> images. Avoid outdated base images. Verify supply chain integrity.</div>
+          <div style="font-size:7.5px;padding:3px 6px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;text-align:center">Trivy · Cosign · Sigstore</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:8px 14px;border-radius:9px;background:var(--sxD);border:1px solid var(--sxB);text-align:center">
+        <div style="font-size:clamp(9px,1.2vw,11px);font-weight:700;color:var(--white)">🏰 <span style="color:#FCA5A5">Defense in depth</span> — Each layer protects the others. If one fails, the rest still hold.</div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 AUTH & AUTHZ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Access Control</div>
+        <div class="stitle">Authentication <span style="color:var(--sx)">&amp;</span> Authorization</div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">👤</div><div class="bt"><strong>Authentication = "Who are you?"</strong> — verifies identity. Kubernetes checks certificates, tokens, or OIDC before allowing any request</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🎯</div><div class="bt"><strong>Authorization = "What can you do?"</strong> — after identity is confirmed, K8s checks if that user/service account has permission for the action</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">⚙</div><div class="bt"><strong>RBAC — Role-Based Access Control</strong> — the standard K8s authorization system. Defines Roles (what) and RoleBindings (who gets that role)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🤖</div><div class="bt"><strong>Service Accounts for workloads</strong> — Pods get their own identity via ServiceAccount. Used by apps to call the Kubernetes API securely</div></div>
+        <div class="bi"><div class="ico" style="background:var(--sxD)">⚠</div><div class="bt"><strong>Least privilege is critical</strong> — grant only the minimum permissions needed. A compromised Pod with admin rights = full cluster compromise</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--sxD);border:1px solid var(--sxB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">RBAC rule: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Never use ClusterAdmin for regular workloads. Create specific Roles with only the permissions the app actually needs.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--sxD);border:2px solid var(--sxB);box-shadow:0 0 22px rgba(239,68,68,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Auth Flow</div>
+            <div style="padding:6px 10px;border-radius:8px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.28);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#F9A8D4">👤 User / Service Account</div>
+              <div style="font-size:7.5px;color:var(--muted);margin-top:1px">sends API request to cluster</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--sx);margin:3px 0">↓</div>
+            <div style="padding:6px 10px;border-radius:8px;background:var(--sxD);border:1.5px solid var(--sxB);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">🔐 Authentication</div>
+              <div style="font-size:7.5px;color:var(--muted);margin-top:1px">cert / token / OIDC — who are you?</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--sx);margin:3px 0">↓</div>
+            <div style="padding:6px 10px;border-radius:8px;background:var(--podD);border:1.5px solid var(--podB);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD">🎯 Authorization (RBAC)</div>
+              <div style="font-size:7.5px;color:var(--muted);margin-top:1px">Role + RoleBinding — what can you do?</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--sx);margin:3px 0">↓</div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;padding:5px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Allowed</div>
+                <div style="font-size:7px;color:var(--muted)">action permitted</div>
+              </div>
+              <div style="flex:1;padding:5px;border-radius:7px;background:var(--sxD);border:1px solid var(--sxB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5">❌ Denied</div>
+                <div style="font-size:7px;color:var(--muted)">403 Forbidden</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 POD SECURITY -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Container Hardening</div>
+        <div class="stitle">Pod &amp; Container <span style="color:#BAE6FD">Security</span></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🚫</div><div class="bt"><strong>Never run containers as root</strong> — a root container that gets compromised gives the attacker root access to the host node. Always use a non-root user.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🔒</div><div class="bt"><strong>Use Security Contexts</strong> — define <code style="color:#BAE6FD;background:rgba(50,108,229,.1);padding:1px 5px;border-radius:4px">runAsUser</code>, <code style="color:#BAE6FD;background:rgba(50,108,229,.1);padding:1px 5px;border-radius:4px">readOnlyRootFilesystem</code>, and <code style="color:#BAE6FD;background:rgba(50,108,229,.1);padding:1px 5px;border-radius:4px">allowPrivilegeEscalation: false</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">⚡</div><div class="bt"><strong>Drop unnecessary Linux capabilities</strong> — containers inherit host capabilities by default. Drop all and add only what's needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">📋</div><div class="bt"><strong>Pod Security Admission (PSA)</strong> — Kubernetes built-in policy engine. Enforces Baseline or Restricted profiles across namespaces.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">🔒</div><div class="bt"><strong>Read-only root filesystem</strong> — prevent attackers from writing malicious files to the container if it is compromised</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--podD);border:1px solid var(--podB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Rule: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Least privilege for containers = run as non-root, read-only FS, no extra capabilities. Default = deny all extras.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:11px;background:var(--sxD);border:1.5px solid var(--sxB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:7px">❌ Insecure Container</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(239,68,68,.2);font-family:monospace;font-size:7.5px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#FCA5A5">runAsRoot: true ❌</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#FCA5A5">privileged: true ❌</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#FCA5A5">allowPrivEscalation: true ❌</span></div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:7px">✅ Secure Container</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:7.5px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsUser: 1000 ✅</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsNonRoot: true ✅</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">readOnlyRootFS: true ✅</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">allowPrivEscalation: false ✅</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">capabilities: drop: [ALL] ✅</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 NETWORK SECURITY -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Network Isolation</div>
+        <div class="stitle">Network Security &amp; <span style="color:#DDD6FE">Policies</span></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🌐</div><div class="bt"><strong>By default all Pods can talk to all Pods</strong> — a K8s cluster is fully open by default. Every Pod can reach every other Pod. This is dangerous in production.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">📋</div><div class="bt"><strong>Network Policies restrict traffic</strong> — define exactly which Pods can communicate with which other Pods using label selectors and rules</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🔒</div><div class="bt"><strong>Default deny strategy</strong> — block all traffic first, then explicitly allow only what's needed. A frontend Pod should NOT reach the database directly.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🔐</div><div class="bt"><strong>Use TLS for service communication</strong> — encrypt traffic between services using mutual TLS (mTLS). Service meshes like Istio can automate this.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--netD)">🌍</div><div class="bt"><strong>Control ingress and egress</strong> — restrict what comes into and what goes out of your cluster. Prevent data exfiltration and unauthorized access.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--netD);border:1px solid var(--netB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Best practice: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Apply a default-deny NetworkPolicy to every namespace. Then explicitly allow only the connections your app actually needs.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--netD);border:2px solid var(--netB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Network Policy</div>
+            <!-- Allowed -->
+            <div style="border-radius:8px;padding:9px;background:var(--okD);border:1.5px solid var(--okB);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:5px">✅ Allowed connections</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+                <div style="padding:3px 7px;border-radius:5px;background:var(--podD);border:1px solid var(--podB);font-size:7.5px;color:#BAE6FD;font-weight:600">Frontend</div>
+                <div style="font-size:10px;color:var(--ok)">→</div>
+                <div style="padding:3px 7px;border-radius:5px;background:var(--netD);border:1px solid var(--netB);font-size:7.5px;color:#DDD6FE;font-weight:600">Backend</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="padding:3px 7px;border-radius:5px;background:var(--netD);border:1px solid var(--netB);font-size:7.5px;color:#DDD6FE;font-weight:600">Backend</div>
+                <div style="font-size:10px;color:var(--ok)">→</div>
+                <div style="padding:3px 7px;border-radius:5px;background:var(--secD);border:1px solid var(--secB);font-size:7.5px;color:#F9A8D4;font-weight:600">Database</div>
+              </div>
+            </div>
+            <!-- Blocked -->
+            <div style="border-radius:8px;padding:9px;background:var(--sxD);border:1.5px solid var(--sxB)">
+              <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:5px">❌ Blocked connections</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+                <div style="padding:3px 7px;border-radius:5px;background:var(--podD);border:1px solid var(--podB);font-size:7.5px;color:#BAE6FD;font-weight:600">Frontend</div>
+                <div style="font-size:10px;color:var(--sx)">✗</div>
+                <div style="padding:3px 7px;border-radius:5px;background:var(--secD);border:1px solid var(--secB);font-size:7.5px;color:#F9A8D4;font-weight:600">Database</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="padding:3px 7px;border-radius:5px;background:var(--cmD);border:1px solid var(--cmB);font-size:7.5px;color:#FDE068;font-weight:600">External</div>
+                <div style="font-size:10px;color:var(--sx)">✗</div>
+                <div style="padding:3px 7px;border-radius:5px;background:var(--secD);border:1px solid var(--secB);font-size:7.5px;color:#F9A8D4;font-weight:600">Database</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 SECRETS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(236,72,153,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Sensitive Data</div>
+        <div class="stitle">Secrets &amp; <span style="color:#F9A8D4">Sensitive Data Protection</span></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">🔐</div><div class="bt"><strong>Never hardcode credentials</strong> — passwords, tokens, keys in source code get committed to Git and shared. One leak = full system compromise.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">📦</div><div class="bt"><strong>Use Kubernetes Secrets</strong> — store sensitive data base64-encoded, access-controlled via RBAC, and mountable securely into Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">🛡</div><div class="bt"><strong>Enable encryption at rest</strong> — by default etcd stores Secrets unencrypted. Enable etcd encryption to protect data if the disk is compromised.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">🏛</div><div class="bt"><strong>Use external secret stores</strong> — for production, integrate HashiCorp Vault or AWS Secrets Manager. Secrets are never stored in etcd directly.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--secD)">🔄</div><div class="bt"><strong>Rotate secrets regularly</strong> — change passwords and tokens on a schedule. Kubernetes Secrets make rotation easy — update and restart Pod.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--secD);border:1px solid var(--secB)">
+          <span style="font-size:10px;font-weight:700;color:#F9A8D4">Vault analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Don't leave the password on a sticky note (hardcoded). Put it in a locked vault (Secret) and give only the right people the key (RBAC).</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--secD);border:2px solid var(--secB);box-shadow:0 0 22px rgba(236,72,153,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#F9A8D4;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Secret Security Levels</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:7px;padding:7px;background:var(--sxD);border:1px solid var(--sxB)">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:2px">❌ Level 0 — Worst</div>
+                <div style="font-size:7.5px;color:#94A3B8">Hardcoded in source code / Docker image</div>
+              </div>
+              <div style="border-radius:7px;padding:7px;background:var(--cmD);border:1px solid var(--cmB)">
+                <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:2px">⚠ Level 1 — Bad</div>
+                <div style="font-size:7.5px;color:#94A3B8">Stored in ConfigMap (plain text, visible)</div>
+              </div>
+              <div style="border-radius:7px;padding:7px;background:var(--secD);border:1px solid var(--secB)">
+                <div style="font-size:8px;font-weight:700;color:#F9A8D4;margin-bottom:2px">✅ Level 2 — Good</div>
+                <div style="font-size:7.5px;color:#94A3B8">Kubernetes Secret (RBAC + base64)</div>
+              </div>
+              <div style="border-radius:7px;padding:7px;background:var(--okD);border:1px solid var(--okB)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:2px">🏆 Level 3 — Best</div>
+                <div style="font-size:7.5px;color:#94A3B8">K8s Secret + etcd encryption + Vault</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 IMAGE SECURITY -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Supply Chain</div>
+        <div class="stitle">Image &amp; Supply Chain <span style="color:#FDE068">Security</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">🐳</div><div class="bt"><strong>Use trusted base images only</strong> — start from official images (nginx:alpine, python:3.12-slim). Never use random images from unknown authors on Docker Hub.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">🔍</div><div class="bt"><strong>Scan images for vulnerabilities</strong> — use tools like <strong style="color:#FDE068">Trivy</strong>, Snyk, or Grype. Scan every image in your CI/CD pipeline before it goes to production.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">🔄</div><div class="bt"><strong>Keep images up to date</strong> — old images have old CVEs (Common Vulnerabilities). Rebuild images regularly to get the latest patched packages.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">✍</div><div class="bt"><strong>Sign and verify images</strong> — use <strong style="color:#FDE068">Cosign</strong> + <strong style="color:#FDE068">Sigstore</strong> to sign images and enforce that only signed images run in your cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">🏠</div><div class="bt"><strong>Use a private registry</strong> — push verified images to your own registry (ECR, GCR, ACR, Harbor). Restrict access to prevent unauthorized image pulls.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Pipeline rule: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Build → Scan → Sign → Push → Deploy. Never deploy an image that hasn't passed a vulnerability scan.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--cmD);border:2px solid var(--cmB);box-shadow:0 0 22px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Secure Image Pipeline</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#BAE6FD">👨‍💻 Developer writes code</div></div>
+              <div style="font-size:10px;color:var(--cm)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--cmD);border:1.5px solid var(--cmB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#FDE068">🐳 Build Docker image</div></div>
+              <div style="font-size:10px;color:var(--cm)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--sxD);border:1px solid var(--sxB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#FCA5A5">🔍 Trivy scan for CVEs</div><div style="font-size:7px;color:var(--muted);margin-top:1px">Fail pipeline if HIGH/CRITICAL found</div></div>
+              <div style="font-size:10px;color:var(--cm)">↓ passes scan</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--netD);border:1px solid var(--netB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#DDD6FE">✍ Sign with Cosign</div></div>
+              <div style="font-size:10px;color:var(--cm)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#86EFAC">🚀 Deploy to cluster ✅</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(239,68,68,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Security Checklist</div>
+      <div class="stitle">Kubernetes Security Best Practices</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;padding-top:8px">
+        <div style="border-radius:12px;padding:12px;background:var(--sxD);border:2px solid var(--sxB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎯</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FCA5A5;margin-bottom:4px">Least Privilege Everywhere</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">RBAC roles with minimum permissions. Non-root containers. Drop all Linux capabilities. No wildcard permissions.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--podD);border:2px solid var(--podB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔄</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#BAE6FD;margin-bottom:4px">Keep Everything Updated</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Upgrade Kubernetes regularly. Patch node OS. Rebuild container images to get latest security fixes. Update dependencies.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--netD);border:2px solid var(--netB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#DDD6FE;margin-bottom:4px">Default-Deny Networking</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Apply NetworkPolicies blocking all traffic by default. Explicitly allow only required connections. Use TLS between services.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--cmD);border:2px solid var(--cmB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔍</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Scan Images in CI/CD</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Block deployment of images with HIGH/CRITICAL CVEs. Use Trivy or Snyk. Sign images with Cosign. Use admission controllers.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--secD);border:2px solid var(--secB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(236,72,153,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔐</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#F9A8D4;margin-bottom:4px">Protect Secrets Properly</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Enable etcd encryption. Use Vault for production. Rotate credentials regularly. Never store secrets in ConfigMaps or code.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--okD);border:2px solid var(--okB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Monitor &amp; Audit Everything</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Enable audit logging. Use Falco for runtime threat detection. Monitor RBAC changes. Set up alerts for anomalous activity.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes Security — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy trio -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Cluster</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Apartment building</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Multiple tenants (apps/teams) share the same infrastructure.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--sxD);border:1.5px solid var(--sxB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--sx),var(--purple));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Defense in Depth</div>
+              <div style="font-size:26px;margin-top:4px">🛡</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Security Layers</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Locks, guards, cameras</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Multiple controls — if one fails, others still protect.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Secure, resilient cluster</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Every tenant protected. Data safe. Breaches contained.</div>
+            </div>
+          </div>
+          <!-- 5 key areas recap -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--sxD);border:1px solid var(--sxB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">RBAC &amp; Auth</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Least privilege access</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🛡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Pod Security</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Non-root · read-only</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--netD);border:1px solid var(--netB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Network Policies</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Default deny traffic</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--secD);border:1px solid var(--secB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔒</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#F9A8D4">Secrets</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Encrypted + RBAC</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🏗</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Image Security</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Scan · sign · verify</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Monitor &amp; Audit</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Falco · audit logs</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">Cluster = building</span>. <span style="color:#FCA5A5">Security = locks, guards, cameras, access cards</span>. Every layer matters."</div>
+          </div>
+        </div>
+        <!-- Right panel -->
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--sxD);border:1.5px solid var(--sxB)">
+            <div style="font-size:9px;font-weight:700;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sx)">◆</span>Security at every layer</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sx)">◆</span>Least privilege always</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sx)">◆</span>Default deny networking</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sx)">◆</span>Scan &amp; sign images</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sx)">◆</span>Monitor and audit always</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.28);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#BAE6FD;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">RBAC<br>Roles &amp; RoleBindings</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Deep dive into K8s<br>access control</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#FCA5A5;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

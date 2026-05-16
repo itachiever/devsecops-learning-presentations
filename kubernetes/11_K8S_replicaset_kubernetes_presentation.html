@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --rs:#00D4FF;--rsD:rgba(0,212,255,.09);--rsB:rgba(0,212,255,.3);
+  --pod:#326CE5;--podD:rgba(50,108,229,.12);--podB:rgba(50,108,229,.36);
+  --ok:#22C55E;--okD:rgba(34,197,94,.1);--okB:rgba(34,197,94,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --want:#F59E0B;--wantD:rgba(245,158,11,.1);--wantB:rgba(245,158,11,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* pod chip */
+.pod-chip{width:52px;height:52px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1.5px solid;flex-shrink:0}
+.pod-ok{background:var(--okD);border-color:var(--okB)}
+.pod-fail{background:var(--failD);border-color:var(--failB);opacity:.7}
+.pod-new{background:rgba(0,212,255,.1);border-color:var(--rsB)}
+.pod-label{font-size:7px;font-weight:700}
+/* rs controller box */
+.rs-box{border-radius:12px;padding:10px;background:var(--rsD);border:2px solid var(--rsB);text-align:center}
+.rs-title{font-size:9px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(24px,5.5vw,56px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,var(--blue) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ReplicaSet</div>
+        <div style="font-size:clamp(10px,1.7vw,16px);color:var(--muted);margin-bottom:18px;line-height:1.5">Maintaining the Desired Number of Pods<br>— Automatic healing, scaling, and self-management</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">✅ Self-healing</span>
+          <span class="tag" style="background:var(--rsD);color:#67E8F9;border:1px solid var(--rsB);padding:4px 11px;font-size:9px">🎯 Desired state</span>
+          <span class="tag" style="background:var(--podD);color:#BAE6FD;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📦 Manages Pods</span>
+          <span class="tag" style="background:var(--wantD);color:#FDE068;border:1px solid var(--wantB);padding:4px 11px;font-size:9px">📈 Horizontal scale</span>
+        </div>
+      </div>
+      <!-- right: RS hero diagram -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:300px">
+          <div style="border-radius:14px;padding:14px;background:var(--rsD);border:2px solid var(--rsB);box-shadow:0 0 30px rgba(0,212,255,.15)">
+            <div style="text-align:center;padding:8px;border-radius:9px;background:rgba(0,212,255,.12);border:1px solid var(--rsB);margin-bottom:10px">
+              <div style="font-size:9px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase">⚙ ReplicaSet</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">desired: 3 replicas</div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px">
+              <div style="text-align:center;font-size:18px;color:var(--cyan)">↙</div>
+              <div style="text-align:center;font-size:18px;color:var(--cyan)">↓</div>
+              <div style="text-align:center;font-size:18px;color:var(--cyan)">↘</div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center">
+              <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+              <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+              <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+            </div>
+            <div style="margin-top:8px;padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">actual: 3 ✅  desired: 3 ✅  matched!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 08</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">What Happens <span style="color:var(--red)">Without</span> ReplicaSet?</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">💀</div><div class="bt"><strong>Pod crashes → app goes down</strong> — nobody auto-creates a replacement. Users see errors.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">📈</div><div class="bt"><strong>Traffic spike → no more Pods</strong> — your single Pod gets overwhelmed. No way to scale fast.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🧑‍💻</div><div class="bt"><strong>Manual recovery is painful</strong> — someone has to notice the crash, then manually restart the Pod</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🎲</div><div class="bt"><strong>No guarantee of reliability</strong> — nothing ensures your required number of Pods are always running</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">💡 Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">ReplicaSet watches your Pods and automatically fixes any issues — no human needed</span>
+        </div>
+      </div>
+      <div class="lr">
+        <!-- failing pods visual -->
+        <div style="width:100%;max-width:255px">
+          <div style="border-radius:13px;padding:13px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚠ No ReplicaSet — Chaos!</div>
+            <!-- time 1: all ok -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:5px;font-weight:600">T=0 — Everything running</div>
+              <div style="display:flex;gap:5px">
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+              </div>
+            </div>
+            <!-- time 2: pod fails -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:#FCA5A5;margin-bottom:5px;font-weight:600">T=5m — Pod 2 crashes!</div>
+              <div style="display:flex;gap:5px">
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+                <div class="pod-chip pod-fail"><div style="font-size:14px">💀</div><div class="pod-label" style="color:#FCA5A5">Dead</div></div>
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+              </div>
+            </div>
+            <!-- time 3: more fail -->
+            <div style="margin-bottom:8px">
+              <div style="font-size:8px;color:#FCA5A5;margin-bottom:5px;font-weight:600">T=15m — Pod 3 also crashes!</div>
+              <div style="display:flex;gap:5px">
+                <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+                <div class="pod-chip pod-fail"><div style="font-size:14px">💀</div><div class="pod-label" style="color:#FCA5A5">Dead</div></div>
+                <div class="pod-chip pod-fail"><div style="font-size:14px">💀</div><div class="pod-label" style="color:#FCA5A5">Dead</div></div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(239,68,68,.15);border:1px solid var(--failB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">Only 1/3 Pods running 😱</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">No one auto-fixes this!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 08</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS RS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--cyan)">ReplicaSet?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--rsD)">🎯</div><div class="bt"><strong>Ensures a specified number of Pods always run</strong> — you tell it "I want 3 Pods", it makes sure there are always 3</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rsD)">👁</div><div class="bt"><strong>Monitors Pods continuously</strong> — watches every Pod it manages in real-time, 24/7</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rsD)">🔁</div><div class="bt"><strong>Auto-creates replacement Pods</strong> — detects a crashed Pod and immediately schedules a new one</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rsD)">⚡</div><div class="bt"><strong>Maintains desired state</strong> — the target count you define is always matched, no matter what happens</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--rsD);border:1px solid var(--rsB)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">One sentence: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">ReplicaSet = an automatic Pod manager that guarantees your app always has the right number of instances running.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <!-- RS controller diagram -->
+          <div style="border-radius:13px;padding:13px;background:var(--rsD);border:2px solid var(--rsB);box-shadow:0 0 24px rgba(0,212,255,.14)">
+            <div class="rs-box" style="margin-bottom:9px">
+              <div class="rs-title">⚙ ReplicaSet Controller</div>
+              <div style="font-size:8px;color:var(--muted)">continuously watches cluster state</div>
+            </div>
+            <div style="display:flex;gap:4px;justify-content:space-around;margin-bottom:6px">
+              <div style="font-size:18px;color:var(--cyan)">↙</div>
+              <div style="font-size:18px;color:var(--cyan)">↓</div>
+              <div style="font-size:18px;color:var(--cyan)">↘</div>
+            </div>
+            <!-- 3 healthy pods -->
+            <div style="display:flex;gap:5px;margin-bottom:8px;justify-content:center">
+              <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+              <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+              <div class="pod-chip pod-ok"><div style="font-size:14px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+            </div>
+            <!-- match indicator -->
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--okB);text-align:center;margin-bottom:7px">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ desired=3 actual=3 — Happy!</div>
+            </div>
+            <!-- what if crash -->
+            <div style="border-radius:8px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+              <div style="font-size:8px;font-weight:700;color:var(--muted);text-align:center;margin-bottom:5px">If Pod crashes...</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:center">
+                <div class="pod-chip pod-fail" style="width:36px;height:36px"><div style="font-size:11px">💀</div><div class="pod-label" style="color:#FCA5A5">Dead</div></div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div style="font-size:12px;color:var(--cyan)">⚙ RS detects</div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#67E8F9">New!</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 08</span></div>
+  </div>
+
+  <!-- ══ S4 DESIRED VS ACTUAL ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Core Concept</div>
+      <div class="stitle">Desired State vs Actual State</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- left: explanation -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--wantD);border:1.5px solid var(--wantB);display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:11px;font-weight:800;color:#FDE068;display:flex;align-items:center;gap:7px"><span style="font-size:18px">🎯</span>Desired State</div>
+              <div style="font-size:10px;color:#CBD5E1;line-height:1.45">What <strong style="color:#FDE068">you define</strong> in the ReplicaSet spec — the number of Pods you want running at all times</div>
+              <div style="padding:7px;border-radius:7px;background:rgba(245,158,11,.12);border:1px solid var(--wantB);font-family:monospace;font-size:9px;color:#FDE068">replicas: 3</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:11px;font-weight:800;color:#BAE6FD;display:flex;align-items:center;gap:7px"><span style="font-size:18px">📊</span>Actual State</div>
+              <div style="font-size:10px;color:#CBD5E1;line-height:1.45">What is <strong style="color:#BAE6FD">really running</strong> in your cluster at this moment — ReplicaSet reads this continuously</div>
+              <div style="padding:7px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);font-family:monospace;font-size:9px;color:#BAE6FD">current: ?</div>
+            </div>
+          </div>
+          <!-- 3 scenarios -->
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);display:flex;align-items:center;gap:10px">
+              <div style="font-size:20px;flex-shrink:0">✅</div>
+              <div style="flex:1">
+                <div style="font-size:10px;font-weight:700;color:#86EFAC">Desired = Actual (Happy path)</div>
+                <div style="font-size:9px;color:#94A3B8">desired: 3, actual: 3 → ReplicaSet does nothing. All is well.</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+              </div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);display:flex;align-items:center;gap:10px">
+              <div style="font-size:20px;flex-shrink:0">⬆</div>
+              <div style="flex:1">
+                <div style="font-size:10px;font-weight:700;color:#FCA5A5">Actual &lt; Desired (Too few Pods)</div>
+                <div style="font-size:9px;color:#94A3B8">desired: 3, actual: 1 → RS creates 2 new Pods immediately</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+                <div class="pod-chip pod-new" style="width:32px;height:32px"><div style="font-size:11px">✨</div></div>
+                <div class="pod-chip pod-new" style="width:32px;height:32px"><div style="font-size:11px">✨</div></div>
+              </div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);display:flex;align-items:center;gap:10px">
+              <div style="font-size:20px;flex-shrink:0">⬇</div>
+              <div style="flex:1">
+                <div style="font-size:10px;font-weight:700;color:#FDE068">Actual &gt; Desired (Too many Pods)</div>
+                <div style="font-size:9px;color:#94A3B8">desired: 3, actual: 5 → RS terminates 2 extra Pods</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+                <div class="pod-chip pod-ok" style="width:32px;height:32px"><div style="font-size:11px">📦</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- right: visual balance -->
+        <div style="width:200px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:13px;background:var(--rsD);border:1.5px solid var(--rsB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">⚖ The Balance</div>
+            <!-- desired -->
+            <div style="padding:7px;border-radius:7px;background:rgba(245,158,11,.12);border:1px solid var(--wantB);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:#FDE068">🎯 Desired: 3</div>
+              <div style="font-size:8px;color:var(--muted)">set by you in YAML</div>
+            </div>
+            <div style="text-align:center;font-size:20px;color:var(--cyan);margin:2px 0">⚖</div>
+            <!-- actual -->
+            <div style="padding:7px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center;margin-bottom:7px">
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD">📊 Actual: ?</div>
+              <div style="font-size:8px;color:var(--muted)">read from cluster</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--cyan);margin-bottom:6px">↓ if not equal ↓</div>
+            <!-- reconcile -->
+            <div style="padding:7px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid var(--rsB);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:800;color:var(--cyan)">⚙ ReplicaSet acts</div>
+              <div style="font-size:8px;color:var(--muted)">create or delete pods</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--green);margin-bottom:4px">↓ until ↓</div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--okB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ Desired = Actual</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 08</span></div>
+  </div>
+
+  <!-- ══ S5 HOW RS WORKS ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.13) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Step-by-Step</div>
+      <div class="stitle">How ReplicaSet <span style="color:var(--cyan)">Works</span></div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- flow steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">You define desired replicas in YAML</div><div style="font-size:9px;color:#94A3B8">spec.replicas: 3 → "I always want 3 Pods of my app"</div></div>
+            <div style="margin-left:auto;font-family:monospace;font-size:9px;padding:4px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068">replicas: 3</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--cyan)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--rsD);border:1px solid var(--rsB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--cyan)">ReplicaSet creates Pods via API Server</div><div style="font-size:9px;color:#94A3B8">Sends create-pod requests. Scheduler places them on nodes.</div></div>
+            <div style="margin-left:auto;display:flex;gap:4px">
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+            </div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--green)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Continuous monitoring loop begins</div><div style="font-size:9px;color:#94A3B8">RS watches every Pod using label selectors — health checked constantly</div></div>
+            <div style="margin-left:auto;padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid var(--okB);font-size:9px;font-weight:700;color:#86EFAC">👁 watching...</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--red)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">Pod fails → RS immediately detects</div><div style="font-size:9px;color:#94A3B8">actual=2, desired=3 → drift detected automatically</div></div>
+            <div style="margin-left:auto;display:flex;gap:4px;align-items:center">
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+              <div class="pod-chip pod-fail" style="width:30px;height:30px"><div style="font-size:11px">💀</div></div>
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+            </div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--cyan)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--rsD);border:1px solid var(--rsB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:var(--cyan)">RS creates replacement Pod → state restored</div><div style="font-size:9px;color:#94A3B8">New Pod scheduled, desired=3 actual=3 again. Loop continues.</div></div>
+            <div style="margin-left:auto;display:flex;gap:4px;align-items:center">
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+              <div class="pod-chip pod-new" style="width:30px;height:30px"><div style="font-size:11px">✨</div></div>
+              <div class="pod-chip pod-ok" style="width:30px;height:30px"><div style="font-size:11px">📦</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- right: loop diagram -->
+        <div style="width:185px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:var(--rsD);border:1.5px solid var(--rsB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Control Loop</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(245,158,11,.12);border:1px solid var(--wantB);text-align:center"><div style="font-size:8px;font-weight:700;color:#FDE068">📋 Observe</div><div style="font-size:7px;color:var(--muted)">Read current state</div></div>
+              <div style="font-size:11px;color:var(--cyan)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:8px;font-weight:700;color:#BAE6FD">🔍 Diff</div><div style="font-size:7px;color:var(--muted)">Desired vs actual?</div></div>
+              <div style="font-size:11px;color:var(--cyan)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid var(--rsB);text-align:center"><div style="font-size:8px;font-weight:700;color:var(--cyan)">⚙ Act</div><div style="font-size:7px;color:var(--muted)">Create or delete pods</div></div>
+              <div style="font-size:11px;color:var(--green)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--okB);text-align:center"><div style="font-size:8px;font-weight:700;color:#86EFAC">✅ Reconcile</div><div style="font-size:7px;color:var(--muted)">State matched!</div></div>
+              <div style="font-size:11px;color:var(--muted)">↕ repeat forever</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 08</span></div>
+  </div>
+
+  <!-- ══ S6 SCALING ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Scaling</div>
+        <div class="stitle">Scaling with <span style="color:#86EFAC">ReplicaSet</span></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">📈</div><div class="bt"><strong>Scale up → more Pods created</strong> — increase replicas from 3 to 5, RS adds 2 new Pods instantly</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">📉</div><div class="bt"><strong>Scale down → Pods removed</strong> — decrease replicas from 5 to 2, RS terminates 3 Pods gracefully</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rsD)">🚦</div><div class="bt"><strong>Handles traffic spikes</strong> — scale up when load increases, scale down to save resources when it drops</div></div>
+        <div class="bi"><div class="ico" style="background:var(--podD)">↔️</div><div class="bt"><strong>Horizontal Pod Autoscaler (HPA)</strong> — can auto-scale ReplicaSet based on CPU/memory metrics</div></div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <div style="flex:1;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border)">
+            <div style="font-size:8px;font-weight:700;color:var(--muted);margin-bottom:5px">Scale up command</div>
+            <div style="font-family:monospace;font-size:9px;color:#86EFAC">kubectl scale rs myapp <span style="color:var(--cyan)">--replicas=5</span></div>
+          </div>
+          <div style="flex:1;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border)">
+            <div style="font-size:8px;font-weight:700;color:var(--muted);margin-bottom:5px">Scale down command</div>
+            <div style="font-family:monospace;font-size:9px;color:#FCA5A5">kubectl scale rs myapp <span style="color:var(--cyan)">--replicas=2</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px;display:flex;flex-direction:column;gap:8px">
+          <!-- scale up -->
+          <div style="border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📈</span>Scale Up (3 → 5)</div>
+            <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap">
+              <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC">P1</div></div>
+              <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC">P2</div></div>
+              <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC">P3</div></div>
+              <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#67E8F9">P4</div></div>
+              <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#67E8F9">P5</div></div>
+            </div>
+            <div style="font-size:8px;color:#86EFAC;font-weight:600;text-align:center">2 new Pods created ↑</div>
+          </div>
+          <!-- scale down -->
+          <div style="border-radius:11px;padding:11px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">📉</span>Scale Down (5 → 2)</div>
+            <div style="display:flex;gap:4px;margin-bottom:5px;flex-wrap:wrap">
+              <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC">P1</div></div>
+              <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC">P2</div></div>
+              <div class="pod-chip pod-fail" style="width:36px;height:36px;opacity:.5"><div style="font-size:11px">🗑</div><div class="pod-label" style="color:#FCA5A5">P3</div></div>
+              <div class="pod-chip pod-fail" style="width:36px;height:36px;opacity:.5"><div style="font-size:11px">🗑</div><div class="pod-label" style="color:#FCA5A5">P4</div></div>
+              <div class="pod-chip pod-fail" style="width:36px;height:36px;opacity:.5"><div style="font-size:11px">🗑</div><div class="pod-label" style="color:#FCA5A5">P5</div></div>
+            </div>
+            <div style="font-size:8px;color:#FCA5A5;font-weight:600;text-align:center">3 extra Pods removed ↓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 08</span></div>
+  </div>
+
+  <!-- ══ S7 IMPORTANT POINTS ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(124,58,237,.13) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Key Details</div>
+      <div class="stitle">Important Things to Know About ReplicaSet</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="bi"><div class="ico" style="background:rgba(124,58,237,.2)">🏷</div><div class="bt"><strong>Uses labels & selectors to identify Pods</strong> — RS finds its Pods by matching labels, not by name. Any Pod matching the selector is "owned"</div></div>
+          <div class="bi"><div class="ico" style="background:var(--podD)">📦</div><div class="bt"><strong>Manages Pods, not containers</strong> — RS creates/deletes Pods. The container inside is managed by Kubelet on the node</div></div>
+          <div class="bi"><div class="ico" style="background:var(--rsD)">🏗</div><div class="bt"><strong>Usually managed by Deployments</strong> — in real production, you rarely use ReplicaSet directly. Deployments wrap it and add rolling updates</div></div>
+          <div class="bi"><div class="ico" style="background:rgba(239,68,68,.15)">⚠️</div><div class="bt"><strong>Rarely used directly in production</strong> — always prefer Deployments over raw ReplicaSets unless you have a specific reason not to</div></div>
+          <!-- yaml snippet -->
+          <div style="padding:10px 12px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px;line-height:1.7;flex:1">
+            <div style="color:var(--muted);margin-bottom:4px"># ReplicaSet YAML example</div>
+            <div><span style="color:var(--cyan)">apiVersion:</span> <span style="color:#86EFAC">apps/v1</span></div>
+            <div><span style="color:var(--cyan)">kind:</span> <span style="color:#86EFAC">ReplicaSet</span></div>
+            <div><span style="color:var(--cyan)">spec:</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">replicas:</span> <span style="color:#FDE068">3</span>  <span style="color:var(--muted)"># desired count</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">selector:</span></div>
+            <div>&nbsp;&nbsp;&nbsp; <span style="color:var(--cyan)">matchLabels:</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--cyan)">app:</span> <span style="color:#86EFAC">my-app</span>  <span style="color:var(--muted)"># ← label selector</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">template:</span></div>
+            <div>&nbsp;&nbsp;&nbsp; <span style="color:var(--cyan)">metadata:</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--cyan)">labels:</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--cyan)">app:</span> <span style="color:#86EFAC">my-app</span>  <span style="color:var(--muted)"># must match ↑</span></div>
+          </div>
+        </div>
+        <!-- right: label selector diagram -->
+        <div style="width:210px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(124,58,237,.07);border:1.5px solid rgba(124,58,237,.3)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">🏷 Label Matching</div>
+            <!-- RS selector -->
+            <div style="padding:7px 10px;border-radius:8px;background:var(--rsD);border:1.5px solid var(--rsB);text-align:center;margin-bottom:5px">
+              <div style="font-size:8px;font-weight:700;color:var(--cyan)">⚙ ReplicaSet</div>
+              <div style="font-size:7px;color:var(--muted);margin-top:2px">selector: app=my-app</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--purple);margin-bottom:4px">↓ finds pods with ↓</div>
+            <!-- matching pods -->
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:5px">
+              <div style="padding:5px 8px;border-radius:6px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center;gap:6px">
+                <div class="pod-chip pod-ok" style="width:28px;height:28px"><div style="font-size:10px">📦</div></div>
+                <div><div style="font-size:8px;font-weight:700;color:#86EFAC">Pod 1</div><div style="font-size:7px;color:var(--muted)">label: app=my-app ✅</div></div>
+              </div>
+              <div style="padding:5px 8px;border-radius:6px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center;gap:6px">
+                <div class="pod-chip pod-ok" style="width:28px;height:28px"><div style="font-size:10px">📦</div></div>
+                <div><div style="font-size:8px;font-weight:700;color:#86EFAC">Pod 2</div><div style="font-size:7px;color:var(--muted)">label: app=my-app ✅</div></div>
+              </div>
+              <div style="padding:5px 8px;border-radius:6px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22);display:flex;align-items:center;gap:6px">
+                <div class="pod-chip pod-fail" style="width:28px;height:28px"><div style="font-size:10px">📦</div></div>
+                <div><div style="font-size:8px;font-weight:700;color:#FCA5A5">Other Pod</div><div style="font-size:7px;color:var(--muted)">label: app=other ❌</div></div>
+              </div>
+            </div>
+            <div style="padding:5px;border-radius:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);text-align:center">
+              <div style="font-size:8px;color:#DDD6FE;font-weight:600">RS only manages pods with matching labels</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 08</span></div>
+  </div>
+
+  <!-- ══ S8 SUMMARY ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">ReplicaSet — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">👔</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">Team Manager</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= ReplicaSet</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Always ensures the team has exactly the right number of workers — no more, no less</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">👷</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Workers</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Pods</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Do the actual work — if one leaves, manager finds a replacement immediately</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--rsD);border:1.5px solid var(--rsB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Rule</div>
+              <div style="font-size:28px;margin-top:4px">📋</div>
+              <div style="font-size:10px;font-weight:800;color:var(--cyan)">Headcount Rule</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Desired replicas</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">"We always need exactly 3 workers" — enforced automatically</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--rsD);border:1px solid var(--rsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--cyan)">Ensures desired count</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Always matches actual to desired Pods</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔁</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Auto-heals failures</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Crashed Pod? New one created instantly</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--wantD);border:1px solid var(--wantB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">↔️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Horizontal scaling</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Scale up/down with one command</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(124,58,237,.09);border:1px solid rgba(124,58,237,.28);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🏗</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Wrapped by Deployment</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">In production, use Deployments instead</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"ReplicaSet is your <span style="color:var(--cyan)">reliability guarantee</span> — it ensures your app never runs with fewer instances than you need"</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--rsD);border:1.5px solid var(--rsB)">
+            <div style="font-size:9px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Auto-manages Pod count</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Self-heals on failure</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Uses labels & selectors</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Reconciliation loop</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Use Deployments in prod</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Deployment</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Rolling updates · Rollbacks · Zero downtime</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 08</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

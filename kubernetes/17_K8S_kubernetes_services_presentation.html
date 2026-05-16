@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --cip:#326CE5;--cipD:rgba(50,108,229,.11);--cipB:rgba(50,108,229,.35);
+  --np:#7C3AED;--npD:rgba(124,58,237,.11);--npB:rgba(124,58,237,.35);
+  --lb:#22C55E;--lbD:rgba(34,197,94,.1);--lbB:rgba(34,197,94,.3);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.28);
+  --user:#EC4899;--userD:rgba(236,72,153,.1);--userB:rgba(236,72,153,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:3px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* pod chip */
+.pod-chip{border-radius:8px;padding:6px 8px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.pod-name{font-size:7px;font-weight:700;color:#67E8F9}
+/* svc box */
+.svc-cip{border-radius:9px;padding:8px 10px;background:var(--cipD);border:1.5px solid var(--cipB);text-align:center}
+.svc-np{border-radius:9px;padding:8px 10px;background:var(--npD);border:1.5px solid var(--npB);text-align:center}
+.svc-lb{border-radius:9px;padding:8px 10px;background:var(--lbD);border:1.5px solid var(--lbB);text-align:center}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* flow arrow */
+.arr{font-size:11px;color:var(--cyan);text-align:center;line-height:1;flex-shrink:0}
+/* node wr */
+.node-wr{border-radius:10px;padding:9px;border:1.5px solid rgba(14,165,233,.28);background:rgba(14,165,233,.06)}
+.node-lbl{font-size:8px;font-weight:700;color:#38BDF8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(22px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--blue) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Services</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">ClusterIP · NodePort · LoadBalancer — Explained Simply<br>Connect your applications to the world</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--cipD);color:#BAE6FD;border:1px solid var(--cipB);padding:4px 11px;font-size:9px">🔵 ClusterIP</span>
+          <span class="tag" style="background:var(--npD);color:#DDD6FE;border:1px solid var(--npB);padding:4px 11px;font-size:9px">🟣 NodePort</span>
+          <span class="tag" style="background:var(--lbD);color:#86EFAC;border:1px solid var(--lbB);padding:4px 11px;font-size:9px">🟢 LoadBalancer</span>
+        </div>
+      </div>
+      <!-- right: service routing visual -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:300px">
+          <div style="border-radius:14px;padding:13px;background:rgba(50,108,229,.07);border:1.5px solid rgba(50,108,229,.28)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Service Routes Traffic to Pods</div>
+            <!-- users -->
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:5px">
+              <div style="padding:5px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:9px;font-weight:700;color:#F9A8D4;display:flex;align-items:center;gap:4px"><span>👤</span>User</div>
+              <div style="padding:5px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:9px;font-weight:700;color:#F9A8D4;display:flex;align-items:center;gap:4px"><span>📱</span>App</div>
+            </div>
+            <div style="text-align:center;font-size:13px;color:var(--cyan);margin-bottom:4px">↓</div>
+            <!-- service -->
+            <div class="svc-cip" style="margin-bottom:6px;box-shadow:0 0 16px rgba(50,108,229,.18)">
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">⚙ Service</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">stable IP · DNS · load balancer</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--blue)">↙ ↓ ↘</div>
+            <!-- pods -->
+            <div style="display:flex;gap:5px;margin-top:4px;justify-content:center">
+              <div class="pod-chip"><div style="font-size:12px">📦</div><div class="pod-name">Pod 1</div></div>
+              <div class="pod-chip"><div style="font-size:12px">📦</div><div class="pod-name">Pod 2</div></div>
+              <div class="pod-chip"><div style="font-size:12px">📦</div><div class="pod-name">Pod 3</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why You <span style="color:var(--red)">Can't</span> Use Pod IPs Directly</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">♻️</div><div class="bt"><strong>Pods are temporary and replaceable</strong> — when a Pod restarts or is rescheduled, it gets a completely new IP address</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">📍</div><div class="bt"><strong>You can't hardcode Pod IPs</strong> — if you code <code style="font-size:10px;color:#FCA5A5">10.0.1.5</code> in your app, it breaks the moment that Pod restarts</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🎲</div><div class="bt"><strong>No stable endpoint exists</strong> — Pods can be on any node, any IP, changing constantly without warning</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">❌</div><div class="bt"><strong>No load balancing either</strong> — if you call one Pod directly, other Pods sit idle. No traffic distribution.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Kubernetes <strong style="color:#7EB3FF">Services</strong> — a stable, fixed endpoint that always points to the right Pods, even if they restart</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">❌ Without a Service</div>
+            <!-- before crash -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px;font-weight:600">Step 1 — hardcoded IP</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--cipD);border:1px solid var(--cipB);text-align:center"><div style="font-size:9px">📦</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-pod</div><div style="font-size:7px;color:#86EFAC">10.0.1.5</div></div>
+                <div style="font-size:10px;color:var(--cyan)">←</div>
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px">📦</div><div style="font-size:7px;color:#67E8F9">web-pod</div><div style="font-size:7px;color:#FDE068">calls 10.0.1.5</div></div>
+              </div>
+            </div>
+            <!-- crash -->
+            <div style="padding:5px 9px;border-radius:6px;background:rgba(239,68,68,.15);border:1px solid var(--failB);text-align:center;margin-bottom:7px">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">💀 api-pod crashes → K8s restarts it</div>
+            </div>
+            <!-- after crash -->
+            <div>
+              <div style="font-size:8px;color:#FCA5A5;margin-bottom:4px;font-weight:600">Step 2 — IP changed! App breaks!</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center"><div style="font-size:9px">📦</div><div style="font-size:7px;font-weight:700;color:#86EFAC">api-pod</div><div style="font-size:7px;color:#FCA5A5">10.0.1.99 ← NEW!</div></div>
+                <div style="font-size:10px;color:#FCA5A5">✗</div>
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px">📦</div><div style="font-size:7px;color:#67E8F9">web-pod</div><div style="font-size:7px;color:#FCA5A5">still calls 10.0.1.5 ❌</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS SERVICE ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a Kubernetes <span style="color:var(--cyan)">Service?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cipD)">📌</div><div class="bt"><strong>A stable, fixed endpoint for your Pods</strong> — Service IP and DNS name never change, even when Pods restart</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cipD)">🌐</div><div class="bt"><strong>Gets its own IP (ClusterIP)</strong> — this virtual IP is allocated when the Service is created and stays forever</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cipD)">🎯</div><div class="bt"><strong>Routes traffic to matching Pods</strong> — uses label selectors to find the right Pods and send traffic to them</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cipD)">⚖️</div><div class="bt"><strong>Load balances automatically</strong> — distributes incoming requests across all healthy Pods evenly</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cipD);border:1px solid var(--cipB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Think of Service as: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">A reception desk. You always call reception (Service). They connect you to the right staff (Pod). Staff may change, reception number never does.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:13px;padding:13px;background:var(--cipD);border:2px solid var(--cipB);box-shadow:0 0 22px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">⚙ Service = Stable Front</div>
+            <!-- callers -->
+            <div style="display:flex;gap:4px;margin-bottom:5px;justify-content:center">
+              <div style="padding:4px 7px;border-radius:6px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">📦 Pod A</div>
+              <div style="padding:4px 7px;border-radius:6px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">👤 User</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--cyan);margin-bottom:4px">↓ call "api-svc"</div>
+            <!-- service -->
+            <div class="svc-cip" style="margin-bottom:6px;box-shadow:0 0 14px rgba(50,108,229,.2)">
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">⚙ api-service</div>
+              <div style="font-size:8px;color:#86EFAC;margin-top:1px">ClusterIP: 10.96.0.10 (never changes)</div>
+              <div style="font-size:8px;color:var(--muted)">label selector: app=api</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--blue)">↙ ↓ ↘</div>
+            <!-- pods -->
+            <div style="display:flex;gap:5px;margin-top:4px">
+              <div class="pod-chip" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name">api-1</div><div style="font-size:6px;color:#86EFAC">app=api ✓</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name">api-2</div><div style="font-size:6px;color:#86EFAC">app=api ✓</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name">api-3</div><div style="font-size:6px;color:#86EFAC">app=api ✓</div></div>
+            </div>
+            <div style="margin-top:7px;text-align:center;font-size:8px;color:#86EFAC;font-weight:600">Pods may change IPs — Service stays stable ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- ══ S4 TYPES OVERVIEW ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Service Types</div>
+      <div class="stitle">Three Types of Kubernetes Services</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- ClusterIP -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--cipD);border:2px solid var(--cipB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔵</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">ClusterIP</div><div style="font-size:8px;color:var(--muted)">Default type</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Internal cluster communication only. Other Pods can reach it, but <strong style="color:#BAE6FD">external users cannot</strong>.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>✅</span>Pod-to-Pod communication</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>🔒</span>Internal only (cluster)</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;display:flex;gap:5px;align-items:center"><span>❌</span>Not accessible externally</div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#BAE6FD">Use for: backend / DB services</div>
+        </div>
+        <!-- NodePort -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--npD);border:2px solid var(--npB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🟣</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">NodePort</div><div style="font-size:8px;color:var(--muted)">External via Node IP</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Opens a port on every node. External traffic hits <strong style="color:#DDD6FE">NodeIP:Port</strong> and gets routed to Pods.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>✅</span>External access via Node IP</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>🔢</span>Port range: 30000–32767</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#FDE068;display:flex;gap:5px;align-items:center"><span>⚠️</span>Manual node IP needed</div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(124,58,237,.18);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">Use for: dev / testing access</div>
+        </div>
+        <!-- LoadBalancer -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--lbD);border:2px solid var(--lbB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🟢</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">LoadBalancer</div><div style="font-size:8px;color:var(--muted)">Cloud-managed external</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">Cloud provider provisions a real <strong style="color:#86EFAC">external IP / LB</strong>. Best for production apps on AWS/GCP/Azure.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>✅</span>Auto external IP from cloud</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>✅</span>Production-ready LB</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>💰</span>Cloud costs apply</div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(34,197,94,.18);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Use for: production frontends</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- ══ S5 CLUSTERIP ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Type 1 — Default</div>
+        <div class="stitle" style="color:#BAE6FD">ClusterIP <span style="font-size:.65em;color:var(--muted)">— Internal Only</span></div>
+        <div class="bi" style="background:var(--cipD);border-color:var(--cipB)"><div class="ico" style="background:rgba(50,108,229,.22)">🔒</div><div class="bt"><strong>Only accessible inside the cluster</strong> — no external user or system can reach it. Private by design.</div></div>
+        <div class="bi" style="background:var(--cipD);border-color:var(--cipB)"><div class="ico" style="background:rgba(50,108,229,.22)">📦</div><div class="bt"><strong>Perfect for backend & database services</strong> — web Pod calls API Pod via ClusterIP. DB never exposed outside.</div></div>
+        <div class="bi" style="background:var(--cipD);border-color:var(--cipB)"><div class="ico" style="background:rgba(50,108,229,.22)">🤖</div><div class="bt"><strong>Default type</strong> — if you don't specify a type in YAML, K8s creates a ClusterIP Service automatically</div></div>
+        <div class="bi" style="background:var(--cipD);border-color:var(--cipB)"><div class="ico" style="background:rgba(50,108,229,.22)">🌐</div><div class="bt"><strong>DNS works</strong> — other Pods call it by name: <code style="font-size:10px;color:#BAE6FD">http://api-svc:8080</code> — no IP needed</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+          <div style="color:var(--muted);font-size:7px;margin-bottom:3px">YAML spec</div>
+          <div><span style="color:var(--cyan)">spec.type:</span> <span style="color:#BAE6FD">ClusterIP</span> &nbsp;<span style="color:var(--muted)"># or omit entirely</span></div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--cipD);border:2px solid var(--cipB);box-shadow:0 0 22px rgba(50,108,229,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🔵 ClusterIP — Cluster-only</div>
+            <!-- cluster boundary -->
+            <div style="border:1.5px dashed rgba(50,108,229,.3);border-radius:11px;padding:10px;background:rgba(50,108,229,.04)">
+              <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);margin-bottom:7px">☸ Cluster boundary</div>
+              <!-- web pod calls api-svc -->
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+                <div class="pod-chip" style="flex:1"><div style="font-size:11px">📦</div><div class="pod-name">web-pod</div></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+                  <div style="font-size:8px;color:var(--cyan)">→</div>
+                  <div style="font-size:6px;color:var(--muted)">api-svc</div>
+                </div>
+                <div class="svc-cip" style="flex:1;padding:6px"><div style="font-size:10px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-service</div><div style="font-size:6px;color:#86EFAC">10.96.0.10</div></div>
+              </div>
+              <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--blue)">↙ ↓ ↘</div>
+              <div style="display:flex;gap:4px;margin-top:4px">
+                <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">api-1</div></div>
+                <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">api-2</div></div>
+              </div>
+            </div>
+            <!-- external blocked -->
+            <div style="margin-top:7px;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22)">
+              <span style="font-size:14px">👤</span>
+              <div style="font-size:10px;color:var(--red)">→ ✗</div>
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">External users blocked ❌</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- ══ S6 NODEPORT ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Type 2 — External</div>
+        <div class="stitle" style="color:#DDD6FE">NodePort <span style="font-size:.65em;color:var(--muted)">— Via Node IP</span></div>
+        <div class="bi" style="background:var(--npD);border-color:var(--npB)"><div class="ico" style="background:rgba(124,58,237,.22)">🌐</div><div class="bt"><strong>Opens a port on every node</strong> — allows external traffic to enter via <code style="font-size:10px;color:#DDD6FE">NodeIP:Port</code></div></div>
+        <div class="bi" style="background:var(--npD);border-color:var(--npB)"><div class="ico" style="background:rgba(124,58,237,.22)">🔢</div><div class="bt"><strong>Port range 30000–32767</strong> — K8s reserves this range for NodePort. You pick one or let K8s assign it.</div></div>
+        <div class="bi" style="background:var(--npD);border-color:var(--npB)"><div class="ico" style="background:rgba(124,58,237,.22)">🧪</div><div class="bt"><strong>Good for dev/testing</strong> — quick external access without needing a cloud load balancer</div></div>
+        <div class="bi" style="background:var(--npD);border-color:var(--npB)"><div class="ico" style="background:rgba(124,58,237,.22)">⚠️</div><div class="bt"><strong>Not production-recommended</strong> — must know node IP, node can change, no smart routing</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+          <div><span style="color:var(--cyan)">spec.type:</span> <span style="color:#DDD6FE">NodePort</span></div>
+          <div><span style="color:var(--cyan)">spec.ports.nodePort:</span> <span style="color:#FDE068">31000</span> &nbsp;<span style="color:var(--muted)"># 30000–32767</span></div>
+          <div style="color:var(--muted);font-size:8px;margin-top:3px">Access via: http://&lt;NodeIP&gt;:31000</div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:275px">
+          <div style="border-radius:13px;padding:13px;background:var(--npD);border:2px solid var(--npB);box-shadow:0 0 22px rgba(124,58,237,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🟣 NodePort Flow</div>
+            <!-- external user -->
+            <div style="display:flex;justify-content:center;margin-bottom:5px">
+              <div style="padding:6px 10px;border-radius:8px;background:var(--userD);border:1px solid var(--userB);display:flex;align-items:center;gap:7px">
+                <span style="font-size:16px">👤</span>
+                <div><div style="font-size:9px;font-weight:700;color:#F9A8D4">External User</div><div style="font-family:monospace;font-size:8px;color:#94A3B8">203.0.1.5:31000</div></div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--np);margin-bottom:4px">↓ hits any node</div>
+            <!-- node -->
+            <div class="node-wr" style="margin-bottom:6px">
+              <div class="node-lbl">🖥 node-1 (192.168.1.10:31000)</div>
+              <div class="svc-np">
+                <div style="font-size:9px;font-weight:700;color:#DDD6FE">⚙ web-service (NodePort)</div>
+                <div style="font-size:8px;color:var(--muted)">port: 80 → nodePort: 31000</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--np)">↙ ↓ ↘</div>
+            <!-- pods -->
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-1</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-2</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-3</div></div>
+            </div>
+            <div style="margin-top:7px;font-size:8px;color:#86EFAC;font-weight:600;text-align:center">Works even on different nodes ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- ══ S7 LOADBALANCER ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.17) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Type 3 — Production</div>
+        <div class="stitle" style="color:#86EFAC">LoadBalancer <span style="font-size:.65em;color:var(--muted)">— Cloud-Managed</span></div>
+        <div class="bi" style="background:var(--lbD);border-color:var(--lbB)"><div class="ico" style="background:rgba(34,197,94,.22)">☁️</div><div class="bt"><strong>Cloud creates a real Load Balancer</strong> — AWS ELB, Azure LB, GCP GLB — a true production-grade LB</div></div>
+        <div class="bi" style="background:var(--lbD);border-color:var(--lbB)"><div class="ico" style="background:rgba(34,197,94,.22)">🌍</div><div class="bt"><strong>Gets a real external IP</strong> — a public IP (or hostname) that the internet can reach directly</div></div>
+        <div class="bi" style="background:var(--lbD);border-color:var(--lbB)"><div class="ico" style="background:rgba(34,197,94,.22)">📈</div><div class="bt"><strong>Handles traffic distribution</strong> — cloud LB spreads traffic across nodes, then Service routes to Pods</div></div>
+        <div class="bi" style="background:var(--lbD);border-color:var(--lbB)"><div class="ico" style="background:rgba(34,197,94,.22)">🏭</div><div class="bt"><strong>Production standard</strong> — the go-to for customer-facing applications in real cloud environments</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+          <div><span style="color:var(--cyan)">spec.type:</span> <span style="color:#86EFAC">LoadBalancer</span></div>
+          <div style="color:var(--muted);font-size:8px;margin-top:2px"># Cloud auto-assigns: EXTERNAL-IP: 34.102.15.20</div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:280px">
+          <div style="border-radius:13px;padding:13px;background:var(--lbD);border:2px solid var(--lbB);box-shadow:0 0 22px rgba(34,197,94,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🟢 LoadBalancer Flow</div>
+            <!-- users -->
+            <div style="display:flex;gap:4px;justify-content:center;margin-bottom:5px">
+              <div style="padding:4px 7px;border-radius:6px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">👤 User 1</div>
+              <div style="padding:4px 7px;border-radius:6px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">📱 User 2</div>
+              <div style="padding:4px 7px;border-radius:6px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600">💻 User 3</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--lb);margin-bottom:4px">↓</div>
+            <!-- cloud LB -->
+            <div style="padding:8px;border-radius:9px;background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.45);margin-bottom:6px;text-align:center">
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">☁️ Cloud Load Balancer</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">External IP: 34.102.15.20</div>
+              <div style="display:flex;gap:4px;margin-top:5px;justify-content:center">
+                <span style="font-size:7px;padding:2px 6px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#FDE068">AWS ELB</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);color:#BAE6FD">Azure LB</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#86EFAC">GCP GLB</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--lb);margin-bottom:4px">↓ routes to nodes ↓</div>
+            <!-- service -->
+            <div class="svc-lb" style="margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">⚙ web-service (LB)</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--lb)">↙ ↓ ↘</div>
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-1</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-2</div></div>
+              <div class="pod-chip" style="flex:1"><div style="font-size:10px">📦</div><div class="pod-name" style="font-size:6px">web-3</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- ══ S8 COMPARISON TABLE ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Head-to-Head</div>
+      <div class="stitle">ClusterIP vs NodePort vs LoadBalancer</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;padding-top:8px">
+        <!-- header -->
+        <div style="display:flex;gap:8px">
+          <div style="flex:1.3;padding:7px 10px;border-radius:8px 8px 0 0;background:rgba(255,255,255,.03);border:1px solid var(--border);border-bottom:none;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Criteria</div>
+          <div style="flex:1;padding:7px;border-radius:8px 8px 0 0;background:var(--cipD);border:1px solid var(--cipB);border-bottom:none;font-size:9px;font-weight:800;color:#BAE6FD;text-align:center">🔵 ClusterIP</div>
+          <div style="flex:1;padding:7px;border-radius:8px 8px 0 0;background:var(--npD);border:1px solid var(--npB);border-bottom:none;font-size:9px;font-weight:800;color:#DDD6FE;text-align:center">🟣 NodePort</div>
+          <div style="flex:1;padding:7px;border-radius:8px 8px 0 0;background:var(--lbD);border:1px solid var(--lbB);border-bottom:none;font-size:9px;font-weight:800;color:#86EFAC;text-align:center">🟢 LoadBalancer</div>
+        </div>
+        <!-- rows -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.3;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span>🌐</span>External Access</div>
+            <div style="flex:1;padding:7px;background:var(--cipD);border:1px solid var(--cipB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FCA5A5">❌ No</span></div>
+            <div style="flex:1;padding:7px;background:var(--npD);border:1px solid var(--npB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">⚠️ Via NodeIP</span></div>
+            <div style="flex:1;padding:7px;background:var(--lbD);border:1px solid var(--lbB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Yes (cloud LB)</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.3;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span>🔢</span>Port Exposed</div>
+            <div style="flex:1;padding:7px;background:var(--cipD);border:1px solid var(--cipB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#BAE6FD">Internal only</span></div>
+            <div style="flex:1;padding:7px;background:var(--npD);border:1px solid var(--npB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#DDD6FE">30000–32767</span></div>
+            <div style="flex:1;padding:7px;background:var(--lbD);border:1px solid var(--lbB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">80/443 (any)</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.3;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span>⚖️</span>Load Balancing</div>
+            <div style="flex:1;padding:7px;background:var(--cipD);border:1px solid var(--cipB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Internal LB</span></div>
+            <div style="flex:1;padding:7px;background:var(--npD);border:1px solid var(--npB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">⚠️ Basic</span></div>
+            <div style="flex:1;padding:7px;background:var(--lbD);border:1px solid var(--lbB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Cloud-grade</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.3;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span>💰</span>Cost</div>
+            <div style="flex:1;padding:7px;background:var(--cipD);border:1px solid var(--cipB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Free</span></div>
+            <div style="flex:1;padding:7px;background:var(--npD);border:1px solid var(--npB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Free</span></div>
+            <div style="flex:1;padding:7px;background:var(--lbD);border:1px solid var(--lbB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FCA5A5">💲 Cloud cost</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.3;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span>🎯</span>Best For</div>
+            <div style="flex:1;padding:7px;background:var(--cipD);border:1px solid var(--cipB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#BAE6FD">Backend / DB</span></div>
+            <div style="flex:1;padding:7px;background:var(--npD);border:1px solid var(--npB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#DDD6FE">Dev / Testing</span></div>
+            <div style="flex:1;padding:7px;background:var(--lbD);border:1px solid var(--lbB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">Production</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- ══ S9 WHEN TO USE WHAT ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:20%;width:55%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Decision Guide</div>
+      <div class="stitle">When to Use Which Service Type?</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- ClusterIP -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--cipD);border:2px solid var(--cipB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;padding:6px;border-radius:8px;background:rgba(50,108,229,.18);border:1px solid var(--cipB);font-size:10px;font-weight:800;color:#BAE6FD">🔵 ClusterIP — Use when...</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🗄</span>
+              <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Database Services</div><div style="font-size:8px;color:#94A3B8">MySQL, PostgreSQL — only your app Pods should reach it</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">⚙️</span>
+              <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Internal APIs</div><div style="font-size:8px;color:#94A3B8">Backend microservices that don't need external exposure</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🔐</span>
+              <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Security-sensitive services</div><div style="font-size:8px;color:#94A3B8">Auth, secrets management — strictly internal</div></div>
+            </div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#BAE6FD">Default choice for backend</div>
+        </div>
+        <!-- NodePort -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--npD);border:2px solid var(--npB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;padding:6px;border-radius:8px;background:rgba(124,58,237,.18);border:1px solid var(--npB);font-size:10px;font-weight:800;color:#DDD6FE">🟣 NodePort — Use when...</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🧪</span>
+              <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Local development</div><div style="font-size:8px;color:#94A3B8">Testing app quickly on Minikube or local cluster</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🎓</span>
+              <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Learning / Demo</div><div style="font-size:8px;color:#94A3B8">Quick external access when you don't have a cloud LB</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🔧</span>
+              <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Simple setups</div><div style="font-size:8px;color:#94A3B8">Non-cloud, on-premise clusters with known node IPs</div></div>
+            </div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(124,58,237,.18);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">Use for dev/test only</div>
+        </div>
+        <!-- LoadBalancer -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--lbD);border:2px solid var(--lbB);display:flex;flex-direction:column;gap:7px">
+          <div style="text-align:center;padding:6px;border-radius:8px;background:rgba(34,197,94,.18);border:1px solid var(--lbB);font-size:10px;font-weight:800;color:#86EFAC">🟢 LoadBalancer — Use when...</div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🌍</span>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">Public-facing apps</div><div style="font-size:8px;color:#94A3B8">Web apps, APIs that real users on the internet access</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">🏭</span>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">Production environments</div><div style="font-size:8px;color:#94A3B8">Running on EKS, AKS, GKE with real cloud infrastructure</div></div>
+            </div>
+            <div style="padding:7px 9px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);display:flex;gap:7px;align-items:flex-start">
+              <span style="font-size:14px;flex-shrink:0">📈</span>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">High-traffic services</div><div style="font-size:8px;color:#94A3B8">Need real HA, auto-scaling, and proper routing</div></div>
+            </div>
+          </div>
+          <div style="padding:5px;border-radius:7px;background:rgba(34,197,94,.18);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Default for cloud production</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- ══ S10 SUMMARY ══ -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Services — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- 3 analogy cards -->
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--cipD);border:1.5px solid var(--cipB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:24px">📞</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">ClusterIP</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Internal extension</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.35">Office internal number. Only colleagues (Pods) can call. Outside world can't reach it.</div>
+            </div>
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--npD);border:1.5px solid var(--npB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:24px">☎️</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">NodePort</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Direct office number</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.35">Published direct number. Anyone can call, but they need the exact building address (node IP).</div>
+            </div>
+            <div style="flex:1;border-radius:10px;padding:11px;background:var(--lbD);border:1.5px solid var(--lbB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--lb),var(--blue));padding:2px 9px;border-radius:10px;font-size:7px;font-weight:800;color:#fff;white-space:nowrap">⭐ Production</div>
+              <div style="font-size:24px;margin-top:4px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">LoadBalancer</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Customer support</div>
+              <div style="font-size:8px;color:#94A3B8;line-height:1.35">1-800 number. Anyone calls it, routed intelligently to right agent. Scales automatically.</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--cipD);border:1px solid var(--cipB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">📌</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Stable endpoint</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Service IP + DNS never change even when Pods do</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--npD);border:1px solid var(--npB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🏷</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Label selectors</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Service finds Pods by matching labels automatically</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--lbD);border:1px solid var(--lbB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚖️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Load balancing</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">All types distribute traffic across healthy Pods</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">DNS built-in</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Call by name: api-svc — CoreDNS resolves the IP</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">ClusterIP</span> for internal · <span style="color:#DDD6FE">NodePort</span> for testing · <span style="color:#86EFAC">LoadBalancer</span> for production. Right tool, right job."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--cipD);border:1.5px solid var(--cipB)">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag" style="background:var(--cipD);color:#BAE6FD;border:1px solid var(--cipB);flex-shrink:0">CIP</span>Internal only</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag" style="background:var(--npD);color:#DDD6FE;border:1px solid var(--npB);flex-shrink:0">NP</span>Via node IP</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag" style="background:var(--lbD);color:#86EFAC;border:1px solid var(--lbB);flex-shrink:0">LB</span>Cloud external IP</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>All use label selectors</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>All load balance traffic</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Ingress</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Path routing · SSL · Smart traffic rules</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

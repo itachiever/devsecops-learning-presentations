@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --job:#326CE5;--jobD:rgba(50,108,229,.11);--jobB:rgba(50,108,229,.35);
+  --cj:#F59E0B;--cjD:rgba(245,158,11,.1);--cjB:rgba(245,158,11,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.1);--okB:rgba(34,197,94,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* step blocks */
+.step{border-radius:9px;padding:8px 11px;border:1.5px solid;display:flex;align-items:center;gap:9px}
+.step-job{background:var(--jobD);border-color:var(--jobB)}
+.step-ok{background:var(--okD);border-color:var(--okB)}
+.step-cj{background:var(--cjD);border-color:var(--cjB)}
+/* timeline tick */
+.tick{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.tick-line{width:2px;height:18px;border-radius:1px;background:var(--cjB)}
+.tick-label{font-size:7px;font-weight:700;color:var(--muted);text-align:center;white-space:nowrap}
+.tick-job{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--cjB);background:var(--cjD);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px">
+          <span style="background:linear-gradient(135deg,#fff 15%,var(--blue) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Job</span>
+          <span style="color:var(--muted);font-weight:300"> & </span>
+          <span style="background:linear-gradient(135deg,var(--amber),#FDE68A);-webkit-background-clip:text;-webkit-text-fill-color:transparent">CronJob</span>
+        </div>
+        <div style="font-size:clamp(10px,1.7vw,16px);color:var(--muted);margin-bottom:18px;line-height:1.5">Running Tasks in Kubernetes<br>— One-time tasks & scheduled automation explained simply</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--jobD);color:#BAE6FD;border:1px solid var(--jobB);padding:4px 11px;font-size:9px">✅ Job — Runs once</span>
+          <span class="tag" style="background:var(--cjD);color:#FDE068;border:1px solid var(--cjB);padding:4px 11px;font-size:9px">⏰ CronJob — Scheduled</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">🔁 Retry on failure</span>
+          <span class="tag" style="background:rgba(124,58,237,.12);color:#DDD6FE;border:1px solid rgba(124,58,237,.3);padding:4px 11px;font-size:9px">⚡ Batch processing</span>
+        </div>
+      </div>
+      <!-- right visual -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px">
+          <!-- Job visual -->
+          <div style="border-radius:12px;padding:12px;background:var(--jobD);border:2px solid var(--jobB);box-shadow:0 0 20px rgba(50,108,229,.15)">
+            <div style="font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⚡ Job — One Time</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(50,108,229,.18);border:1px solid var(--jobB);font-size:9px;font-weight:700;color:#BAE6FD">▶ Start</div>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(50,108,229,.18);border:1px solid var(--jobB);font-size:9px;font-weight:700;color:#BAE6FD">⚙ Run</div>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--cyan),var(--ok))"></div>
+              <div style="padding:6px 9px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);font-size:9px;font-weight:700;color:#86EFAC">✅ Done</div>
+            </div>
+          </div>
+          <!-- CronJob visual -->
+          <div style="border-radius:12px;padding:12px;background:var(--cjD);border:2px solid var(--cjB);box-shadow:0 0 20px rgba(245,158,11,.14)">
+            <div style="font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⏰ CronJob — Scheduled</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <div style="font-size:8px;font-weight:700;color:var(--muted)">Mon</div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:28px;height:28px;border-radius:6px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;align-items:center;justify-content:center;font-size:12px">⚡</div>
+                <div style="font-size:7px;color:#FDE068;margin-top:1px">run</div>
+              </div>
+              <div style="flex:1;height:1.5px;background:rgba(245,158,11,.3)"></div>
+              <div style="font-size:8px;font-weight:700;color:var(--muted)">Tue</div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:28px;height:28px;border-radius:6px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;align-items:center;justify-content:center;font-size:12px">⚡</div>
+                <div style="font-size:7px;color:#FDE068;margin-top:1px">run</div>
+              </div>
+              <div style="flex:1;height:1.5px;background:rgba(245,158,11,.3)"></div>
+              <div style="font-size:8px;font-weight:700;color:var(--muted)">Wed</div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div style="width:28px;height:28px;border-radius:6px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;align-items:center;justify-content:center;font-size:12px">⚡</div>
+                <div style="font-size:7px;color:#FDE068;margin-top:1px">run</div>
+              </div>
+              <div style="flex:1;height:1.5px;background:rgba(245,158,11,.3)"></div>
+              <div style="font-size:8px;font-weight:700;color:var(--muted)">...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Not All Workloads Run <span style="color:var(--red)">Forever</span></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🔁</div><div class="bt"><strong>Deployment runs Pods continuously</strong> — great for web servers, but what about one-time database backup?</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">💾</div><div class="bt"><strong>Backup jobs need to run & stop</strong> — run once at midnight, complete, then exit. Not keep running.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">📊</div><div class="bt"><strong>Data processing has a clear end</strong> — process a file, generate a report. Done. No need to keep the Pod alive.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🎲</div><div class="bt"><strong>Deployment would restart completed Pods</strong> — Deployment thinks completion = failure, keeps restarting it forever!</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"><strong style="color:#7EB3FF">Job</strong> for one-time tasks · <strong style="color:#FDE068">CronJob</strong> for scheduled recurring tasks</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:9px">
+          <!-- continuous -->
+          <div style="border-radius:12px;padding:12px;background:rgba(50,108,229,.09);border:1.5px solid rgba(50,108,229,.28)">
+            <div style="font-size:9px;font-weight:800;color:#BAE6FD;margin-bottom:7px;display:flex;align-items:center;gap:6px"><span style="padding:2px 7px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.35)">Deployment</span>Continuous</div>
+            <div style="display:flex;gap:4px;align-items:center">
+              <div style="padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);font-size:8px;color:#BAE6FD;font-weight:600">🌐 Web server</div>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));position:relative">
+                <div style="position:absolute;right:-4px;top:-4px;width:0;height:0;border-left:8px solid var(--cyan);border-top:4px solid transparent;border-bottom:4px solid transparent"></div>
+              </div>
+            </div>
+            <div style="font-size:8px;color:#86EFAC;margin-top:5px;font-weight:600">✅ Runs forever → correct!</div>
+          </div>
+          <!-- one time needed -->
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;margin-bottom:7px;display:flex;align-items:center;gap:6px"><span style="padding:2px 7px;border-radius:6px;background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.35)">Deployment</span>Task — BAD!</div>
+            <div style="font-size:9px;color:#94A3B8;margin-bottom:5px">Backup task completes → Deployment restarts it again!</div>
+            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+              <div style="padding:4px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);font-size:8px;color:#86EFAC">Done ✅</div>
+              <div style="font-size:10px;color:#FCA5A5">→🔁→</div>
+              <div style="padding:4px 7px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);font-size:8px;color:#FCA5A5">Restart!</div>
+              <div style="font-size:10px;color:#FCA5A5">→🔁→</div>
+              <div style="padding:4px 7px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);font-size:8px;color:#FCA5A5">Again!</div>
+            </div>
+            <div style="font-size:8px;color:#FCA5A5;margin-top:5px;font-weight:600">❌ Wrong! Deployment = not for tasks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS JOB ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Kubernetes Object</div>
+        <div class="stitle">What is a <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Job?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--jobD)">▶</div><div class="bt"><strong>Runs a task until completion</strong> — creates one or more Pods to run the task and tracks whether they finish</div></div>
+        <div class="bi"><div class="ico" style="background:var(--jobD)">✅</div><div class="bt"><strong>Ensures task runs successfully</strong> — if a Pod fails, Job creates a new one. Keeps trying until success.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--jobD)">🔁</div><div class="bt"><strong>Retries on failure</strong> — you define <code style="background:rgba(50,108,229,.15);padding:1px 5px;border-radius:4px;font-size:10px;color:#BAE6FD">backoffLimit</code>: how many times to retry before giving up</div></div>
+        <div class="bi"><div class="ico" style="background:var(--jobD)">🛑</div><div class="bt"><strong>Stops after completion</strong> — once all Pods complete successfully, Job marks itself as done and stops</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--jobD);border:1px solid var(--jobB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Key difference: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Unlike Deployment, a Job's Pod completing successfully is the desired state — not a failure to restart</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:13px;padding:13px;background:var(--jobD);border:2px solid var(--jobB);box-shadow:0 0 24px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⚡ Job Execution Flow</div>
+            <!-- steps -->
+            <div class="step step-job" style="margin-bottom:5px">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">1</div>
+              <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Job created</div><div style="font-size:8px;color:var(--muted)">kubectl apply -f job.yaml</div></div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--blue);padding:2px">↓</div>
+            <div class="step step-job" style="margin-bottom:5px">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">2</div>
+              <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Pod created & runs</div><div style="font-size:8px;color:var(--muted)">Task executes inside the Pod</div></div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--cyan);padding:2px">↓</div>
+            <!-- fail scenario -->
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div class="step" style="flex:1;background:var(--failD);border-color:var(--failB)">
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">💀 Pod fails?</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">Job auto-retries</div>
+              </div>
+              <div style="font-size:10px;color:var(--blue);display:flex;align-items:center">→🔁</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--ok);padding:2px">↓</div>
+            <div class="step step-ok">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">3</div>
+              <div><div style="font-size:9px;font-weight:700;color:#86EFAC">✅ Job Complete!</div><div style="font-size:8px;color:var(--muted)">Pod exits 0 — Job marks as succeeded</div></div>
+            </div>
+            <div style="margin-top:7px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid var(--okB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC">Pod kept for log inspection. Job history retained.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 JOB FEATURES ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Job Features</div>
+      <div class="stitle">Key Features of a <span style="color:var(--cyan)">Job</span></div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- feature cards -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="bi"><div class="ico" style="background:var(--jobD)">1️⃣</div><div class="bt"><strong>One-time execution</strong> — run a task once and stop. Perfect for migrations, reports, data imports</div></div>
+          <div class="bi"><div class="ico" style="background:var(--jobD)">🔁</div><div class="bt"><strong>Retry on failure</strong> — <code style="font-size:10px;color:#BAE6FD">backoffLimit: 3</code> means try up to 3 times before declaring failure</div></div>
+          <div class="bi"><div class="ico" style="background:var(--jobD)">⚡</div><div class="bt"><strong>Parallel execution</strong> — set <code style="font-size:10px;color:#BAE6FD">parallelism: 4</code> to run 4 Pods at once and process faster</div></div>
+          <div class="bi"><div class="ico" style="background:var(--jobD)">🎯</div><div class="bt"><strong>Completions count</strong> — set <code style="font-size:10px;color:#BAE6FD">completions: 10</code> to process 10 tasks in total</div></div>
+          <!-- yaml snippet -->
+          <div style="padding:10px 12px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px;line-height:1.7;flex:1">
+            <div style="color:var(--muted);font-size:7px;margin-bottom:4px"># Job YAML example</div>
+            <div><span style="color:var(--cyan)">apiVersion:</span> <span style="color:#86EFAC">batch/v1</span></div>
+            <div><span style="color:var(--cyan)">kind:</span> <span style="color:#86EFAC">Job</span></div>
+            <div><span style="color:var(--cyan)">spec:</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">completions:</span> <span style="color:#FDE068">1</span> &nbsp;<span style="color:var(--muted)"># run once</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">backoffLimit:</span> <span style="color:#FDE068">3</span> &nbsp;<span style="color:var(--muted)"># retry 3 times</span></div>
+            <div>&nbsp; <span style="color:var(--cyan)">parallelism:</span> <span style="color:#FDE068">1</span> &nbsp;<span style="color:var(--muted)"># 1 pod at a time</span></div>
+          </div>
+        </div>
+        <!-- right: parallel visual -->
+        <div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="border-radius:12px;padding:12px;background:var(--jobD);border:1.5px solid var(--jobB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Parallel Jobs (parallelism: 3)</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="font-size:8px;color:var(--muted);width:40px">Pod-1</div>
+                <div style="flex:1;height:14px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan));display:flex;align-items:center;padding-left:5px"><span style="font-size:7px;color:#fff;font-weight:600">running</span></div>
+                <span style="font-size:9px;color:#86EFAC">✅</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="font-size:8px;color:var(--muted);width:40px">Pod-2</div>
+                <div style="flex:1;height:14px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan));display:flex;align-items:center;padding-left:5px"><span style="font-size:7px;color:#fff;font-weight:600">running</span></div>
+                <span style="font-size:9px;color:#86EFAC">✅</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="font-size:8px;color:var(--muted);width:40px">Pod-3</div>
+                <div style="flex:.6;height:14px;border-radius:4px;background:linear-gradient(90deg,var(--blue),rgba(50,108,229,.3));"></div>
+                <span style="font-size:9px;color:var(--amber)">⏳</span>
+              </div>
+            </div>
+            <div style="font-size:8px;color:#BAE6FD;font-weight:600;text-align:center;margin-top:6px">All 3 running simultaneously ⚡</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;margin-bottom:7px">Retry on Failure</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px"><span style="color:#FCA5A5">Attempt 1</span><span style="color:var(--red)">💀 fail</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px"><span style="color:#FCA5A5">Attempt 2</span><span style="color:var(--red)">💀 fail</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:9px"><span style="color:#86EFAC">Attempt 3</span><span style="color:#86EFAC">✅ success!</span></div>
+            </div>
+            <div style="font-size:8px;color:#FCA5A5;margin-top:4px;text-align:center">backoffLimit: 3 → 3 attempts allowed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 WHAT IS CRONJOB ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Kubernetes Object</div>
+        <div class="stitle">What is a <span style="background:linear-gradient(135deg,var(--amber),#FDE68A);-webkit-background-clip:text;-webkit-text-fill-color:transparent">CronJob?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cjD)">⏰</div><div class="bt"><strong>Runs Jobs on a defined schedule</strong> — specify when to run using a cron expression (e.g., every midnight)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cjD)">🐧</div><div class="bt"><strong>Similar to Linux cron</strong> — if you know Linux's <code style="background:rgba(245,158,11,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#FDE068">crontab</code>, you already understand CronJob</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cjD)">🔄</div><div class="bt"><strong>Automates repetitive tasks</strong> — set it once, runs automatically forever at the scheduled time</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cjD)">⚡</div><div class="bt"><strong>Creates a new Job each time</strong> — every schedule trigger creates a fresh Job and Pod internally</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cjD);border:1px solid var(--cjB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Cron syntax: </span>
+          <span style="font-family:monospace;font-size:10px;color:#86EFAC">"0 2 * * *"</span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> = run at 2:00 AM every day</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--cjD);border:2px solid var(--cjB);box-shadow:0 0 24px rgba(245,158,11,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">⏰ CronJob — Daily Schedule</div>
+            <!-- timeline -->
+            <div style="display:flex;align-items:flex-end;gap:3px;margin-bottom:5px">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div style="width:32px;height:32px;border-radius:7px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:11px">⚡</span><div style="font-size:6px;color:#86EFAC;font-weight:600">✅</div></div>
+                <div style="width:1.5px;height:14px;background:rgba(245,158,11,.3)"></div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">Mon<br>02:00</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div style="width:32px;height:32px;border-radius:7px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:11px">⚡</span><div style="font-size:6px;color:#86EFAC;font-weight:600">✅</div></div>
+                <div style="width:1.5px;height:14px;background:rgba(245,158,11,.3)"></div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">Tue<br>02:00</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div style="width:32px;height:32px;border-radius:7px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:11px">⚡</span><div style="font-size:6px;color:#86EFAC;font-weight:600">✅</div></div>
+                <div style="width:1.5px;height:14px;background:rgba(245,158,11,.3)"></div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">Wed<br>02:00</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div style="width:32px;height:32px;border-radius:7px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:11px">⚡</span><div style="font-size:6px;color:#86EFAC;font-weight:600">✅</div></div>
+                <div style="width:1.5px;height:14px;background:rgba(245,158,11,.3)"></div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">Thu<br>02:00</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div style="width:32px;height:32px;border-radius:7px;background:rgba(245,158,11,.07);border:1px dashed rgba(245,158,11,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:11px">⏳</span><div style="font-size:6px;color:var(--muted)">soon</div></div>
+                <div style="width:1.5px;height:14px;background:rgba(245,158,11,.2)"></div>
+                <div style="font-size:7px;color:var(--muted);text-align:center">Fri<br>02:00</div>
+              </div>
+            </div>
+            <!-- horizontal line -->
+            <div style="height:2px;border-radius:1px;background:linear-gradient(90deg,rgba(245,158,11,.5),rgba(245,158,11,.1));margin-bottom:8px"></div>
+            <!-- what happens each time -->
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;font-weight:700;color:#FDE068;margin-bottom:3px">Each trigger creates:</div>
+              <div style="display:flex;align-items:center;gap:7px;padding:5px 9px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22)">
+                <span style="font-size:12px">⏰</span>
+                <div style="font-size:10px;color:var(--muted)">CronJob</div>
+                <div style="font-size:10px;color:var(--amber)">→</div>
+                <div style="padding:3px 7px;border-radius:5px;background:var(--jobD);border:1px solid var(--jobB);font-size:8px;color:#BAE6FD;font-weight:600">⚡ Job</div>
+                <div style="font-size:10px;color:var(--blue)">→</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.25);font-size:8px;color:#BAE6FD;font-weight:600">📦 Pod</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 CRONJOB EXAMPLES ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(245,158,11,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">CronJob Examples</div>
+      <div class="stitle">Real-World CronJob Schedules</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- left: 4 examples -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div style="padding:10px 13px;border-radius:10px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;gap:11px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💾</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:700;color:#FDE068">Daily Database Backup</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.35">Dumps the entire database to storage every midnight</div>
+            </div>
+            <div style="font-family:monospace;font-size:8px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#86EFAC;flex-shrink:0;white-space:nowrap">0 0 * * *</div>
+          </div>
+          <div style="padding:10px 13px;border-radius:10px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;gap:11px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:700;color:#FDE068">Weekly Analytics Report</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.35">Generates and emails weekly user analytics every Monday 8 AM</div>
+            </div>
+            <div style="font-family:monospace;font-size:8px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#86EFAC;flex-shrink:0;white-space:nowrap">0 8 * * 1</div>
+          </div>
+          <div style="padding:10px 13px;border-radius:10px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;gap:11px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🧹</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:700;color:#FDE068">Hourly Log Cleanup</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.35">Removes logs older than 7 days to free up disk space</div>
+            </div>
+            <div style="font-family:monospace;font-size:8px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#86EFAC;flex-shrink:0;white-space:nowrap">0 * * * *</div>
+          </div>
+          <div style="padding:10px 13px;border-radius:10px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;gap:11px;align-items:flex-start">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔄</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:700;color:#FDE068">Every 5-min Data Sync</div>
+              <div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.35">Syncs inventory data from external API every 5 minutes</div>
+            </div>
+            <div style="font-family:monospace;font-size:8px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#86EFAC;flex-shrink:0;white-space:nowrap">*/5 * * * *</div>
+          </div>
+        </div>
+        <!-- right: cron syntax decoder -->
+        <div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="border-radius:12px;padding:12px;background:rgba(0,0,0,.35);border:1px solid var(--border)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⏰ Cron Syntax</div>
+            <div style="font-family:monospace;font-size:12px;color:#FDE068;text-align:center;letter-spacing:3px;margin-bottom:8px">* * * * *</div>
+            <div style="display:flex;gap:3px;justify-content:center;margin-bottom:8px">
+              <div style="width:28px;font-size:8px;color:#86EFAC;font-weight:600;text-align:center">min</div>
+              <div style="width:28px;font-size:8px;color:#67E8F9;font-weight:600;text-align:center">hr</div>
+              <div style="width:28px;font-size:8px;color:#DDD6FE;font-weight:600;text-align:center">day</div>
+              <div style="width:28px;font-size:8px;color:#FCA5A5;font-weight:600;text-align:center">mo</div>
+              <div style="width:28px;font-size:8px;color:#FDE068;font-weight:600;text-align:center">wday</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="font-family:monospace;font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#FDE068;width:90px;flex-shrink:0">0 0 * * *</div>
+                <div style="font-size:8px;color:#94A3B8">Every midnight</div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="font-family:monospace;font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#FDE068;width:90px;flex-shrink:0">*/5 * * * *</div>
+                <div style="font-size:8px;color:#94A3B8">Every 5 minutes</div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="font-family:monospace;font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#FDE068;width:90px;flex-shrink:0">0 8 * * 1</div>
+                <div style="font-size:8px;color:#94A3B8">Mon 8 AM</div>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center">
+                <div style="font-family:monospace;font-size:9px;padding:3px 8px;border-radius:5px;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#FDE068;width:90px;flex-shrink:0">0 0 1 * *</div>
+                <div style="font-size:8px;color:#94A3B8">1st of month</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 JOB vs CRONJOB ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle">Job vs CronJob — Side by Side</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Job -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--jobD);border:2px solid var(--jobB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚡</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Job</div><div style="font-size:8px;color:var(--muted)">One-time task runner</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>1️⃣</span>Runs exactly ONCE</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>🔁</span>Retries on failure</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>✅</span>Stops when complete</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>⚡</span>Supports parallel pods</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>📋</span>Manually triggered</div>
+          </div>
+          <!-- visual timeline -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">Timeline</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <div style="font-size:8px;color:#BAE6FD">▶</div>
+              <div style="flex:1;height:10px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan));display:flex;align-items:center;padding:0 6px"><span style="font-size:7px;color:#fff;font-weight:600">running...</span></div>
+              <div style="padding:3px 7px;border-radius:5px;background:var(--okD);border:1px solid var(--okB);font-size:8px;color:#86EFAC;font-weight:600">✅ done</div>
+            </div>
+            <div style="font-size:8px;color:#BAE6FD;text-align:center;margin-top:5px">Runs once → stops</div>
+          </div>
+        </div>
+        <!-- VS -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)">VS</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- CronJob -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--cjD);border:2px solid var(--cjB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⏰</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">CronJob</div><div style="font-size:8px;color:var(--muted)">Scheduled task runner</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:5px;align-items:center"><span>♾</span>Runs on a SCHEDULE</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:5px;align-items:center"><span>⚡</span>Creates a new Job each time</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🔄</span>Repeats automatically forever</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🐧</span>Cron expression syntax</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🕐</span>Time-triggered automatically</div>
+          </div>
+          <!-- visual timeline -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">Timeline (daily)</div>
+            <div style="display:flex;align-items:center;gap:3px;justify-content:center">
+              <div style="padding:3px 5px;border-radius:4px;background:var(--cjD);border:1px solid var(--cjB);font-size:7px;color:#86EFAC">✅ Mon</div>
+              <div style="font-size:8px;color:var(--muted)">–</div>
+              <div style="padding:3px 5px;border-radius:4px;background:var(--cjD);border:1px solid var(--cjB);font-size:7px;color:#86EFAC">✅ Tue</div>
+              <div style="font-size:8px;color:var(--muted)">–</div>
+              <div style="padding:3px 5px;border-radius:4px;background:var(--cjD);border:1px solid var(--cjB);font-size:7px;color:#86EFAC">✅ Wed</div>
+              <div style="font-size:8px;color:var(--muted)">–</div>
+              <div style="font-size:8px;color:var(--amber)">∞</div>
+            </div>
+            <div style="font-size:8px;color:#FDE068;text-align:center;margin-top:5px">Runs repeatedly on schedule</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:9px;padding:8px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:var(--cyan)">Key relationship: </span>
+        <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"><strong style="color:#FDE068">CronJob</strong> is a Job scheduler — it creates and manages <strong style="color:#BAE6FD">Jobs</strong> on a time-based schedule</span>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 USE CASES ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real World</div>
+      <div class="stitle">Production Use Cases</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Job use cases -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--jobD);border:2px solid var(--jobB);display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:6px;border-radius:8px;background:rgba(50,108,229,.18);border:1px solid var(--jobB);font-size:10px;font-weight:800;color:#BAE6FD">⚡ Job — One-Time Tasks</div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">🗄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Database Migration</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Run schema changes when deploying new app version</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">⚙️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Batch Data Processing</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Process a large CSV file and import data into database</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">🔧</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">One-time Setup Task</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Initialise a database with seed data on first deploy</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">📧</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Send Notification Batch</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Send emails to all users for an important announcement</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- CronJob use cases -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--cjD);border:2px solid var(--cjB);display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:6px;border-radius:8px;background:rgba(245,158,11,.18);border:1px solid var(--cjB);font-size:10px;font-weight:800;color:#FDE068">⏰ CronJob — Recurring Tasks</div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">💾</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Automated DB Backup</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Daily at midnight — dump and upload to S3</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">📊</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Monitoring Health Check</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Every 5 minutes — ping endpoints and alert if down</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">🧹</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Log / Cache Cleanup</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Weekly — purge old logs & expired cache entries</div></div>
+            </div>
+            <div style="padding:9px 11px;border-radius:9px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);display:flex;gap:9px;align-items:flex-start">
+              <div style="font-size:18px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Data Sync</div><div style="font-size:9px;color:#94A3B8;margin-top:1px">Hourly — sync inventory from external supplier API</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Job & CronJob — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy row -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--jobD);border:1.5px solid var(--jobB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">📝</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Job</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= One-time Assignment</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Your boss gives you a specific report to write — do it once, hand it in, done</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--cjD);border:1.5px solid var(--cjB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--amber),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Scheduled</div>
+              <div style="font-size:28px;margin-top:4px">📅</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">CronJob</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Daily Routine</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Like brushing your teeth every morning — same task, same time, every day automatically</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(124,58,237,.09);border:1.5px solid rgba(124,58,237,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🔗</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Relationship</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">CronJob → Job → Pod</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">CronJob creates a Job on schedule. Job creates a Pod to do the work.</div>
+            </div>
+          </div>
+          <!-- key facts grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--jobD);border:1px solid var(--jobB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">✅</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Job completes & stops</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Success = Pod exits 0. Deployment restarts it — Job celebrates it.</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--cjD);border:1px solid var(--cjB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⏰</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">CronJob repeats forever</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Set schedule once, automatic execution forever</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔁</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Retry on failure</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">backoffLimit controls how many retries before failing</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(124,58,237,.09);border:1px solid rgba(124,58,237,.28);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">batch/v1 API group</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Both use <code style="color:#DDD6FE">apiVersion: batch/v1</code></div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">Job</span> for when you need it done once. <span style="color:#FDE068">CronJob</span> for when you need it done on a schedule — automation at its best."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:rgba(50,108,229,.09);border:1.5px solid rgba(50,108,229,.28)">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Job = run once & stop</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>CronJob = scheduled Job</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Retry on failure</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Parallel execution</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>batch/v1 API group</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Networking Basics</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Services · Ingress · DNS · ClusterIP</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

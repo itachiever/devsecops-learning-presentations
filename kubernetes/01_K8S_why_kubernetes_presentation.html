@@ -1,0 +1,437 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--bg2:#0D1520;--bg3:#0F1E35;
+  --blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --red:#EF4444;--green:#22C55E;--amber:#F59E0B;
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;
+  --card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dot-row{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.nbtn.pri:hover{opacity:.85}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s ease;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.7);backdrop-filter:blur(4px)}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.stitle{font-size:clamp(16px,3vw,28px);font-weight:800;line-height:1.2;margin-bottom:12px}
+/* grid bg */
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.glow{position:absolute;border-radius:50%;pointer-events:none}
+
+/* ─── S1 title ─── */
+.s1c{position:relative;z-index:2;display:flex;height:100%;align-items:center;justify-content:center;flex-direction:column;padding:5%}
+.s1ttl{font-size:clamp(28px,5.5vw,56px);font-weight:900;text-align:center;background:linear-gradient(135deg,#fff 20%,var(--blue) 55%,var(--cyan) 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-bottom:10px}
+.s1sub{font-size:clamp(12px,2vw,20px);color:var(--muted);text-align:center;margin-bottom:22px}
+.s1tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.stag{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600}
+.tblue{background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);color:#7EB3FF}
+.tpurple{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#C084FC}
+.tcyan{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9}
+.tred{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#FCA5A5}
+.tgreen{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#86EFAC}
+/* inline vis */
+.ivis{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.cbox{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+/* two-col layout */
+.twocol{position:relative;z-index:2;display:flex;height:100%;padding:4% 4.5%}
+.col-l{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.col-r{flex:1;display:flex;align-items:center;justify-content:center}
+/* bullet items */
+.bitem{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border-radius:9px;margin-bottom:8px;background:var(--card);border:1px solid rgba(50,108,229,.18);transition:all .25s}
+.bitem:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.bicon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.btext{font-size:clamp(10px,1.3vw,13px);color:#CBD5E1;line-height:1.4;padding-top:4px}
+.btext strong{color:var(--white);font-weight:600}
+/* comparison */
+.cmprow{display:flex;gap:10px;width:100%;justify-content:center}
+.cmpcard{flex:1;border-radius:12px;padding:12px;border:1px solid;display:flex;flex-direction:column;gap:7px;max-width:200px}
+.citem{font-size:clamp(9px,1.1vw,11px);display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.citem:last-child{border:none}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* vis container */
+.visbox{padding:14px;border-radius:13px;background:rgba(255,255,255,.02);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.vislbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+/* fullrow */
+.fullrow{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.5% 4.5%}
+.grid3{display:flex;gap:9px;flex:1;align-items:stretch;padding-top:8px}
+.g3card{flex:1;border-radius:11px;padding:11px;border:1px solid;display:flex;flex-direction:column;gap:6px}
+.g3title{font-size:clamp(10px,1.3vw,13px);font-weight:700;margin-bottom:4px}
+.g3item{font-size:clamp(9px,1.1vw,11px);color:#94A3B8;display:flex;align-items:center;gap:5px}
+.g3dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+</style>
+
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dot-row" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+
+  <div class="wrap" id="sw">
+
+    <!-- S1: TITLE -->
+    <div class="slide on" data-s="1">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+      <div class="glow" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+      <div class="s1c">
+        <div style="margin-bottom:14px">
+          <svg width="70" height="70" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.08)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="20" r="4" fill="#00D4FF"/><circle cx="50" cy="80" r="4" fill="#00D4FF"/><circle cx="24" cy="35" r="4" fill="#00D4FF"/><circle cx="76" cy="65" r="4" fill="#00D4FF"/><circle cx="24" cy="65" r="4" fill="#00D4FF"/><circle cx="76" cy="35" r="4" fill="#00D4FF"/></svg>
+        </div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;padding:4px 14px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        <div class="s1ttl">Why Kubernetes?</div>
+        <div class="s1sub">Problems with Docker & Docker Swarm - explained simply</div>
+        <div class="s1tags">
+          <span class="stag tblue">Beginner Friendly</span>
+          <span class="stag tcyan">Container Basics</span>
+          <span class="stag tpurple">Orchestration</span>
+          <span class="stag tred">Docker Limits</span>
+        </div>
+        <div class="ivis" style="margin-top:18px">
+          <div class="cbox" style="background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4)">📦</div>
+          <div style="font-size:18px;color:var(--muted)">→</div>
+          <div style="display:flex;gap:4px">
+            <div class="cbox" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);font-size:14px">📦</div>
+            <div class="cbox" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);font-size:14px">💥</div>
+            <div class="cbox" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);font-size:14px">📦</div>
+          </div>
+          <div style="font-size:18px;color:var(--muted)">→</div>
+          <div class="cbox" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.35)">⚙️</div>
+        </div>
+      </div>
+      <div class="sfooter"><span>01 / 08</span></div>
+    </div>
+
+    <!-- S2: DOCKER IS GREAT -->
+    <div class="slide" data-s="2">
+      <div class="gbg"></div>
+      <div class="glow" style="bottom:-10%;left:-5%;width:50%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.12) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">The Starting Point</div>
+          <div class="stitle">Docker is Great - <span style="color:var(--green)">Really!</span></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(34,197,94,.15)">📦</div><div class="btext"><strong>Package everything together</strong> - your app, code, and all its dependencies in one box</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(0,212,255,.12)">🌐</div><div class="btext"><strong>Runs consistently anywhere</strong> - same result on laptop, server, or cloud</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(50,108,229,.15)">⚡</div><div class="btext"><strong>Lightweight & fast</strong> - starts in seconds, uses less resources than VMs</div></div>
+          <div style="margin-top:12px;padding:10px 14px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:10px;font-weight:700;color:var(--green);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Simple Analogy</div>
+            <div style="font-size:clamp(10px,1.3vw,13px);color:#CBD5E1">Think of Docker like a <strong style="color:var(--white)">lunchbox</strong> - everything you need, neatly packed, works anywhere you open it 🍱</div>
+          </div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:220px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">Single Container</div>
+            <div style="width:110px;height:110px;border-radius:14px;border:2px solid rgba(34,197,94,.4);background:rgba(34,197,94,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+              <div style="font-size:28px">📦</div>
+              <div style="font-size:9px;font-weight:700;color:var(--green)">YOUR APP</div>
+              <div style="font-size:8px;color:var(--muted)">+ all dependencies</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:4px">
+              <div style="padding:4px 10px;border-radius:6px;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);font-size:9px;color:#7EB3FF;font-weight:600">Laptop</div>
+              <div style="padding:4px 10px;border-radius:6px;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);font-size:9px;color:#7EB3FF;font-weight:600">Server</div>
+              <div style="padding:4px 10px;border-radius:6px;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);font-size:9px;color:#7EB3FF;font-weight:600">Cloud</div>
+            </div>
+            <div style="font-size:10px;color:var(--green);font-weight:600;margin-top:4px">Works the same everywhere ✓</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>02 / 08</span></div>
+    </div>
+
+    <!-- S3: SCALING PROBLEM -->
+    <div class="slide" data-s="3">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;right:-5%;width:50%;height:65%;background:radial-gradient(ellipse,rgba(239,68,68,.14) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">When Apps Grow</div>
+          <div class="stitle">The Problem <span style="color:var(--red)">Begins...</span></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(245,158,11,.15)">📈</div><div class="btext"><strong>More users arrive</strong> - one container can't handle all the traffic alone</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(239,68,68,.15)">🔀</div><div class="btext"><strong>You need more containers</strong> - but who manages them? Where do they run?</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(124,58,237,.15)">🤯</div><div class="btext"><strong>Tracking is a nightmare</strong> - which container is healthy? Which crashed?</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(239,68,68,.15)">🧑‍💻</div><div class="btext"><strong>Manual scaling is painful</strong> - someone has to do it by hand, every time</div></div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:240px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--red)">Containers exploding in count</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;padding:8px">
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);display:flex;align-items:center;justify-content:center;font-size:14px;transform:rotate(15deg)">💥</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);display:flex;align-items:center;justify-content:center;font-size:14px;transform:rotate(-10deg)">📦</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);display:flex;align-items:center;justify-content:center;font-size:14px;transform:rotate(8deg)">💀</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);display:flex;align-items:center;justify-content:center;font-size:14px;transform:rotate(-15deg)">💥</div>
+              <div style="width:32px;height:32px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);display:flex;align-items:center;justify-content:center;font-size:14px">📦</div>
+            </div>
+            <div style="font-size:11px;color:var(--red);font-weight:600">Who's managing all this?! 😰</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>03 / 08</span></div>
+    </div>
+
+    <!-- S4: DOCKER ALONE CHALLENGES -->
+    <div class="slide" data-s="4">
+      <div class="gbg"></div>
+      <div class="glow" style="top:10%;left:30%;width:40%;height:50%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+      <div class="fullrow">
+        <div class="lbl">Docker's Limitations</div>
+        <div class="stitle">Challenges with Docker Alone</div>
+        <div class="grid3">
+          <div class="g3card" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px">📉</div>
+            <div class="g3title" style="color:#FCA5A5">No Auto-Scaling</div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Traffic spike? Scale manually</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Human intervention always needed</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Slow reaction to load changes</span></div>
+          </div>
+          <div class="g3card" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px">💀</div>
+            <div class="g3title" style="color:#FCA5A5">No Self-Healing</div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Container crashes → stays dead</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>No automatic restart</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>App goes down until you notice</span></div>
+          </div>
+          <div class="g3card" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px">⚖️</div>
+            <div class="g3title" style="color:#FCA5A5">Manual Load Balancing</div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>No smart traffic distribution</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Must configure manually</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>One container gets overwhelmed</span></div>
+          </div>
+          <div class="g3card" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px">🖥</div>
+            <div class="g3title" style="color:#FCA5A5">Single Server Problem</div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Designed for one machine</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>Hard to spread across servers</span></div>
+            <div class="g3item"><div class="g3dot" style="background:var(--red)"></div><span>No built-in multi-node support</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:9px 16px;border-radius:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);text-align:center">
+          <span style="font-size:clamp(10px,1.3vw,13px);color:#FCA5A5;font-weight:600">Bottom line: Docker is great for running containers - but not for <em>managing</em> them at scale</span>
+        </div>
+      </div>
+      <div class="sfooter"><span>04 / 08</span></div>
+    </div>
+
+    <!-- S5: DOCKER SWARM -->
+    <div class="slide" data-s="5">
+      <div class="gbg"></div>
+      <div class="glow" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.12) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">First Solution Attempt</div>
+          <div class="stitle">Enter Docker Swarm <span style="color:var(--amber)">⚡</span></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(245,158,11,.15)">🔗</div><div class="btext"><strong>Clustering</strong> - links multiple Docker hosts into one pool</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(245,158,11,.15)">📊</div><div class="btext"><strong>Basic scaling</strong> - can run more replicas of your container</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(245,158,11,.15)">🔧</div><div class="btext"><strong>Simple setup</strong> - easy to configure if you already know Docker</div></div>
+          <div class="bitem"><div class="bicon" style="background:rgba(245,158,11,.15)">⚖️</div><div class="btext"><strong>Built-in load balancing</strong> - distributes traffic across containers</div></div>
+          <div style="margin-top:10px;padding:9px 14px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3)">
+            <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">The Catch</div>
+            <div style="font-size:clamp(10px,1.3vw,13px);color:#CBD5E1">Swarm is a step forward - but it's like upgrading from a bicycle to a moped when you actually need a car 🚗</div>
+          </div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:230px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber)">Docker Swarm Cluster</div>
+            <div style="width:90px;height:36px;border-radius:8px;background:rgba(245,158,11,.15);border:1.5px solid rgba(245,158,11,.4);display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px">
+              <span style="font-size:12px">👑</span>
+              <span style="font-size:10px;font-weight:700;color:var(--amber)">Manager</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:2px">
+              <div style="width:60px;height:52px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+                <span style="font-size:12px">🖥</span>
+                <span style="font-size:8px;color:var(--muted);font-weight:600">Node 1</span>
+                <span style="font-size:8px">📦📦</span>
+              </div>
+              <div style="width:60px;height:52px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+                <span style="font-size:12px">🖥</span>
+                <span style="font-size:8px;color:var(--muted);font-weight:600">Node 2</span>
+                <span style="font-size:8px">📦📦</span>
+              </div>
+              <div style="width:60px;height:52px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+                <span style="font-size:12px">🖥</span>
+                <span style="font-size:8px;color:var(--muted);font-weight:600">Node 3</span>
+                <span style="font-size:8px">📦📦</span>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--amber);font-weight:600;margin-top:6px">Simple but limited</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>05 / 08</span></div>
+    </div>
+
+    <!-- S6: SWARM PROBLEMS -->
+    <div class="slide" data-s="6">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-5%;left:20%;width:60%;height:50%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+      <div class="fullrow">
+        <div class="lbl">Swarm's Shortcomings</div>
+        <div class="stitle">Problems with Docker Swarm</div>
+        <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+          <div style="flex:1.1;display:flex;flex-direction:column;gap:8px">
+            <div class="bitem" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)"><div class="bicon" style="background:rgba(239,68,68,.15)">📏</div><div class="btext"><strong style="color:#FCA5A5">Limited at large scale</strong> - struggles with thousands of containers</div></div>
+            <div class="bitem" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)"><div class="bicon" style="background:rgba(239,68,68,.15)">🎯</div><div class="btext"><strong style="color:#FCA5A5">Weak scheduling</strong> - can't make smart decisions about where to place containers</div></div>
+            <div class="bitem" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)"><div class="bicon" style="background:rgba(239,68,68,.15)">🧩</div><div class="btext"><strong style="color:#FCA5A5">Limited ecosystem</strong> - fewer plugins, tools, and integrations</div></div>
+            <div class="bitem" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)"><div class="bicon" style="background:rgba(239,68,68,.15)">🏢</div><div class="btext"><strong style="color:#FCA5A5">Not enterprise-ready</strong> - companies hesitate to bet production on it</div></div>
+            <div class="bitem" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)"><div class="bicon" style="background:rgba(239,68,68,.15)">📦</div><div class="btext"><strong style="color:#FCA5A5">No advanced features</strong> - no namespaces, no RBAC, no rich storage options</div></div>
+          </div>
+          <div style="flex:.9;display:flex;align-items:center;justify-content:center">
+            <div class="visbox" style="max-width:220px">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Feature Comparison</div>
+              <div style="width:100%">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                  <div style="font-size:9px;font-weight:700;color:var(--muted)">Feature</div>
+                  <div style="display:flex;gap:18px"><div style="font-size:9px;font-weight:700;color:var(--amber)">Swarm</div><div style="font-size:9px;font-weight:700;color:var(--blue)">K8s</div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:9px;color:#94A3B8">Auto scaling</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">⚠️</span><span style="font-size:11px">✅</span></div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:9px;color:#94A3B8">Self-healing</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">⚠️</span><span style="font-size:11px">✅</span></div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:9px;color:#94A3B8">Rich ecosystem</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">❌</span><span style="font-size:11px">✅</span></div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:9px;color:#94A3B8">RBAC / Security</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">❌</span><span style="font-size:11px">✅</span></div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:9px;color:#94A3B8">Enterprise use</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">❌</span><span style="font-size:11px">✅</span></div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0"><span style="font-size:9px;color:#94A3B8">Smart scheduling</span><div style="display:flex;gap:18px;padding-right:4px"><span style="font-size:11px">❌</span><span style="font-size:11px">✅</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>06 / 08</span></div>
+    </div>
+
+    <!-- S7: WHY K8S WINS -->
+    <div class="slide" data-s="7">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;right:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.13) 0%,transparent 65%)"></div>
+      <div class="glow" style="bottom:-15%;left:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">The Solution</div>
+          <div class="stitle">Why <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes</span> Wins</div>
+          <div class="bitem" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)"><div class="bicon" style="background:rgba(34,197,94,.15)">📈</div><div class="btext"><strong style="color:#86EFAC">Auto-scales</strong> - detects traffic and adds/removes containers automatically</div></div>
+          <div class="bitem" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)"><div class="bicon" style="background:rgba(34,197,94,.15)">🔁</div><div class="btext"><strong style="color:#86EFAC">Self-heals</strong> - crashed container? K8s restarts it instantly, automatically</div></div>
+          <div class="bitem" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)"><div class="bicon" style="background:rgba(34,197,94,.15)">⚖️</div><div class="btext"><strong style="color:#86EFAC">Smart load balancing</strong> - spreads traffic intelligently across all containers</div></div>
+          <div class="bitem" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)"><div class="bicon" style="background:rgba(34,197,94,.15)">🌐</div><div class="btext"><strong style="color:#86EFAC">Multi-node ready</strong> - runs across hundreds of servers with ease</div></div>
+          <div class="bitem" style="background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.2)"><div class="bicon" style="background:rgba(34,197,94,.15)">🏆</div><div class="btext"><strong style="color:#86EFAC">Industry standard</strong> - used by Google, Netflix, Amazon - the whole industry</div></div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:230px;gap:10px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">Organized K8s Cluster</div>
+            <div style="width:100%;padding:8px;border-radius:10px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+              <div style="text-align:center;margin-bottom:8px;padding:5px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">⚙ Control Plane (K8s Brain)</div>
+              <div style="display:flex;gap:5px;justify-content:center">
+                <div style="flex:1;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:6px;text-align:center">
+                  <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                  <div style="font-size:8px;color:var(--muted)">Node 1</div>
+                  <div style="font-size:9px;margin-top:2px">📦📦</div>
+                  <div style="width:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--green),transparent);margin-top:4px"></div>
+                </div>
+                <div style="flex:1;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:6px;text-align:center">
+                  <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                  <div style="font-size:8px;color:var(--muted)">Node 2</div>
+                  <div style="font-size:9px;margin-top:2px">📦📦</div>
+                  <div style="width:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--green),transparent);margin-top:4px"></div>
+                </div>
+                <div style="flex:1;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);padding:6px;text-align:center">
+                  <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                  <div style="font-size:8px;color:var(--muted)">Node 3</div>
+                  <div style="font-size:9px;margin-top:2px">📦📦</div>
+                  <div style="width:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--green),transparent);margin-top:4px"></div>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--green);font-weight:600">Everything managed automatically ✓</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>07 / 08</span></div>
+    </div>
+
+    <!-- S8: ANALOGY + TRANSITION -->
+    <div class="slide" data-s="8">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+      <div class="glow" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+      <div class="fullrow">
+        <div class="lbl">The Big Picture</div>
+        <div class="stitle">Think of it this way...</div>
+        <div style="display:flex;gap:10px;flex:1;align-items:stretch;padding-top:6px">
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1.2">
+            <div style="display:flex;gap:8px;flex:1">
+              <div style="flex:1;border-radius:12px;padding:13px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.25);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+                <div style="font-size:28px">🐳</div>
+                <div style="font-size:11px;font-weight:800;color:#7EB3FF">Docker</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted)">= Individual Worker</div>
+                <div style="font-size:10px;color:#94A3B8;line-height:1.4">Good at one job, runs on their own, no team coordination</div>
+              </div>
+              <div style="flex:1;border-radius:12px;padding:13px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+                <div style="font-size:28px">👥</div>
+                <div style="font-size:11px;font-weight:800;color:var(--amber)">Docker Swarm</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted)">= Small Team</div>
+                <div style="font-size:10px;color:#94A3B8;line-height:1.4">Workers work together - but no smart manager to guide them</div>
+              </div>
+              <div style="flex:1;border-radius:12px;padding:13px;background:rgba(50,108,229,.1);border:1.5px solid rgba(50,108,229,.4);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;position:relative">
+                <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--purple));padding:3px 10px;border-radius:12px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap">Industry Standard</div>
+                <div style="font-size:28px;margin-top:6px">🧠</div>
+                <div style="font-size:11px;font-weight:800;color:#67E8F9">Kubernetes</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted)">= Smart Manager</div>
+                <div style="font-size:10px;color:#94A3B8;line-height:1.4">Knows who works where, fixes problems, scales automatically</div>
+              </div>
+            </div>
+            <div style="padding:11px 16px;border-radius:10px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.35);text-align:center">
+              <div style="font-size:clamp(11px,1.5vw,15px);font-weight:700;color:var(--white);line-height:1.4">"This is why Kubernetes became the <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">industry standard</span> for container orchestration"</div>
+            </div>
+          </div>
+          <div style="width:200px;display:flex;flex-direction:column;gap:8px;justify-content:center">
+            <div style="padding:13px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+              <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--purpleL);margin-bottom:8px">Up Next</div>
+              <div style="font-size:12px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:10px">What is Kubernetes & How it Works?</div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Pods · Nodes · Control Plane · Architecture</div>
+              <div style="padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:10px;font-weight:700;color:#fff">Next Episode →</div>
+            </div>
+            <div style="padding:11px 14px;border-radius:10px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:5px">Don't miss it!</div>
+              <div style="font-size:10px;color:var(--muted)">Subscribe & hit the bell 🔔 to get notified</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>08 / 08</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let c=1,t=8;
+const dotsEl=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
+function goTo(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;goTo(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>

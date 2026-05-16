@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--bg2:#0D1520;
+  --blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --red:#EF4444;--green:#22C55E;--amber:#F59E0B;--pink:#EC4899;
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;
+  --card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.glow{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.twocol{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.col-l{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.col-r{flex:1;display:flex;align-items:center;justify-content:center}
+.fullcol{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bitem{display:flex;align-items:flex-start;gap:9px;padding:8px 12px;border-radius:9px;margin-bottom:7px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bitem:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.bico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.btxt{font-size:clamp(9px,1.2vw,12px);color:#CBD5E1;line-height:1.45;padding-top:4px}
+.btxt strong{color:var(--white);font-weight:600}
+.visbox{padding:13px;border-radius:13px;background:var(--card);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.vlbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap" id="sw">
+
+    <!-- ══ SLIDE 1: TITLE ══ -->
+    <div class="slide on" data-s="1">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.22) 0%,transparent 65%)"></div>
+      <div class="glow" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)"></div>
+      <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;justify-content:center;flex-direction:column;padding:5%">
+        <!-- K8s Logo -->
+        <svg width="72" height="72" viewBox="0 0 100 100" style="margin-bottom:12px"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="20" r="4" fill="#00D4FF"/><circle cx="50" cy="80" r="4" fill="#00D4FF"/><circle cx="24" cy="35" r="4" fill="#00D4FF"/><circle cx="76" cy="65" r="4" fill="#00D4FF"/><circle cx="24" cy="65" r="4" fill="#00D4FF"/><circle cx="76" cy="35" r="4" fill="#00D4FF"/></svg>
+        <div style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;padding:4px 14px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        <div style="font-size:clamp(26px,5vw,52px);font-weight:900;text-align:center;background:linear-gradient(135deg,#fff 20%,var(--blue) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1;margin-bottom:10px">What is Kubernetes?</div>
+        <div style="font-size:clamp(12px,1.8vw,18px);color:var(--muted);text-align:center;margin-bottom:22px">How Kubernetes Works - A Simple, Visual Explanation</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <span style="padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);color:#7EB3FF">Container Orchestration</span>
+          <span style="padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9">Cluster Architecture</span>
+          <span style="padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#C084FC">Auto-Scaling</span>
+          <span style="padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#86EFAC">Self-Healing</span>
+        </div>
+        <!-- mini visual -->
+        <div style="display:flex;align-items:center;gap:8px;margin-top:18px">
+          <div style="font-size:10px;color:var(--muted)">kubectl</div>
+          <div style="width:28px;height:1px;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+          <div style="padding:5px 10px;border-radius:7px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);font-size:10px;font-weight:700;color:#7EB3FF">API Server</div>
+          <div style="width:28px;height:1px;background:linear-gradient(90deg,var(--cyan),var(--purple))"></div>
+          <div style="display:flex;gap:4px">
+            <div style="width:26px;height:26px;border-radius:6px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;font-size:12px">📦</div>
+            <div style="width:26px;height:26px;border-radius:6px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;font-size:12px">📦</div>
+            <div style="width:26px;height:26px;border-radius:6px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;font-size:12px">📦</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>01 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 2: DEFINITION ══ -->
+    <div class="slide" data-s="2">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;right:-5%;width:50%;height:65%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">Simple Definition</div>
+          <div class="stitle">What is <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes?</span></div>
+          <div class="bitem"><div class="bico" style="background:rgba(50,108,229,.18)">⚙️</div><div class="btxt"><strong>Container Orchestration Platform</strong> - automatically manages your containers so you don't have to</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(0,212,255,.12)">🚀</div><div class="btxt"><strong>Deploy & Scale automatically</strong> - tells containers where to run, when to scale up or down</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(124,58,237,.15)">🌐</div><div class="btxt"><strong>Works across many machines</strong> - runs your app on a whole cluster of servers, not just one</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(34,197,94,.12)">🏆</div><div class="btxt"><strong>Open-source & industry standard</strong> - born at Google, now used by Netflix, Amazon, Microsoft</div></div>
+          <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22)">
+            <span style="font-size:10px;font-weight:700;color:var(--cyan)">K8s = </span>
+            <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> "Kubernetes" - the 8 letters between K and S. It's just a shorthand! 😄</span>
+          </div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:230px;gap:10px">
+            <div class="vlbl">Centrally Managed Cluster</div>
+            <!-- control plane -->
+            <div style="width:100%;padding:8px 10px;border-radius:9px;background:linear-gradient(135deg,rgba(50,108,229,.15),rgba(124,58,237,.15));border:1.5px solid rgba(50,108,229,.35);text-align:center">
+              <div style="font-size:9px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase">⚙ Kubernetes (K8s)</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:2px">Manages everything below</div>
+            </div>
+            <div style="font-size:16px;color:var(--blue)">↓</div>
+            <!-- nodes row -->
+            <div style="display:flex;gap:6px;width:100%">
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Node 1</div>
+                <div style="font-size:10px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Node 2</div>
+                <div style="font-size:10px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:10px;margin-bottom:3px">🖥</div>
+                <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Node 3</div>
+                <div style="font-size:10px">📦📦</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--green);font-weight:600">All containers managed centrally ✓</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>02 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 3: WHY K8S ══ -->
+    <div class="slide" data-s="3">
+      <div class="gbg"></div>
+      <div class="glow" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">The Need</div>
+          <div class="stitle">Why Do We <span style="color:var(--red)">Need</span> Kubernetes?</div>
+          <div class="bitem"><div class="bico" style="background:rgba(245,158,11,.15)">📈</div><div class="btxt"><strong>Apps must scale with users</strong> - 100 users vs 1 million users need very different resources</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(239,68,68,.15)">💀</div><div class="btxt"><strong>Containers fail</strong> - apps crash, servers die. We need automatic recovery with zero manual work</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(124,58,237,.15)">🤯</div><div class="btxt"><strong>Managing containers manually is chaos</strong> - 50 containers across 10 servers is humanly impossible</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(50,108,229,.15)">🤖</div><div class="btxt"><strong>We need automation</strong> - deploy, scale, restart, balance - all done automatically by K8s</div></div>
+          <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22)">
+            <span style="font-size:10px;font-weight:700;color:var(--green)">Solution: </span>
+            <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> Kubernetes handles all of this so engineers can focus on building, not babysitting servers</span>
+          </div>
+        </div>
+        <div class="col-r">
+          <div class="visbox" style="max-width:220px;gap:9px">
+            <div class="vlbl">Growing App Problem</div>
+            <div style="display:flex;flex-direction:column;gap:6px;width:100%">
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)">
+                <span style="font-size:14px">👤</span>
+                <div style="flex:1">
+                  <div style="font-size:8px;color:var(--muted)">100 users</div>
+                  <div style="height:5px;border-radius:3px;background:rgba(34,197,94,.3);width:25%;margin-top:3px"></div>
+                </div>
+                <span style="font-size:9px;color:var(--green);font-weight:600">1 pod</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)">
+                <span style="font-size:14px">👥</span>
+                <div style="flex:1">
+                  <div style="font-size:8px;color:var(--muted)">10,000 users</div>
+                  <div style="height:5px;border-radius:3px;background:rgba(245,158,11,.4);width:60%;margin-top:3px"></div>
+                </div>
+                <span style="font-size:9px;color:var(--amber);font-weight:600">5 pods</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.3)">
+                <span style="font-size:14px">🌍</span>
+                <div style="flex:1">
+                  <div style="font-size:8px;color:var(--muted)">1M+ users</div>
+                  <div style="height:5px;border-radius:3px;background:rgba(50,108,229,.6);width:100%;margin-top:3px"></div>
+                </div>
+                <span style="font-size:9px;color:#7EB3FF;font-weight:600">50+ pods</span>
+              </div>
+            </div>
+            <div style="font-size:9px;color:var(--cyan);font-weight:600;text-align:center">K8s scales automatically ↑↓</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>03 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 4: CLUSTER CONCEPT ══ -->
+    <div class="slide" data-s="4">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-5%;right:10%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+      <div class="twocol">
+        <div class="col-l">
+          <div class="lbl">Key Concept</div>
+          <div class="stitle">The <span style="color:var(--cyan)">Cluster</span> Concept</div>
+          <div class="bitem"><div class="bico" style="background:rgba(0,212,255,.12)">🔗</div><div class="btxt"><strong>Cluster = group of machines</strong> working together as one single system</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(50,108,229,.15)">🖥</div><div class="btxt"><strong>Nodes = the machines</strong> (physical or virtual servers) inside the cluster</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(124,58,237,.15)">🧠</div><div class="btxt"><strong>Control Plane</strong> - the brain. Makes all the decisions (schedule, monitor, heal)</div></div>
+          <div class="bitem"><div class="bico" style="background:rgba(34,197,94,.12)">💪</div><div class="btxt"><strong>Worker Nodes</strong> - the muscles. Actually run your containers and handle user traffic</div></div>
+          <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+            <span style="font-size:10px;font-weight:700;color:var(--blue)">Analogy: </span>
+            <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> Control Plane = Restaurant Manager &nbsp;|&nbsp; Worker Nodes = Kitchen Staff 👨‍🍳</span>
+          </div>
+        </div>
+        <div class="col-r">
+          <!-- Cluster visual -->
+          <div class="visbox" style="max-width:260px;gap:9px">
+            <div class="vlbl">Kubernetes Cluster</div>
+            <!-- control plane box -->
+            <div style="width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,rgba(50,108,229,.14),rgba(124,58,237,.14));border:1.5px solid rgba(50,108,229,.4)">
+              <div style="text-align:center;font-size:9px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🧠 Control Plane</div>
+              <div style="display:flex;gap:5px;justify-content:center">
+                <div style="padding:4px 7px;border-radius:6px;background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.35);font-size:8px;color:#7EB3FF;font-weight:600;text-align:center">API<br>Server</div>
+                <div style="padding:4px 7px;border-radius:6px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.35);font-size:8px;color:#C084FC;font-weight:600;text-align:center">Sched-<br>uler</div>
+                <div style="padding:4px 7px;border-radius:6px;background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.3);font-size:8px;color:#67E8F9;font-weight:600;text-align:center">ctrl<br>Mgr</div>
+                <div style="padding:4px 7px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);font-size:8px;color:#FDE047;font-weight:600;text-align:center">etcd</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:3px;color:var(--blue);font-size:12px">↙&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;↘</div>
+            <!-- workers -->
+            <div style="display:flex;gap:5px;width:100%">
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:9px;color:var(--muted);margin-bottom:4px">💪 Worker</div>
+                <div style="font-size:9px">📦 Pod</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">Kubelet</div>
+              </div>
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:9px;color:var(--muted);margin-bottom:4px">💪 Worker</div>
+                <div style="font-size:9px">📦 Pod</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">Kubelet</div>
+              </div>
+              <div style="flex:1;border-radius:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);padding:7px;text-align:center">
+                <div style="font-size:9px;color:var(--muted);margin-bottom:4px">💪 Worker</div>
+                <div style="font-size:9px">📦 Pod</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:2px">Kubelet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>04 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 5: CORE COMPONENTS ══ -->
+    <div class="slide" data-s="5">
+      <div class="gbg"></div>
+      <div class="glow" style="top:5%;left:25%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+      <div class="fullcol">
+        <div class="lbl">Architecture</div>
+        <div class="stitle">Core Components of Kubernetes</div>
+        <div style="display:flex;gap:10px;flex:1;padding-top:6px">
+          <!-- Control Plane -->
+          <div style="flex:1;border-radius:12px;padding:13px;background:linear-gradient(160deg,rgba(50,108,229,.08),rgba(124,58,237,.08));border:1.5px solid rgba(50,108,229,.35);display:flex;flex-direction:column;gap:8px">
+            <div style="text-align:center;padding:6px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase">🧠 Control Plane (Brain)</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3)">
+                <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-bottom:2px">🔌 API Server</div>
+                <div style="font-size:9px;color:#94A3B8">The front door - every request goes through here first</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3)">
+                <div style="font-size:10px;font-weight:700;color:#C084FC;margin-bottom:2px">📅 Scheduler</div>
+                <div style="font-size:9px;color:#94A3B8">Decides which node runs which container (smart placement)</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25)">
+                <div style="font-size:10px;font-weight:700;color:#67E8F9;margin-bottom:2px">🔄 Controller Manager</div>
+                <div style="font-size:9px;color:#94A3B8">Watches the cluster - ensures desired state is always maintained</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)">
+                <div style="font-size:10px;font-weight:700;color:#FDE047;margin-bottom:2px">🗄 etcd</div>
+                <div style="font-size:9px;color:#94A3B8">The memory - stores all cluster data and configuration</div>
+              </div>
+            </div>
+          </div>
+          <!-- Worker Node -->
+          <div style="flex:1;border-radius:12px;padding:13px;background:rgba(34,197,94,.05);border:1.5px solid rgba(34,197,94,.3);display:flex;flex-direction:column;gap:8px">
+            <div style="text-align:center;padding:6px;border-radius:8px;background:linear-gradient(135deg,#166534,#22C55E);font-size:9px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase">💪 Worker Node (Does the Work)</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
+                <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-bottom:2px">🤝 Kubelet</div>
+                <div style="font-size:9px;color:#94A3B8">The node agent - receives orders from control plane and runs pods</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.3)">
+                <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-bottom:2px">🐳 Container Runtime</div>
+                <div style="font-size:9px;color:#94A3B8">Actually runs containers (Docker, containerd, CRI-O)</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25)">
+                <div style="font-size:10px;font-weight:700;color:#67E8F9;margin-bottom:2px">🌐 kube-proxy</div>
+                <div style="font-size:9px;color:#94A3B8">Manages network routing - how traffic flows to the right container</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:8px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25)">
+                <div style="font-size:10px;font-weight:700;color:#C084FC;margin-bottom:2px">📦 Pod</div>
+                <div style="font-size:9px;color:#94A3B8">Smallest unit in K8s - a wrapper around one or more containers</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>05 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 6: HOW IT WORKS ══ -->
+    <div class="slide" data-s="6">
+      <div class="gbg"></div>
+      <div class="glow" style="bottom:-15%;right:-5%;width:50%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+      <div class="fullcol">
+        <div class="lbl">Step-by-Step Flow</div>
+        <div class="stitle">How Kubernetes <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Works</span></div>
+        <div style="flex:1;display:flex;align-items:center;gap:0;padding-top:8px">
+          <!-- steps -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.3)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">1</div>
+              <div><div style="font-size:11px;font-weight:700;color:#7EB3FF">User runs kubectl apply</div><div style="font-size:9px;color:var(--muted)">You tell K8s: "I want 3 pods running my app"</div></div>
+              <div style="margin-left:auto;font-size:16px">🧑‍💻</div>
+            </div>
+            <div style="padding-left:22px;color:var(--blue);font-size:13px">↓</div>
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;flex-shrink:0">2</div>
+              <div><div style="font-size:11px;font-weight:700;color:#67E8F9">API Server receives & validates request</div><div style="font-size:9px;color:var(--muted)">Checks if the request is valid, stores intent in etcd</div></div>
+              <div style="margin-left:auto;font-size:16px">🔌</div>
+            </div>
+            <div style="padding-left:22px;color:var(--cyan);font-size:13px">↓</div>
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.28)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">3</div>
+              <div><div style="font-size:11px;font-weight:700;color:#C084FC">Scheduler picks the best Node</div><div style="font-size:9px;color:var(--muted)">Finds node with enough CPU/memory to run the pod</div></div>
+              <div style="margin-left:auto;font-size:16px">📅</div>
+            </div>
+            <div style="padding-left:22px;color:var(--purple);font-size:13px">↓</div>
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">4</div>
+              <div><div style="font-size:11px;font-weight:700;color:#86EFAC">Kubelet runs the container</div><div style="font-size:9px;color:var(--muted)">Worker node pulls the image and starts the container</div></div>
+              <div style="margin-left:auto;font-size:16px">🤝</div>
+            </div>
+            <div style="padding-left:22px;color:var(--green);font-size:13px">↓</div>
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25)">
+              <div style="width:26px;height:26px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;flex-shrink:0">5</div>
+              <div><div style="font-size:11px;font-weight:700;color:#FDE047">K8s monitors & self-heals forever</div><div style="font-size:9px;color:var(--muted)">If anything breaks, K8s automatically fixes it 24/7</div></div>
+              <div style="margin-left:auto;font-size:16px">🔁</div>
+            </div>
+          </div>
+          <!-- right mini diagram -->
+          <div style="width:200px;flex-shrink:0;margin-left:14px;display:flex;flex-direction:column;align-items:center;gap:6px">
+            <div style="width:100%;padding:8px 10px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.3);text-align:center">
+              <div style="font-size:14px">🧑‍💻</div>
+              <div style="font-size:9px;font-weight:600;color:#7EB3FF">kubectl apply</div>
+            </div>
+            <div style="font-size:11px;color:var(--blue)">↓</div>
+            <div style="width:100%;padding:8px 10px;border-radius:9px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);text-align:center">
+              <div style="font-size:14px">🔌</div>
+              <div style="font-size:9px;font-weight:600;color:var(--cyan)">API Server</div>
+            </div>
+            <div style="font-size:11px;color:var(--cyan)">↓</div>
+            <div style="width:100%;padding:8px 10px;border-radius:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);text-align:center">
+              <div style="font-size:14px">📅</div>
+              <div style="font-size:9px;font-weight:600;color:#C084FC">Scheduler</div>
+            </div>
+            <div style="font-size:11px;color:var(--purple)">↓</div>
+            <div style="width:100%;padding:8px 10px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:14px">📦</div>
+              <div style="font-size:9px;font-weight:600;color:var(--green)">Pod Running!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>06 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 7: KEY FEATURES ══ -->
+    <div class="slide" data-s="7">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;right:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.12) 0%,transparent 65%)"></div>
+      <div class="fullcol">
+        <div class="lbl">Superpowers</div>
+        <div class="stitle">Key Features of <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;flex:1;padding-top:8px">
+          <div style="border-radius:12px;padding:13px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.18);display:flex;align-items:center;justify-content:center;font-size:19px">📈</div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC">Auto Scaling</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">Automatically adds or removes containers based on actual traffic load</div>
+            <div style="font-size:8px;font-weight:600;color:var(--green);padding:3px 8px;border-radius:12px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);width:fit-content">HPA / VPA</div>
+          </div>
+          <div style="border-radius:12px;padding:13px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.25);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.18);display:flex;align-items:center;justify-content:center;font-size:19px">🔁</div>
+            <div style="font-size:11px;font-weight:800;color:#7EB3FF">Self-Healing</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">Detects crashed containers and restarts them instantly - zero manual work</div>
+            <div style="font-size:8px;font-weight:600;color:#7EB3FF;padding:3px 8px;border-radius:12px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);width:fit-content">Auto-restart</div>
+          </div>
+          <div style="border-radius:12px;padding:13px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.22);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(0,212,255,.14);display:flex;align-items:center;justify-content:center;font-size:19px">⚖️</div>
+            <div style="font-size:11px;font-weight:800;color:#67E8F9">Load Balancing</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">Splits incoming traffic evenly across all healthy containers</div>
+            <div style="font-size:8px;font-weight:600;color:#67E8F9;padding:3px 8px;border-radius:12px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);width:fit-content">Built-in</div>
+          </div>
+          <div style="border-radius:12px;padding:13px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.25);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,.18);display:flex;align-items:center;justify-content:center;font-size:19px">🔄</div>
+            <div style="font-size:11px;font-weight:800;color:#C084FC">Rolling Updates</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">Deploy new app versions with zero downtime - one pod at a time</div>
+            <div style="font-size:8px;font-weight:600;color:#C084FC;padding:3px 8px;border-radius:12px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);width:fit-content">Zero downtime</div>
+          </div>
+          <div style="border-radius:12px;padding:13px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.16);display:flex;align-items:center;justify-content:center;font-size:19px">📄</div>
+            <div style="font-size:11px;font-weight:800;color:#FDE047">Declarative Config</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">You describe the desired state in a YAML file - K8s makes it happen</div>
+            <div style="font-size:8px;font-weight:600;color:#FDE047;padding:3px 8px;border-radius:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);width:fit-content">YAML / GitOps</div>
+          </div>
+          <div style="border-radius:12px;padding:13px;background:rgba(236,72,153,.07);border:1px solid rgba(236,72,153,.22);display:flex;flex-direction:column;gap:6px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(236,72,153,.16);display:flex;align-items:center;justify-content:center;font-size:19px">🌐</div>
+            <div style="font-size:11px;font-weight:800;color:#F9A8D4">Multi-Cloud Ready</div>
+            <div style="font-size:9px;color:#94A3B8;line-height:1.45">Runs on AWS, GCP, Azure or your own data center - same K8s everywhere</div>
+            <div style="font-size:8px;font-weight:600;color:#F9A8D4;padding:3px 8px;border-radius:12px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);width:fit-content">Portable</div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>07 / 08</span></div>
+    </div>
+
+    <!-- ══ SLIDE 8: ANALOGY + WRAP UP ══ -->
+    <div class="slide" data-s="8">
+      <div class="gbg"></div>
+      <div class="glow" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+      <div class="glow" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+      <div class="fullcol">
+        <div class="lbl">Think of it this way</div>
+        <div class="stitle">Real-World Analogy + <span style="color:var(--cyan)">Wrap Up</span></div>
+        <div style="display:flex;gap:10px;flex:1;align-items:stretch;padding-top:8px">
+          <!-- analogy 3 cards -->
+          <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:8px;flex:1">
+              <div style="flex:1;border-radius:11px;padding:12px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+                <div style="font-size:26px">📦</div>
+                <div style="font-size:10px;font-weight:800;color:#7EB3FF">Containers</div>
+                <div style="font-size:9px;font-weight:700;color:var(--muted)">= Workers</div>
+                <div style="font-size:9px;color:#94A3B8;line-height:1.4">Each does one specific job - runs your app</div>
+              </div>
+              <div style="flex:1;border-radius:11px;padding:12px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px">
+                <div style="font-size:26px">🖥</div>
+                <div style="font-size:10px;font-weight:800;color:#86EFAC">Nodes</div>
+                <div style="font-size:9px;font-weight:700;color:var(--muted)">= Workplaces</div>
+                <div style="font-size:9px;color:#94A3B8;line-height:1.4">The physical or virtual machines where workers live</div>
+              </div>
+              <div style="flex:1;border-radius:11px;padding:12px;background:rgba(50,108,229,.12);border:1.5px solid rgba(50,108,229,.45);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;position:relative">
+                <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--purple));padding:3px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Magic</div>
+                <div style="font-size:26px;margin-top:6px">🧠</div>
+                <div style="font-size:10px;font-weight:800;color:var(--cyan)">Kubernetes</div>
+                <div style="font-size:9px;font-weight:700;color:var(--muted)">= Smart Manager</div>
+                <div style="font-size:9px;color:#94A3B8;line-height:1.4">Knows who works where, fixes problems, scales on demand</div>
+              </div>
+            </div>
+            <div style="padding:10px 14px;border-radius:10px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.35);text-align:center">
+              <div style="font-size:clamp(11px,1.5vw,14px);font-weight:700;color:var(--white);line-height:1.4">"Kubernetes is the <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">smart manager</span> that keeps all your containers running perfectly - so you don't have to"</div>
+            </div>
+          </div>
+          <!-- right panel -->
+          <div style="width:196px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+            <div style="padding:12px;border-radius:12px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green);margin-bottom:7px">✅ What You Learned</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="font-size:9px;color:#CBD5E1;display:flex;align-items:center;gap:5px"><span style="color:var(--green)">✓</span> What Kubernetes is</div>
+                <div style="font-size:9px;color:#CBD5E1;display:flex;align-items:center;gap:5px"><span style="color:var(--green)">✓</span> Cluster = Control Plane + Nodes</div>
+                <div style="font-size:9px;color:#CBD5E1;display:flex;align-items:center;gap:5px"><span style="color:var(--green)">✓</span> How K8s handles a request</div>
+                <div style="font-size:9px;color:#CBD5E1;display:flex;align-items:center;gap:5px"><span style="color:var(--green)">✓</span> Core features (scale, heal, balance)</div>
+              </div>
+            </div>
+            <div style="padding:12px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+              <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Up Next →</div>
+              <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:8px">Kubernetes vs Docker Swarm</div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Deep comparison · When to use what</div>
+              <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Next Episode →</div>
+            </div>
+            <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.25);text-align:center">
+              <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+              <div style="font-size:9px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfooter"><span>08 / 08</span></div>
+    </div>
+
+  </div><!-- /wrap -->
+</div><!-- /pres -->
+
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

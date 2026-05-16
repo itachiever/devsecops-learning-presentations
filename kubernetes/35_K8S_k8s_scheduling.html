@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --sc:#326CE5;--scD:rgba(50,108,229,.1);--scB:rgba(50,108,229,.32);
+  --nd:#00D4FF;--ndD:rgba(0,212,255,.09);--ndB:rgba(0,212,255,.28);
+  --af:#7C3AED;--afD:rgba(124,58,237,.1);--afB:rgba(124,58,237,.32);
+  --tn:#EF4444;--tnD:rgba(239,68,68,.1);--tnB:rgba(239,68,68,.3);
+  --tl:#22C55E;--tlD:rgba(34,197,94,.09);--tlB:rgba(34,197,94,.28);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--sc);border-color:var(--sc);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--sc);color:var(--sc)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.18);border-color:var(--sc)}
+.nbtn.pri{background:linear-gradient(135deg,var(--sc),var(--cyan));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.12)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(50,108,229,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--nd);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.14);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.06);border-color:rgba(50,108,229,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.pod-chip{border-radius:7px;padding:5px 8px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:8px;font-weight:700;color:#67E8F9}
+.node-box{border-radius:10px;padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--nd);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--nd) 55%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Scheduling</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">NodeSelector · Affinity · Taints &amp; Tolerations<br>— Control exactly where your Pods run</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--scD);color:#BAE6FD;border:1px solid var(--scB);padding:4px 11px;font-size:9px">🎯 NodeSelector</span>
+          <span class="tag" style="background:var(--afD);color:#DDD6FE;border:1px solid var(--afB);padding:4px 11px;font-size:9px">🧲 Affinity</span>
+          <span class="tag" style="background:var(--tnD);color:#FCA5A5;border:1px solid var(--tnB);padding:4px 11px;font-size:9px">🚫 Taints</span>
+          <span class="tag" style="background:var(--tlD);color:#86EFAC;border:1px solid var(--tlB);padding:4px 11px;font-size:9px">🔑 Tolerations</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px;border:1.5px dashed rgba(0,212,255,.22);border-radius:14px;padding:12px;background:rgba(0,212,255,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Scheduler in Action</div>
+          <!-- Scheduler -->
+          <div style="border-radius:8px;padding:7px 10px;background:var(--scD);border:1px solid var(--scB);text-align:center;margin-bottom:5px">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD">⎈ kube-scheduler</div>
+            <div style="font-size:7.5px;color:var(--muted)">Filters → Scores → Assigns</div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:14px;font-size:10px;color:var(--nd);margin:3px 0">↙ &nbsp; ↓ &nbsp; ↘</div>
+          <div style="display:flex;gap:4px">
+            <div style="flex:1;border-radius:7px;padding:5px;background:var(--ndD);border:1px solid var(--ndB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9">Node A</div>
+              <div style="font-size:7px;color:var(--muted)">🏷 gpu=true</div>
+              <div style="margin-top:3px;background:rgba(0,212,255,.18);border-radius:4px;padding:2px 0;font-size:7px;color:#67E8F9">📦 ML Pod ✅</div>
+            </div>
+            <div style="flex:1;border-radius:7px;padding:5px;background:var(--afD);border:1px solid var(--afB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#DDD6FE">Node B</div>
+              <div style="font-size:7px;color:var(--muted)">🏷 zone=us-1a</div>
+              <div style="margin-top:3px;background:rgba(124,58,237,.18);border-radius:4px;padding:2px 0;font-size:7px;color:#DDD6FE">📦 Web Pod ✅</div>
+            </div>
+            <div style="flex:1;border-radius:7px;padding:5px;background:var(--tnD);border:1px solid var(--tnB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#FCA5A5">Node C</div>
+              <div style="font-size:7px;color:var(--muted)">🚫 Tainted</div>
+              <div style="margin-top:3px;background:rgba(239,68,68,.15);border-radius:4px;padding:2px 0;font-size:7px;color:#FCA5A5">📦 DB Pod 🔑</div>
+            </div>
+          </div>
+          <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:6px">Right Pod → Right Node, every time</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHAT IS SCHEDULING -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Scheduling Basics</div>
+        <div class="stitle">What is <span style="color:var(--nd)">Scheduling</span> in Kubernetes?</div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">⎈</div><div class="bt"><strong>The Scheduler decides where every Pod runs</strong> — when you create a Pod, it starts in "Pending" state. The scheduler finds the best node and assigns it.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🔍</div><div class="bt"><strong>Two-phase decision: Filter then Score</strong> — first eliminates unsuitable nodes (no resources, wrong labels), then scores remaining nodes and picks the best one.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">📦</div><div class="bt"><strong>Based on resources, rules &amp; constraints</strong> — checks CPU/memory availability, node labels, affinity rules, taints, and topology constraints before placing a Pod.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">📈</div><div class="bt"><strong>Smart scheduling = better reliability</strong> — proper placement improves performance, prevents overloaded nodes, and enables high availability across zones.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Think of the Scheduler as an airline seat allocator ✈️ — checks your requirements (window seat, extra legroom) against available seats and assigns the best match.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(50,108,229,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Scheduling Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px 9px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#FDE068">📦 New Pod Created</div>
+                <div style="font-size:7px;color:var(--muted)">Status: Pending</div>
+              </div>
+              <div style="font-size:10px;color:var(--nd)">↓</div>
+              <div style="width:100%;padding:6px 9px;border-radius:7px;background:var(--scD);border:1.5px solid var(--scB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#BAE6FD">⎈ Scheduler: Filter Phase</div>
+                <div style="font-size:7px;color:var(--muted)">Remove nodes that don't qualify</div>
+              </div>
+              <div style="font-size:10px;color:var(--nd)">↓</div>
+              <div style="width:100%;padding:6px 9px;border-radius:7px;background:var(--afD);border:1.5px solid var(--afB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#DDD6FE">⎈ Scheduler: Score Phase</div>
+                <div style="font-size:7px;color:var(--muted)">Rank remaining nodes 0–100</div>
+              </div>
+              <div style="font-size:10px;color:var(--nd)">↓</div>
+              <div style="width:100%;padding:6px 9px;border-radius:7px;background:var(--tlD);border:1px solid var(--tlB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">✅ Pod Bound to Best Node</div>
+                <div style="font-size:7px;color:var(--muted)">Status: Running</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHY NEEDED -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Why It Matters</div>
+      <div class="stitle">Why Scheduling Rules Are Needed</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.4;display:flex;flex-direction:column;gap:6px">
+          <div class="bi" style="border-color:rgba(0,212,255,.2)"><div class="ico" style="background:var(--ndD)">⚡</div><div class="bt"><strong>GPU workloads need GPU nodes</strong> — an ML training job scheduled on a CPU-only node will either crash or run thousands of times slower. Labels + NodeSelector solve this.</div></div>
+          <div class="bi" style="border-color:rgba(124,58,237,.2)"><div class="ico" style="background:var(--afD)">🧠</div><div class="bt"><strong>Memory-intensive apps need high-RAM nodes</strong> — an in-memory database needs 256 GB RAM. Scheduling it on a 16 GB node causes OOM kills. Node Affinity targets the right class of node.</div></div>
+          <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--tnD)">🔒</div><div class="bt"><strong>Secure/compliance nodes must be isolated</strong> — PCI or HIPAA workloads may only run on audited nodes. Taints prevent other Pods from sharing those nodes accidentally.</div></div>
+          <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--tlD)">📍</div><div class="bt"><strong>HA requires spreading across zones</strong> — running all DB replicas on the same node means one node failure = full outage. Pod Anti-Affinity spreads them across availability zones.</div></div>
+          <div style="margin-top:4px;padding:9px 13px;border-radius:9px;background:var(--afD);border:1px solid var(--afB)">
+            <span style="font-size:10px;font-weight:700;color:#DDD6FE">Bottom line: </span>
+            <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Without scheduling control, Kubernetes places Pods randomly. You lose performance, security, and reliability. Scheduling rules = fine-grained workload control.</span>
+          </div>
+        </div>
+        <div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:12px;padding:11px;background:var(--ndD);border:1.5px solid var(--ndB)">
+            <div style="font-size:8.5px;font-weight:800;color:#67E8F9;margin-bottom:7px">⚡ GPU Node</div>
+            <div style="font-size:7.5px;color:#94A3B8;margin-bottom:5px">🏷 gpu=true · accelerated</div>
+            <div class="pod-chip" style="margin-bottom:3px">📦 ML Training Pod ✅</div>
+            <div class="pod-chip">📦 AI Inference Pod ✅</div>
+            <div style="margin-top:4px;border-radius:5px;padding:3px 7px;background:var(--tnD);border:1px solid var(--tnB);font-size:7px;color:#FCA5A5">🚫 Web Pod → blocked</div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--afD);border:1.5px solid var(--afB)">
+            <div style="font-size:8.5px;font-weight:800;color:#DDD6FE;margin-bottom:7px">🗄 DB Nodes — HA spread</div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;border-radius:6px;padding:5px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28);text-align:center">
+                <div style="font-size:7.5px;color:#DDD6FE;font-weight:700">Zone A</div>
+                <div style="font-size:7px;color:#94A3B8">DB-1</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:5px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28);text-align:center">
+                <div style="font-size:7.5px;color:#DDD6FE;font-weight:700">Zone B</div>
+                <div style="font-size:7px;color:#94A3B8">DB-2</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:5px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28);text-align:center">
+                <div style="font-size:7.5px;color:#DDD6FE;font-weight:700">Zone C</div>
+                <div style="font-size:7px;color:#94A3B8">DB-3</div>
+              </div>
+            </div>
+            <div style="margin-top:4px;border-radius:5px;padding:3px 7px;background:var(--tlD);border:1px solid var(--tlB);font-size:7px;color:#86EFAC">Anti-Affinity → zone failure safe ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 NODESELECTOR -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.11) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">NodeSelector</div>
+        <div class="stitle">What is <span style="color:var(--nd)">NodeSelector?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ndD)">🏷</div><div class="bt"><strong>Simplest scheduling method in Kubernetes</strong> — add a label to a Node, reference it in the Pod spec. Pod only lands on a node with that exact label.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ndD)">📋</div><div class="bt"><strong>Works as a hard requirement (not a preference)</strong> — if no node has the matching label, the Pod stays in Pending state forever and never runs.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ndD)">✅</div><div class="bt"><strong>Use case: basic workload separation</strong> — route GPU jobs to GPU nodes, route disk-heavy jobs to SSD nodes. Simple, effective, easy to understand.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--tnD)">⚠</div><div class="bt"><strong>Limitation: no flexibility</strong> — strict match only. No "prefer" option. Cannot use operators like &gt;, &lt;, or "In". For that, use Node Affinity.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB)">
+          <div style="font-size:8.5px;font-weight:700;color:#67E8F9;margin-bottom:3px">YAML Snippet</div>
+          <div style="border-radius:6px;padding:8px;background:rgba(6,10,16,.7);border:1px solid rgba(0,212,255,.18);font-family:monospace;font-size:8px;color:#94A3B8">
+            <div><span style="color:#7C3AED">spec:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#00D4FF">nodeSelector:</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">gpu</span>: <span style="color:#FDE068">"true"</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#7C3AED">containers:</span></div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">- name:</span> <span style="color:#86EFAC">ml-trainer</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--ndD);border:2px solid var(--ndB);box-shadow:0 0 22px rgba(0,212,255,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">NodeSelector Flow</div>
+            <div style="border-radius:8px;padding:7px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);text-align:center;margin-bottom:5px">
+              <div style="font-size:8.5px;font-weight:700;color:#FDE068">📦 ML Training Pod</div>
+              <div style="font-size:7px;color:var(--muted)">nodeSelector: gpu=true</div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:var(--nd);margin:2px 0">↓ scheduler checks all nodes</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+              <div style="border-radius:7px;padding:7px 9px;background:var(--tlD);border:1.5px solid var(--tlB);display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:8.5px;font-weight:700;color:#86EFAC">✅ Node A</div>
+                  <div style="font-size:7px;color:#94A3B8">🏷 gpu=true  ← matches!</div>
+                </div>
+                <div style="font-size:16px">✅</div>
+              </div>
+              <div style="border-radius:7px;padding:7px 9px;background:var(--tnD);border:1px solid var(--tnB);display:flex;align-items:center;justify-content:space-between;opacity:.8">
+                <div>
+                  <div style="font-size:8.5px;font-weight:700;color:#FCA5A5">✗ Node B</div>
+                  <div style="font-size:7px;color:#94A3B8">🏷 disk=ssd  ← no match</div>
+                </div>
+                <div style="font-size:16px">✗</div>
+              </div>
+              <div style="border-radius:7px;padding:7px 9px;background:var(--tnD);border:1px solid var(--tnB);display:flex;align-items:center;justify-content:space-between;opacity:.8">
+                <div>
+                  <div style="font-size:8.5px;font-weight:700;color:#FCA5A5">✗ Node C</div>
+                  <div style="font-size:7px;color:#94A3B8">🏷 env=prod  ← no match</div>
+                </div>
+                <div style="font-size:16px">✗</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;border-radius:6px;padding:5px 9px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:7.5px;color:#86EFAC">Pod placed on Node A ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 AFFINITY INTRO -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Affinity</div>
+        <div class="stitle">What is <span style="color:var(--purpleL)">Affinity?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--afD)">🧲</div><div class="bt"><strong>Advanced, flexible scheduling rules</strong> — goes beyond NodeSelector. Supports operators (In, NotIn, Exists, Gt), soft preferences, and Pod-to-Pod awareness.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--afD)">📋</div><div class="bt"><strong>Required vs Preferred</strong> — <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 4px;border-radius:3px;font-size:8.5px">requiredDuringScheduling</code> is a hard rule (like NodeSelector). <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 4px;border-radius:3px;font-size:8.5px">preferredDuringScheduling</code> is a soft preference — Pod still schedules if no match.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--afD)">🖥</div><div class="bt"><strong>Node Affinity</strong> — attract a Pod to specific nodes based on node labels. E.g. "must run in us-east-1, prefer SSD storage".</div></div>
+        <div class="bi"><div class="ico" style="background:var(--afD)">🤝</div><div class="bt"><strong>Pod Affinity / Anti-Affinity</strong> — place Pods near or far from other specific Pods. E.g. "co-locate web + cache" or "spread DB replicas across zones".</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--afD);border:1px solid var(--afB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Key upgrade over NodeSelector: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Affinity gives you <strong style="color:#fff">"prefer"</strong> (best-effort) in addition to <strong style="color:#fff">"require"</strong> (hard), making scheduling far more resilient and expressive.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--afD);border:2px solid var(--afB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Affinity Types</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:8px;padding:8px 10px;background:var(--scD);border:1px solid var(--scB)">
+                <div style="font-size:9px;font-weight:700;color:#BAE6FD">🖥 Node Affinity</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Pod ↔ Node Labels</div>
+                <div style="font-size:7px;color:#BAE6FD;margin-top:2px">e.g. "run in us-east, on SSD nodes"</div>
+              </div>
+              <div style="border-radius:8px;padding:8px 10px;background:var(--afD);border:1.5px solid var(--afB)">
+                <div style="font-size:9px;font-weight:700;color:#DDD6FE">🤝 Pod Affinity</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Pod ↔ Other Pod Labels</div>
+                <div style="font-size:7px;color:#DDD6FE;margin-top:2px">e.g. "place near cache Pod (same node)"</div>
+              </div>
+              <div style="border-radius:8px;padding:8px 10px;background:var(--tnD);border:1px solid var(--tnB)">
+                <div style="font-size:9px;font-weight:700;color:#FCA5A5">↔ Pod Anti-Affinity</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Pod avoids other Pod Labels</div>
+                <div style="font-size:7px;color:#FCA5A5;margin-top:2px">e.g. "don't co-locate DB replicas"</div>
+              </div>
+            </div>
+            <div style="margin-top:6px;border-radius:6px;padding:4px 8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);text-align:center;font-size:7.5px;color:#FDE068">All three can be combined in one Pod spec</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 NODE AFFINITY vs POD AFFINITY -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(124,58,237,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Affinity Deep Dive</div>
+      <div class="stitle">Node Affinity vs Pod Affinity vs Anti-Affinity</div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- Node Affinity -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--scD);border:2px solid var(--scB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🖥</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Node Affinity</div><div style="font-size:8px;color:var(--muted)">Pod targets specific nodes</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Attract a Pod to nodes with specific labels. Supports <strong style="color:#BAE6FD">required</strong> (hard) and <strong style="color:#BAE6FD">preferred</strong> (soft) rules. More powerful than NodeSelector.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2)">
+            <div style="font-size:7.5px;color:#BAE6FD;margin-bottom:4px">Example: prefer SSD, must be us-east</div>
+            <svg viewBox="0 0 200 60" width="100%" style="display:block">
+              <rect x="2" y="8" width="66" height="44" rx="7" fill="rgba(50,108,229,.15)" stroke="rgba(50,108,229,.4)" stroke-width="1"/>
+              <text x="35" y="24" text-anchor="middle" fill="#BAE6FD" font-size="8" font-weight="700" font-family="Segoe UI">📦 Pod</text>
+              <text x="35" y="36" text-anchor="middle" fill="#94A3B8" font-size="6.5" font-family="Segoe UI">affinity:</text>
+              <text x="35" y="46" text-anchor="middle" fill="#94A3B8" font-size="6.5" font-family="Segoe UI">zone=us-east</text>
+              <line x1="68" y1="30" x2="90" y2="30" stroke="#326CE5" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#a1)"/>
+              <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#326CE5" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+              <rect x="92" y="5" width="50" height="22" rx="6" fill="rgba(34,197,94,.15)" stroke="rgba(34,197,94,.35)" stroke-width="1"/>
+              <text x="117" y="15" text-anchor="middle" fill="#86EFAC" font-size="7.5" font-weight="700" font-family="Segoe UI">Node A ✅</text>
+              <text x="117" y="24" text-anchor="middle" fill="#94A3B8" font-size="6" font-family="Segoe UI">zone=us-east</text>
+              <rect x="150" y="5" width="48" height="22" rx="6" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.22)" stroke-width="1" opacity=".6"/>
+              <text x="174" y="15" text-anchor="middle" fill="#FCA5A5" font-size="7.5" font-weight="700" font-family="Segoe UI">Node B ✗</text>
+              <text x="174" y="24" text-anchor="middle" fill="#94A3B8" font-size="6" font-family="Segoe UI">zone=eu-west</text>
+            </svg>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD">💡 Use for: geo-routing, hardware classes, env tiers</div>
+        </div>
+        <!-- Pod Affinity -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--afD);border:2px solid var(--afB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🤝</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Pod Affinity</div><div style="font-size:8px;color:var(--muted)">Run near specific Pods</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Schedule a Pod on the same node (or zone) as another Pod. Reduces network latency between co-dependent services. Example: Web app <strong style="color:#DDD6FE">next to its Redis cache</strong>.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22)">
+            <div style="font-size:7.5px;color:#DDD6FE;margin-bottom:4px">Web + Cache on same node (low latency)</div>
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;border-radius:6px;padding:5px;background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.3);text-align:center">
+                <div style="font-size:7.5px;color:#BAE6FD;font-weight:700">Node A</div>
+                <div style="font-size:7px;color:#67E8F9;margin-top:2px">📦 Web Pod</div>
+                <div style="font-size:7px;color:#67E8F9">📦 Cache Pod</div>
+                <div style="font-size:6.5px;color:#86EFAC;margin-top:2px">← together ✅</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:5px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);text-align:center;opacity:.6">
+                <div style="font-size:7.5px;color:#94A3B8;font-weight:700">Node B</div>
+                <div style="font-size:7px;color:#94A3B8;margin-top:2px">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">💡 Use for: microservice co-location, latency reduction</div>
+        </div>
+        <!-- Anti-Affinity -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--tnD);border:2px solid rgba(239,68,68,.22);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">↔</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FCA5A5">Anti-Affinity</div><div style="font-size:8px;color:var(--muted)">Spread Pods apart</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Schedule a Pod <strong style="color:#FCA5A5">away from</strong> other specific Pods. Prevents single-point-of-failure. Example: DB replicas on <strong style="color:#FCA5A5">different nodes</strong> so one failure doesn't take all down.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2)">
+            <div style="font-size:7.5px;color:#FCA5A5;margin-bottom:4px">DB replicas spread for HA</div>
+            <div style="display:flex;gap:3px">
+              <div style="flex:1;border-radius:6px;padding:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);text-align:center">
+                <div style="font-size:7px;color:#FCA5A5;font-weight:700">Node A</div>
+                <div style="font-size:7px;color:#67E8F9">📦 DB-1</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);text-align:center">
+                <div style="font-size:7px;color:#FCA5A5;font-weight:700">Node B</div>
+                <div style="font-size:7px;color:#67E8F9">📦 DB-2</div>
+              </div>
+              <div style="flex:1;border-radius:6px;padding:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);text-align:center">
+                <div style="font-size:7px;color:#FCA5A5;font-weight:700">Node C</div>
+                <div style="font-size:7px;color:#67E8F9">📦 DB-3</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">💡 Use for: HA databases, replicated services</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 TAINTS & TOLERATIONS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.11) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Taints &amp; Tolerations</div>
+      <div class="stitle">Taints &amp; Tolerations — <span style="color:#FCA5A5">Restrict</span> and <span style="color:#86EFAC">Allow</span></div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Taints -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--tnD);border:2px solid var(--tnB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(239,68,68,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🚫</div>
+            <div><div style="font-size:13px;font-weight:800;color:#FCA5A5">Taints</div><div style="font-size:8px;color:var(--muted)">Applied to Nodes — repel Pods</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">A taint marks a node as <strong style="color:#FCA5A5">restricted</strong>. Regular Pods that don't have a matching toleration are blocked from scheduling on it. Protects special-purpose nodes.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)">
+            <div style="font-size:7.5px;color:#FCA5A5;margin-bottom:4px">Three taint effects:</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5"><strong>NoSchedule</strong> — don't place new Pods here</div>
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);color:#FCA5A5"><strong>PreferNoSchedule</strong> — avoid if possible</div>
+              <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5"><strong>NoExecute</strong> — evict existing Pods too</div>
+            </div>
+          </div>
+          <div style="border-radius:7px;padding:6px 9px;background:rgba(6,10,16,.6);border:1px solid rgba(239,68,68,.2);font-family:monospace;font-size:8px;color:#94A3B8">
+            kubectl taint nodes <span style="color:#67E8F9">node1</span> <span style="color:#86EFAC">gpu=true</span>:<span style="color:#FCA5A5">NoSchedule</span>
+          </div>
+        </div>
+        <!-- vs -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);font-size:9px;font-weight:700;color:var(--nd)">pair</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Tolerations -->
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--tlD);border:2px solid var(--tlB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🔑</div>
+            <div><div style="font-size:13px;font-weight:800;color:#86EFAC">Tolerations</div><div style="font-size:8px;color:var(--muted)">Applied to Pods — bypass taints</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">A toleration gives a Pod the <strong style="color:#86EFAC">permission</strong> to run on a tainted node. It says: "I can handle this taint." The Pod is then scheduled normally on that node.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2)">
+            <div style="font-size:7.5px;color:#86EFAC;margin-bottom:5px">YAML Toleration:</div>
+            <div style="border-radius:6px;padding:7px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.18);font-family:monospace;font-size:7.5px;color:#94A3B8">
+              <div><span style="color:#7C3AED">tolerations:</span></div>
+              <div>- <span style="color:#7C3AED">key:</span> <span style="color:#86EFAC">"gpu"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">operator:</span> <span style="color:#67E8F9">"Equal"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">value:</span> <span style="color:#FDE068">"true"</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">effect:</span> <span style="color:#FCA5A5">"NoSchedule"</span></div>
+            </div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#86EFAC">🔑 Without this toleration → Pod blocked. With it → Pod enters.</div>
+        </div>
+        <!-- Visual -->
+        <div style="width:170px;flex-shrink:0;border-radius:12px;padding:11px;background:rgba(0,212,255,.04);border:1.5px dashed rgba(0,212,255,.2);display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="text-align:center;font-size:8.5px;font-weight:700;color:var(--nd);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Combined View</div>
+          <div style="border-radius:7px;padding:7px;background:var(--tnD);border:1px solid var(--tnB);text-align:center">
+            <div style="font-size:8px;font-weight:700;color:#FCA5A5">🚫 Tainted Node</div>
+            <div style="font-size:7px;color:#94A3B8;margin-top:1px">gpu=true:NoSchedule</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="border-radius:6px;padding:5px 7px;background:var(--tnD);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5;display:flex;justify-content:space-between;align-items:center">
+              <span>📦 Web Pod</span><span>✗ blocked</span>
+            </div>
+            <div style="border-radius:6px;padding:5px 7px;background:var(--tlD);border:1px solid var(--tlB);font-size:7.5px;color:#86EFAC;display:flex;justify-content:space-between;align-items:center">
+              <span>📦 ML Pod 🔑</span><span>✅ enters</span>
+            </div>
+          </div>
+          <div style="border-radius:6px;padding:4px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);font-size:7px;color:#FDE068;text-align:center;line-height:1.4">Only ML Pod has the matching toleration</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">GPU Node Reserved for AI Workloads</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:5px;width:60px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 1</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 2</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 3</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 4</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Step 5</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">Result</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--scD);border:1px solid var(--scB);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">🖥 GPU node added to cluster with nvidia GPUs</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--tnD);border:1px solid var(--tnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">🚫 Admin taints node: <code style="color:#FDE068;font-size:8px">gpu=true:NoSchedule</code> — blocks all Pods</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--ndD);border:1px solid var(--ndB);display:flex;align-items:center"><div style="font-size:8.5px;color:#67E8F9;font-weight:600">🏷 Node also labeled: <code style="color:#FDE068;font-size:8px">accelerator=nvidia-gpu</code></div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--afD);border:1px solid var(--afB);display:flex;align-items:center"><div style="font-size:8.5px;color:#DDD6FE;font-weight:600">📋 ML Pod gets: Node Affinity (require gpu label) + Toleration (for taint)</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--tnD);border:1px solid var(--tnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">🚫 Regular Web/API Pods → no toleration → blocked from GPU node</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--tlD);border:1px solid var(--tlB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ GPU node runs only ML workloads — zero interference — optimized utilization</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:230px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--ndD);border:2px solid var(--ndB);box-shadow:0 0 18px rgba(0,212,255,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Cluster View</div>
+            <!-- GPU Node -->
+            <div style="border-radius:9px;padding:9px;background:rgba(0,212,255,.07);border:1.5px solid var(--ndB);margin-bottom:6px">
+              <div style="font-size:8.5px;font-weight:700;color:#67E8F9;margin-bottom:2px">⚡ GPU Node (Tainted)</div>
+              <div style="font-size:7px;color:#94A3B8;margin-bottom:5px">🚫 gpu=true:NoSchedule · 🏷 accelerator=nvidia</div>
+              <div style="display:flex;gap:3px">
+                <div style="flex:1;border-radius:5px;padding:4px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);text-align:center">
+                  <div style="font-size:7px;color:#86EFAC;font-weight:700">📦 ML Pod ✅</div>
+                  <div style="font-size:6.5px;color:#94A3B8">has toleration</div>
+                </div>
+                <div style="flex:1;border-radius:5px;padding:4px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);text-align:center">
+                  <div style="font-size:7px;color:#86EFAC;font-weight:700">📦 AI Pod ✅</div>
+                  <div style="font-size:6.5px;color:#94A3B8">has toleration</div>
+                </div>
+              </div>
+              <div style="margin-top:4px;border-radius:4px;padding:3px 6px;background:var(--tnD);border:1px solid var(--tnB);font-size:7px;color:#FCA5A5;text-align:center">📦 Web Pod → ✗ blocked (no toleration)</div>
+            </div>
+            <!-- General Nodes -->
+            <div style="border-radius:9px;padding:9px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.2)">
+              <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;margin-bottom:4px">🌐 General Nodes</div>
+              <div style="display:flex;gap:3px">
+                <div class="pod-chip" style="flex:1;font-size:7px">📦 Web Pod</div>
+                <div class="pod-chip" style="flex:1;font-size:7px">📦 API Pod</div>
+                <div class="pod-chip" style="flex:1;font-size:7px">📦 Cache</div>
+              </div>
+              <div style="margin-top:4px;font-size:7px;color:#94A3B8;text-align:center">No taint → all Pods welcome</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 COMPARISON -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison &amp; Best Practices</div>
+      <div class="stitle">Scheduling Methods — Side by Side</div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1.6;display:flex;flex-direction:column;gap:0">
+          <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr;gap:0;border-radius:10px 10px 0 0;overflow:hidden">
+            <div style="padding:7px 10px;background:rgba(255,255,255,.06);font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.5px">Method</div>
+            <div style="padding:7px 10px;background:rgba(255,255,255,.06);font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.5px">Set On</div>
+            <div style="padding:7px 10px;background:rgba(255,255,255,.06);font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.5px">Type</div>
+            <div style="padding:7px 10px;background:rgba(255,255,255,.06);font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.5px">Flex</div>
+            <div style="padding:7px 10px;background:rgba(255,255,255,.06);font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:.5px">Best for</div>
+          </div>
+          <div id="tbl" style="display:flex;flex-direction:column;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid var(--border);border-top:none">
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr;border-bottom:1px solid rgba(255,255,255,.05)">
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--scD);color:#BAE6FD;border:1px solid var(--scB)">NodeSelector</span></div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Pod</div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Hard only</div>
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.1);color:#FDE068;border:1px solid rgba(245,158,11,.2)">Low</span></div>
+              <div style="padding:8px 10px;font-size:8px;color:#94A3B8;display:flex;align-items:center">Simple label matching</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr;border-bottom:1px solid rgba(255,255,255,.05)">
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--afD);color:#DDD6FE;border:1px solid var(--afB)">Node Affinity</span></div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Pod</div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Hard + Soft</div>
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:var(--tlD);color:#86EFAC;border:1px solid var(--tlB)">High</span></div>
+              <div style="padding:8px 10px;font-size:8px;color:#94A3B8;display:flex;align-items:center">Complex node targeting</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr;border-bottom:1px solid rgba(255,255,255,.05)">
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--afD);color:#DDD6FE;border:1px solid var(--afB)">Pod Affinity</span></div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Pod</div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Hard + Soft</div>
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:var(--tlD);color:#86EFAC;border:1px solid var(--tlB)">High</span></div>
+              <div style="padding:8px 10px;font-size:8px;color:#94A3B8;display:flex;align-items:center">Co-locate services</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr;border-bottom:1px solid rgba(255,255,255,.05)">
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--tnD);color:#FCA5A5;border:1px solid var(--tnB)">Taints</span></div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Node</div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Restriction</div>
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.1);color:#FDE068;border:1px solid rgba(245,158,11,.2)">Med</span></div>
+              <div style="padding:8px 10px;font-size:8px;color:#94A3B8;display:flex;align-items:center">Protect special nodes</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr 0.9fr 1.3fr">
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--tlD);color:#86EFAC;border:1px solid var(--tlB)">Tolerations</span></div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Pod</div>
+              <div style="padding:8px 10px;font-size:8.5px;color:#CBD5E1;display:flex;align-items:center">Permission</div>
+              <div style="padding:8px 10px;display:flex;align-items:center"><span style="font-size:8px;padding:2px 7px;border-radius:8px;background:var(--tlD);color:#86EFAC;border:1px solid var(--tlB)">High</span></div>
+              <div style="padding:8px 10px;font-size:8px;color:#94A3B8;display:flex;align-items:center">Paired with Taints</div>
+            </div>
+          </div>
+        </div>
+        <div style="width:210px;flex-shrink:0;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:11px;padding:11px;background:var(--scD);border:1.5px solid var(--scB)">
+            <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;margin-bottom:6px">✅ Best Practices</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:var(--nd);flex-shrink:0">◆</span>Start with NodeSelector for simple cases</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:var(--nd);flex-shrink:0">◆</span>Upgrade to Affinity when you need "prefer"</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:var(--nd);flex-shrink:0">◆</span>Use Taints for dedicated / sensitive nodes</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:var(--nd);flex-shrink:0">◆</span>Anti-Affinity for HA across zones</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:var(--nd);flex-shrink:0">◆</span>Always label nodes clearly + consistently</div>
+            </div>
+          </div>
+          <div style="border-radius:11px;padding:11px;background:var(--afD);border:1.5px solid var(--afB)">
+            <div style="font-size:8.5px;font-weight:700;color:#DDD6FE;margin-bottom:5px">⚠ Common Mistakes</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Forget to label nodes before deploying</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Tainting without matching tolerations</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Too strict rules → Pods stuck Pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes Scheduling — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--scD);border:1.5px solid var(--scB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:22px">🏷</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">NodeSelector</div>
+              <div style="font-size:7.5px;color:var(--muted)">= "I need a sea-view room"</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Simple exact label match. Hard rule. Easy to use.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--afD);border:1.5px solid var(--afB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:22px">🧲</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Affinity</div>
+              <div style="font-size:7.5px;color:var(--muted)">= "Prefer near the pool, must be quiet floor"</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Flexible. Hard + soft. Node &amp; Pod aware.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--tnD);border:1.5px solid var(--tnB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:22px">🚫🔑</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Taints &amp; Tolerations</div>
+              <div style="font-size:7.5px;color:var(--muted)">= VIP floor + special access key</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Node protection. Only tolerated Pods enter.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--scD);border:1px solid var(--scB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⎈</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Scheduler</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Filter → Score → Bind</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🏷</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#67E8F9">Node Labels</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Foundation for all rules</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--afD);border:1px solid var(--afB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📋</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Hard vs Soft</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Required vs Preferred</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--tnD);border:1px solid var(--tnB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚫</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Taints</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Node repels Pods</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--tlD);border:1px solid var(--tlB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔑</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Tolerations</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Pod bypasses taint</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--scD);border:1px solid var(--scB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📍</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">HA with Anti-Affinity</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Spread Pods across zones</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"Scheduler = hotel manager · <span style="color:#FCA5A5">Taints = VIP-only floors</span> · <span style="color:#86EFAC">Tolerations = special access key</span> · <span style="color:#BAE6FD">Affinity = room preferences</span>"</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--scD);border:1.5px solid var(--scB)">
+            <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--nd)">◆</span>Scheduler = pod placement engine</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--nd)">◆</span>NodeSelector for simple routing</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--nd)">◆</span>Affinity for advanced rules</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--nd)">◆</span>Taints protect special nodes</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--nd)">◆</span>Tolerations = the access key</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Logging in<br>Kubernetes</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">Fluentd · EFK Stack<br>Centralized log management</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#BAE6FD;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --k8s-blue:#326CE5;--k8s-dark:#0D1117;--k8s-darker:#060A10;
+    --k8s-navy:#0F2040;--cyan:#00D4FF;--purple:#7C3AED;
+    --purple-light:#A855F7;--cyan-dim:#0EA5E9;--white:#F0F6FF;
+    --muted:#8B9EC7;--border:#1E3A6E;--grad1:linear-gradient(135deg,#326CE5,#7C3AED);
+    --grad2:linear-gradient(135deg,#00D4FF,#326CE5);
+    --grad3:linear-gradient(135deg,#7C3AED,#EC4899);
+  }
+  body,html{background:#060A10;font-family:'Inter',sans-serif;color:#F0F6FF}
+  .pres{width:100%;max-width:960px;margin:0 auto;padding:12px}
+  .slide-nav{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+  .nav-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center}
+  .nav-dot.active{background:var(--k8s-blue);border-color:var(--k8s-blue);color:#fff;transform:scale(1.1)}
+  .nav-dot:hover:not(.active){border-color:var(--k8s-blue);color:var(--k8s-blue)}
+  .slide-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 60px rgba(50,108,229,.18)}
+  .slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .5s ease;display:flex;flex-direction:column}
+  .slide.active{opacity:1;pointer-events:all}
+  .slide-footer{position:absolute;bottom:0;left:0;right:0;padding:10px 28px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(50,108,229,.2);font-size:11px;color:var(--muted);background:rgba(6,10,16,.6);backdrop-filter:blur(4px)}
+  .nav-btns{display:flex;gap:10px;justify-content:center;margin-top:12px}
+  .nav-btn{padding:8px 24px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:13px;font-weight:500;cursor:pointer;transition:all .25s}
+  .nav-btn:hover{background:rgba(50,108,229,.25);border-color:var(--k8s-blue)}
+  .nav-btn.primary{background:var(--grad1);border:none;color:#fff}
+  .nav-btn.primary:hover{opacity:.85}
+
+  /* ── SLIDE 1 ── */
+  .s1{background:var(--k8s-darker)}
+  .s1-bg{position:absolute;inset:0;overflow:hidden}
+  .s1-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.07) 1px,transparent 1px);background-size:40px 40px}
+  .s1-glow1{position:absolute;top:-10%;left:-5%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.22) 0%,transparent 65%);border-radius:50%}
+  .s1-glow2{position:absolute;bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%);border-radius:50%}
+  .s1-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:5%}
+  .k8s-logo{width:80px;height:80px;margin-bottom:16px}
+  .s1-badge{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:12px;padding:4px 14px;border:1px solid rgba(0,212,255,.3);border-radius:20px;background:rgba(0,212,255,.06)}
+  .s1-title{font-size:clamp(22px,4.5vw,46px);font-weight:900;text-align:center;line-height:1.1;background:linear-gradient(135deg,#fff 30%,#326CE5 70%,#00D4FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px}
+  .s1-sub{font-size:clamp(11px,1.8vw,16px);color:var(--muted);text-align:center;max-width:560px;line-height:1.5;margin-bottom:24px}
+  .s1-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .tag{padding:5px 13px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
+  .tag-blue{background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.35);color:#7EB3FF}
+  .tag-purple{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#C084FC}
+  .tag-cyan{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:#67E8F9}
+  .cluster-vis{position:absolute;right:4%;top:50%;transform:translateY(-50%);opacity:.35}
+
+  /* ── SLIDE 2 ── */
+  .s2{background:var(--k8s-darker);flex-direction:column}
+  .s2-bg{position:absolute;inset:0;overflow:hidden}
+  .s2-glow{position:absolute;top:-20%;right:-10%;width:50%;height:80%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)}
+  .s2-inner{position:relative;z-index:2;display:flex;height:100%;padding:4% 5%}
+  .s2-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:4%}
+  .slide-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+  .slide-title{font-size:clamp(17px,3vw,30px);font-weight:800;line-height:1.2;margin-bottom:18px;color:#F0F6FF}
+  .prob-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2)}
+  .prob-icon{width:28px;height:28px;border-radius:6px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+  .prob-text{font-size:clamp(10px,1.4vw,13px);color:#CBD5E1;line-height:1.4;padding-top:2px}
+  .prob-text strong{color:#F87171;font-weight:600}
+  .s2-right{flex:1;display:flex;align-items:center;justify-content:center}
+  .chaos-vs{display:flex;align-items:center;gap:12px}
+  .chaos-box,.order-box{border-radius:12px;padding:14px;text-align:center;width:140px}
+  .chaos-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25)}
+  .order-box{background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.3)}
+  .box-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+  .chaos-box .box-label{color:#F87171}
+  .order-box .box-label{color:#7EB3FF}
+  .vs-arrow{font-size:20px;color:var(--muted)}
+  .mini-containers{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:6px}
+  .mini-c{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px}
+  .mini-c.chaotic{background:rgba(239,68,68,.25);border:1px solid rgba(239,68,68,.4);color:#F87171;transform:rotate(var(--r,0deg))}
+  .mini-c.ordered{background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);color:#7EB3FF}
+  .k8s-orchestrator{margin-top:8px;padding:6px 10px;border-radius:6px;background:var(--grad1);font-size:9px;font-weight:700;letter-spacing:1px;color:#fff;text-align:center}
+
+  /* ── SLIDE 3 ── */
+  .s3{background:var(--k8s-darker)}
+  .s3-bg{position:absolute;inset:0}
+  .s3-glow{position:absolute;bottom:-15%;left:-5%;width:50%;height:70%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)}
+  .s3-inner{position:relative;z-index:2;display:flex;height:100%;padding:4% 5%}
+  .s3-left{width:42%;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+  .s3-right{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px}
+  .learn-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(50,108,229,.2);transition:all .3s}
+  .learn-item:hover{background:rgba(50,108,229,.08);border-color:rgba(50,108,229,.4);transform:translateX(4px)}
+  .learn-num{width:26px;height:26px;border-radius:6px;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+  .learn-text{font-size:clamp(10px,1.3vw,13px);color:#CBD5E1;font-weight:500}
+  .learn-text strong{color:#F0F6FF}
+  .roadmap-visual{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px}
+  .road-step{padding:7px 16px;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:.5px;width:160px;text-align:center}
+  .road-arrow{color:var(--cyan);font-size:14px}
+
+  /* ── SLIDE 4 ── */
+  .s4{background:var(--k8s-darker)}
+  .s4-bg{position:absolute;inset:0;overflow:hidden}
+  .s4-glow{position:absolute;top:-10%;right:20%;width:40%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)}
+  .s4-inner{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.5% 5%}
+  .s4-grid{display:flex;gap:8px;flex:1;align-items:stretch;padding-top:10px}
+  .phase-card{flex:1;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:7px;border:1px solid;position:relative;overflow:hidden}
+  .phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:2px 2px 0 0}
+  .phase-num{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+  .phase-title{font-size:clamp(10px,1.2vw,13px);font-weight:800;line-height:1.2;margin-bottom:4px}
+  .phase-topic{font-size:clamp(9px,1vw,11px);color:#94A3B8;display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .phase-topic:last-child{border:none}
+  .phase-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+  .p1{background:rgba(50,108,229,.06);border-color:rgba(50,108,229,.25)}.p1::before{background:var(--k8s-blue)}.p1 .phase-num{color:var(--k8s-blue)}.p1 .phase-title{color:#7EB3FF}.p1 .phase-dot{background:var(--k8s-blue)}
+  .p2{background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.25)}.p2::before{background:var(--cyan)}.p2 .phase-num{color:var(--cyan)}.p2 .phase-title{color:#67E8F9}.p2 .phase-dot{background:var(--cyan)}
+  .p3{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.25)}.p3::before{background:var(--purple)}.p3 .phase-num{color:var(--purple-light)}.p3 .phase-title{color:#C084FC}.p3 .phase-dot{background:var(--purple-light)}
+  .p4{background:rgba(234,179,8,.06);border-color:rgba(234,179,8,.25)}.p4::before{background:#EAB308}.p4 .phase-num{color:#EAB308}.p4 .phase-title{color:#FDE047}.p4 .phase-dot{background:#EAB308}
+  .p5{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.25)}.p5::before{background:#22C55E}.p5 .phase-num{color:#22C55E}.p5 .phase-title{color:#86EFAC}.p5 .phase-dot{background:#22C55E}
+
+  /* ── SLIDE 5 ── */
+  .s5{background:var(--k8s-darker)}
+  .s5-bg{position:absolute;inset:0}
+  .s5-glow{position:absolute;bottom:-10%;left:30%;width:40%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)}
+  .s5-inner{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.5% 5%}
+  .audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:1;align-content:center;padding-top:10px}
+  .aud-card{border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;border:1px solid rgba(50,108,229,.2);background:rgba(255,255,255,.02);transition:all .3s;cursor:default}
+  .aud-card:hover{background:rgba(50,108,229,.08);border-color:rgba(50,108,229,.5);transform:translateY(-3px)}
+  .aud-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .aud-role{font-size:clamp(10px,1.2vw,12px);font-weight:700;color:#F0F6FF;margin-bottom:2px}
+  .aud-desc{font-size:clamp(9px,1vw,11px);color:var(--muted);line-height:1.3}
+
+  /* ── SLIDE 6 ── */
+  .s6{background:var(--k8s-darker)}
+  .s6-bg{position:absolute;inset:0;overflow:hidden}
+  .s6-glow1{position:absolute;top:-20%;left:-10%;width:60%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)}
+  .s6-glow2{position:absolute;bottom:-10%;right:-10%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)}
+  .s6-inner{position:relative;z-index:2;display:flex;height:100%;padding:4% 5%}
+  .s6-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:4%}
+  .s6-right{width:42%;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .special-item{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(50,108,229,.18)}
+  .special-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .special-text{font-size:clamp(10px,1.3vw,13px);color:#CBD5E1;font-weight:500;padding-top:4px}
+  .special-text strong{color:#F0F6FF}
+  .cta-box{padding:16px;border-radius:14px;background:var(--grad1);text-align:center;margin-top:4px}
+  .cta-main{font-size:clamp(12px,1.6vw,16px);font-weight:800;color:#fff;margin-bottom:6px}
+  .cta-sub{font-size:clamp(10px,1.2vw,12px);color:rgba(255,255,255,.75)}
+  .cta-btn{display:inline-block;margin-top:10px;padding:8px 20px;border-radius:8px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .25s}
+  .cta-btn:hover{background:rgba(255,255,255,.25)}
+  .slide-counter{font-size:11px;color:var(--muted)}
+</style>
+
+<div class="pres">
+  <div class="slide-nav" id="nav"></div>
+  <div class="slide-wrap" id="slides">
+
+    <!-- SLIDE 1 -->
+    <div class="slide s1 active" data-slide="1">
+      <div class="s1-bg"><div class="s1-grid"></div><div class="s1-glow1"></div><div class="s1-glow2"></div></div>
+      <div class="s1-content">
+        <svg class="k8s-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/>
+          <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,0.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+          <circle cx="50" cy="50" r="14" fill="#326CE5" opacity="0.9"/>
+          <circle cx="50" cy="50" r="5" fill="#fff"/>
+          <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="50" cy="20" r="4" fill="#00D4FF"/>
+          <circle cx="50" cy="80" r="4" fill="#00D4FF"/>
+          <circle cx="24" cy="35" r="4" fill="#00D4FF"/>
+          <circle cx="76" cy="65" r="4" fill="#00D4FF"/>
+          <circle cx="24" cy="65" r="4" fill="#00D4FF"/>
+          <circle cx="76" cy="35" r="4" fill="#00D4FF"/>
+        </svg>
+        <div class="s1-badge">New Kubernetes Series</div>
+        <div class="s1-title">Kubernetes Mastery Series</div>
+        <div class="s1-sub">From Basics to Real-World DevOps Implementation - A complete journey for beginners through advanced practitioners</div>
+        <div class="s1-tags">
+          <span class="tag tag-blue">Beginner Friendly</span>
+          <span class="tag tag-purple">DevOps Ready</span>
+          <span class="tag tag-cyan">Hands-On Labs</span>
+          <span class="tag tag-blue">Interview Prep</span>
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">01 / 06</span></div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide s2" data-slide="2">
+      <div class="s2-bg"><div class="s2-glow"></div></div>
+      <div class="s2-inner">
+        <div class="s2-left">
+          <div class="slide-label">The Problem</div>
+          <div class="slide-title">Why This Series?</div>
+          <div class="prob-item">
+            <div class="prob-icon">⚠</div>
+            <div class="prob-text"><strong>Manual container management</strong> doesn't scale - tracking dozens of containers by hand is error-prone and exhausting</div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-icon">📈</div>
+            <div class="prob-text"><strong>Scaling is complex</strong> - traffic spikes, rolling updates, and zero-downtime deployments are nearly impossible manually</div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-icon">🐳</div>
+            <div class="prob-text"><strong>Docker alone isn't enough</strong> in production - you need orchestration, self-healing, and load balancing</div>
+          </div>
+          <div style="margin-top:14px;padding:10px 14px;border-radius:10px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3)">
+            <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:3px">THE SOLUTION</div>
+            <div style="font-size:clamp(10px,1.3vw,13px);color:#F0F6FF;font-weight:600">Kubernetes - the industry-standard container orchestration platform</div>
+          </div>
+        </div>
+        <div class="s2-right">
+          <div class="chaos-vs">
+            <div class="chaos-box">
+              <div class="box-label">Without K8s</div>
+              <div class="mini-containers">
+                <div class="mini-c chaotic" style="--r:12deg">📦</div>
+                <div class="mini-c chaotic" style="--r:-8deg">📦</div>
+                <div class="mini-c chaotic" style="--r:15deg">💀</div>
+                <div class="mini-c chaotic" style="--r:-5deg">📦</div>
+                <div class="mini-c chaotic" style="--r:20deg">💥</div>
+                <div class="mini-c chaotic" style="--r:-12deg">📦</div>
+              </div>
+              <div style="font-size:10px;color:#F87171;margin-top:8px;font-weight:600">Chaos</div>
+            </div>
+            <div class="vs-arrow">→</div>
+            <div class="order-box">
+              <div class="box-label">With K8s</div>
+              <div class="mini-containers">
+                <div class="mini-c ordered">📦</div>
+                <div class="mini-c ordered">📦</div>
+                <div class="mini-c ordered">📦</div>
+                <div class="mini-c ordered">📦</div>
+                <div class="mini-c ordered">📦</div>
+                <div class="mini-c ordered">📦</div>
+              </div>
+              <div class="k8s-orchestrator">⚙ Orchestrated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">02 / 06</span></div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide s3" data-slide="3">
+      <div class="s3-bg"><div class="s3-glow"></div></div>
+      <div class="s3-inner">
+        <div class="s3-left">
+          <div class="slide-label">Curriculum</div>
+          <div class="slide-title">What You Will Learn</div>
+          <div class="roadmap-visual">
+            <div class="road-step" style="background:rgba(50,108,229,.2);border:1px solid rgba(50,108,229,.4);color:#7EB3FF">Foundations</div>
+            <div class="road-arrow">↓</div>
+            <div class="road-step" style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.35);color:#67E8F9">Core Objects</div>
+            <div class="road-arrow">↓</div>
+            <div class="road-step" style="background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#C084FC">Networking</div>
+            <div class="road-arrow">↓</div>
+            <div class="road-step" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.35);color:#FDE047">Security & Scale</div>
+            <div class="road-arrow">↓</div>
+            <div class="road-step" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.35);color:#86EFAC">DevOps & CI/CD</div>
+          </div>
+        </div>
+        <div class="s3-right">
+          <div class="learn-item"><div class="learn-num">1</div><div class="learn-text"><strong>Kubernetes from scratch</strong> - zero to confident</div></div>
+          <div class="learn-item"><div class="learn-num">2</div><div class="learn-text"><strong>Core concepts</strong> - Pods, Deployments, Services explained simply</div></div>
+          <div class="learn-item"><div class="learn-num">3</div><div class="learn-text"><strong>Architecture</strong> - Control plane, nodes, etcd & API Server</div></div>
+          <div class="learn-item"><div class="learn-num">4</div><div class="learn-text"><strong>Networking & Storage</strong> - Ingress, PVCs, ConfigMaps</div></div>
+          <div class="learn-item"><div class="learn-num">5</div><div class="learn-text"><strong>Security</strong> - RBAC, NetworkPolicies, Secrets</div></div>
+          <div class="learn-item"><div class="learn-num">6</div><div class="learn-text"><strong>Real-world CI/CD</strong> - GitOps, Helm, ArgoCD</div></div>
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">03 / 06</span></div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide s4" data-slide="4">
+      <div class="s4-bg"><div class="s4-glow"></div></div>
+      <div class="s4-inner">
+        <div class="slide-label">Series Roadmap</div>
+        <div class="slide-title" style="font-size:clamp(16px,2.8vw,26px)">Complete Learning Path</div>
+        <div class="s4-grid">
+          <div class="phase-card p1">
+            <div class="phase-num">Phase 1</div>
+            <div class="phase-title">Fundamentals</div>
+            <div class="phase-topic"><div class="phase-dot"></div>What is Kubernetes</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Architecture overview</div>
+            <div class="phase-topic"><div class="phase-dot"></div>kubectl basics</div>
+            <div class="phase-topic"><div class="phase-dot"></div>First cluster setup</div>
+          </div>
+          <div class="phase-card p2">
+            <div class="phase-num">Phase 2</div>
+            <div class="phase-title">Core Objects</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Pods & ReplicaSets</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Deployments</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Services & Ingress</div>
+            <div class="phase-topic"><div class="phase-dot"></div>ConfigMaps & Secrets</div>
+          </div>
+          <div class="phase-card p3">
+            <div class="phase-num">Phase 3</div>
+            <div class="phase-title">Networking & Storage</div>
+            <div class="phase-topic"><div class="phase-dot"></div>CNI & DNS</div>
+            <div class="phase-topic"><div class="phase-dot"></div>PV & PVC</div>
+            <div class="phase-topic"><div class="phase-dot"></div>StorageClass</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Network policies</div>
+          </div>
+          <div class="phase-card p4">
+            <div class="phase-num">Phase 4</div>
+            <div class="phase-title">Security & Scaling</div>
+            <div class="phase-topic"><div class="phase-dot"></div>RBAC & namespaces</div>
+            <div class="phase-topic"><div class="phase-dot"></div>HPA & VPA</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Resource limits</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Taints & tolerations</div>
+          </div>
+          <div class="phase-card p5">
+            <div class="phase-num">Phase 5</div>
+            <div class="phase-title">Advanced DevOps</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Helm charts</div>
+            <div class="phase-topic"><div class="phase-dot"></div>ArgoCD / GitOps</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Monitoring (Prometheus)</div>
+            <div class="phase-topic"><div class="phase-dot"></div>Production hardening</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">04 / 06</span></div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide s5" data-slide="5">
+      <div class="s5-bg"><div class="s5-glow"></div></div>
+      <div class="s5-inner">
+        <div class="slide-label">Target Audience</div>
+        <div class="slide-title" style="font-size:clamp(16px,2.8vw,26px)">Who Is This For?</div>
+        <div class="audience-grid">
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(50,108,229,.15)">⚙️</div>
+            <div class="aud-role">DevOps Engineers</div>
+            <div class="aud-desc">Level up your container orchestration skills for production</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(0,212,255,.12)">💻</div>
+            <div class="aud-role">Developers</div>
+            <div class="aud-desc">Deploy your apps with confidence on K8s clusters</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(124,58,237,.15)">🖥</div>
+            <div class="aud-role">Sys Admins</div>
+            <div class="aud-desc">Transition from VMs to cloud-native infrastructure</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(34,197,94,.12)">🎓</div>
+            <div class="aud-role">Freshers</div>
+            <div class="aud-desc">Enter the Cloud & DevOps field with real skills</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(234,179,8,.12)">📋</div>
+            <div class="aud-role">Interview Seekers</div>
+            <div class="aud-desc">Crack K8s interviews at top tech companies</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon" style="background:rgba(239,68,68,.12)">🐳</div>
+            <div class="aud-role">Docker Users</div>
+            <div class="aud-desc">Natural next step - from Docker Compose to K8s</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">05 / 06</span></div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide s6" data-slide="6">
+      <div class="s6-bg"><div class="s6-glow1"></div><div class="s6-glow2"></div></div>
+      <div class="s6-inner">
+        <div class="s6-left">
+          <div class="slide-label">Why Choose Us</div>
+          <div class="slide-title">What Makes This Series Special?</div>
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px">
+            <div class="special-item">
+              <div class="special-icon" style="background:rgba(50,108,229,.2)">🌍</div>
+              <div class="special-text"><strong>Real-world explanations</strong> - production patterns, not just theory</div>
+            </div>
+            <div class="special-item">
+              <div class="special-icon" style="background:rgba(0,212,255,.15)">🧠</div>
+              <div class="special-text"><strong>Beginner-friendly</strong> - complex concepts made simple with visuals</div>
+            </div>
+            <div class="special-item">
+              <div class="special-icon" style="background:rgba(124,58,237,.2)">🔬</div>
+              <div class="special-text"><strong>Hands-on demos</strong> - every concept backed by live practice</div>
+            </div>
+            <div class="special-item">
+              <div class="special-icon" style="background:rgba(234,179,8,.15)">💼</div>
+              <div class="special-text"><strong>Interview-focused</strong> - top K8s questions from real interviews</div>
+            </div>
+            <div class="special-item">
+              <div class="special-icon" style="background:rgba(34,197,94,.15)">🚀</div>
+              <div class="special-text"><strong>End-to-end journey</strong> - from kubectl to full GitOps pipeline</div>
+            </div>
+          </div>
+        </div>
+        <div class="s6-right">
+          <div style="padding:16px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(50,108,229,.3);text-align:center">
+            <div style="margin-bottom:12px">
+              <svg width="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/>
+                <circle cx="50" cy="50" r="14" fill="#326CE5" opacity="0.9"/>
+                <circle cx="50" cy="50" r="5" fill="#fff"/>
+                <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="50" cy="20" r="4" fill="#00D4FF"/>
+                <circle cx="50" cy="80" r="4" fill="#00D4FF"/>
+                <circle cx="24" cy="35" r="4" fill="#00D4FF"/>
+                <circle cx="76" cy="65" r="4" fill="#00D4FF"/>
+                <circle cx="24" cy="65" r="4" fill="#00D4FF"/>
+                <circle cx="76" cy="35" r="4" fill="#00D4FF"/>
+              </svg>
+            </div>
+            <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px"></div>
+            <div style="font-size:clamp(13px,1.8vw,18px);font-weight:800;color:#F0F6FF;line-height:1.3;margin-bottom:4px">Let's Master Kubernetes Together!</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Join our K8s learning journey</div>
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+              <div style="padding:8px 16px;border-radius:8px;background:linear-gradient(135deg,#326CE5,#7C3AED);font-size:12px;font-weight:700;color:#fff">Subscribe Now</div>
+              <div style="padding:8px 16px;border-radius:8px;border:1px solid rgba(50,108,229,.4);font-size:12px;font-weight:600;color:#7EB3FF">Like & Share</div>
+            </div>
+          </div>
+          <!-- <div style="padding:12px 16px;border-radius:12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+            <div style="font-size:11px;color:var(--cyan);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Series Starts Soon</div>
+            <div style="font-size:clamp(10px,1.2vw,12px);color:#94A3B8;line-height:1.5">Drop a "K8S" in the comments to be notified when Episode 1 goes live!</div>
+          </div> -->
+        </div>
+      </div>
+      <div class="slide-footer"><span class="slide-counter">06 / 06</span></div>
+    </div>
+
+  </div>
+
+  <div class="nav-btns">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+  let cur = 1, total = 6;
+  const nav = document.getElementById('nav');
+  for(let i=1;i<=total;i++){
+    const d = document.createElement('button');
+    d.className='nav-dot'+(i===1?' active':'');
+    d.textContent=i;d.onclick=()=>goTo(i);
+    nav.appendChild(d);
+  }
+  function goTo(n){
+    document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.nav-dot').forEach((d,i)=>d.classList.toggle('active',i+1===n));
+    document.querySelector('[data-slide="'+n+'"]').classList.add('active');
+    cur=n;
+    document.getElementById('prevBtn').style.opacity=cur===1?'.35':'1';
+    document.getElementById('nextBtn').textContent=cur===total?'Restart ↺':'Next →';
+  }
+  function changeSlide(d){
+    let n=cur+d;
+    if(n<1)n=1;if(n>total)n=1;
+    goTo(n);
+  }
+  goTo(1);
+</script>

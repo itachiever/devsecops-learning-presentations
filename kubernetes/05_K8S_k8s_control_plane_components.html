@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --api:#326CE5;--apiD:rgba(50,108,229,.13);--apiB:rgba(50,108,229,.38);
+  --sch:#7C3AED;--schD:rgba(124,58,237,.13);--schB:rgba(124,58,237,.38);
+  --ctrl:#22C55E;--ctrlD:rgba(34,197,94,.11);--ctrlB:rgba(34,197,94,.32);
+  --etc:#F59E0B;--etcD:rgba(245,158,11,.11);--etcB:rgba(245,158,11,.32);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* component color cards */
+.card-api{background:var(--apiD);border:1.5px solid var(--apiB)}
+.card-sch{background:var(--schD);border:1.5px solid var(--schB)}
+.card-ctrl{background:var(--ctrlD);border:1.5px solid var(--ctrlB)}
+.card-etc{background:var(--etcD);border:1.5px solid var(--etcB)}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.tag-api{background:rgba(50,108,229,.2);color:#BAE6FD;border:1px solid rgba(50,108,229,.35)}
+.tag-sch{background:rgba(124,58,237,.2);color:#DDD6FE;border:1px solid rgba(124,58,237,.35)}
+.tag-ctrl{background:rgba(34,197,94,.15);color:#86EFAC;border:1px solid rgba(34,197,94,.3)}
+.tag-etc{background:rgba(245,158,11,.15);color:#FDE068;border:1px solid rgba(245,158,11,.3)}
+/* flow arrow */
+.arr{text-align:center;font-size:12px;line-height:1;padding:1px 0}
+/* mini comp block */
+.mc{padding:5px 8px;border-radius:6px;font-size:8px;font-weight:700;text-align:center}
+.mc-api{background:rgba(50,108,229,.22);border:1px solid var(--apiB);color:#BAE6FD}
+.mc-sch{background:rgba(124,58,237,.2);border:1px solid var(--schB);color:#DDD6FE}
+.mc-ctrl{background:rgba(34,197,94,.15);border:1px solid var(--ctrlB);color:#86EFAC}
+.mc-etc{background:rgba(245,158,11,.13);border:1px solid var(--etcB);color:#FDE068}
+.mc-pod{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);color:#67E8F9}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.22) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <!-- left -->
+      <div style="flex:1">
+        <!-- K8s logo + series label -->
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="72" height="72" viewBox="0 0 100 100" style="margin-bottom:12px"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="20" r="4" fill="#00D4FF"/><circle cx="50" cy="80" r="4" fill="#00D4FF"/><circle cx="24" cy="35" r="4" fill="#00D4FF"/><circle cx="76" cy="65" r="4" fill="#00D4FF"/><circle cx="24" cy="65" r="4" fill="#00D4FF"/><circle cx="76" cy="35" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,4vw,40px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--blue) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Control Plane<br>Components</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Deep Dive into the Brain of Kubernetes</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag tag-api" style="padding:4px 11px;font-size:9px">🔌 API Server</span>
+          <span class="tag tag-sch" style="padding:4px 11px;font-size:9px">📅 Scheduler</span>
+          <span class="tag tag-ctrl" style="padding:4px 11px;font-size:9px">🔄 Controller Mgr</span>
+          <span class="tag tag-etc" style="padding:4px 11px;font-size:9px">🗄 etcd</span>
+        </div>
+      </div>
+      <!-- right: cluster diagram highlighting control plane -->
+      <div style="flex:1;display:flex;justify-content:center">
+        <div style="width:100%;max-width:290px">
+          <div style="border:1.5px dashed rgba(50,108,229,.3);border-radius:14px;padding:12px;background:rgba(50,108,229,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">☸ Kubernetes Cluster</div>
+            <!-- control plane highlighted -->
+            <div style="border-radius:11px;padding:10px;background:linear-gradient(135deg,rgba(50,108,229,.18),rgba(124,58,237,.15));border:2px solid var(--apiB);margin-bottom:8px;box-shadow:0 0 20px rgba(50,108,229,.2)">
+              <div style="font-size:8px;font-weight:800;color:#7EB3FF;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">🧠 Control Plane ← We're here!</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div class="mc mc-api" style="display:flex;align-items:center;gap:4px;justify-content:center"><span>🔌</span>API Server</div>
+                <div class="mc mc-sch" style="display:flex;align-items:center;gap:4px;justify-content:center"><span>📅</span>Scheduler</div>
+                <div class="mc mc-ctrl" style="display:flex;align-items:center;gap:4px;justify-content:center"><span>🔄</span>Ctrl Manager</div>
+                <div class="mc mc-etc" style="display:flex;align-items:center;gap:4px;justify-content:center"><span>🗄</span>etcd</div>
+              </div>
+            </div>
+            <!-- arrows -->
+            <div style="display:flex;justify-content:space-around;margin-bottom:5px">
+              <span style="font-size:10px;color:var(--cyan)">↕</span><span style="font-size:10px;color:var(--cyan)">↕</span><span style="font-size:10px;color:var(--cyan)">↕</span>
+            </div>
+            <!-- worker nodes (dimmed) -->
+            <div style="display:flex;gap:5px;opacity:.45">
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);text-align:center"><div style="font-size:8px;color:#86EFAC;font-weight:600">Worker 1</div><div style="font-size:9px">📦📦</div></div>
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);text-align:center"><div style="font-size:8px;color:#86EFAC;font-weight:600">Worker 2</div><div style="font-size:9px">📦📦</div></div>
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);text-align:center"><div style="font-size:8px;color:#86EFAC;font-weight:600">Worker 3</div><div style="font-size:9px">📦📦</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 WHAT IS CONTROL PLANE ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Brain</div>
+        <div class="stitle">What is the Control Plane?</div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">🧠</div><div class="bt"><strong>Brain of the Kubernetes cluster</strong> — makes all decisions and manages the overall system</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.14)">📊</div><div class="bt"><strong>Manages cluster state</strong> — always knows what's running and what should be running</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.18)">🎯</div><div class="bt"><strong>Makes key decisions</strong> — scheduling, scaling, healing broken containers automatically</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.14)">🛡</div><div class="bt"><strong>Ensures desired state</strong> — if 3 replicas are needed and one dies, it creates a new one instantly</div></div>
+        <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">Think of it as: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> The Head Office that runs the entire company — workers just follow its instructions</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:230px;display:flex;flex-direction:column;gap:9px">
+          <div style="border-radius:14px;padding:14px;background:linear-gradient(135deg,var(--apiD),rgba(124,58,237,.1));border:2px solid var(--apiB);text-align:center;box-shadow:0 0 28px rgba(50,108,229,.18)">
+            <div style="font-size:32px;margin-bottom:6px">🧠</div>
+            <div style="font-size:11px;font-weight:800;color:#7EB3FF;margin-bottom:4px;letter-spacing:.5px">CONTROL PLANE</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:10px">Runs on the Master Node</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:5px 8px;border-radius:7px;background:rgba(50,108,229,.18);border:1px solid var(--apiB);font-size:9px;font-weight:700;color:#BAE6FD;display:flex;align-items:center;gap:6px"><span>🔌</span>API Server</div>
+              <div style="padding:5px 8px;border-radius:7px;background:rgba(124,58,237,.18);border:1px solid var(--schB);font-size:9px;font-weight:700;color:#DDD6FE;display:flex;align-items:center;gap:6px"><span>📅</span>Scheduler</div>
+              <div style="padding:5px 8px;border-radius:7px;background:rgba(34,197,94,.14);border:1px solid var(--ctrlB);font-size:9px;font-weight:700;color:#86EFAC;display:flex;align-items:center;gap:6px"><span>🔄</span>Controller Manager</div>
+              <div style="padding:5px 8px;border-radius:7px;background:rgba(245,158,11,.14);border:1px solid var(--etcB);font-size:9px;font-weight:700;color:#FDE068;display:flex;align-items:center;gap:6px"><span>🗄</span>etcd</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--cyan)">↕ communicates ↕</div>
+          <div style="border-radius:10px;padding:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:#86EFAC">💪 Worker Nodes</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:2px">Run actual app containers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 OVERVIEW — ALL 4 COMPONENTS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Overview</div>
+      <div class="stitle">Control Plane — All 4 Components</div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- API Server -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--apiD);border:2px solid var(--apiB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(50,108,229,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔌</div>
+            <div><div style="font-size:11px;font-weight:800;color:#7EB3FF">API Server</div><div style="font-size:8px;color:var(--muted)">kube-apiserver</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">The <strong style="color:#7EB3FF">front door</strong> — every request from kubectl, UI, or any tool enters here first. Validates, processes, and routes everything.</div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#BAE6FD">Entry Point for ALL requests</div>
+        </div>
+        <!-- Scheduler -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--schD);border:2px solid var(--schB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(124,58,237,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📅</div>
+            <div><div style="font-size:11px;font-weight:800;color:#C084FC">Scheduler</div><div style="font-size:8px;color:var(--muted)">kube-scheduler</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">The <strong style="color:#C084FC">decision maker</strong> — watches for new Pods with no node assigned, then picks the best node based on resources and rules.</div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(124,58,237,.18);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">Assigns Pods → best Node</div>
+        </div>
+        <!-- Controller Mgr -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--ctrlD);border:2px solid var(--ctrlB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔄</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Controller Manager</div><div style="font-size:8px;color:var(--muted)">kube-controller-manager</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">The <strong style="color:#86EFAC">maintainer</strong> — runs many controllers in one process. Constantly watches cluster state and fixes any difference from desired.</div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.15);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Detects & Fixes drift</div>
+        </div>
+        <!-- etcd -->
+        <div style="flex:1;border-radius:12px;padding:13px;background:var(--etcD);border:2px solid var(--etcB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🗄</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FDE068">etcd</div><div style="font-size:8px;color:var(--muted)">key-value store</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">The <strong style="color:#FDE068">memory</strong> — stores all cluster data: config, state, secrets. Every change is saved here. If etcd is healthy, the cluster is recoverable.</div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(245,158,11,.15);text-align:center;font-size:9px;font-weight:700;color:#FDE068">Source of Truth</div>
+        </div>
+      </div>
+      <!-- bottom: all communicate via API -->
+      <div style="margin-top:9px;padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:#7EB3FF">🔑 Key rule: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">All components communicate exclusively through the <strong style="color:#7EB3FF">API Server</strong> — no direct component-to-component calls</span>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 API SERVER ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.22) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 1</div>
+        <div class="stitle" style="color:#7EB3FF">API Server <span style="font-size:.7em;color:var(--muted)">— The Entry Point</span></div>
+        <div class="bi" style="background:var(--apiD);border-color:var(--apiB)"><div class="ico" style="background:rgba(50,108,229,.25)">🌐</div><div class="bt"><strong>Central communication hub</strong> — every single request in Kubernetes goes through here</div></div>
+        <div class="bi" style="background:var(--apiD);border-color:var(--apiB)"><div class="ico" style="background:rgba(50,108,229,.25)">📥</div><div class="bt"><strong>Receives all requests</strong> — from kubectl (CLI), dashboards, CI/CD pipelines, other components</div></div>
+        <div class="bi" style="background:var(--apiD);border-color:var(--apiB)"><div class="ico" style="background:rgba(50,108,229,.25)">✅</div><div class="bt"><strong>Validates & authenticates</strong> — checks who you are and if your request is allowed</div></div>
+        <div class="bi" style="background:var(--apiD);border-color:var(--apiB)"><div class="ico" style="background:rgba(50,108,229,.25)">💾</div><div class="bt"><strong>Reads/writes to etcd</strong> — after validation, stores or retrieves the cluster state</div></div>
+        <div class="bi" style="background:var(--apiD);border-color:var(--apiB)"><div class="ico" style="background:rgba(50,108,229,.25)">📡</div><div class="bt"><strong>Exposes REST API</strong> — uses HTTPS so any tool can talk to it securely</div></div>
+      </div>
+      <div class="lr">
+        <!-- gateway diagram -->
+        <div style="width:100%;max-width:240px">
+          <div style="border-radius:13px;padding:13px;background:var(--apiD);border:2px solid var(--apiB);box-shadow:0 0 28px rgba(50,108,229,.18)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7EB3FF;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">API Server — Gateway</div>
+            <!-- requestors -->
+            <div style="display:flex;gap:4px;margin-bottom:6px;justify-content:center">
+              <div style="padding:5px 7px;border-radius:6px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);font-size:8px;font-weight:600;color:#C084FC;text-align:center">🧑‍💻<br>kubectl</div>
+              <div style="padding:5px 7px;border-radius:6px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);font-size:8px;font-weight:600;color:#C084FC;text-align:center">🖥<br>Dashboard</div>
+              <div style="padding:5px 7px;border-radius:6px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);font-size:8px;font-weight:600;color:#C084FC;text-align:center">🔧<br>CI/CD</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--cyan);margin-bottom:4px">↓ all requests ↓</div>
+            <!-- API server central -->
+            <div style="padding:10px;border-radius:9px;background:rgba(50,108,229,.22);border:2px solid rgba(50,108,229,.5);text-align:center;margin-bottom:6px">
+              <div style="font-size:18px;margin-bottom:2px">🔌</div>
+              <div style="font-size:10px;font-weight:800;color:#7EB3FF">API Server</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Validate → Authenticate → Route</div>
+            </div>
+            <!-- routes to -->
+            <div style="text-align:center;font-size:9px;color:var(--blue);margin-bottom:5px">↙ ↓ ↘</div>
+            <div style="display:flex;gap:4px">
+              <div class="mc mc-etc" style="flex:1;display:flex;align-items:center;gap:3px;justify-content:center"><span>🗄</span>etcd</div>
+              <div class="mc mc-sch" style="flex:1;display:flex;align-items:center;gap:3px;justify-content:center"><span>📅</span>Sched</div>
+              <div class="mc mc-ctrl" style="flex:1;display:flex;align-items:center;gap:3px;justify-content:center"><span>🔄</span>Ctrl</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 SCHEDULER ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(124,58,237,.22) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 2</div>
+        <div class="stitle" style="color:#C084FC">Scheduler <span style="font-size:.7em;color:var(--muted)">— The Decision Maker</span></div>
+        <div class="bi" style="background:var(--schD);border-color:var(--schB)"><div class="ico" style="background:rgba(124,58,237,.25)">👀</div><div class="bt"><strong>Watches for unscheduled Pods</strong> — as soon as a new Pod is created, Scheduler sees it</div></div>
+        <div class="bi" style="background:var(--schD);border-color:var(--schB)"><div class="ico" style="background:rgba(124,58,237,.25)">🖥</div><div class="bt"><strong>Checks resource availability</strong> — scans all nodes for CPU, memory, and storage space</div></div>
+        <div class="bi" style="background:var(--schD);border-color:var(--schB)"><div class="ico" style="background:rgba(124,58,237,.25)">📋</div><div class="bt"><strong>Respects constraints & rules</strong> — node selectors, affinity rules, taints & tolerations</div></div>
+        <div class="bi" style="background:var(--schD);border-color:var(--schB)"><div class="ico" style="background:rgba(124,58,237,.25)">✅</div><div class="bt"><strong>Assigns Pod to best Node</strong> — tells API Server the decision, which then updates etcd</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25)">
+          <span style="font-size:10px;font-weight:700;color:#C084FC">Note: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Scheduler only <strong style="color:#C084FC">decides</strong> where to run — the Kubelet on the worker node <strong style="color:#C084FC">actually runs</strong> it</span>
+        </div>
+      </div>
+      <div class="lr">
+        <!-- decision flow diagram -->
+        <div style="width:100%;max-width:230px">
+          <div style="border-radius:13px;padding:13px;background:var(--schD);border:2px solid var(--schB);box-shadow:0 0 25px rgba(124,58,237,.18)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#C084FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Scheduler Flow</div>
+            <div style="padding:6px;border-radius:7px;background:rgba(124,58,237,.18);border:1px solid var(--schB);text-align:center;margin-bottom:4px"><div style="font-size:9px;font-weight:700;color:#DDD6FE">📦 New Pod created (no node)</div></div>
+            <div class="arr" style="color:var(--purpleL)">↓</div>
+            <div style="padding:6px;border-radius:7px;background:rgba(50,108,229,.15);border:1px solid var(--apiB);text-align:center;margin-bottom:4px"><div style="font-size:9px;font-weight:700;color:#BAE6FD">🔌 API Server notifies Scheduler</div></div>
+            <div class="arr" style="color:var(--cyan)">↓</div>
+            <div style="padding:8px;border-radius:8px;background:rgba(124,58,237,.22);border:2px solid rgba(124,58,237,.45);margin-bottom:4px">
+              <div style="font-size:9px;font-weight:800;color:#C084FC;text-align:center;margin-bottom:5px">📅 Scheduler checks all nodes</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:8px;color:#94A3B8;padding:2px 6px;background:rgba(124,58,237,.12);border-radius:4px">✓ CPU available?</div>
+                <div style="font-size:8px;color:#94A3B8;padding:2px 6px;background:rgba(124,58,237,.12);border-radius:4px">✓ Memory available?</div>
+                <div style="font-size:8px;color:#94A3B8;padding:2px 6px;background:rgba(124,58,237,.12);border-radius:4px">✓ Rules satisfied?</div>
+              </div>
+            </div>
+            <div class="arr" style="color:var(--green)">↓</div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);text-align:center;margin-bottom:4px"><div style="font-size:9px;font-weight:700;color:#86EFAC">🎯 Best Node selected</div></div>
+            <div class="arr" style="color:var(--green)">↓</div>
+            <div style="display:flex;gap:3px;justify-content:center">
+              <div style="flex:1;padding:4px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center;font-size:8px;color:#86EFAC;font-weight:600">💪 Worker 1<br>✅ Assigned</div>
+              <div style="flex:1;padding:4px;border-radius:5px;background:rgba(255,255,255,.03);border:1px solid var(--border);text-align:center;font-size:8px;color:var(--muted)">💪 Worker 2<br>⬜ Skipped</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 CONTROLLER MANAGER ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 3</div>
+        <div class="stitle" style="color:#86EFAC">Controller Manager <span style="font-size:.7em;color:var(--muted)">— The Maintainer</span></div>
+        <div class="bi" style="background:var(--ctrlD);border-color:var(--ctrlB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔁</div><div class="bt"><strong>Runs a continuous control loop</strong> — forever checks: is actual state = desired state?</div></div>
+        <div class="bi" style="background:var(--ctrlD);border-color:var(--ctrlB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔍</div><div class="bt"><strong>Detects drift</strong> — if desired = 3 Pods but only 2 are running, it notices immediately</div></div>
+        <div class="bi" style="background:var(--ctrlD);border-color:var(--ctrlB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔧</div><div class="bt"><strong>Automatically fixes issues</strong> — creates a new Pod to replace the failed one</div></div>
+        <div class="bi" style="background:var(--ctrlD);border-color:var(--ctrlB)"><div class="ico" style="background:rgba(34,197,94,.22)">📦</div><div class="bt"><strong>Multiple controllers inside one</strong> — Node Controller, Replication Controller, Job Controller</div></div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+          <div style="padding:5px 10px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--ctrlB);font-size:9px;color:#86EFAC;font-weight:600">Node Controller</div>
+          <div style="padding:5px 10px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--ctrlB);font-size:9px;color:#86EFAC;font-weight:600">Replication Controller</div>
+          <div style="padding:5px 10px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--ctrlB);font-size:9px;color:#86EFAC;font-weight:600">Job Controller</div>
+          <div style="padding:5px 10px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--ctrlB);font-size:9px;color:#86EFAC;font-weight:600">Endpoint Controller</div>
+        </div>
+      </div>
+      <div class="lr">
+        <!-- reconciliation loop diagram -->
+        <div style="width:100%;max-width:230px">
+          <div style="border-radius:13px;padding:13px;background:var(--ctrlD);border:2px solid var(--ctrlB);box-shadow:0 0 25px rgba(34,197,94,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">🔄 Reconciliation Loop</div>
+            <!-- loop visual -->
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:7px;border-radius:7px;background:rgba(50,108,229,.15);border:1px solid var(--apiB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">📋 Desired State (from etcd)</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">e.g. 3 Pods should be running</div>
+              </div>
+              <div class="arr" style="color:var(--ctrl)">↓ compare ↓</div>
+              <div style="padding:7px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#FDE068">📊 Actual State (cluster)</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:1px">e.g. only 2 Pods running 😱</div>
+              </div>
+              <div class="arr" style="color:var(--red)">↓ drift detected! ↓</div>
+              <div style="padding:8px;border-radius:8px;background:rgba(34,197,94,.18);border:2px solid rgba(34,197,94,.4);text-align:center">
+                <div style="font-size:8px;font-weight:800;color:#86EFAC;margin-bottom:3px">🔄 Controller Manager acts</div>
+                <div style="font-size:8px;color:#94A3B8">Creates 1 new Pod to restore desired state</div>
+              </div>
+              <div class="arr" style="color:var(--ctrl)">↓ result ↓</div>
+              <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid var(--ctrlB);text-align:center">
+                <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ 3 Pods running — state restored!</div>
+              </div>
+              <div class="arr" style="color:var(--muted)">↻ loop repeats forever</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 ETCD ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 4</div>
+        <div class="stitle" style="color:#FDE068">etcd <span style="font-size:.7em;color:var(--muted)">— The Data Store</span></div>
+        <div class="bi" style="background:var(--etcD);border-color:var(--etcB)"><div class="ico" style="background:rgba(245,158,11,.22)">💾</div><div class="bt"><strong>Stores all cluster data</strong> — every object, config, and state lives here as key-value pairs</div></div>
+        <div class="bi" style="background:var(--etcD);border-color:var(--etcB)"><div class="ico" style="background:rgba(245,158,11,.22)">📖</div><div class="bt"><strong>Key-value database</strong> — simple concept: key = "pod/name", value = all pod details in JSON</div></div>
+        <div class="bi" style="background:var(--etcD);border-color:var(--etcB)"><div class="ico" style="background:rgba(245,158,11,.22)">🔐</div><div class="bt"><strong>Stores secrets & config</strong> — ConfigMaps, Secrets, RBAC rules all stored securely</div></div>
+        <div class="bi" style="background:var(--etcD);border-color:var(--etcB)"><div class="ico" style="background:rgba(245,158,11,.22)">🔒</div><div class="bt"><strong>Only API Server reads/writes</strong> — no other component touches etcd directly</div></div>
+        <div class="bi" style="background:var(--etcD);border-color:var(--etcB)"><div class="ico" style="background:rgba(245,158,11,.22)">⚡</div><div class="bt"><strong>Distributed & consistent</strong> — uses Raft consensus algorithm to stay reliable</div></div>
+        <div style="margin-top:6px;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">⚠ Critical: </span><span style="font-size:clamp(9px,1.2vw,11px);color:#CBD5E1">If etcd data is lost and not backed up, the entire cluster configuration is gone</span>
+        </div>
+      </div>
+      <div class="lr">
+        <!-- etcd storage visual -->
+        <div style="width:100%;max-width:235px">
+          <div style="border-radius:13px;padding:13px;background:var(--etcD);border:2px solid var(--etcB);box-shadow:0 0 25px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🗄 etcd — What it stores</div>
+            <!-- key-value examples -->
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+              <div style="display:flex;gap:4px;align-items:center">
+                <div style="flex:.9;padding:5px 7px;border-radius:5px;background:rgba(245,158,11,.15);border:1px solid var(--etcB);font-size:8px;color:#FDE068;font-weight:600">KEY</div>
+                <div style="flex:1.6;padding:5px 7px;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:8px;color:#94A3B8;font-weight:600">VALUE</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div style="flex:.9;padding:4px 7px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid var(--etcB);font-size:8px;color:#FDE068">/pods/web</div>
+                <div style="flex:1.6;padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:8px;color:#94A3B8">image:nginx, replicas:3...</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div style="flex:.9;padding:4px 7px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid var(--etcB);font-size:8px;color:#FDE068">/nodes/n1</div>
+                <div style="flex:1.6;padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:8px;color:#94A3B8">cpu:4, memory:8Gi, ready</div>
+              </div>
+              <div style="display:flex;gap:4px">
+                <div style="flex:.9;padding:4px 7px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid var(--etcB);font-size:8px;color:#FDE068">/secrets/db</div>
+                <div style="flex:1.6;padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.03);border:1px solid var(--border);font-size:8px;color:#94A3B8">password:••••••• (encrypted)</div>
+              </div>
+            </div>
+            <!-- rule: only API writes -->
+            <div style="padding:7px 10px;border-radius:8px;background:rgba(50,108,229,.12);border:1px solid var(--apiB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#7EB3FF;margin-bottom:4px">🔒 Access Rule</div>
+              <div style="display:flex;gap:4px;justify-content:center;align-items:center">
+                <div style="padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.2);font-size:8px;color:#BAE6FD;font-weight:600">🔌 API Server</div>
+                <span style="font-size:9px;color:var(--green)">✅</span>
+              </div>
+              <div style="display:flex;gap:4px;justify-content:center;align-items:center;margin-top:3px">
+                <div style="padding:4px 8px;border-radius:5px;background:rgba(255,255,255,.04);font-size:8px;color:var(--muted)">All other components</div>
+                <span style="font-size:9px;color:var(--red)">❌</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 HOW IT ALL WORKS TOGETHER ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:15%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">End-to-End Flow</div>
+      <div class="stitle">How Control Plane Components Work Together</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#C084FC">User runs: kubectl apply -f deployment.yaml</div><div style="font-size:9px;color:#94A3B8">Request is sent to the cluster — "I want 3 Nginx pods"</div></div>
+            <div style="margin-left:auto;font-size:13px">🧑‍💻</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--api)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--apiD);border:1px solid var(--apiB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">API Server validates & stores in etcd</div><div style="font-size:9px;color:#94A3B8">Authenticates request → saves deployment intent to etcd</div></div>
+            <div style="margin-left:auto;font-size:13px">🔌</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--etc)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--etcD);border:1px solid var(--etcB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">etcd persists the desired state</div><div style="font-size:9px;color:#94A3B8">State is saved: desired = 3 replicas of nginx:latest</div></div>
+            <div style="margin-left:auto;font-size:13px">🗄</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--sch)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--schD);border:1px solid var(--schB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#C084FC">Scheduler assigns Pods to best Nodes</div><div style="font-size:9px;color:#94A3B8">Picks nodes with enough CPU/memory → assigns each Pod</div></div>
+            <div style="margin-left:auto;font-size:13px">📅</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--ctrl)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ctrlD);border:1px solid var(--ctrlB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Controller Manager keeps monitoring forever</div><div style="font-size:9px;color:#94A3B8">If a Pod dies → immediately recreates it to match desired state</div></div>
+            <div style="margin-left:auto;font-size:13px">🔄</div>
+          </div>
+        </div>
+        <!-- right: compact visual flow -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:13px;padding:12px;background:rgba(50,108,229,.04);border:1.5px dashed rgba(50,108,229,.28)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Control Plane Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);text-align:center"><div style="font-size:10px">🧑‍💻</div><div style="font-size:8px;font-weight:600;color:#C084FC">kubectl</div></div>
+              <div style="font-size:10px;color:var(--api)">↓ HTTPS</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--apiD);border:1.5px solid var(--apiB);text-align:center"><div style="font-size:10px">🔌</div><div style="font-size:8px;font-weight:700;color:#7EB3FF">API Server</div></div>
+              <div style="display:flex;gap:4px;width:100%">
+                <div style="font-size:10px;color:var(--etc);flex:1;text-align:center">↙</div>
+                <div style="font-size:10px;color:var(--sch);flex:1;text-align:center">↘</div>
+              </div>
+              <div style="display:flex;gap:4px;width:100%">
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--etcD);border:1px solid var(--etcB);text-align:center"><div style="font-size:9px">🗄</div><div style="font-size:7px;color:#FDE068;font-weight:600">etcd</div></div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:var(--schD);border:1px solid var(--schB);text-align:center"><div style="font-size:9px">📅</div><div style="font-size:7px;color:#C084FC;font-weight:600">Scheduler</div></div>
+              </div>
+              <div style="font-size:10px;color:var(--ctrl)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:6px;background:var(--ctrlD);border:1px solid var(--ctrlB);text-align:center"><div style="font-size:9px">🔄</div><div style="font-size:7px;color:#86EFAC;font-weight:600">Controller Mgr</div></div>
+              <div style="font-size:10px;color:var(--green)">↓ assigns</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center"><div style="font-size:8px;color:#86EFAC;font-weight:600">💪 Worker Nodes<br><span style="font-weight:400;color:var(--muted)">Pods running</span></div></div>
+              <div style="width:100%;padding:4px;border-radius:5px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center;font-size:7px;color:var(--cyan)">↑ status reports back ↑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY + ANALOGY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Control Plane — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- left: 4 component summary cards -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--apiD);border:1.5px solid var(--apiB);display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px"><div style="font-size:18px">🔌</div><div style="font-size:10px;font-weight:800;color:#7EB3FF">API Server</div></div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Communication Gateway</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Every message in the cluster passes through here</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--schD);border:1.5px solid var(--schB);display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px"><div style="font-size:18px">📅</div><div style="font-size:10px;font-weight:800;color:#C084FC">Scheduler</div></div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The Decision Maker</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Picks the right node for every new Pod</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--ctrlD);border:1.5px solid var(--ctrlB);display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px"><div style="font-size:18px">🔄</div><div style="font-size:10px;font-weight:800;color:#86EFAC">Controller Manager</div></div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The System Fixer</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Detects drift and restores desired state 24/7</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--etcD);border:1.5px solid var(--etcB);display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:6px"><div style="font-size:18px">🗄</div><div style="font-size:10px;font-weight:800;color:#FDE068">etcd</div></div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Cluster Memory</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Stores everything — config, state, secrets</div>
+            </div>
+          </div>
+          <!-- bottom quote -->
+          <div style="padding:10px 14px;border-radius:10px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.28);text-align:center">
+            <div style="font-size:clamp(10px,1.4vw,13px);font-weight:700;color:var(--white);line-height:1.4">"The Control Plane is the <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">brain</span> — it never runs your apps, it just <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">manages everything</span> perfectly"</div>
+          </div>
+        </div>
+        <!-- right: next episode + recap -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:9px;font-weight:700;color:var(--ctrl);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ What You Learned</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-api" style="flex-shrink:0">API</span>Entry point</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-sch" style="flex-shrink:0">SCHED</span>Pod placement</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-ctrl" style="flex-shrink:0">CTRL</span>Self-healing loop</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-etc" style="flex-shrink:0">ETCD</span>Source of truth</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Up Next →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Worker Node Components Deep Dive</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Kubelet · kube-proxy · Container Runtime · Pods</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Next Episode →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div><!-- /wrap -->
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

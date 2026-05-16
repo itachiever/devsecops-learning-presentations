@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --kub:#22C55E;--kubD:rgba(34,197,94,.11);--kubB:rgba(34,197,94,.32);
+  --crt:#326CE5;--crtD:rgba(50,108,229,.12);--crtB:rgba(50,108,229,.36);
+  --prx:#7C3AED;--prxD:rgba(124,58,237,.12);--prxB:rgba(124,58,237,.36);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.tag-kub{background:rgba(34,197,94,.18);color:#86EFAC;border:1px solid var(--kubB)}
+.tag-crt{background:rgba(50,108,229,.18);color:#BAE6FD;border:1px solid var(--crtB)}
+.tag-prx{background:rgba(124,58,237,.18);color:#DDD6FE;border:1px solid var(--prxB)}
+.tag-pod{background:rgba(0,212,255,.12);color:#67E8F9;border:1px solid var(--podB)}
+.mc{padding:5px 8px;border-radius:6px;font-size:8px;font-weight:700;text-align:center}
+.mc-kub{background:rgba(34,197,94,.18);border:1px solid var(--kubB);color:#86EFAC}
+.mc-crt{background:rgba(50,108,229,.2);border:1px solid var(--crtB);color:#BAE6FD}
+.mc-prx{background:rgba(124,58,237,.18);border:1px solid var(--prxB);color:#DDD6FE}
+.mc-pod{background:rgba(0,212,255,.12);border:1px solid var(--podB);color:#67E8F9}
+.mc-cp{background:rgba(50,108,229,.15);border:1px solid rgba(50,108,229,.35);color:#7EB3FF}
+.arr{text-align:center;font-size:12px;line-height:1.2;padding:1px 0}
+/* K8s SVG logo reusable */
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <!-- left text -->
+      <div style="flex:1">
+        <!-- K8s logo + series label -->
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="72" height="72" viewBox="0 0 100 100" style="margin-bottom:12px"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="43" x2="26.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="57" x2="73.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="37.9" y1="57" x2="26.5" y2="63.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="62.1" y1="43" x2="73.5" y2="36.5" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="20" r="4" fill="#00D4FF"/><circle cx="50" cy="80" r="4" fill="#00D4FF"/><circle cx="24" cy="35" r="4" fill="#00D4FF"/><circle cx="76" cy="65" r="4" fill="#00D4FF"/><circle cx="24" cy="65" r="4" fill="#00D4FF"/><circle cx="76" cy="35" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,4vw,40px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--green) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Worker Node<br>Components</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Understanding the Execution Layer — Where Your Apps Actually Run</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag tag-kub" style="padding:4px 11px;font-size:9px">🤝 Kubelet</span>
+          <span class="tag tag-crt" style="padding:4px 11px;font-size:9px">🐳 Container Runtime</span>
+          <span class="tag tag-prx" style="padding:4px 11px;font-size:9px">🌐 Kube-proxy</span>
+          <span class="tag tag-pod" style="padding:4px 11px;font-size:9px">📦 Pods</span>
+        </div>
+      </div>
+      <!-- right: worker node visual -->
+      <div style="flex:1;display:flex;justify-content:center">
+        <div style="width:100%;max-width:290px">
+          <div style="border:1.5px dashed rgba(34,197,94,.35);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">💪 Worker Node</div>
+            <!-- pods section -->
+            <div style="border-radius:10px;padding:9px;background:rgba(0,212,255,.07);border:1px solid var(--podB);margin-bottom:7px">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">📦 Pods (your apps)</div>
+              <div style="display:flex;gap:5px;justify-content:center">
+                <div style="padding:7px 10px;border-radius:7px;background:rgba(0,212,255,.12);border:1px solid var(--podB);text-align:center"><div style="font-size:12px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod 1</div></div>
+                <div style="padding:7px 10px;border-radius:7px;background:rgba(0,212,255,.12);border:1px solid var(--podB);text-align:center"><div style="font-size:12px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod 2</div></div>
+                <div style="padding:7px 10px;border-radius:7px;background:rgba(0,212,255,.12);border:1px solid var(--podB);text-align:center"><div style="font-size:12px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod 3</div></div>
+              </div>
+            </div>
+            <!-- 3 components -->
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(34,197,94,.14);border:1px solid var(--kubB);display:flex;align-items:center;gap:7px">
+                <span style="font-size:12px">🤝</span>
+                <div><div style="font-size:9px;font-weight:700;color:#86EFAC">Kubelet</div><div style="font-size:7px;color:var(--muted)">Node agent — manages pods</div></div>
+              </div>
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(50,108,229,.14);border:1px solid var(--crtB);display:flex;align-items:center;gap:7px">
+                <span style="font-size:12px">🐳</span>
+                <div><div style="font-size:9px;font-weight:700;color:#BAE6FD">Container Runtime</div><div style="font-size:7px;color:var(--muted)">Runs containers (containerd)</div></div>
+              </div>
+              <div style="padding:6px 9px;border-radius:7px;background:rgba(124,58,237,.14);border:1px solid var(--prxB);display:flex;align-items:center;gap:7px">
+                <span style="font-size:12px">🌐</span>
+                <div><div style="font-size:9px;font-weight:700;color:#DDD6FE">Kube-proxy</div><div style="font-size:7px;color:var(--muted)">Handles networking & routing</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>01 / 08</span></div>
+  </div>
+
+  <!-- ══ S2 WHAT IS A WORKER NODE ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Execution Layer</div>
+        <div class="stitle">What is a <span style="color:#86EFAC">Worker Node?</span></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.2)">🖥</div><div class="bt"><strong>A machine that runs your applications</strong> — can be a physical server or a cloud virtual machine</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.18)">📋</div><div class="bt"><strong>Executes workloads assigned by Control Plane</strong> — it never decides on its own, just follows instructions</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.13)">📦</div><div class="bt"><strong>Hosts Pods</strong> — a Pod is the smallest unit in K8s, wrapping one or more containers (your apps)</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.18)">📡</div><div class="bt"><strong>Reports back to Control Plane</strong> — constantly sends health status and metrics to keep K8s updated</div></div>
+        <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> Worker Node = a factory floor 🏭 — the Control Plane is management, Worker Nodes do the actual production</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:240px">
+          <div style="border-radius:14px;padding:14px;background:rgba(34,197,94,.07);border:2px solid var(--kubB);box-shadow:0 0 28px rgba(34,197,94,.12)">
+            <!-- control plane mini -->
+            <div style="padding:7px 10px;border-radius:8px;background:rgba(50,108,229,.13);border:1px solid rgba(50,108,229,.32);text-align:center;margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#7EB3FF">🧠 Control Plane</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Sends instructions</div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--cyan);margin-bottom:4px">↕ API communication ↕</div>
+            <!-- worker node -->
+            <div style="border-radius:10px;padding:10px;background:rgba(34,197,94,.1);border:1.5px solid var(--kubB)">
+              <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💪 Worker Node</div>
+              <div style="display:flex;gap:4px;justify-content:center;margin-bottom:6px">
+                <div style="flex:1;padding:6px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                  <div style="font-size:11px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod</div>
+                </div>
+                <div style="flex:1;padding:6px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                  <div style="font-size:11px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod</div>
+                </div>
+                <div style="flex:1;padding:6px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                  <div style="font-size:11px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:2px">Pod</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div class="mc mc-kub" style="display:flex;align-items:center;justify-content:center;gap:4px"><span>🤝</span>Kubelet</div>
+                <div class="mc mc-crt" style="display:flex;align-items:center;justify-content:center;gap:4px"><span>🐳</span>Container Runtime</div>
+                <div class="mc mc-prx" style="display:flex;align-items:center;justify-content:center;gap:4px"><span>🌐</span>Kube-proxy</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>02 / 08</span></div>
+  </div>
+
+  <!-- ══ S3 NODE OVERVIEW — ALL 3 COMPONENTS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Node Internals</div>
+      <div class="stitle">Worker Node — Component Overview</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- kubelet -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:rgba(34,197,94,.08);border:2px solid var(--kubB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤝</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Kubelet</div><div style="font-size:8px;color:var(--muted)">Node Agent</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">The <strong style="color:#86EFAC">supervisor</strong> on every node. Receives Pod specs from the API Server and makes sure containers are running correctly.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2)">✅ Runs on every worker node</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2)">✅ Monitors container health</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2)">✅ Reports status to API Server</div>
+          </div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.15);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">= Supervisor / Node Agent</div>
+        </div>
+        <!-- container runtime -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:rgba(50,108,229,.09);border:2px solid var(--crtB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🐳</div>
+            <div><div style="font-size:12px;font-weight:800;color:#7EB3FF">Container Runtime</div><div style="font-size:8px;color:var(--muted)">containerd / CRI-O</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">The <strong style="color:#7EB3FF">engine</strong> that actually pulls images and starts containers. Works under Kubelet's direction via the CRI interface.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(50,108,229,.12);border-radius:5px;border:1px solid rgba(50,108,229,.25)">✅ Pulls container images</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(50,108,229,.12);border-radius:5px;border:1px solid rgba(50,108,229,.25)">✅ Starts & stops containers</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(50,108,229,.12);border-radius:5px;border:1px solid rgba(50,108,229,.25)">✅ Works via CRI interface</div>
+          </div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#BAE6FD">= Container Engine</div>
+        </div>
+        <!-- kube-proxy -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:rgba(124,58,237,.09);border:2px solid var(--prxB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#C084FC">Kube-proxy</div><div style="font-size:8px;color:var(--muted)">Network Proxy</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">The <strong style="color:#C084FC">network manager</strong> of each node. Maintains routing rules so traffic reaches the right Pod from any Service.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(124,58,237,.12);border-radius:5px;border:1px solid rgba(124,58,237,.25)">✅ Pod-to-Pod communication</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(124,58,237,.12);border-radius:5px;border:1px solid rgba(124,58,237,.25)">✅ Service-based routing</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(124,58,237,.12);border-radius:5px;border:1px solid rgba(124,58,237,.25)">✅ Uses iptables / IPVS</div>
+          </div>
+          <div style="padding:5px 9px;border-radius:7px;background:rgba(124,58,237,.18);text-align:center;font-size:9px;font-weight:700;color:#DDD6FE">= Network Router</div>
+        </div>
+      </div>
+      <!-- bottom note -->
+      <div style="margin-top:9px;padding:8px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:var(--cyan)">Together: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Kubelet manages → Runtime runs → Kube-proxy connects. All three must work together to run your applications correctly.</span>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>03 / 08</span></div>
+  </div>
+
+  <!-- ══ S4 KUBELET ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.18) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 1</div>
+        <div class="stitle" style="color:#86EFAC">Kubelet <span style="font-size:.65em;color:var(--muted)">— The Node Agent</span></div>
+        <div class="bi" style="background:rgba(34,197,94,.08);border-color:var(--kubB)"><div class="ico" style="background:rgba(34,197,94,.22)">📍</div><div class="bt"><strong>Runs on every worker node</strong> — it's always present, always listening for instructions</div></div>
+        <div class="bi" style="background:rgba(34,197,94,.08);border-color:var(--kubB)"><div class="ico" style="background:rgba(34,197,94,.22)">📥</div><div class="bt"><strong>Receives Pod specs from API Server</strong> — a PodSpec (YAML) tells it exactly what containers to run</div></div>
+        <div class="bi" style="background:rgba(34,197,94,.08);border-color:var(--kubB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔍</div><div class="bt"><strong>Monitors container health</strong> — uses liveness & readiness probes to check if containers are okay</div></div>
+        <div class="bi" style="background:rgba(34,197,94,.08);border-color:var(--kubB)"><div class="ico" style="background:rgba(34,197,94,.22)">📤</div><div class="bt"><strong>Reports status back to API Server</strong> — "Pod is running, healthy, using X CPU/memory"</div></div>
+        <div class="bi" style="background:rgba(34,197,94,.08);border-color:var(--kubB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔁</div><div class="bt"><strong>Restarts failed containers</strong> — if a container crashes, Kubelet tells runtime to restart it</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:240px">
+          <div style="border-radius:13px;padding:13px;background:rgba(34,197,94,.08);border:2px solid var(--kubB);box-shadow:0 0 28px rgba(34,197,94,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Kubelet — How it works</div>
+            <!-- API sends -->
+            <div style="padding:6px 9px;border-radius:7px;background:rgba(50,108,229,.13);border:1px solid rgba(50,108,229,.32);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:#7EB3FF">🔌 API Server</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Sends PodSpec (YAML)</div>
+            </div>
+            <div class="arr" style="color:var(--kub)">↓ instructions ↓</div>
+            <!-- kubelet central -->
+            <div style="padding:10px;border-radius:9px;background:rgba(34,197,94,.18);border:2px solid rgba(34,197,94,.45);text-align:center;margin:4px 0">
+              <div style="font-size:18px;margin-bottom:3px">🤝</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Kubelet</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Reads specs → acts on them</div>
+            </div>
+            <div style="display:flex;gap:4px;margin:4px 0">
+              <div style="font-size:10px;color:var(--blue);flex:1;text-align:center">↓ start</div>
+              <div style="font-size:10px;color:var(--kub);flex:1;text-align:center">↑ report</div>
+            </div>
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div style="flex:1;padding:6px;border-radius:6px;background:rgba(50,108,229,.13);border:1px solid var(--crtB);text-align:center">
+                <div style="font-size:9px">🐳</div><div style="font-size:7px;color:#BAE6FD;font-weight:600;margin-top:2px">Container Runtime</div>
+              </div>
+              <div style="flex:1;padding:6px;border-radius:6px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.2);text-align:center">
+                <div style="font-size:9px">🔌</div><div style="font-size:7px;color:#7EB3FF;font-weight:600;margin-top:2px">API Server</div>
+              </div>
+            </div>
+            <!-- running pods -->
+            <div style="padding:7px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid var(--podB)">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;text-align:center;margin-bottom:4px">📦 Pods Running</div>
+              <div style="display:flex;gap:3px;justify-content:center">
+                <div style="padding:4px 7px;border-radius:5px;background:rgba(0,212,255,.12);border:1px solid var(--podB);font-size:8px;color:#86EFAC;font-weight:600">✅ Healthy</div>
+                <div style="padding:4px 7px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);font-size:8px;color:#FCA5A5;font-weight:600">💀 → 🔁 Restart</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>04 / 08</span></div>
+  </div>
+
+  <!-- ══ S5 CONTAINER RUNTIME ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 2</div>
+        <div class="stitle" style="color:#7EB3FF">Container Runtime <span style="font-size:.65em;color:var(--muted)">— The Engine</span></div>
+        <div class="bi" style="background:rgba(50,108,229,.09);border-color:var(--crtB)"><div class="ico" style="background:rgba(50,108,229,.22)">⚙️</div><div class="bt"><strong>Responsible for running containers</strong> — the actual engine underneath Kubernetes</div></div>
+        <div class="bi" style="background:rgba(50,108,229,.09);border-color:var(--crtB)"><div class="ico" style="background:rgba(50,108,229,.22)">📥</div><div class="bt"><strong>Pulls container images</strong> — downloads images from registries like Docker Hub or private registries</div></div>
+        <div class="bi" style="background:rgba(50,108,229,.09);border-color:var(--crtB)"><div class="ico" style="background:rgba(50,108,229,.22)">🚀</div><div class="bt"><strong>Starts and stops containers</strong> — creates isolated environments using Linux namespaces & cgroups</div></div>
+        <div class="bi" style="background:rgba(50,108,229,.09);border-color:var(--crtB)"><div class="ico" style="background:rgba(50,108,229,.22)">🔗</div><div class="bt"><strong>Works with Kubelet via CRI</strong> — CRI = Container Runtime Interface, the standard API between them</div></div>
+        <div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">
+          <div style="padding:6px 12px;border-radius:8px;background:rgba(50,108,229,.13);border:1px solid var(--crtB);font-size:10px;font-weight:700;color:#BAE6FD;display:flex;align-items:center;gap:5px"><span>🐳</span>containerd <span style="color:var(--green);font-size:9px">⭐ Default</span></div>
+          <div style="padding:6px 12px;border-radius:8px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.22);font-size:10px;font-weight:700;color:#94A3B8;display:flex;align-items:center;gap:5px"><span>🦦</span>CRI-O</div>
+          <div style="padding:6px 12px;border-radius:8px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.22);font-size:10px;font-weight:700;color:#94A3B8;display:flex;align-items:center;gap:5px"><span>🐋</span>Docker (legacy)</div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:240px">
+          <div style="border-radius:13px;padding:13px;background:rgba(50,108,229,.08);border:2px solid var(--crtB);box-shadow:0 0 28px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7EB3FF;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Container Runtime Flow</div>
+            <!-- kubelet calls -->
+            <div style="padding:6px 9px;border-radius:7px;background:rgba(34,197,94,.12);border:1px solid var(--kubB);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">🤝 Kubelet calls CRI</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">"Start this container"</div>
+            </div>
+            <div class="arr" style="color:var(--crt)">↓ via CRI interface ↓</div>
+            <!-- runtime -->
+            <div style="padding:10px;border-radius:9px;background:rgba(50,108,229,.2);border:2px solid rgba(50,108,229,.45);text-align:center;margin:4px 0">
+              <div style="font-size:18px;margin-bottom:3px">🐳</div>
+              <div style="font-size:10px;font-weight:800;color:#7EB3FF">containerd</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Container Runtime</div>
+            </div>
+            <div class="arr" style="color:var(--cyan)">↓ pulls image ↓</div>
+            <!-- registry -->
+            <div style="padding:6px;border-radius:7px;background:rgba(0,212,255,.08);border:1px solid var(--podB);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:#67E8F9">📦 Image Registry</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Docker Hub / Private</div>
+            </div>
+            <div class="arr" style="color:var(--green)">↓ image downloaded ↓</div>
+            <!-- container starts -->
+            <div style="padding:7px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid var(--kubB)">
+              <div style="display:flex;gap:4px;justify-content:center">
+                <div style="padding:5px 8px;border-radius:5px;background:rgba(0,212,255,.12);border:1px solid var(--podB);text-align:center">
+                  <div style="font-size:10px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:1px">Container ✅</div>
+                </div>
+                <div style="padding:5px 8px;border-radius:5px;background:rgba(0,212,255,.12);border:1px solid var(--podB);text-align:center">
+                  <div style="font-size:10px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600;margin-top:1px">Container ✅</div>
+                </div>
+              </div>
+              <div style="font-size:8px;color:#86EFAC;font-weight:600;text-align:center;margin-top:4px">Containers running!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>05 / 08</span></div>
+  </div>
+
+  <!-- ══ S6 KUBE-PROXY ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Component 3</div>
+        <div class="stitle" style="color:#C084FC">Kube-proxy <span style="font-size:.65em;color:var(--muted)">— The Network Manager</span></div>
+        <div class="bi" style="background:rgba(124,58,237,.09);border-color:var(--prxB)"><div class="ico" style="background:rgba(124,58,237,.22)">🌐</div><div class="bt"><strong>Handles all networking on the node</strong> — manages how traffic flows in, out, and between Pods</div></div>
+        <div class="bi" style="background:rgba(124,58,237,.09);border-color:var(--prxB)"><div class="ico" style="background:rgba(124,58,237,.22)">🔗</div><div class="bt"><strong>Enables Pod-to-Pod communication</strong> — Pods on different nodes can still talk to each other</div></div>
+        <div class="bi" style="background:rgba(124,58,237,.09);border-color:var(--prxB)"><div class="ico" style="background:rgba(124,58,237,.22)">⚖️</div><div class="bt"><strong>Service-based routing</strong> — routes traffic from a Service to the correct backend Pods</div></div>
+        <div class="bi" style="background:rgba(124,58,237,.09);border-color:var(--prxB)"><div class="ico" style="background:rgba(124,58,237,.22)">📋</div><div class="bt"><strong>Maintains network rules</strong> — uses iptables or IPVS to set routing rules on every node</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25)">
+          <span style="font-size:10px;font-weight:700;color:#C084FC">Simple: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> kube-proxy = the node's <strong style="color:#C084FC">traffic cop</strong> 🚦 — it directs every network packet to the right destination</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:245px">
+          <div style="border-radius:13px;padding:13px;background:rgba(124,58,237,.08);border:2px solid var(--prxB);box-shadow:0 0 28px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#C084FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Kube-proxy — Network Flow</div>
+            <!-- user traffic -->
+            <div style="padding:6px;border-radius:7px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);text-align:center;margin-bottom:4px">
+              <div style="font-size:9px;font-weight:700;color:#FDE068">👤 User / External Traffic</div>
+            </div>
+            <div class="arr" style="color:var(--prx)">↓</div>
+            <!-- service -->
+            <div style="padding:6px;border-radius:7px;background:rgba(50,108,229,.13);border:1px solid var(--crtB);text-align:center;margin:4px 0">
+              <div style="font-size:9px;font-weight:700;color:#7EB3FF">🔌 Kubernetes Service</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Stable IP / DNS name</div>
+            </div>
+            <div class="arr" style="color:var(--prx)">↓ kube-proxy routes ↓</div>
+            <!-- kube-proxy -->
+            <div style="padding:9px;border-radius:9px;background:rgba(124,58,237,.2);border:2px solid rgba(124,58,237,.45);text-align:center;margin:4px 0">
+              <div style="font-size:17px;margin-bottom:2px">🌐</div>
+              <div style="font-size:10px;font-weight:800;color:#C084FC">kube-proxy</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">iptables / IPVS rules</div>
+            </div>
+            <div style="display:flex;gap:4px;margin:4px 0">
+              <div style="font-size:10px;color:var(--prx);flex:1;text-align:right">↙</div>
+              <div style="font-size:10px;color:var(--prx);flex:1;text-align:center">↓</div>
+              <div style="font-size:10px;color:var(--prx);flex:1;text-align:left">↘</div>
+            </div>
+            <!-- pods -->
+            <div style="display:flex;gap:4px">
+              <div style="flex:1;padding:5px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600">Pod A</div>
+              </div>
+              <div style="flex:1;padding:5px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600">Pod B</div>
+              </div>
+              <div style="flex:1;padding:5px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid var(--podB);text-align:center">
+                <div style="font-size:9px">🐳</div><div style="font-size:7px;color:#67E8F9;font-weight:600">Pod C</div>
+              </div>
+            </div>
+            <div style="margin-top:5px;font-size:8px;color:var(--green);font-weight:600;text-align:center">Traffic distributed evenly ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>06 / 08</span></div>
+  </div>
+
+  <!-- ══ S7 HOW THEY WORK TOGETHER ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">End-to-End Flow</div>
+      <div class="stitle">How Worker Node Components Work Together</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.3)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">API Server sends Pod spec to Kubelet</div><div style="font-size:9px;color:#94A3B8">"Run 2 replicas of nginx on this node"</div></div>
+            <div style="margin-left:auto;font-size:13px">🔌</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--kub)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid var(--kubB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Kubelet reads the Pod spec</div><div style="font-size:9px;color:#94A3B8">Parses YAML — knows which image, ports, volumes are needed</div></div>
+            <div style="margin-left:auto;font-size:13px">🤝</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--crt)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(50,108,229,.09);border:1px solid var(--crtB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">Kubelet calls Container Runtime via CRI</div><div style="font-size:9px;color:#94A3B8">Runtime pulls image from registry → starts containers in Pod</div></div>
+            <div style="margin-left:auto;font-size:13px">🐳</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--prx)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(124,58,237,.09);border:1px solid var(--prxB)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#C084FC">kube-proxy sets up networking rules</div><div style="font-size:9px;color:#94A3B8">Updates iptables so traffic can reach the new Pod via its Service</div></div>
+            <div style="margin-left:auto;font-size:13px">🌐</div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--amber)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.28)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Kubelet monitors & reports continuously</div><div style="font-size:9px;color:#94A3B8">Pod health is checked — status reported back to API Server forever</div></div>
+            <div style="margin-left:auto;font-size:13px">🔄</div>
+          </div>
+        </div>
+        <!-- right: compact node diagram -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:13px;padding:12px;background:rgba(34,197,94,.04);border:1.5px dashed var(--kubB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Worker Node — Live Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);text-align:center"><div style="font-size:9px;font-weight:600;color:#7EB3FF">🔌 API Server → PodSpec</div></div>
+              <div style="font-size:10px;color:var(--kub)">↓</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:rgba(34,197,94,.14);border:1.5px solid var(--kubB);text-align:center"><div style="font-size:9px">🤝</div><div style="font-size:8px;font-weight:700;color:#86EFAC">Kubelet</div></div>
+              <div style="display:flex;gap:4px;width:100%">
+                <div style="font-size:10px;color:var(--crt);flex:1;text-align:right">↙ start</div>
+                <div style="font-size:10px;color:var(--prx);flex:1;text-align:left">route ↘</div>
+              </div>
+              <div style="display:flex;gap:4px;width:100%">
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(50,108,229,.13);border:1px solid var(--crtB);text-align:center"><div style="font-size:9px">🐳</div><div style="font-size:7px;color:#BAE6FD;font-weight:600">Runtime</div></div>
+                <div style="flex:1;padding:5px;border-radius:6px;background:rgba(124,58,237,.13);border:1px solid var(--prxB);text-align:center"><div style="font-size:9px">🌐</div><div style="font-size:7px;color:#DDD6FE;font-weight:600">kube-proxy</div></div>
+              </div>
+              <div style="font-size:10px;color:var(--kub)">↓ creates</div>
+              <div style="width:100%;padding:7px;border-radius:8px;background:rgba(0,212,255,.08);border:1px solid var(--podB)">
+                <div style="display:flex;gap:3px;justify-content:center;margin-bottom:3px">
+                  <div style="width:26px;height:22px;border-radius:5px;background:rgba(0,212,255,.15);border:1px solid var(--podB);display:flex;align-items:center;justify-content:center;font-size:9px">🐳</div>
+                  <div style="width:26px;height:22px;border-radius:5px;background:rgba(0,212,255,.15);border:1px solid var(--podB);display:flex;align-items:center;justify-content:center;font-size:9px">🐳</div>
+                </div>
+                <div style="font-size:7px;color:#67E8F9;font-weight:600;text-align:center">Pods running ✅</div>
+              </div>
+              <div style="width:100%;padding:4px;border-radius:5px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);text-align:center;font-size:7px;color:#86EFAC">↑ health reports to API ↑</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>07 / 08</span></div>
+  </div>
+
+  <!-- ══ S8 SUMMARY + ANALOGY ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Worker Node — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- left: 3 component + node summary -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:7px">
+          <!-- 3 cards row -->
+          <div style="display:flex;gap:7px;flex:1">
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(34,197,94,.08);border:1.5px solid var(--kubB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:24px">🤝</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Kubelet</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Worker Supervisor</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Manages all pods, monitors health, reports to the boss (API Server)</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(50,108,229,.08);border:1.5px solid var(--crtB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:24px">🐳</div>
+              <div style="font-size:10px;font-weight:800;color:#7EB3FF">Container Runtime</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The Machine</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Actually does the work — pulls images and runs containers</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(124,58,237,.08);border:1.5px solid var(--prxB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:24px">🌐</div>
+              <div style="font-size:10px;font-weight:800;color:#C084FC">Kube-proxy</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Communication System</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Ensures every pod can be reached — routes traffic correctly</div>
+            </div>
+          </div>
+          <!-- worker node = factory floor -->
+          <div style="padding:10px 14px;border-radius:10px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">🏭 The Big Analogy</div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="font-size:26px">🏭</div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:700;color:var(--white);margin-bottom:4px">Worker Node = Factory Floor</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+                  <div style="font-size:9px;color:#94A3B8;display:flex;gap:4px"><span class="tag tag-kub" style="flex-shrink:0">Kubelet</span>= Floor Manager</div>
+                  <div style="font-size:9px;color:#94A3B8;display:flex;gap:4px"><span class="tag tag-crt" style="flex-shrink:0">Runtime</span>= Machines</div>
+                  <div style="font-size:9px;color:#94A3B8;display:flex;gap:4px"><span class="tag tag-prx" style="flex-shrink:0">kube-proxy</span>= Logistics</div>
+                  <div style="font-size:9px;color:#94A3B8;display:flex;gap:4px"><span class="tag tag-pod" style="flex-shrink:0">Pods</span>= Products made</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- closing quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.4vw,13px);font-weight:700;color:var(--white);line-height:1.4">"The Worker Node is where <span style="background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">actual work happens</span> — Control Plane decides, Worker Node executes"</div>
+          </div>
+        </div>
+        <!-- right: next ep + checklist -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:9px;font-weight:700;color:var(--kub);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ What You Learned</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-kub" style="flex-shrink:0">Kubelet</span>Node Agent</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-crt" style="flex-shrink:0">Runtime</span>Runs containers</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-prx" style="flex-shrink:0">k-proxy</span>Network routing</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-pod" style="flex-shrink:0">Pod</span>Runs your app</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes Cluster Setup</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Install · Configure · Deploy your first app</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span style="opacity:0">·</span><span>08 / 08</span></div>
+  </div>
+
+  </div><!-- /wrap -->
+</div>
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

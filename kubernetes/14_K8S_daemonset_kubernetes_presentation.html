@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --ds:#22C55E;--dsD:rgba(34,197,94,.1);--dsB:rgba(34,197,94,.32);
+  --dep:#326CE5;--depD:rgba(50,108,229,.11);--depB:rgba(50,108,229,.34);
+  --node:#0EA5E9;--nodeD:rgba(14,165,233,.1);--nodeB:rgba(14,165,233,.3);
+  --pod:#A855F7;--podD:rgba(168,85,247,.1);--podB:rgba(168,85,247,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--ds);border-color:var(--ds);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--ds);color:var(--ds)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(34,197,94,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(34,197,94,.18);border-color:var(--ds)}
+.nbtn.pri{background:linear-gradient(135deg,var(--ds),var(--blue));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(34,197,94,.12)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(34,197,94,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ds);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(34,197,94,.17);transition:all .25s}
+.bi:hover{background:rgba(34,197,94,.07);border-color:rgba(34,197,94,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Node block */
+.node{border-radius:10px;padding:9px 10px;border:1.5px solid var(--nodeB);background:var(--nodeD);text-align:center;position:relative}
+.node-lbl{font-size:8px;font-weight:800;color:#38BDF8;letter-spacing:.5px;margin-bottom:5px}
+/* pod in node */
+.ds-pod{border-radius:7px;padding:5px 8px;background:var(--dsD);border:1.5px solid var(--dsB);font-size:8px;font-weight:700;color:#86EFAC;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
+.dep-pod-sm{border-radius:7px;padding:5px 8px;background:var(--depD);border:1px solid var(--depB);font-size:8px;font-weight:700;color:#BAE6FD;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
+.empty-pod{border-radius:7px;padding:5px 8px;background:rgba(239,68,68,.08);border:1.5px dashed rgba(239,68,68,.35);font-size:8px;font-weight:700;color:#FCA5A5;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:4px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ds);padding:3px 12px;border:1px solid rgba(34,197,94,.25);border-radius:20px;background:rgba(34,197,94,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(28px,6vw,60px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--ds) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">DaemonSet</div>
+        <div style="font-size:clamp(10px,1.7vw,16px);color:var(--muted);margin-bottom:18px;line-height:1.5">Running Pods on Every Node — Guaranteed<br>— System-level services across your entire cluster</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--dsD);color:#86EFAC;border:1px solid var(--dsB);padding:4px 11px;font-size:9px">☑ One Pod / Node</span>
+          <span class="tag" style="background:var(--nodeD);color:#38BDF8;border:1px solid var(--nodeB);padding:4px 11px;font-size:9px">🖥 All Nodes</span>
+          <span class="tag" style="background:rgba(245,158,11,.1);color:#FDE068;border:1px solid rgba(245,158,11,.3);padding:4px 11px;font-size:9px">📋 Log Agents</span>
+          <span class="tag" style="background:var(--podD);color:#DDD6FE;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📊 Monitoring</span>
+        </div>
+      </div>
+      <!-- right: nodes each with one pod -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:300px">
+          <!-- DS controller -->
+          <div style="border-radius:11px;padding:8px 12px;background:var(--dsD);border:2px solid var(--dsB);text-align:center;margin-bottom:8px;box-shadow:0 0 20px rgba(34,197,94,.15)">
+            <div style="font-size:10px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase">🌿 DaemonSet — fluentd</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:1px">one Pod per node, always</div>
+          </div>
+          <div style="display:flex;gap:4px;justify-content:center;margin-bottom:5px">
+            <span style="font-size:12px;color:var(--ds)">↙</span><span style="font-size:12px;color:var(--ds)">↓</span><span style="font-size:12px;color:var(--ds)">↓</span><span style="font-size:12px;color:var(--ds)">↘</span>
+          </div>
+          <!-- 4 nodes -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div class="node"><div class="node-lbl">🖥 node-1</div><div class="ds-pod"><span>📋</span>fluentd-x7k</div></div>
+            <div class="node"><div class="node-lbl">🖥 node-2</div><div class="ds-pod"><span>📋</span>fluentd-m2p</div></div>
+            <div class="node"><div class="node-lbl">🖥 node-3</div><div class="ds-pod"><span>📋</span>fluentd-q9r</div></div>
+            <div class="node"><div class="node-lbl">🖥 node-4</div><div class="ds-pod"><span>📋</span>fluentd-a5n</div></div>
+          </div>
+          <div style="margin-top:7px;padding:5px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid var(--dsB);text-align:center">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ 4 nodes = 4 pods — every node covered!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 08</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Some Apps <span style="color:var(--red)">Must</span> Run on Every Node</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">📋</div><div class="bt"><strong>Log agents need every node covered</strong> — if a node has no log agent, its container logs are completely lost</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">📊</div><div class="bt"><strong>Monitoring agents need every node</strong> — missing a node means blind spots in your cluster metrics</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🌐</div><div class="bt"><strong>Network plugins run per-node</strong> — CNI plugins must exist on every node to enable pod networking</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🎲</div><div class="bt"><strong>Deployment can't guarantee this</strong> — Deployment spreads Pods randomly. A node could have 2 Pods or 0 Pods.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--dsD);border:1px solid var(--dsB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">DaemonSet guarantees exactly one Pod on every node — always, automatically</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">❌ Deployment — No Guarantee</div>
+            <!-- problem: deployment spreads randomly -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="node" style="border-color:var(--failB);background:var(--failD)">
+                <div class="node-lbl" style="color:#FCA5A5">🖥 node-1</div>
+                <div style="display:flex;gap:4px;justify-content:center">
+                  <div class="dep-pod-sm">📋 log-abc</div>
+                  <div class="dep-pod-sm">📋 log-xyz</div>
+                </div>
+                <div style="font-size:7px;color:#FCA5A5;margin-top:3px">2 Pods — too many!</div>
+              </div>
+              <div class="node" style="border-color:var(--failB);background:var(--failD)">
+                <div class="node-lbl" style="color:#FCA5A5">🖥 node-2</div>
+                <div class="empty-pod">🚫 No log Pod!</div>
+                <div style="font-size:7px;color:#FCA5A5;margin-top:3px">0 Pods — logs lost! 😱</div>
+              </div>
+              <div class="node" style="border-color:var(--failB);background:var(--failD)">
+                <div class="node-lbl" style="color:#FCA5A5">🖥 node-3</div>
+                <div class="empty-pod">🚫 No log Pod!</div>
+                <div style="font-size:7px;color:#FCA5A5;margin-top:3px">0 Pods — logs lost! 😱</div>
+              </div>
+            </div>
+            <div style="margin-top:7px;padding:5px;border-radius:6px;background:rgba(239,68,68,.12);border:1px solid var(--failB);text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#FCA5A5">Deployment distributes Pods randomly — not per-node!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 08</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS DAEMONSET ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--ds)">DaemonSet?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">🌿</div><div class="bt"><strong>Ensures one Pod runs on EACH node</strong> — not one or two, but exactly one per node, every time</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">➕</div><div class="bt"><strong>Auto-adds Pods to new nodes</strong> — new node joins the cluster? DaemonSet immediately schedules a Pod on it</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">➖</div><div class="bt"><strong>Auto-removes Pods when nodes leave</strong> — node removed? Its DaemonSet Pod is cleaned up automatically</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">🎯</div><div class="bt"><strong>Designed for system-level services</strong> — background agents that need cluster-wide presence, not application Pods</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--dsD);border:1px solid var(--dsB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Key rule: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">N nodes in your cluster = N Pods created by DaemonSet. Always. Automatically.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:13px;padding:13px;background:var(--dsD);border:2px solid var(--dsB);box-shadow:0 0 24px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">✅ DaemonSet — One Pod Per Node</div>
+            <!-- ds controller -->
+            <div style="padding:7px;border-radius:8px;background:rgba(34,197,94,.14);border:1px solid var(--dsB);text-align:center;margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">🌿 DaemonSet</div>
+              <div style="font-size:8px;color:var(--muted)">watches all nodes</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-bottom:5px">
+              <span style="font-size:12px;color:var(--ds)">↙</span><span style="font-size:12px;color:var(--ds)">↓</span><span style="font-size:12px;color:var(--ds)">↘</span>
+            </div>
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:6px">
+              <div class="node" style="flex:1"><div class="node-lbl">🖥 node-1</div><div class="ds-pod"><span>📋</span>1 Pod</div></div>
+              <div class="node" style="flex:1"><div class="node-lbl">🖥 node-2</div><div class="ds-pod"><span>📋</span>1 Pod</div></div>
+              <div class="node" style="flex:1"><div class="node-lbl">🖥 node-3</div><div class="ds-pod"><span>📋</span>1 Pod</div></div>
+            </div>
+            <!-- new node joins -->
+            <div style="border-top:1px solid rgba(34,197,94,.2);padding-top:7px">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:5px">🆕 New node-4 joins cluster →</div>
+              <div class="node">
+                <div class="node-lbl">🖥 node-4 (new!)</div>
+                <div class="ds-pod"><span>✨</span>Auto Pod created!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 08</span></div>
+  </div>
+
+  <!-- ══ S4 HOW IT WORKS ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(14,165,233,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Mechanism</div>
+      <div class="stitle">How DaemonSet <span style="color:var(--ds)">Works</span></div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">You create a DaemonSet YAML</div><div style="font-size:9px;color:#94A3B8">Define which Pod to run — e.g., Fluentd log agent</div></div>
+            <div style="margin-left:auto;font-family:monospace;font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068">kind: DaemonSet</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--ds)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--dsD);border:1px solid var(--dsB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--ds),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">DaemonSet Controller scans all nodes</div><div style="font-size:9px;color:#94A3B8">Checks: does every node already have this Pod?</div></div>
+            <div style="margin-left:auto;font-size:13px">👁</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--node)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--nodeD);border:1px solid var(--nodeB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--node),#0284C7);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#38BDF8">Schedules one Pod per node</div><div style="font-size:9px;color:#94A3B8">Creates the Pod directly on each node — bypasses normal scheduling</div></div>
+            <div style="margin-left:auto;font-size:13px">📋</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--ds)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--dsD);border:1px solid var(--dsB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--ds),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">New node joins → Pod auto-created instantly</div><div style="font-size:9px;color:#94A3B8">DaemonSet watches for new nodes, immediately adds a Pod</div></div>
+            <div style="margin-left:auto;font-size:13px">✨</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--red)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">Node removed → Pod cleaned up automatically</div><div style="font-size:9px;color:#94A3B8">No stale Pods left behind. Cluster stays clean.</div></div>
+            <div style="margin-left:auto;font-size:13px">🗑</div>
+          </div>
+        </div>
+        <!-- right: live flow diagram -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(34,197,94,.05);border:1.5px dashed var(--dsB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Node Lifecycle Events</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <!-- node joins -->
+              <div style="padding:7px;border-radius:8px;background:var(--dsD);border:1px solid var(--dsB)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:4px">🆕 Node joins</div>
+                <div style="display:flex;align-items:center;gap:5px">
+                  <div class="node" style="flex:1;padding:5px"><div style="font-size:8px;color:#38BDF8">🖥 new-node</div></div>
+                  <div style="font-size:10px;color:var(--ds)">→</div>
+                  <div style="flex:1;border-radius:7px;padding:5px;background:var(--dsD);border:1px solid var(--dsB);text-align:center"><div style="font-size:8px">📋</div><div style="font-size:7px;color:#86EFAC;font-weight:600">Pod ✨</div></div>
+                </div>
+              </div>
+              <!-- pod runs -->
+              <div style="padding:7px;border-radius:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:4px">✅ Running state</div>
+                <div style="display:flex;gap:4px">
+                  <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">🖥</div><div class="ds-pod" style="padding:2px 4px;font-size:7px">📋 1 Pod</div></div>
+                  <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">🖥</div><div class="ds-pod" style="padding:2px 4px;font-size:7px">📋 1 Pod</div></div>
+                </div>
+              </div>
+              <!-- node leaves -->
+              <div style="padding:7px;border-radius:8px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22)">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:4px">💀 Node leaves</div>
+                <div style="display:flex;align-items:center;gap:5px">
+                  <div style="flex:1;border-radius:7px;padding:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);text-align:center"><div style="font-size:8px">📋💀</div><div style="font-size:7px;color:#FCA5A5;font-weight:600">Pod removed</div></div>
+                  <div style="font-size:10px;color:var(--red)">→</div>
+                  <div class="node" style="flex:1;padding:5px;opacity:.5"><div style="font-size:8px;color:#38BDF8">🖥 gone</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 08</span></div>
+  </div>
+
+  <!-- ══ S5 USE CASES ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Uses</div>
+      <div class="stitle">Key Use Cases for DaemonSet</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- logging -->
+        <div style="border-radius:12px;padding:13px;background:rgba(245,158,11,.08);border:2px solid rgba(245,158,11,.3);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📋</div>
+            <div><div style="font-size:11px;font-weight:800;color:#FDE068">Log Collection</div><div style="font-size:8px;color:var(--muted)">Capture all container logs</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Every node must have a log agent to collect container stdout/stderr and ship to a central store.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🦋</span>Fluentd / Fluentbit</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>📦</span>Logstash agent</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🏷</span>Filebeat (ELK Stack)</div>
+          </div>
+        </div>
+        <!-- monitoring -->
+        <div style="border-radius:12px;padding:13px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(168,85,247,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Monitoring Agents</div><div style="font-size:8px;color:var(--muted)">Hardware & node metrics</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Collect CPU, memory, disk, network metrics from every node to feed into your monitoring stack.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>🔥</span>Prometheus Node Exporter</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>🐶</span>Datadog agent</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);color:#DDD6FE;display:flex;gap:5px;align-items:center"><span>📈</span>Dynatrace agent</div>
+          </div>
+        </div>
+        <!-- networking -->
+        <div style="border-radius:12px;padding:13px;background:var(--nodeD);border:2px solid var(--nodeB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(14,165,233,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#38BDF8">Networking Plugins</div><div style="font-size:8px;color:var(--muted)">Enable pod networking</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">CNI plugins must run on every node to configure the network interface for Pods to communicate.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);color:#38BDF8;display:flex;gap:5px;align-items:center"><span>🐊</span>Calico / Weave</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);color:#38BDF8;display:flex;gap:5px;align-items:center"><span>🌊</span>Flannel / Cilium</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);color:#38BDF8;display:flex;gap:5px;align-items:center"><span>🔌</span>kube-proxy (built-in)</div>
+          </div>
+        </div>
+        <!-- security -->
+        <div style="border-radius:12px;padding:13px;background:var(--dsD);border:2px solid var(--dsB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Security Agents</div><div style="font-size:8px;color:var(--muted)">Detect threats on every node</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Security scanning must watch every node for intrusions, vulnerabilities, and policy violations.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🦅</span>Falco runtime security</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🛡</span>CrowdStrike / Sysdig</div>
+            <div style="font-size:9px;padding:4px 8px;border-radius:5px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🔑</span>Vault agent injector</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 08</span></div>
+  </div>
+
+  <!-- ══ S6 IMPORTANT BEHAVIOR ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(14,165,233,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Behavior</div>
+        <div class="stitle">Important DaemonSet Behaviors</div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">☑</div><div class="bt"><strong>Exactly one Pod per node by default</strong> — the core guarantee. Never more, never less on each node</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">🏷</div><div class="bt"><strong>Can target specific nodes with selectors</strong> — only run on GPU nodes, only on SSD nodes, only on specific zones</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">⚙️</div><div class="bt"><strong>Tolerates system taints</strong> — DaemonSet Pods can run on master/control-plane nodes that regular Pods cannot</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dsD)">🔄</div><div class="bt"><strong>Pod restarts follow normal policy</strong> — if the DaemonSet Pod crashes, Kubelet on that node restarts it automatically</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+          <div style="color:var(--muted);font-size:7px;margin-bottom:4px">Node selector example in YAML</div>
+          <div><span style="color:var(--cyan)">nodeSelector:</span></div>
+          <div>&nbsp; <span style="color:#86EFAC">disktype:</span> <span style="color:#FDE068">ssd</span> &nbsp;<span style="color:var(--muted)"># only run on SSD nodes</span></div>
+        </div>
+      </div>
+      <div class="lr">
+        <!-- node filtering visual -->
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--dsD);border:2px solid var(--dsB);box-shadow:0 0 22px rgba(34,197,94,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Node Targeting</div>
+            <!-- all nodes mode -->
+            <div style="margin-bottom:9px;padding:9px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:5px">Default — All nodes</div>
+              <div style="display:flex;gap:4px">
+                <div class="node" style="flex:1;padding:5px"><div style="font-size:8px;color:#38BDF8">🖥 n1</div><div class="ds-pod" style="font-size:7px;padding:2px 4px">📋</div></div>
+                <div class="node" style="flex:1;padding:5px"><div style="font-size:8px;color:#38BDF8">🖥 n2</div><div class="ds-pod" style="font-size:7px;padding:2px 4px">📋</div></div>
+                <div class="node" style="flex:1;padding:5px"><div style="font-size:8px;color:#38BDF8">🖥 n3</div><div class="ds-pod" style="font-size:7px;padding:2px 4px">📋</div></div>
+                <div class="node" style="flex:1;padding:5px"><div style="font-size:8px;color:#38BDF8">🖥 n4</div><div class="ds-pod" style="font-size:7px;padding:2px 4px">📋</div></div>
+              </div>
+            </div>
+            <!-- selected nodes mode -->
+            <div style="padding:9px;border-radius:9px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2)">
+              <div style="font-size:8px;font-weight:700;color:#38BDF8;margin-bottom:5px">nodeSelector: disktype=ssd</div>
+              <div style="display:flex;gap:4px">
+                <div class="node" style="flex:1;padding:5px;border-color:var(--nodeB)">
+                  <div style="font-size:7px;color:#38BDF8">🖥 n1</div>
+                  <div style="font-size:6px;padding:1px 3px;border-radius:3px;background:rgba(34,197,94,.1);color:#86EFAC;margin:2px 0">ssd ✓</div>
+                  <div class="ds-pod" style="font-size:7px;padding:2px 4px;margin-top:2px">📋</div>
+                </div>
+                <div class="node" style="flex:1;padding:5px;border-color:rgba(239,68,68,.25)">
+                  <div style="font-size:7px;color:#38BDF8">🖥 n2</div>
+                  <div style="font-size:6px;padding:1px 3px;border-radius:3px;background:rgba(239,68,68,.1);color:#FCA5A5;margin:2px 0">hdd ✗</div>
+                  <div class="empty-pod" style="font-size:7px;padding:2px 4px;margin-top:2px">skip</div>
+                </div>
+                <div class="node" style="flex:1;padding:5px;border-color:var(--nodeB)">
+                  <div style="font-size:7px;color:#38BDF8">🖥 n3</div>
+                  <div style="font-size:6px;padding:1px 3px;border-radius:3px;background:rgba(34,197,94,.1);color:#86EFAC;margin:2px 0">ssd ✓</div>
+                  <div class="ds-pod" style="font-size:7px;padding:2px 4px;margin-top:2px">📋</div>
+                </div>
+                <div class="node" style="flex:1;padding:5px;border-color:rgba(239,68,68,.25)">
+                  <div style="font-size:7px;color:#38BDF8">🖥 n4</div>
+                  <div style="font-size:6px;padding:1px 3px;border-radius:3px;background:rgba(239,68,68,.1);color:#FCA5A5;margin:2px 0">hdd ✗</div>
+                  <div class="empty-pod" style="font-size:7px;padding:2px 4px;margin-top:2px">skip</div>
+                </div>
+              </div>
+              <div style="font-size:8px;color:#38BDF8;font-weight:600;text-align:center;margin-top:5px">Pods only on n1 and n3 ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 08</span></div>
+  </div>
+
+  <!-- ══ S7 DAEMONSET VS DEPLOYMENT ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle">DaemonSet vs Deployment</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- deployment -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--depD);border:2px solid var(--depB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚀</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Deployment</div><div style="font-size:8px;color:var(--muted)">For application workloads</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>🎯</span>Runs N replicas anywhere in cluster</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>🔀</span>Pods placed by Scheduler</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap=5px;align-items:center"><span>📈</span>Scale up/down freely</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap=5px;align-items:center"><span>🔄</span>Rolling updates and rollbacks</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD;display:flex;gap:5px;align-items:center"><span>🌐</span>Web apps, APIs, microservices</div>
+          </div>
+          <!-- visual -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">3 Pods — spread by scheduler</div>
+            <div style="display:flex;gap:4px">
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n1</div><div class="dep-pod-sm" style="font-size:7px;padding:2px">P1</div><div class="dep-pod-sm" style="font-size:7px;padding:2px;margin-top:2px">P2</div></div>
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n2</div><div style="height:28px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--muted)">no pod</div></div>
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n3</div><div class="dep-pod-sm" style="font-size:7px;padding:2px">P3</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- VS -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)">VS</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- daemonset -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--dsD);border:2px solid var(--dsB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌿</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">DaemonSet</div><div style="font-size:8px;color:var(--muted)">For system-level agents</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>☑</span>One Pod on EVERY node</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🎯</span>Pod placed directly on each node</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>➕</span>Auto-scales with cluster nodes</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🌍</span>Cluster-wide coverage always</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:var(--dsD);border:1px solid var(--dsB);color:#86EFAC;display:flex;gap:5px;align-items:center"><span>🔧</span>Logging, monitoring, networking</div>
+          </div>
+          <!-- visual -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">1 Pod per node — guaranteed</div>
+            <div style="display:flex;gap:4px">
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n1</div><div class="ds-pod" style="font-size:7px;padding:2px">📋</div></div>
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n2</div><div class="ds-pod" style="font-size:7px;padding:2px">📋</div></div>
+              <div class="node" style="flex:1;padding:5px;text-align:center"><div style="font-size:8px;color:#38BDF8">n3</div><div class="ds-pod" style="font-size:7px;padding:2px">📋</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 08</span></div>
+  </div>
+
+  <!-- ══ S8 SUMMARY ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">DaemonSet — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--dsD);border:1.5px solid var(--dsB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ds),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ Core Idea</div>
+              <div style="font-size:28px;margin-top:4px">🛡</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">DaemonSet</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Antivirus on every PC</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Just like antivirus must run on every computer in a network — DaemonSet runs on every node</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--nodeD);border:1.5px solid var(--nodeB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🖥</div>
+              <div style="font-size:10px;font-weight:800;color:#38BDF8">Nodes</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Computers in network</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Each machine needs its own instance of the service — no sharing possible</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.28);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">📋</div>
+              <div style="font-size:10px;font-weight:800;color:#FDE068">DaemonSet Pod</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= The agent itself</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">The log/monitor/network agent running locally on each node</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--dsD);border:1px solid var(--dsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">☑</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">One Pod Per Node</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Guaranteed — always exactly one per node</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--nodeD);border:1px solid var(--nodeB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">➕</div>
+              <div><div style="font-size:10px;font-weight:700;color:#38BDF8">Auto Node Coverage</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">New node joins → Pod auto-created instantly</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">System Services</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Logging, monitoring, networking, security</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🏷</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Node Selectors</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Target specific nodes with labels</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"DaemonSet is your <span style="color:var(--ds)">cluster-wide sentinel</span> — ensuring a service runs on every single node, no matter what"</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--dsD);border:1.5px solid var(--dsB)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ds)">◆</span>One Pod on every node</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ds)">◆</span>Auto add/remove pods</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ds)">◆</span>Logging & monitoring</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--ds)">◆</span>Network plugins (CNI)</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap=5px;align-items:center"><span style="color:var(--ds)">◆</span>Different from Deployment</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7EB3FF;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Job & CronJob</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Run tasks once or on a schedule</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--ds),var(--blue));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 08</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=8;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

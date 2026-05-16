@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+  --term:#0D1117;--termB:#1E3A6E;--cmd:#00D4FF;--arg:#A5F3FC;--flag:#C084FC;
+  --str:#86EFAC;--cmt:#4B5563;--out:#CBD5E1;--prompt:#326CE5;
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* terminal */
+.term{border-radius:10px;background:var(--term);border:1px solid var(--termB);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:5px;padding:7px 11px;background:#0A0F1A;border-bottom:1px solid var(--termB)}
+.t-dot{width:9px;height:9px;border-radius:50%}
+.term-title{font-size:9px;color:var(--muted);font-family:monospace;margin-left:6px}
+.term-body{padding:10px 12px;font-family:'Courier New',monospace;font-size:clamp(8px,1.1vw,11px);line-height:1.7}
+.p{color:var(--prompt);font-weight:700}
+.kc{color:var(--cmd);font-weight:700}
+.ka{color:var(--arg)}
+.kf{color:var(--flag)}
+.ks{color:var(--str)}
+.km{color:var(--cmt);font-style:italic}
+.ko{color:var(--out)}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.14) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--blue) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">kubectl<br>Basics &<br>Commands</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">How to Interact with Your Kubernetes Cluster<br>— The essential CLI tool every DevOps engineer must know</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:rgba(50,108,229,.18);color:#BAE6FD;border:1px solid rgba(50,108,229,.35);padding:4px 11px;font-size:9px">🔍 get</span>
+          <span class="tag" style="background:rgba(34,197,94,.15);color:#86EFAC;border:1px solid rgba(34,197,94,.3);padding:4px 11px;font-size:9px">✅ apply</span>
+          <span class="tag" style="background:rgba(239,68,68,.12);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);padding:4px 11px;font-size:9px">🗑 delete</span>
+          <span class="tag" style="background:rgba(245,158,11,.12);color:#FDE068;border:1px solid rgba(245,158,11,.3);padding:4px 11px;font-size:9px">📋 describe</span>
+          <span class="tag" style="background:rgba(124,58,237,.15);color:#DDD6FE;border:1px solid rgba(124,58,237,.3);padding:4px 11px;font-size:9px">📝 logs</span>
+        </div>
+      </div>
+      <!-- right: title terminal -->
+      <div style="flex:1;display:flex;justify-content:center">
+        <div style="width:100%;max-width:310px">
+          <div class="term">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">terminal — kubectl</span>
+            </div>
+            <div class="term-body">
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="ka">get</span> <span class="ks">pods</span></div>
+              <div class="ko">NAME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; STATUS &nbsp; READY</div>
+              <div class="ko">web-app-1abc &nbsp; Running &nbsp; 1/1</div>
+              <div class="ko">web-app-2def &nbsp; Running &nbsp; 1/1</div>
+              <div style="margin-top:6px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="ka">apply</span> <span class="kf">-f</span> <span class="ks">deployment.yaml</span></div>
+              <div class="ko">deployment.apps/web-app created</div>
+              <div style="margin-top:6px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="ka">logs</span> <span class="ks">web-app-1abc</span></div>
+              <div class="ko">Server running on port 3000</div>
+              <div class="ko">Connected to database ✓</div>
+              <div style="margin-top:6px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="ka">get</span> <span class="ks">nodes</span></div>
+              <div class="ko">node-1 &nbsp; Ready &nbsp; 2d</div>
+              <div class="ko">node-2 &nbsp; Ready &nbsp; 2d</div>
+              <div style="margin-top:4px"><span class="p">$</span> <span style="color:#4B5563">█</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 WHAT IS KUBECTL ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Tool</div>
+        <div class="stitle">What is <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">kubectl?</span></div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">⌨️</div><div class="bt"><strong>Command-line tool for Kubernetes</strong> — your primary way to talk to a K8s cluster from the terminal</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.14)">🔌</div><div class="bt"><strong>Sends requests to the API Server</strong> — every kubectl command is an HTTPS call to the API Server under the hood</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">📦</div><div class="bt"><strong>Manages all Kubernetes resources</strong> — Pods, Deployments, Services, ConfigMaps and much more</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.18)">🌐</div><div class="bt"><strong>Works with any cluster</strong> — Minikube, Kubeadm, EKS, AKS, GKE — same commands everywhere</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">Pronunciation: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> "kube-control" or "kube-cuddle" — both are widely accepted 😄</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:250px;display:flex;flex-direction:column;gap:8px">
+          <!-- flow diagram -->
+          <div style="border-radius:12px;padding:13px;background:rgba(50,108,229,.06);border:1.5px solid rgba(50,108,229,.28)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">How kubectl works</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:8px;border-radius:8px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);display:flex;align-items:center;gap:8px">
+                <span style="font-size:16px">🧑‍💻</span>
+                <div><div style="font-size:10px;font-weight:700;color:#C084FC">You (User)</div><div style="font-size:8px;color:var(--muted)">Type kubectl command</div></div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--cyan)">↓ HTTPS request ↓</div>
+              <div style="width:100%;padding:8px;border-radius:8px;background:rgba(50,108,229,.18);border:1.5px solid rgba(50,108,229,.4);display:flex;align-items:center;gap:8px">
+                <span style="font-size:16px">⌨️</span>
+                <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">kubectl CLI</div><div style="font-size:8px;color:var(--muted)">Formats & sends request</div></div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--blue)">↓ REST API call ↓</div>
+              <div style="width:100%;padding:8px;border-radius:8px;background:rgba(50,108,229,.13);border:1px solid rgba(50,108,229,.32);display:flex;align-items:center;gap:8px">
+                <span style="font-size:16px">🔌</span>
+                <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">API Server</div><div style="font-size:8px;color:var(--muted)">Validates & processes</div></div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--green)">↓ acts on cluster ↓</div>
+              <div style="width:100%;padding:8px;border-radius:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);display:flex;align-items:center;gap:8px">
+                <span style="font-size:16px">☸</span>
+                <div><div style="font-size:10px;font-weight:700;color:#86EFAC">K8s Cluster</div><div style="font-size:8px;color:var(--muted)">Executes the action</div></div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--muted)">↓ response ↓</div>
+              <div style="width:100%;padding:5px 8px;border-radius:7px;background:rgba(0,0,0,.25);border:1px solid var(--termB);font-family:monospace;font-size:8px;color:var(--str)">pod/web-app created ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHY KUBECTL IS IMPORTANT ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Why It Matters</div>
+        <div class="stitle">Why is kubectl <span style="color:#86EFAC">Essential?</span></div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">🎛</div><div class="bt"><strong>Main control interface for Kubernetes</strong> — without kubectl, you have no way to easily manage your cluster</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.18)">🚀</div><div class="bt"><strong>Deploy applications</strong> — push new versions, scale replicas, manage rollouts in one command</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.14)">📊</div><div class="bt"><strong>Check cluster status</strong> — instantly see what's running, what's failing, and resource usage</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(239,68,68,.15)">🔍</div><div class="bt"><strong>Troubleshoot problems</strong> — view logs, exec into containers, describe resources to find root causes</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(245,158,11,.15)">💼</div><div class="bt"><strong>Required for all DevOps interviews</strong> — every K8s interview will test your kubectl knowledge</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:240px;display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:10px;border-radius:11px;background:rgba(50,108,229,.1);border:1.5px solid rgba(50,108,229,.3)">
+            <div style="font-size:28px;margin-bottom:4px">⌨️</div>
+            <div style="font-size:11px;font-weight:800;color:#7EB3FF;margin-bottom:3px">kubectl</div>
+            <div style="font-size:9px;color:var(--muted)">Your K8s Swiss Army Knife</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="padding:9px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">🚀</div>
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">Deploy</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Push & scale apps</div>
+            </div>
+            <div style="padding:9px;border-radius:9px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.22);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">📊</div>
+              <div style="font-size:9px;font-weight:700;color:#67E8F9">Monitor</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Check status</div>
+            </div>
+            <div style="padding:9px;border-radius:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">🔍</div>
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5">Debug</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Find & fix issues</div>
+            </div>
+            <div style="padding:9px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.22);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">⚙️</div>
+              <div style="font-size:9px;font-weight:700;color:#FDE068">Manage</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Create & delete</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 COMMAND STRUCTURE ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Syntax</div>
+      <div class="stitle">kubectl Command Structure</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- left: structure breakdown -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <!-- formula box -->
+          <div style="padding:12px 16px;border-radius:11px;background:rgba(50,108,229,.08);border:1.5px solid rgba(50,108,229,.3)">
+            <div style="font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Command Format</div>
+            <div style="font-family:monospace;font-size:clamp(11px,1.8vw,18px);display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              <span style="color:var(--cmd);font-weight:700">kubectl</span>
+              <span style="color:var(--flag)">&lt;action&gt;</span>
+              <span style="color:var(--str)">&lt;resource&gt;</span>
+              <span style="color:var(--arg)">[name]</span>
+              <span style="color:var(--muted)">[flags]</span>
+            </div>
+          </div>
+          <!-- breakdown cards -->
+          <div style="display:flex;gap:7px">
+            <div style="flex:1;padding:10px;border-radius:9px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.28);text-align:center">
+              <div style="font-size:14px;font-family:monospace;font-weight:800;color:var(--cmd);margin-bottom:4px">kubectl</div>
+              <div style="font-size:9px;color:var(--muted)">The CLI tool itself</div>
+            </div>
+            <div style="flex:1;padding:10px;border-radius:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);text-align:center">
+              <div style="font-size:14px;font-family:monospace;font-weight:800;color:var(--flag);margin-bottom:4px">&lt;action&gt;</div>
+              <div style="font-size:9px;color:var(--muted)">get · apply · delete · describe · logs</div>
+            </div>
+            <div style="flex:1;padding:10px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.25);text-align:center">
+              <div style="font-size:14px;font-family:monospace;font-weight:800;color:var(--str);margin-bottom:4px">&lt;resource&gt;</div>
+              <div style="font-size:9px;color:var(--muted)">pods · nodes · services · deployments</div>
+            </div>
+            <div style="flex:1;padding:10px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);text-align:center">
+              <div style="font-size:14px;font-family:monospace;font-weight:800;color:var(--arg);margin-bottom:4px">[flags]</div>
+              <div style="font-size:9px;color:var(--muted)">-n namespace · -o wide · --all</div>
+            </div>
+          </div>
+          <!-- examples terminal -->
+          <div class="term" style="flex:1">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">examples</span>
+            </div>
+            <div class="term-body" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div>
+                <div class="km"># View pods</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span></div>
+              </div>
+              <div>
+                <div class="km"># View nodes</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">nodes</span></div>
+              </div>
+              <div>
+                <div class="km"># Apply config</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">apply</span> <span class="ka">-f</span> <span class="ks">app.yaml</span></div>
+              </div>
+              <div>
+                <div class="km"># Delete pod</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">delete</span> <span class="ks">pod</span> <span class="ka">my-pod</span></div>
+              </div>
+              <div>
+                <div class="km"># Describe pod</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">describe</span> <span class="ks">pod</span> <span class="ka">web</span></div>
+              </div>
+              <div>
+                <div class="km"># View logs</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">web-pod</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 VIEW COMMANDS ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Viewing Resources</div>
+        <div class="stitle">kubectl <span style="color:var(--cyan)">get</span> & <span style="color:var(--amber)">describe</span> Commands</div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.15)">📋</div><div class="bt"><code style="color:var(--cmd);background:rgba(50,108,229,.15);padding:1px 6px;border-radius:4px;font-size:10px">kubectl get pods</code> — <strong>lists all Pods</strong> in the current namespace with status</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.15)">🖥</div><div class="bt"><code style="color:var(--cmd);background:rgba(50,108,229,.15);padding:1px 6px;border-radius:4px;font-size:10px">kubectl get nodes</code> — <strong>lists all worker nodes</strong> and their Ready/NotReady status</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.15)">🌐</div><div class="bt"><code style="color:var(--cmd);background:rgba(50,108,229,.15);padding:1px 6px;border-radius:4px;font-size:10px">kubectl get services</code> — <strong>lists all Services</strong> and their types, IPs, and ports</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(245,158,11,.15)">🔎</div><div class="bt"><code style="color:var(--amber);background:rgba(245,158,11,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl describe pod &lt;name&gt;</code> — <strong>full details</strong>: events, volumes, IP, image, restart count</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">🌍</div><div class="bt"><code style="color:var(--str);background:rgba(34,197,94,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl get all</code> — <strong>shows everything</strong> at once — pods, services, deployments, replicas</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:300px">
+          <div class="term">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">kubectl get outputs</span>
+            </div>
+            <div class="term-body">
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span></div>
+              <div class="ko" style="font-size:9px">NAME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; READY &nbsp; STATUS &nbsp;&nbsp; AGE</div>
+              <div class="ko" style="font-size:9px"><span class="ks">web-app-abc123</span> &nbsp;&nbsp; 1/1 &nbsp;&nbsp;&nbsp; Running &nbsp; 5m</div>
+              <div class="ko" style="font-size:9px"><span class="ks">api-server-xyz</span> &nbsp;&nbsp;&nbsp; 1/1 &nbsp;&nbsp;&nbsp; Running &nbsp; 5m</div>
+              <div style="margin-top:7px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">nodes</span></div>
+              <div class="ko" style="font-size:9px">NAME &nbsp;&nbsp; STATUS &nbsp; VERSION</div>
+              <div class="ko" style="font-size:9px"><span class="ks">node-1</span> &nbsp; Ready &nbsp;&nbsp; v1.28.0</div>
+              <div class="ko" style="font-size:9px"><span class="ks">node-2</span> &nbsp; Ready &nbsp;&nbsp; v1.28.0</div>
+              <div style="margin-top:7px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">describe</span> <span class="ks">pod</span> <span class="ka">web-app-abc123</span></div>
+              <div class="ko" style="font-size:9px">Name: &nbsp;&nbsp;&nbsp; web-app-abc123</div>
+              <div class="ko" style="font-size:9px">Status: &nbsp; Running</div>
+              <div class="ko" style="font-size:9px">Node: &nbsp;&nbsp;&nbsp; node-1/10.0.0.5</div>
+              <div class="ko" style="font-size:9px">Image: &nbsp;&nbsp; nginx:1.25</div>
+              <div class="ko" style="font-size:9px">Events: &nbsp; Successfully pulled image</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 CREATE & MANAGE ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Creating & Managing</div>
+        <div class="stitle">Create, Apply, Delete & Scale</div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.2)">✅</div><div class="bt"><code style="color:var(--str);background:rgba(34,197,94,.12);padding:1px 6px;border-radius:4px;font-size:10px">kubectl apply -f file.yaml</code> — <strong>create or update</strong> resources from a YAML config file</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">🆕</div><div class="bt"><code style="color:var(--cmd);background:rgba(50,108,229,.15);padding:1px 6px;border-radius:4px;font-size:10px">kubectl create deployment &lt;name&gt;</code> — <strong>quickly create</strong> a deployment from command line</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(239,68,68,.18)">🗑</div><div class="bt"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl delete pod &lt;name&gt;</code> — <strong>remove</strong> a specific resource permanently</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(124,58,237,.2)">📈</div><div class="bt"><code style="color:var(--flag);background:rgba(124,58,237,.12);padding:1px 6px;border-radius:4px;font-size:10px">kubectl scale --replicas=5</code> — <strong>scale</strong> a deployment to more or fewer Pods instantly</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.22)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">💡 Tip: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Prefer <code style="color:var(--str)">kubectl apply</code> over <code style="color:var(--cmd)">create</code> — apply is idempotent (safe to run multiple times)</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:290px;display:flex;flex-direction:column;gap:7px">
+          <div class="term">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">create & manage</span>
+            </div>
+            <div class="term-body">
+              <div class="km"># Apply from YAML (recommended)</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">apply</span> <span class="ka">-f</span> <span class="ks">deployment.yaml</span></div>
+              <div class="ko" style="color:var(--str)">deployment.apps/web created</div>
+              <div style="margin-top:6px" class="km"># Quick create deployment</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">create</span> <span class="ks">deployment</span> <span class="ka">web</span> <span class="kf">--image</span>=<span class="ks">nginx</span></div>
+              <div class="ko" style="color:var(--str)">deployment.apps/web created</div>
+              <div style="margin-top:6px" class="km"># Scale to 5 replicas</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">scale</span> <span class="ks">deployment</span> <span class="ka">web</span> <span class="kf">--replicas</span>=<span class="ka">5</span></div>
+              <div class="ko" style="color:var(--str)">deployment.apps/web scaled</div>
+              <div style="margin-top:6px" class="km"># Delete a pod</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">delete</span> <span class="ks">pod</span> <span class="ka">web-abc123</span></div>
+              <div class="ko" style="color:#FCA5A5">pod "web-abc123" deleted</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 DEBUGGING & LOGS ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Troubleshooting</div>
+        <div class="stitle">Debugging & <span style="color:#FCA5A5">Logs</span></div>
+        <div class="bi" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)"><div class="ico" style="background:rgba(239,68,68,.2)">📝</div><div class="bt"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl logs &lt;pod-name&gt;</code> — <strong>view container logs</strong> — your app's stdout/stderr output</div></div>
+        <div class="bi" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)"><div class="ico" style="background:rgba(239,68,68,.2)">📝</div><div class="bt"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl logs -f &lt;pod&gt;</code> — <strong>follow logs in real-time</strong> — like <code style="font-size:10px">tail -f</code> for your container</div></div>
+        <div class="bi" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)"><div class="ico" style="background:rgba(239,68,68,.2)">💻</div><div class="bt"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl exec -it &lt;pod&gt; -- bash</code> — <strong>open a shell</strong> inside a running container</div></div>
+        <div class="bi" style="background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.22)"><div class="ico" style="background:rgba(239,68,68,.2)">🔎</div><div class="bt"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 6px;border-radius:4px;font-size:10px">kubectl describe pod &lt;name&gt;</code> — <strong>see events & errors</strong> — why is the pod crashing? Look here first.</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25)">
+          <span style="font-size:10px;font-weight:700;color:var(--amber)">🔧 Debug flow: </span>
+          <span style="font-size:clamp(9px,1.2vw,11px);color:#CBD5E1">get pods → describe → logs → exec — in this order to find most issues</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:300px">
+          <div class="term">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">debugging session</span>
+            </div>
+            <div class="term-body">
+              <div class="km"># Check what's wrong</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span></div>
+              <div class="ko" style="font-size:9px"><span style="color:#FCA5A5">web-pod &nbsp;&nbsp; CrashLoopBackOff &nbsp; 0/1</span></div>
+              <div style="margin-top:6px" class="km"># Read the logs</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">web-pod</span></div>
+              <div class="ko" style="font-size:9px;color:#FCA5A5">Error: Cannot connect to DB</div>
+              <div class="ko" style="font-size:9px;color:#FCA5A5">Connection refused on port 5432</div>
+              <div style="margin-top:6px" class="km"># Look at events for more clues</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">describe</span> <span class="ks">pod</span> <span class="ka">web-pod</span></div>
+              <div class="ko" style="font-size:9px">Events:</div>
+              <div class="ko" style="font-size:9px;color:#FCA5A5"> &nbsp;Back-off restarting failed container</div>
+              <div style="margin-top:6px" class="km"># Shell into a running container</div>
+              <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">exec</span> <span class="ka">-it</span> <span class="ks">web-pod</span> <span class="ka">--</span> <span class="ks">bash</span></div>
+              <div class="ko" style="font-size:9px"><span class="str">root@web-pod:/#</span> <span style="color:#4B5563">█</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 REAL WORKFLOW ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World</div>
+      <div class="stitle">A Typical kubectl Workflow</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- steps left column -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:9px;align-items:flex-start;padding:8px 11px;border-radius:9px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:2px">1</div>
+            <div style="flex:1">
+              <div style="font-size:10px;font-weight:700;color:#C084FC;margin-bottom:3px">Write your YAML manifest</div>
+              <div style="font-family:monospace;font-size:8px;color:#94A3B8;background:rgba(0,0,0,.25);padding:5px 8px;border-radius:5px;line-height:1.6">
+                <div><span class="km">apiVersion:</span> apps/v1</div>
+                <div><span class="km">kind:</span> Deployment</div>
+                <div><span class="km">metadata:</span></div>
+                <div>&nbsp; <span class="km">name:</span> my-app</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--blue)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.25)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-bottom:2px">Apply the manifest</div>
+              <div style="font-family:monospace;font-size:9px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">apply</span> <span class="ka">-f</span> <span class="ks">my-app.yaml</span></div>
+            </div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--green)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(50,108,229,.09);border:1px solid rgba(50,108,229,.28)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">3</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-bottom:2px">Check status</div>
+              <div style="font-family:monospace;font-size:9px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span> &amp;&amp; <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">svc</span></div>
+            </div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--amber)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--red),#DC2626);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">4</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#FCA5A5;margin-bottom:2px">Debug if issues</div>
+              <div style="font-family:monospace;font-size:9px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">my-app-abc</span> &amp;&amp; <span class="kc">kubectl</span> <span class="kf">describe</span> <span class="ks">pod</span></div>
+            </div>
+          </div>
+          <div style="padding-left:16px;font-size:11px;color:var(--str)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.22)">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">5</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-bottom:2px">Update & re-apply</div>
+              <div style="font-family:monospace;font-size:9px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">apply</span> <span class="ka">-f</span> <span class="ks">my-app.yaml</span> <span class="km"># repeat as needed</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- right: mini terminal output -->
+        <div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:7px">
+          <div class="term" style="flex:1">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">live output</span>
+            </div>
+            <div class="term-body" style="font-size:9px">
+              <div class="ko">deployment.apps/my-app created</div>
+              <div style="margin-top:5px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span></div>
+              <div class="ko" style="font-size:8px">NAME &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; STATUS &nbsp;&nbsp; READY</div>
+              <div class="ko" style="font-size:8px"><span class="ks">my-app-a1b2</span> &nbsp; Running &nbsp; 1/1</div>
+              <div class="ko" style="font-size:8px"><span class="ks">my-app-c3d4</span> &nbsp; Running &nbsp; 1/1</div>
+              <div class="ko" style="font-size:8px"><span class="ks">my-app-e5f6</span> &nbsp; Running &nbsp; 1/1</div>
+              <div style="margin-top:5px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">svc</span></div>
+              <div class="ko" style="font-size:8px">my-app-svc &nbsp; LoadBalancer</div>
+              <div style="margin-top:5px"><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">my-app-a1b2</span></div>
+              <div class="ko" style="font-size:8px;color:var(--str)">Server running on port 3000 ✓</div>
+              <div class="ko" style="font-size:8px;color:var(--str)">DB connected successfully ✓</div>
+              <div style="margin-top:5px;padding:5px 7px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">✅ App is healthy!</div>
+                <div style="font-size:8px;color:var(--muted)">3/3 pods running</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY + CHEAT SHEET ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary</div>
+      <div class="stitle">kubectl Cheat Sheet + Pro Tips</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- cheat sheet terminal -->
+        <div style="flex:1.3">
+          <div class="term" style="height:100%">
+            <div class="term-bar">
+              <div class="t-dot" style="background:#EF4444"></div>
+              <div class="t-dot" style="background:#F59E0B"></div>
+              <div class="t-dot" style="background:#22C55E"></div>
+              <span class="term-title">kubectl quick reference</span>
+            </div>
+            <div class="term-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:9px">
+              <div>
+                <div style="font-size:8px;font-weight:700;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid var(--termB);padding-bottom:3px">👀 View</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">pods</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">nodes</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">svc</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">get</span> <span class="ks">all</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">describe</span> <span class="ks">pod</span> <span class="ka">&lt;n&gt;</span></div>
+              </div>
+              <div>
+                <div style="font-size:8px;font-weight:700;color:var(--str);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid var(--termB);padding-bottom:3px">✅ Create</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">apply</span> <span class="ka">-f</span> <span class="ks">file.yaml</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">create</span> <span class="ks">deploy</span> <span class="ka">&lt;n&gt;</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">expose</span> <span class="ks">deploy</span> <span class="ka">&lt;n&gt;</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">scale</span> <span class="ka">--replicas=3</span></div>
+              </div>
+              <div>
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid var(--termB);padding-bottom:3px">🗑 Delete</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">delete</span> <span class="ks">pod</span> <span class="ka">&lt;name&gt;</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">delete</span> <span class="ka">-f</span> <span class="ks">file.yaml</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">delete</span> <span class="sts">deploy</span> <span class="ka">&lt;n&gt;</span></div>
+              </div>
+              <div>
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid var(--termB);padding-bottom:3px">🔍 Debug</div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">&lt;pod&gt;</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">logs</span> <span class="ka">-f &lt;pod&gt;</span></div>
+                <div><span class="p">$</span> <span class="kc">kubectl</span> <span class="kf">exec</span> <span class="ka">-it &lt;pod&gt; -- bash</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:190px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:flex-start;padding-top:2px">
+          <!-- pro tip -->
+          <div style="padding:11px;border-radius:11px;background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.3)">
+            <div style="font-size:9px;font-weight:700;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">⭐ Pro Tips</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:9px;color:#CBD5E1;padding:5px 8px;background:rgba(245,158,11,.1);border-radius:6px;border:1px solid rgba(245,158,11,.22)">
+                <div style="font-family:monospace;color:#FDE068;margin-bottom:2px">kubectl get all</div>
+                <div style="color:var(--muted)">See everything at once!</div>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;padding:5px 8px;background:rgba(245,158,11,.1);border-radius:6px;border:1px solid rgba(245,158,11,.22)">
+                <div style="font-family:monospace;color:#FDE068;margin-bottom:2px">kubectl get pods -o wide</div>
+                <div style="color:var(--muted)">See which node pods run on</div>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;padding:5px 8px;background:rgba(245,158,11,.1);border-radius:6px;border:1px solid rgba(245,158,11,.22)">
+                <div style="font-family:monospace;color:#FDE068;margin-bottom:2px">kubectl explain pod</div>
+                <div style="color:var(--muted)">Built-in docs for any resource</div>
+              </div>
+            </div>
+          </div>
+          <!-- next ep -->
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">What is a Pod?</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">The smallest unit in Kubernetes — explained simply</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

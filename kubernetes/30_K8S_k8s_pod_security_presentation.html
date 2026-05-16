@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --ps:#7C3AED;--psD:rgba(124,58,237,.1);--psB:rgba(124,58,237,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --tok:#00D4FF;--tokD:rgba(0,212,255,.09);--tokB:rgba(0,212,255,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --cm:#F59E0B;--cmD:rgba(245,158,11,.09);--cmB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--ps);border-color:var(--ps);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--ps);color:var(--ps)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(124,58,237,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(124,58,237,.18);border-color:var(--ps)}
+.nbtn.pri{background:linear-gradient(135deg,var(--ps),var(--blue));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(124,58,237,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(124,58,237,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(124,58,237,.14);transition:all .25s}
+.bi:hover{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.ps-box{border-radius:10px;padding:9px 12px;background:var(--psD);border:2px solid var(--psB);text-align:center}
+.ok-box{border-radius:10px;padding:9px 12px;background:var(--okD);border:2px solid var(--okB);text-align:center}
+.fail-box{border-radius:10px;padding:9px 12px;background:var(--failD);border:2px solid var(--failB);text-align:center}
+.pod-box{border-radius:10px;padding:9px 12px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--purpleL);padding:3px 12px;border:1px solid rgba(124,58,237,.25);border-radius:20px;background:rgba(124,58,237,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.8vw,36px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--purpleL) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Pod Security &amp;<br>Security Context</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Securing Containers in Kubernetes<br>— Control what containers can and cannot do</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--psD);color:#DDD6FE;border:1px solid var(--psB);padding:4px 11px;font-size:9px">🛡 Security Context</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">👤 Non-root</span>
+          <span class="tag" style="background:var(--tokD);color:#67E8F9;border:1px solid var(--tokB);padding:4px 11px;font-size:9px">🔒 Read-only FS</span>
+          <span class="tag" style="background:var(--cmD);color:#FDE068;border:1px solid var(--cmB);padding:4px 11px;font-size:9px">⚡ Capabilities</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(124,58,237,.25);border-radius:14px;padding:12px;background:rgba(124,58,237,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Security Context Settings</div>
+          <div class="pod-box" style="margin-bottom:6px">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD">📦 Pod / Container</div>
+            <div style="display:flex;flex-direction:column;gap:3px;margin-top:6px">
+              <div style="padding:3px 8px;border-radius:5px;background:var(--okD);border:1px solid var(--okB);font-size:7.5px;font-weight:600;color:#86EFAC">✅ runAsUser: 1000 (non-root)</div>
+              <div style="padding:3px 8px;border-radius:5px;background:var(--okD);border:1px solid var(--okB);font-size:7.5px;font-weight:600;color:#86EFAC">✅ readOnlyRootFilesystem: true</div>
+              <div style="padding:3px 8px;border-radius:5px;background:var(--okD);border:1px solid var(--okB);font-size:7.5px;font-weight:600;color:#86EFAC">✅ allowPrivilegeEscalation: false</div>
+              <div style="padding:3px 8px;border-radius:5px;background:var(--okD);border:1px solid var(--okB);font-size:7.5px;font-weight:600;color:#86EFAC">✅ capabilities: drop: [ALL]</div>
+            </div>
+          </div>
+          <div class="ps-box">
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE">🛡 Security Context</div>
+            <div style="font-size:7.5px;color:var(--muted);margin-top:1px">applied at Pod or container level</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Pod Security <span style="color:var(--purpleL)">Matters</span></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">📦</div><div class="bt"><strong>Containers are powerful but dangerous by default</strong> — without restrictions, a container can access the host filesystem, run as root, and escape to the underlying node</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💀</div><div class="bt"><strong>Misconfigured containers become attack vectors</strong> — a vulnerable app running as root inside a container gives attackers host-level access if exploited</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔓</div><div class="bt"><strong>Excessive permissions = large attack surface</strong> — container with NET_ADMIN capability can reconfigure host networking. That's way more than a web app needs.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🚪</div><div class="bt"><strong>Container escape is a real threat</strong> — a privileged container can break out of its isolation and compromise the entire node and cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🛡</div><div class="bt"><strong>Security Context solves this</strong> — define exactly what the container is allowed to do. Block everything else. Defense by configuration.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--psD);border:1px solid var(--psB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Principle: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Give containers the minimum permissions they need. Deny everything else. A web server does NOT need to modify system files or access the host kernel.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:272px;display:flex;flex-direction:column;gap:8px">
+          <div class="fail-box" style="padding:12px">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:7px">❌ Insecure Container Default</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🔓 Runs as root (UID 0)</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">💣 Can write anywhere on filesystem</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">⚡ All Linux capabilities inherited</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🚪 Can escalate privileges</div>
+            </div>
+          </div>
+          <div class="ok-box" style="padding:12px">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:7px">✅ Hardened Container</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">👤 Runs as UID 1000 (non-root)</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">🔒 Filesystem is read-only</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">⚡ capabilities: drop ALL</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">🛡 allowPrivilegeEscalation: false</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT IS SECURITY CONTEXT -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--purpleL)">Security Context?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">⚙</div><div class="bt"><strong>Security settings for Pods and containers</strong> — a field in the Pod/container spec that controls OS-level security behavior: user, capabilities, filesystem, privileges</div></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">📦</div><div class="bt"><strong>Applied at two levels</strong> — <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">spec.securityContext</code> affects the whole Pod; <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">containers[].securityContext</code> per container</div></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">🎯</div><div class="bt"><strong>Controls permissions and access levels</strong> — WHO the process runs as, WHAT files it can write to, WHAT kernel capabilities it has</div></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">🔒</div><div class="bt"><strong>Enforced by the Linux kernel</strong> — not just configuration labels. The OS actually blocks operations the Security Context forbids.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">🌍</div><div class="bt"><strong>Universal — works across all container runtimes</strong> — Docker, containerd, CRI-O all honor Security Context settings from Kubernetes</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--psD);border:1px solid var(--psB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Security Context = office access rules 🏢. Employee can enter their floor, use their computer, but cannot access the server room or finance files.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--psD);border:2px solid var(--psB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Security Context Scope</div>
+            <!-- Pod level -->
+            <div style="border-radius:9px;padding:9px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:6px">
+              <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;margin-bottom:5px">📦 Pod-level securityContext</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8">
+                <div><span style="color:#7C3AED">securityContext:</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">runAsUser:</span> <span style="color:#86EFAC">1000</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">runAsGroup:</span> <span style="color:#86EFAC">3000</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">fsGroup:</span> <span style="color:#86EFAC">2000</span></div>
+              </div>
+              <div style="font-size:7px;color:var(--muted);margin-top:3px">Applies to ALL containers in Pod</div>
+            </div>
+            <!-- Container level -->
+            <div style="border-radius:9px;padding:9px;background:var(--psD);border:1.5px solid var(--psB)">
+              <div style="font-size:8.5px;font-weight:700;color:#DDD6FE;margin-bottom:5px">📱 Container-level securityContext</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8">
+                <div><span style="color:#7C3AED">securityContext:</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">allowPrivilegeEscalation:</span> <span style="color:#FCA5A5">false</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">readOnlyRootFilesystem:</span> <span style="color:#86EFAC">true</span></div>
+                <div>&nbsp;&nbsp;<span style="color:#A855F7">capabilities:</span></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#A855F7">drop:</span> <span style="color:#FCA5A5">["ALL"]</span></div>
+              </div>
+              <div style="font-size:7px;color:var(--muted);margin-top:3px">Overrides Pod-level for this container</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 NON-ROOT -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">User Identity</div>
+        <div class="stitle">Running as <span style="color:#86EFAC">Non-Root</span></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💀</div><div class="bt"><strong>Root = UID 0 = full OS access</strong> — a process running as root inside a container has the same power as root on the host (in misconfigured setups)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">👤</div><div class="bt"><strong>runAsUser: 1000</strong> — specify a non-privileged UID. Container runs as a regular user, not root. Dramatically reduces breach impact.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🚫</div><div class="bt"><strong>runAsNonRoot: true</strong> — Kubernetes will refuse to start the container if the image tries to run as root. Hard enforcement, not just a suggestion.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">👥</div><div class="bt"><strong>runAsGroup: 3000</strong> — set the group ID for the container process. Controls which files and resources the process can access by group ownership.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🗂</div><div class="bt"><strong>fsGroup: 2000</strong> — all files created in volumes owned by this GID. Essential when containers need to read/write shared volumes.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Root in a container = master key to the building 🗝. Non-root = regular employee key that opens only their office. Much safer.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:8px">
+          <div class="fail-box" style="padding:11px">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:7px">❌ Running as Root</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(239,68,68,.2);font-family:monospace;font-size:7.5px;margin-bottom:5px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#FCA5A5"># nothing specified</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#FCA5A5"># defaults to root (UID 0)</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">🔓 Can read /etc/passwd</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">💀 Can install backdoors</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">🚪 Can escape container</div>
+            </div>
+          </div>
+          <div class="ok-box" style="padding:11px">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:7px">✅ Running as Non-Root</div>
+            <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.6);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:7.5px;margin-bottom:5px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsUser: 1000</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsNonRoot: true</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsGroup: 3000</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">✅ Limited OS access</div>
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">✅ Cannot install system packages</div>
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">✅ Contained breach radius</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 PRIVILEGED vs RESTRICTED -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Privilege Levels</div>
+      <div class="stitle">Privileged vs Restricted Containers</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Privileged -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--failD);border:2px solid var(--failB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💣</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FCA5A5">Privileged Container</div><div style="font-size:8px;color:var(--muted)">privileged: true</div></div>
+            <span class="tag" style="background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid var(--failB);margin-left:auto;font-size:7px;padding:3px 7px">⚠ Avoid</span>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">Gets almost <strong style="color:#FCA5A5">root access to the host</strong>. Can see all host processes, mount host filesystems, bypass cgroups. Essentially no isolation.</div>
+          <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(239,68,68,.2);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">securityContext:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#FCA5A5">privileged: true ❌</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Can mount host filesystems</div>
+            <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Can access host network devices</div>
+            <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Container escape trivial</div>
+          </div>
+        </div>
+        <!-- vs -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 5px;gap:8px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:var(--psD);border:1px solid var(--psB);font-size:9px;font-weight:700;color:#DDD6FE;text-align:center">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Non-privileged -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🛡</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Non-Privileged Container</div><div style="font-size:8px;color:var(--muted)">privileged: false (default)</div></div>
+            <span class="tag" style="background:rgba(34,197,94,.2);color:#86EFAC;border:1px solid var(--okB);margin-left:auto;font-size:7px;padding:3px 7px">⭐ Recommended</span>
+          </div>
+          <div style="font-size:9px;color:#CBD5E1;line-height:1.45;flex:1">Isolated from host. Cannot access host resources unless explicitly permitted. <strong style="color:#86EFAC">Default for almost all workloads</strong>. Use privileged only for node-level tools.</div>
+          <div style="border-radius:7px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">securityContext:</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#86EFAC">privileged: false ✅</span></div>
+            <div>&nbsp;&nbsp;<span style="color:#86EFAC">allowPrivilegeEscalation: false ✅</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Isolated from host filesystem</div>
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Cannot escalate permissions</div>
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Breach stays inside container</div>
+          </div>
+        </div>
+        <!-- Allowed exception -->
+        <div style="width:155px;flex-shrink:0;border-radius:12px;padding:11px;background:var(--cmD);border:1.5px solid var(--cmB);display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="font-size:9px;font-weight:700;color:#FDE068;text-align:center;margin-bottom:3px">⚠ When is Privileged OK?</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:8px;color:#FDE068;padding:4px 7px;background:rgba(245,158,11,.1);border-radius:5px">🔧 Node-level DaemonSets</div>
+            <div style="font-size:8px;color:#FDE068;padding:4px 7px;background:rgba(245,158,11,.1);border-radius:5px">📊 System monitoring agents</div>
+            <div style="font-size:8px;color:#FDE068;padding:4px 7px;background:rgba(245,158,11,.1);border-radius:5px">🌐 Network drivers (CNI)</div>
+            <div style="font-size:8px;color:#FDE068;padding:4px 7px;background:rgba(245,158,11,.1);border-radius:5px">💾 Storage drivers (CSI)</div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);text-align:center;margin-top:3px">These are exceptions, NOT the rule</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 LINUX CAPABILITIES -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Linux Capabilities</div>
+        <div class="stitle">Drop Unnecessary <span style="color:#FDE068">Capabilities</span></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">⚡</div><div class="bt"><strong>Linux capabilities are granular root powers</strong> — instead of "all or nothing" root, Linux splits root into ~40 specific capabilities (NET_ADMIN, SYS_PTRACE, etc.)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>Containers inherit capabilities by default</strong> — a default container gets a large set of capabilities inherited from the container runtime. Too many for most apps.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🗑</div><div class="bt"><strong>Drop ALL, then add only what's needed</strong> — <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">capabilities.drop: ["ALL"]</code> removes everything, then <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">add: ["NET_BIND_SERVICE"]</code> only what you need</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🌐</div><div class="bt"><strong>Most apps need zero extra capabilities</strong> — a typical web server, API, or worker only needs to run on a port. No special capabilities required at all.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--cmD)">🔧</div><div class="bt"><strong>Common legitimate capabilities</strong> — <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">NET_BIND_SERVICE</code> (ports &lt;1024), <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">SYS_TIME</code> (set clock), rarely needed in practice</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Rule: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Start by dropping ALL capabilities. Add specific ones only if your app truly needs them. Most web apps need zero.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--cmD);border:2px solid var(--cmB);box-shadow:0 0 22px rgba(245,158,11,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Capabilities YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(245,158,11,.2);font-family:monospace;font-size:8px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">capabilities:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#FCA5A5">drop:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#FCA5A5">- ALL</span> <span style="color:#94A3B8"># remove everything</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">add:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">- NET_BIND_SERVICE</span> <span style="color:#94A3B8"># only this one</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px">❌ <span>SYS_ADMIN — dropped</span></div>
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px">❌ <span>NET_RAW — dropped</span></div>
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:5px">❌ <span>SYS_PTRACE — dropped</span></div>
+              <div style="font-size:8px;font-weight:600;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px">✅ <span>NET_BIND_SERVICE — kept</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 READONLY FS -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Filesystem Protection</div>
+        <div class="stitle">Read-Only Filesystem &amp; <span style="color:#67E8F9">Resource Protection</span></div>
+        <div class="bi"><div class="ico" style="background:var(--tokD)">🔒</div><div class="bt"><strong>readOnlyRootFilesystem: true</strong> — makes the container's root filesystem immutable. App can read files but cannot write or modify them during runtime.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--tokD)">🛡</div><div class="bt"><strong>Prevents runtime tampering</strong> — attackers who compromise the app cannot drop malicious files, modify binaries, or install backdoors on disk</div></div>
+        <div class="bi"><div class="ico" style="background:var(--tokD)">📁</div><div class="bt"><strong>Use emptyDir for writable temp space</strong> — if your app needs to write (logs, temp files), mount a writable <code style="color:#67E8F9;background:rgba(0,212,255,.1);padding:1px 5px;border-radius:4px">emptyDir</code> volume at that specific path only</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🚫</div><div class="bt"><strong>allowPrivilegeEscalation: false</strong> — prevents the process from gaining more privileges than it started with. Blocks setuid binaries and sudo inside the container.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--tokD)">🏠</div><div class="bt"><strong>seccompProfile: RuntimeDefault</strong> — applies a default set of syscall restrictions. Limits which kernel calls the container can make. Reduces kernel attack surface.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--tokD);border:1px solid var(--tokB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Security gain: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">A read-only FS + no privilege escalation means even if an attacker gets code execution inside the container, they cannot persist or escalate.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:8px">
+          <div class="fail-box" style="padding:10px">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:6px">❌ Writable FS — Dangerous</div>
+            <div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">💀 Attacker writes /tmp/backdoor.sh</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">💀 Modifies /etc/cron to persist</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">💀 Replaces app binary with malware</div>
+            </div>
+          </div>
+          <div class="ok-box" style="padding:10px">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:6px">✅ Read-Only FS — Safe</div>
+            <div style="border-radius:7px;padding:7px;background:rgba(6,10,16,.6);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:7.5px;margin-bottom:4px">
+              <div><span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">readOnlyRootFilesystem: true</span></div>
+              <div><span style="color:#7C3AED">volumeMounts:</span></div>
+              <div><span style="color:#7C3AED">- mountPath:</span> <span style="color:#FDE068">/tmp</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#86EFAC">tmp-dir</span> <span style="color:#94A3B8"># writable</span></div>
+            </div>
+            <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">✅ Cannot write to / — only /tmp</div>
+          </div>
+          <div style="border-radius:9px;padding:9px;background:var(--tokD);border:1.5px solid var(--tokB);text-align:center">
+            <div style="font-size:8.5px;font-weight:700;color:#67E8F9">🏆 Gold standard</div>
+            <div style="font-size:7.5px;color:var(--muted);margin-top:2px">readOnly FS + non-root + drop ALL caps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 POD SECURITY STANDARDS -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(124,58,237,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Kubernetes Built-in Policy</div>
+      <div class="stitle">Pod Security Standards (PSS) — 3 Tiers</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:stretch">
+        <!-- Privileged -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--failD);border:2px solid var(--failB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(239,68,68,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💣</div>
+            <div><div style="font-size:13px;font-weight:800;color:#FCA5A5">Privileged</div><div style="font-size:8px;color:var(--muted)">No restrictions</div></div>
+            <span class="tag" style="background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid var(--failB);margin-left:auto;font-size:7px;padding:3px 7px">⚠ Avoid</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Completely <strong style="color:#FCA5A5">unrestricted</strong>. Allows privileged containers, any user, all capabilities. Used only for system-level workloads like CNI plugins.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">❌ Privileged containers allowed</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">❌ Root user allowed</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#FCA5A5">❌ All capabilities allowed</div>
+          </div>
+          <div style="padding:6px;border-radius:6px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);text-align:center;font-size:8px;color:#FCA5A5">Use for: kube-system, CNI, CSI</div>
+        </div>
+        <!-- Baseline -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--cmD);border:2px solid var(--cmB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⚖</div>
+            <div><div style="font-size:13px;font-weight:800;color:#FDE068">Baseline</div><div style="font-size:8px;color:var(--muted)">Minimal restrictions</div></div>
+            <span class="tag" style="background:rgba(245,158,11,.2);color:#FDE068;border:1px solid var(--cmB);margin-left:auto;font-size:7px;padding:3px 7px">🏭 Common</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Prevents known privilege escalations. <strong style="color:#FDE068">Good starting point</strong> for most workloads. Blocks the most dangerous options while remaining practical.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">❌ No privileged containers</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">⚠ Root allowed (discouraged)</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">✅ Dangerous caps blocked</div>
+          </div>
+          <div style="padding:6px;border-radius:6px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);text-align:center;font-size:8px;color:#FDE068">Use for: most app namespaces</div>
+        </div>
+        <!-- Restricted -->
+        <div style="flex:1;border-radius:13px;padding:13px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🛡</div>
+            <div><div style="font-size:13px;font-weight:800;color:#86EFAC">Restricted</div><div style="font-size:8px;color:var(--muted)">Heavily hardened</div></div>
+            <span class="tag" style="background:rgba(34,197,94,.2);color:#86EFAC;border:1px solid var(--okB);margin-left:auto;font-size:7px;padding:3px 7px">⭐ Best</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Follows security best practices strictly. <strong style="color:#86EFAC">Maximum isolation</strong>. Requires non-root, read-only FS, dropped caps. Some apps may need adjustments.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Non-root enforced</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ No privilege escalation</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Seccomp required</div>
+          </div>
+          <div style="padding:6px;border-radius:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);text-align:center;font-size:8px;color:#86EFAC">Use for: prod, sensitive workloads</div>
+        </div>
+        <!-- How to apply -->
+        <div style="width:155px;flex-shrink:0;border-radius:12px;padding:11px;background:var(--psD);border:1.5px solid var(--psB);display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="font-size:8.5px;font-weight:700;color:#DDD6FE;text-align:center;margin-bottom:3px">How to Apply PSS</div>
+          <div style="border-radius:7px;padding:7px;background:rgba(6,10,16,.6);border:1px solid rgba(124,58,237,.2);font-family:monospace;font-size:7px">
+            <div style="color:#94A3B8;margin-bottom:2px"># Namespace label:</div>
+            <div><span style="color:#7C3AED">labels:</span></div>
+            <div><span style="color:#A855F7">&nbsp;pod-security.k8s.io/</span></div>
+            <div><span style="color:#A855F7">&nbsp;enforce:</span> <span style="color:#86EFAC">restricted</span></div>
+          </div>
+          <div style="font-size:7.5px;color:var(--muted);text-align:center">Applied via namespace labels</div>
+          <div style="display:flex;flex-direction:column;gap:3px;margin-top:3px">
+            <div style="font-size:7.5px;color:#FCA5A5;padding:2px 6px;background:rgba(239,68,68,.1);border-radius:4px">warn — show warnings</div>
+            <div style="font-size:7.5px;color:#FDE068;padding:2px 6px;background:rgba(245,158,11,.1);border-radius:4px">audit — log violations</div>
+            <div style="font-size:7.5px;color:#86EFAC;padding:2px 6px;background:rgba(34,197,94,.1);border-radius:4px">enforce — block violations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 REAL WORLD -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Real-World Example</div>
+        <div class="stitle">Production-Hardened <span style="color:var(--purpleL)">API Container</span></div>
+        <div class="bi"><div class="ico" style="background:var(--psD)">🌐</div><div class="bt"><strong>Scenario:</strong> A Node.js REST API serving production traffic needs to be hardened for security</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">👤</div><div class="bt"><strong>runAsUser: 1001</strong> — app runs as non-root user. Cannot access system files. Breach radius is contained.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🔒</div><div class="bt"><strong>readOnlyRootFilesystem: true</strong> — attacker cannot write malware to disk even if they gain code execution. Only <code style="color:#86EFAC">/tmp</code> is writable via emptyDir.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">⚡</div><div class="bt"><strong>capabilities drop ALL, add NET_BIND_SERVICE</strong> — app binds to port 80 (needs NET_BIND_SERVICE). Every other capability dropped.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🛡</div><div class="bt"><strong>allowPrivilegeEscalation: false</strong> — even if a bug triggers sudo or setuid inside the container, it cannot gain more privileges. Hard blocked.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Net result: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">A full RCE exploit in this app cannot install persistence, escalate, or touch other Pods. Blast radius = only the app process. This is the goal.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:262px">
+          <div style="border-radius:13px;padding:13px;background:var(--psD);border:2px solid var(--psB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Hardened YAML — Full</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(124,58,237,.2);font-family:monospace;font-size:7.5px">
+              <div><span style="color:#7C3AED">spec:</span></div>
+              <div>&nbsp;<span style="color:#7C3AED">securityContext:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsUser: 1001</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">runAsNonRoot: true</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#86EFAC">fsGroup: 2000</span></div>
+              <div>&nbsp;<span style="color:#7C3AED">containers:</span></div>
+              <div>&nbsp;<span style="color:#7C3AED">- securityContext:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">allowPrivilegeEscalation: false</span></div>
+              <div>&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">readOnlyRootFilesystem: true</span></div>
+              <div>&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">capabilities:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#FCA5A5">drop: ["ALL"]</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#86EFAC">add: ["NET_BIND_SERVICE"]</span></div>
+              <div>&nbsp;&nbsp;&nbsp;<span style="color:#7C3AED">seccompProfile:</span></div>
+              <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#A855F7">type: RuntimeDefault</span></div>
+            </div>
+            <div style="margin-top:6px;padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">✅ PSS Restricted — compliant</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Pod Security &amp; Security Context — Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Container</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Employee entering building</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Needs to get in and do their job. But shouldn't be able to go everywhere.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--psD);border:1.5px solid var(--psB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ps),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Rules</div>
+              <div style="font-size:26px;margin-top:4px">🔐</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Security Context</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Building access rules</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Floor badge only. No server room. No admin office. Do your job, nothing more.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Contained &amp; safe</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">If one employee is compromised, only their desk is affected. The vault is still locked.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">👤</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Non-root user</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">runAsUser + runAsNonRoot</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--tokD);border:1px solid var(--tokB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔒</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#67E8F9">Read-only FS</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">readOnlyRootFilesystem: true</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Drop capabilities</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">capabilities.drop: ALL</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚫</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">No priv escalation</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">allowPrivilegeEscalation: false</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--psD);border:1px solid var(--psB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🛡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">PSS Tiers</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Privileged → Baseline → Restricted</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📋</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">Seccomp</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Syscall restriction profile</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#BAE6FD">Security Context = access rules for the building</span>. <span style="color:#DDD6FE">Every container gets only the doors it needs</span>. Nothing more."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--psD);border:1.5px solid var(--psB)">
+            <div style="font-size:9px;font-weight:700;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Always run as non-root</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Read-only FS in production</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Drop all capabilities</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>No privilege escalation</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--purpleL)">◆</span>Use PSS Restricted tier</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#DDD6FE;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Network Policies</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Control Pod-to-Pod traffic<br>in Kubernetes</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--ps));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#DDD6FE;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

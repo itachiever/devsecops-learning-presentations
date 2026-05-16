@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --dep:#326CE5;--depD:rgba(50,108,229,.11);--depB:rgba(50,108,229,.35);
+  --rs:#7C3AED;--rsD:rgba(124,58,237,.11);--rsB:rgba(124,58,237,.35);
+  --pod:#00D4FF;--podD:rgba(0,212,255,.09);--podB:rgba(0,212,255,.3);
+  --ok:#22C55E;--okD:rgba(34,197,94,.1);--okB:rgba(34,197,94,.3);
+  --new:#F59E0B;--newD:rgba(245,158,11,.1);--newB:rgba(245,158,11,.3);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Layer boxes */
+.dep-box{border-radius:11px;padding:9px 12px;background:var(--depD);border:2px solid var(--depB);text-align:center}
+.rs-box{border-radius:10px;padding:8px 11px;background:var(--rsD);border:1.5px solid var(--rsB);text-align:center}
+.pod-chip{width:48px;height:48px;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1.5px solid;flex-shrink:0}
+.pod-ok{background:var(--okD);border-color:var(--okB)}
+.pod-new{background:var(--newD);border-color:var(--newB)}
+.pod-fail{background:var(--failD);border-color:var(--failB);opacity:.7}
+.pod-old{background:rgba(100,116,139,.12);border-color:rgba(100,116,139,.3);opacity:.6}
+.pod-label{font-size:7px;font-weight:700}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(28px,6vw,60px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--blue) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Deployment</div>
+        <div style="font-size:clamp(10px,1.7vw,16px);color:var(--muted);margin-bottom:18px;line-height:1.5">Managing Applications in Kubernetes<br>— Rolling updates, rollbacks & high availability</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--depD);color:#BAE6FD;border:1px solid var(--depB);padding:4px 11px;font-size:9px">🚀 Deployment</span>
+          <span class="tag" style="background:var(--rsD);color:#DDD6FE;border:1px solid var(--rsB);padding:4px 11px;font-size:9px">⚙ ReplicaSet</span>
+          <span class="tag" style="background:var(--podD);color:#67E8F9;border:1px solid var(--podB);padding:4px 11px;font-size:9px">📦 Pods</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">🔄 Rolling Update</span>
+        </div>
+      </div>
+      <!-- right: hero hierarchy -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:290px">
+          <div class="dep-box" style="margin-bottom:8px;box-shadow:0 0 28px rgba(50,108,229,.18)">
+            <div style="font-size:10px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase">🚀 Deployment</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:1px">manages lifecycle & updates</div>
+          </div>
+          <div style="text-align:center;font-size:16px;color:var(--blue);margin-bottom:4px">↓ creates</div>
+          <div class="rs-box" style="margin-bottom:8px">
+            <div style="font-size:10px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase">⚙ ReplicaSet v2</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:1px">ensures desired pod count</div>
+          </div>
+          <div style="text-align:center;font-size:16px;color:var(--rs);margin-bottom:6px">↓ manages</div>
+          <div style="display:flex;gap:7px;justify-content:center">
+            <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+            <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+            <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Life <span style="color:var(--red)">Without</span> Deployment</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🧑‍💻</div><div class="bt"><strong>Pods managed manually</strong> — create, update, delete one by one. Error-prone and slow.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">⚙️</div><div class="bt"><strong>ReplicaSet can't do updates</strong> — it only maintains count. Changing the app image? You're on your own.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">⬇️</div><div class="bt"><strong>Downtime during updates</strong> — stopping old Pods then starting new ones means users see errors</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">↩️</div><div class="bt"><strong>No easy rollback</strong> — if a bad version is deployed, reverting it is complex and risky</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">💡 Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Deployment handles all of this — updates, rollbacks, scaling — all automated</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:255px;display:flex;flex-direction:column;gap:9px">
+          <!-- without deployment -->
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">❌ Without Deployment</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+              </div>
+              <div style="flex:1;font-size:9px;color:var(--muted);text-align:center">want to update to v2 →</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.12);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>Stop old pods (downtime!)</div>
+              <div style="font-size:9px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.12);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>Manually start new pods</div>
+              <div style="font-size:9px;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.12);border-radius:5px;display:flex;gap:5px;align-items:center"><span>❌</span>No rollback if it fails</div>
+            </div>
+          </div>
+          <!-- with deployment -->
+          <div style="border-radius:12px;padding:12px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">✅ With Deployment</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Rolling update — zero downtime</div>
+              <div style="font-size:9px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>One command to update</div>
+              <div style="font-size:9px;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:5px;align-items:center"><span>✅</span>Instant rollback anytime</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS DEPLOYMENT ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Deployment?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">🏆</div><div class="bt"><strong>Higher-level Kubernetes object</strong> — sits above ReplicaSet in the hierarchy. The recommended way to run apps.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">⚙️</div><div class="bt"><strong>Manages ReplicaSets and Pods</strong> — creates and controls ReplicaSets, which in turn manage Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">🔄</div><div class="bt"><strong>Used to deploy and update apps</strong> — change the image version? Deployment handles the transition safely</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">🎯</div><div class="bt"><strong>Maintains desired state</strong> — always keeps your app at the right version with the right number of replicas</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--depD);border:1px solid var(--depB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">In practice: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Every production app in Kubernetes uses a Deployment — it's the standard and recommended approach</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:250px">
+          <div style="border-radius:13px;padding:13px;background:var(--depD);border:2px solid var(--depB);box-shadow:0 0 26px rgba(50,108,229,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Deployment controls everything</div>
+            <!-- deployment -->
+            <div class="dep-box" style="margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">🚀 Deployment</div>
+              <div style="display:flex;gap:5px;justify-content:center;margin-top:5px;flex-wrap:wrap">
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(50,108,229,.2);color:#BAE6FD;font-weight:600">Rolling Update</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(50,108,229,.2);color:#BAE6FD;font-weight:600">Rollback</span>
+                <span style="font-size:7px;padding:2px 6px;border-radius:8px;background:rgba(50,108,229,.2);color:#BAE6FD;font-weight:600">Scale</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--blue);margin-bottom:4px">↓ creates & manages</div>
+            <!-- replicaset -->
+            <div class="rs-box" style="margin-bottom:6px">
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">⚙ ReplicaSet</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">maintains desired count</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--rs);margin-bottom:6px">↓ manages</div>
+            <!-- pods -->
+            <div style="display:flex;gap:5px;justify-content:center">
+              <div class="pod-chip pod-ok" style="width:40px;height:40px"><div style="font-size:13px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+              <div class="pod-chip pod-ok" style="width:40px;height:40px"><div style="font-size:13px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+              <div class="pod-chip pod-ok" style="width:40px;height:40px"><div style="font-size:13px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 ARCHITECTURE ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Architecture</div>
+      <div class="stitle">Deployment → ReplicaSet → Pods Hierarchy</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- left: layered visual -->
+        <div style="flex:1;display:flex;align-items:center;justify-content:center">
+          <div style="width:100%;max-width:380px">
+            <!-- Layer 1: Deployment -->
+            <div style="border-radius:14px;padding:14px;background:linear-gradient(135deg,rgba(50,108,229,.14),rgba(50,108,229,.06));border:2px solid var(--depB);margin-bottom:8px;box-shadow:0 0 24px rgba(50,108,229,.16)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <div style="font-size:22px">🚀</div>
+                <div>
+                  <div style="font-size:11px;font-weight:800;color:#BAE6FD">Deployment</div>
+                  <div style="font-size:8px;color:var(--muted)">Layer 1 — The top-level controller</div>
+                </div>
+                <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
+                  <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:var(--depD);border:1px solid var(--depB);color:#BAE6FD;font-weight:600">Rolling Update</span>
+                  <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:var(--depD);border:1px solid var(--depB);color:#BAE6FD;font-weight:600">Rollback</span>
+                  <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:var(--depD);border:1px solid var(--depB);color:#BAE6FD;font-weight:600">Scale</span>
+                </div>
+              </div>
+              <!-- layer 2 inside -->
+              <div style="border-radius:10px;padding:10px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(124,58,237,.06));border:1.5px solid var(--rsB);margin-bottom:6px">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+                  <div style="font-size:18px">⚙</div>
+                  <div>
+                    <div style="font-size:10px;font-weight:800;color:#DDD6FE">ReplicaSet v2</div>
+                    <div style="font-size:7px;color:var(--muted)">Layer 2 — Maintains replica count</div>
+                  </div>
+                  <div style="margin-left:auto"><span style="font-size:7px;padding:2px 7px;border-radius:8px;background:var(--rsD);border:1px solid var(--rsB);color:#DDD6FE;font-weight:600">replicas: 3</span></div>
+                </div>
+                <!-- layer 3: pods -->
+                <div style="border-radius:8px;padding:9px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.2)">
+                  <div style="font-size:8px;font-weight:700;color:var(--pod);text-align:center;margin-bottom:7px;letter-spacing:1px;text-transform:uppercase">Layer 3 — Pods (running apps)</div>
+                  <div style="display:flex;gap:7px;justify-content:center">
+                    <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 1</div></div>
+                    <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 2</div></div>
+                    <div class="pod-chip pod-ok"><div style="font-size:16px">📦</div><div class="pod-label" style="color:#86EFAC">Pod 3</div></div>
+                  </div>
+                </div>
+              </div>
+              <!-- old RS (dimmed) -->
+              <div style="border-radius:9px;padding:7px 10px;background:rgba(100,116,139,.05);border:1px dashed rgba(100,116,139,.2);display:flex;align-items:center;gap:8px;opacity:.55">
+                <div style="font-size:14px">⚙</div>
+                <div>
+                  <div style="font-size:9px;font-weight:700;color:#64748B">ReplicaSet v1</div>
+                  <div style="font-size:7px;color:#475569">replicas: 0 (kept for rollback)</div>
+                </div>
+                <div style="margin-left:auto;font-size:7px;color:#475569;padding:2px 7px;border-radius:6px;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2)">archived</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- right: key points -->
+        <div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="padding:10px 12px;border-radius:10px;background:var(--depD);border:1px solid var(--depB);display:flex;gap:8px">
+            <div style="font-size:20px;flex-shrink:0">🚀</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Deployment</div><div style="font-size:9px;color:#94A3B8;margin-top:2px">Manages update strategy, rollback history, and scaling</div></div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--blue)">↓ creates</div>
+          <div style="padding:10px 12px;border-radius:10px;background:var(--rsD);border:1px solid var(--rsB);display:flex;gap:8px">
+            <div style="font-size:20px;flex-shrink:0">⚙</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">ReplicaSet</div><div style="font-size:9px;color:#94A3B8;margin-top:2px">Ensures correct number of Pods always run</div></div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--rs)">↓ manages</div>
+          <div style="padding:10px 12px;border-radius:10px;background:var(--podD);border:1px solid var(--podB);display:flex;gap:8px">
+            <div style="font-size:20px;flex-shrink:0">📦</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Pods</div><div style="font-size:9px;color:#94A3B8;margin-top:2px">Run the actual application containers</div></div>
+          </div>
+          <div style="padding:8px 12px;border-radius:9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);margin-top:2px">
+            <div style="font-size:9px;color:#FDE068;font-weight:600">💡 Old ReplicaSets are kept</div>
+            <div style="font-size:8px;color:#94A3B8;margin-top:2px">Enables instant rollback to any previous version</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 ROLLING UPDATE ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Key Feature</div>
+        <div class="stitle">Rolling Update — <span style="color:#86EFAC">Zero Downtime</span></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🔄</div><div class="bt"><strong>Update app without stopping it</strong> — users keep using the app while you deploy the new version</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">📈</div><div class="bt"><strong>Old Pods replaced gradually</strong> — K8s creates a new Pod, waits for it to be ready, then removes an old one</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">✅</div><div class="bt"><strong>Continuous availability guaranteed</strong> — at no point are all Pods down. Always some running.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🎮</div><div class="bt"><strong>Fully controlled update</strong> — configure <code style="background:rgba(34,197,94,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#86EFAC">maxSurge</code> and <code style="background:rgba(34,197,94,.12);padding:1px 5px;border-radius:4px;font-size:10px;color:#86EFAC">maxUnavailable</code> for fine-grained control</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+          <span style="color:var(--muted)">$ </span><span style="color:#86EFAC">kubectl</span> <span style="color:var(--cyan)">set image</span> <span style="color:#BAE6FD">deployment/myapp</span> <span style="color:#FDE068">nginx=nginx:1.25</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px">
+          <div style="border-radius:13px;padding:13px;background:var(--okD);border:2px solid var(--okB);box-shadow:0 0 24px rgba(34,197,94,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🔄 Rolling Update v1 → v2</div>
+            <!-- step 1 -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--muted);font-weight:600;margin-bottom:4px">Step 1 — Before update</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+              </div>
+            </div>
+            <!-- step 2 -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--amber);font-weight:600;margin-bottom:4px">Step 2 — 1 new + 2 old running</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+              </div>
+            </div>
+            <!-- step 3 -->
+            <div style="margin-bottom:7px">
+              <div style="font-size:8px;color:var(--amber);font-weight:600;margin-bottom:4px">Step 3 — 2 new + 1 old</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-old" style="width:36px;height:36px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#64748B;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+              </div>
+            </div>
+            <!-- step 4 -->
+            <div>
+              <div style="font-size:8px;color:#86EFAC;font-weight:600;margin-bottom:4px">Step 4 — All v2, update complete!</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+                <div class="pod-chip pod-new" style="width:36px;height:36px"><div style="font-size:11px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">v2</div></div>
+              </div>
+            </div>
+            <div style="margin-top:7px;padding:5px;border-radius:6px;background:rgba(34,197,94,.12);border:1px solid var(--okB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">✅ Zero downtime throughout!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 ROLLBACK ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Safety Net</div>
+        <div class="stitle">Rollback — <span style="color:var(--amber)">Instant Recovery</span></div>
+        <div class="bi"><div class="ico" style="background:var(--newD)">↩️</div><div class="bt"><strong>Revert to previous version instantly</strong> — one command sends you back to a working state</div></div>
+        <div class="bi"><div class="ico" style="background:var(--newD)">🛡</div><div class="bt"><strong>Application stays stable</strong> — if v2 has bugs, users are never stuck. v1 comes back immediately.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--newD)">📜</div><div class="bt"><strong>Deployment history is kept</strong> — K8s stores old ReplicaSets so you can roll back to any previous revision</div></div>
+        <div class="bi"><div class="ico" style="background:var(--newD)">🚨</div><div class="bt"><strong>Critical for production systems</strong> — bad releases happen. Rollback is your safety net every time.</div></div>
+        <div style="margin-top:8px;display:flex;gap:7px;flex-direction:column">
+          <div style="padding:7px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+            <span style="color:var(--muted)">$ </span><span style="color:#86EFAC">kubectl</span> <span style="color:var(--cyan)">rollout undo</span> <span style="color:#BAE6FD">deployment/myapp</span>
+          </div>
+          <div style="padding:7px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+            <span style="color:var(--muted)">$ </span><span style="color:#86EFAC">kubectl</span> <span style="color:var(--cyan)">rollout history</span> <span style="color:#BAE6FD">deployment/myapp</span>
+          </div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:13px;padding:13px;background:var(--newD);border:2px solid var(--newB);box-shadow:0 0 24px rgba(245,158,11,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">↩ Rollback Flow</div>
+            <!-- bad deploy -->
+            <div style="padding:8px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5;margin-bottom:4px">😱 v2 deployed — bugs found!</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-fail" style="width:34px;height:34px"><div style="font-size:11px">💥</div><div class="pod-label" style="color:#FCA5A5;font-size:6px">v2</div></div>
+                <div class="pod-chip pod-fail" style="width:34px;height:34px"><div style="font-size:11px">💥</div><div class="pod-label" style="color:#FCA5A5;font-size:6px">v2</div></div>
+                <div class="pod-chip pod-fail" style="width:34px;height:34px"><div style="font-size:11px">💥</div><div class="pod-label" style="color:#FCA5A5;font-size:6px">v2</div></div>
+              </div>
+            </div>
+            <!-- rollback command -->
+            <div style="text-align:center;padding:7px;border-radius:7px;background:rgba(245,158,11,.15);border:1px solid var(--newB);margin-bottom:6px">
+              <div style="font-size:9px;font-weight:800;color:#FDE068">↩ kubectl rollout undo</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Deployment activates RS v1</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--amber);margin-bottom:5px">↓ rolling back ↓</div>
+            <!-- recovered -->
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC;margin-bottom:4px">✅ v1 is back — all good!</div>
+              <div style="display:flex;gap:4px">
+                <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+                <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:11px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">v1</div></div>
+              </div>
+            </div>
+            <div style="margin-top:7px;text-align:center;font-size:9px;color:var(--amber);font-weight:600">⚡ Average rollback time: &lt; 30 seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 SCALING ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Scaling</div>
+        <div class="stitle">Scaling Applications with <span style="color:var(--cyan)">Deployment</span></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">📈</div><div class="bt"><strong>Scale up instantly</strong> — increase replicas, Deployment updates its ReplicaSet which creates new Pods</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">📉</div><div class="bt"><strong>Scale down to save resources</strong> — reduce replicas, excess Pods are gracefully terminated</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">🚦</div><div class="bt"><strong>Respond to traffic changes</strong> — scale out during peak hours, scale in overnight</div></div>
+        <div class="bi"><div class="ico" style="background:var(--depD)">🤖</div><div class="bt"><strong>Works with HPA</strong> — Horizontal Pod Autoscaler automatically adjusts replicas based on CPU/memory metrics</div></div>
+        <div style="margin-top:8px;display:flex;gap:7px">
+          <div style="flex:1;padding:8px 11px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px">
+            <div style="color:var(--muted);font-size:7px;margin-bottom:3px">Scale up</div>
+            <span style="color:var(--muted)">$ </span><span style="color:#86EFAC">kubectl</span> <span style="color:var(--cyan)">scale</span> <span style="color:#FDE068">--replicas=6</span> <span style="color:#BAE6FD">deploy/myapp</span>
+          </div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:8px">
+          <!-- scale up -->
+          <div style="border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;margin-bottom:7px;display:flex;align-items:center;gap:5px"><span style="font-size:14px">📈</span>Scale Up — 3 to 6 replicas</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">1</div></div>
+              <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">2</div></div>
+              <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">3</div></div>
+              <div class="pod-chip pod-new" style="width:34px;height:34px"><div style="font-size:12px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">4</div></div>
+              <div class="pod-chip pod-new" style="width:34px;height:34px"><div style="font-size:12px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">5</div></div>
+              <div class="pod-chip pod-new" style="width:34px;height:34px"><div style="font-size:12px">✨</div><div class="pod-label" style="color:#FDE068;font-size:6px">6</div></div>
+            </div>
+            <div style="font-size:8px;color:#86EFAC;font-weight:600;margin-top:5px">3 new Pods added ↑ — more capacity</div>
+          </div>
+          <!-- scale down -->
+          <div style="border-radius:11px;padding:11px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;margin-bottom:7px;display:flex;align-items:center;gap:5px"><span style="font-size:14px">📉</span>Scale Down — 6 to 2 replicas</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">1</div></div>
+              <div class="pod-chip pod-ok" style="width:34px;height:34px"><div style="font-size:12px">📦</div><div class="pod-label" style="color:#86EFAC;font-size:6px">2</div></div>
+              <div class="pod-chip pod-old" style="width:34px;height:34px"><div style="font-size:12px">🗑</div><div class="pod-label" style="color:#64748B;font-size:6px">3</div></div>
+              <div class="pod-chip pod-old" style="width:34px;height:34px"><div style="font-size:12px">🗑</div><div class="pod-label" style="color:#64748B;font-size:6px">4</div></div>
+              <div class="pod-chip pod-old" style="width:34px;height:34px"><div style="font-size:12px">🗑</div><div class="pod-label" style="color:#64748B;font-size:6px">5</div></div>
+              <div class="pod-chip pod-old" style="width:34px;height:34px"><div style="font-size:12px">🗑</div><div class="pod-label" style="color:#64748B;font-size:6px">6</div></div>
+            </div>
+            <div style="font-size:8px;color:#FCA5A5;font-weight:600;margin-top:5px">4 Pods gracefully terminated ↓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 WHY IMPORTANT ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Why It Matters</div>
+      <div class="stitle">Why Deployment is the Go-To Resource</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <div class="bi"><div class="ico" style="background:var(--depD)">🎛</div><div class="bt"><strong>Simplifies app management</strong> — one YAML to describe the entire state of your application's lifecycle</div></div>
+          <div class="bi"><div class="ico" style="background:var(--okD)">🔄</div><div class="bt"><strong>Safe updates at any time</strong> — rolling update is the default. Zero-downtime deployments out of the box.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--newD)">↩️</div><div class="bt"><strong>Instant rollback capability</strong> — every update is reversible. Ship faster knowing you can always recover.</div></div>
+          <div class="bi"><div class="ico" style="background:var(--rsD)">♾</div><div class="bt"><strong>High availability built-in</strong> — via ReplicaSet, your app always runs with the desired number of healthy Pods</div></div>
+          <div class="bi"><div class="ico" style="background:rgba(34,197,94,.15)">🏭</div><div class="bt"><strong>Industry standard for production</strong> — every serious K8s app uses Deployments. It's the recommended way.</div></div>
+        </div>
+        <!-- right: feature highlights -->
+        <div style="width:260px;flex-shrink:0;display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="padding:10px;border-radius:10px;background:var(--depD);border:1px solid var(--depB);text-align:center">
+              <div style="font-size:20px;margin-bottom:4px">🔄</div>
+              <div style="font-size:9px;font-weight:700;color:#BAE6FD">Rolling Update</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">No downtime ever</div>
+            </div>
+            <div style="padding:10px;border-radius:10px;background:var(--newD);border:1px solid var(--newB);text-align:center">
+              <div style="font-size:20px;margin-bottom:4px">↩️</div>
+              <div style="font-size:9px;font-weight:700;color:#FDE068">Rollback</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Instant recovery</div>
+            </div>
+            <div style="padding:10px;border-radius:10px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+              <div style="font-size:20px;margin-bottom:4px">📈</div>
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">Auto Scale</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Handle any load</div>
+            </div>
+            <div style="padding:10px;border-radius:10px;background:var(--rsD);border:1px solid var(--rsB);text-align:center">
+              <div style="font-size:20px;margin-bottom:4px">🛡</div>
+              <div style="font-size:9px;font-weight:700;color:#DDD6FE">Self-Healing</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">Via ReplicaSet</div>
+            </div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:linear-gradient(135deg,rgba(50,108,229,.12),rgba(124,58,237,.12));border:1px solid rgba(50,108,229,.28);text-align:center">
+            <div style="font-size:10px;font-weight:700;color:var(--white);margin-bottom:3px">🏆 The Production Standard</div>
+            <div style="font-size:9px;color:var(--muted);line-height:1.4">Used by Google, Netflix, Spotify and virtually every company running Kubernetes in production</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY + ANALOGY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Deployment — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--depD);border:1.5px solid var(--depB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">👔</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Deployment</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Project Manager</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Plans the roadmap, handles version upgrades, decides how changes roll out</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--rsD);border:1.5px solid var(--rsB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">🧑‍💼</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">ReplicaSet</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Team Lead</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Ensures the team always has the right headcount — replaces anyone who leaves</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--podD);border:1.5px solid var(--podB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--cyan));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The work</div>
+              <div style="font-size:26px;margin-top:4px">👷</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Pods</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Workers</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Do the actual work — run your app and serve your users</div>
+            </div>
+          </div>
+          <!-- key points grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--depD);border:1px solid var(--depB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Rolling updates</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Zero downtime — old Pods replaced gradually</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--newD);border:1px solid var(--newB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">↩️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Instant rollback</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Bad deploy? One command takes you back</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--rsD);border:1px solid var(--rsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚙</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Via ReplicaSet</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Automatic Pod count, self-healing</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🏭</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Production standard</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Always use Deployment for real apps</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"Deployment is your app's <span style="color:var(--cyan)">lifecycle manager</span> — deploy it, update it, scale it, roll it back. All in one place."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--depD);border:1.5px solid var(--depB)">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Manages RS + Pods</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Zero-downtime updates</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>One-command rollback</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Easy horizontal scale</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Production standard</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">StatefulSet</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Stateful apps · Databases · Ordered pods</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --rb:#326CE5;--rbD:rgba(50,108,229,.1);--rbB:rgba(50,108,229,.34);
+  --role:#7C3AED;--roleD:rgba(124,58,237,.1);--roleB:rgba(124,58,237,.32);
+  --bind:#00D4FF;--bindD:rgba(0,212,255,.09);--bindB:rgba(0,212,255,.3);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --usr:#EC4899;--usrD:rgba(236,72,153,.09);--usrB:rgba(236,72,153,.28);
+  --cm:#F59E0B;--cmD:rgba(245,158,11,.09);--cmB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--rb);border-color:var(--rb);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--rb);color:var(--rb)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.18);border-color:var(--rb)}
+.nbtn.pri{background:linear-gradient(135deg,var(--rb),var(--purple));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(50,108,229,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--bind);margin-bottom:7px}
+.stitle{font-size:clamp(14px,2.6vw,24px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.14);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.06);border-color:rgba(50,108,229,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.rb-box{border-radius:10px;padding:9px 12px;background:var(--rbD);border:2px solid var(--rbB);text-align:center}
+.role-box{border-radius:10px;padding:9px 12px;background:var(--roleD);border:2px solid var(--roleB);text-align:center}
+.bind-box{border-radius:10px;padding:9px 12px;background:var(--bindD);border:2px solid var(--bindB);text-align:center}
+.usr-box{border-radius:10px;padding:9px 12px;background:var(--usrD);border:1.5px solid var(--usrB);text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--bind);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,4vw,38px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--bind) 50%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">RBAC<br><span style="font-size:.7em">Roles &amp; RoleBindings</span></div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Managing Access Control in Kubernetes<br>— Control who can do what in your cluster</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--rbD);color:#BAE6FD;border:1px solid var(--rbB);padding:4px 11px;font-size:9px">🔐 Access Control</span>
+          <span class="tag" style="background:var(--roleD);color:#DDD6FE;border:1px solid var(--roleB);padding:4px 11px;font-size:9px">📋 Roles</span>
+          <span class="tag" style="background:var(--bindD);color:#67E8F9;border:1px solid var(--bindB);padding:4px 11px;font-size:9px">🔗 RoleBindings</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">🛡 Least Privilege</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:305px;border:1.5px dashed rgba(50,108,229,.25);border-radius:14px;padding:12px;background:rgba(50,108,229,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">RBAC = Who + What + Where</div>
+          <div class="usr-box" style="margin-bottom:5px"><div style="font-size:9px;font-weight:700;color:#F9A8D4">👤 User / ServiceAccount</div><div style="font-size:7.5px;color:var(--muted);margin-top:1px">alice · developer-sa · ci-pipeline</div></div>
+          <div style="text-align:center;font-size:10px;color:var(--bind);margin:3px 0">↕ linked by</div>
+          <div class="bind-box" style="margin-bottom:5px;box-shadow:0 0 14px rgba(0,212,255,.14)"><div style="font-size:9px;font-weight:700;color:#67E8F9">🔗 RoleBinding</div><div style="font-size:7.5px;color:var(--muted);margin-top:1px">connects user to role</div></div>
+          <div style="text-align:center;font-size:10px;color:var(--purpleL);margin:3px 0">↕ grants</div>
+          <div class="role-box" style="margin-bottom:6px;box-shadow:0 0 14px rgba(124,58,237,.16)"><div style="font-size:9px;font-weight:700;color:#DDD6FE">📋 Role</div><div style="font-size:7.5px;color:var(--muted);margin-top:1px">get pods · list deployments</div></div>
+          <div style="font-size:9px;color:var(--muted);text-align:center">Permissions checked on every API call</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY RBAC -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Kubernetes <span style="color:var(--bind)">Needs RBAC</span></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">👥</div><div class="bt"><strong>Multiple teams share one cluster</strong> — developers, testers, CI/CD pipelines, ops teams all work in the same Kubernetes cluster simultaneously</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💀</div><div class="bt"><strong>Without RBAC everyone has full access</strong> — any developer could delete production databases, modify any namespace, or read all Secrets cluster-wide</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">🎯</div><div class="bt"><strong>Different teams need different permissions</strong> — dev team reads logs, ops team restarts Pods, CI/CD creates Deployments, but no one needs admin access</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>Accidents and attacks both require access</strong> — a bug in CI/CD code or a compromised token can delete critical resources if access isn't restricted</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🛡</div><div class="bt"><strong>RBAC enforces least privilege</strong> — each user and service gets only the minimum permissions needed to do their job. Nothing more.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--rbD);border:1px solid var(--rbB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Real risk: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">A compromised developer token with admin access = full cluster takeover. RBAC limits the blast radius of any breach.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:270px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:7px">❌ Without RBAC — Everyone is Admin</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🧑‍💻 Dev → can delete prod DB</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🤖 CI/CD → can read all Secrets</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🐛 Bug → wipes entire namespace</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">🔓 Intern → cluster admin access</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:7px">✅ With RBAC — Least Privilege</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">🧑‍💻 Dev → get/list pods only</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">🤖 CI/CD → create deployments only</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">👮 Ops → restart pods, view logs</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">👑 Admin → full access (admin only)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT IS RBAC -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is <span style="color:var(--bind)">RBAC?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">📖</div><div class="bt"><strong>RBAC = Role-Based Access Control</strong> — a security mechanism that controls who can perform which actions on which Kubernetes resources</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">🎭</div><div class="bt"><strong>Permissions are assigned to Roles, not users directly</strong> — you create a Role with permissions, then assign that Role to users via RoleBindings</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">🗺</div><div class="bt"><strong>Three core concepts:</strong> <strong style="color:#DDD6FE">Role</strong> (what actions), <strong style="color:#67E8F9">RoleBinding</strong> (who gets the role), <strong style="color:#F9A8D4">Subject</strong> (user/group/service account)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">🌐</div><div class="bt"><strong>Works at namespace or cluster level</strong> — Roles are namespace-scoped, ClusterRoles apply across the entire cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">✅</div><div class="bt"><strong>Built into Kubernetes — enabled by default</strong> — RBAC is the standard authorization mode for all modern Kubernetes clusters</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--rbD);border:1px solid var(--rbB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">RBAC = job roles in a company 🏢. A "Junior Dev" role has defined responsibilities. Assigning Alice to that role gives her exactly those permissions.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--rbD);border:2px solid var(--rbB);box-shadow:0 0 22px rgba(50,108,229,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">RBAC Core Concept</div>
+            <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--usrD);border:1.5px solid var(--usrB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#F9A8D4">👤 Subject (WHO)</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">User · Group · ServiceAccount</div>
+              </div>
+              <div style="font-size:10px;color:var(--bind)">↕ linked by</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--bindD);border:1.5px solid var(--bindB);text-align:center;box-shadow:0 0 10px rgba(0,212,255,.12)">
+                <div style="font-size:8.5px;font-weight:700;color:#67E8F9">🔗 RoleBinding (ASSIGNMENT)</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">connects subject to role</div>
+              </div>
+              <div style="font-size:10px;color:var(--purpleL)">↕ grants</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--roleD);border:1.5px solid var(--roleB);text-align:center;box-shadow:0 0 10px rgba(124,58,237,.12)">
+                <div style="font-size:8.5px;font-weight:700;color:#DDD6FE">📋 Role (WHAT)</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">verbs on resources</div>
+              </div>
+              <div style="font-size:10px;color:var(--ok)">↓ access to</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">☸ K8s Resources (WHERE)</div>
+                <div style="font-size:7px;color:var(--muted);margin-top:1px">Pods · Secrets · Deployments</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 WHAT IS A ROLE -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Role Object</div>
+        <div class="stitle">What is a <span style="color:#DDD6FE">Role?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--roleD)">📋</div><div class="bt"><strong>Role defines a set of allowed actions</strong> — it specifies which <strong style="color:#DDD6FE">verbs</strong> (get, list, create, delete) are allowed on which <strong style="color:#DDD6FE">resources</strong> (pods, secrets, deployments)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--roleD)">🗺</div><div class="bt"><strong>Namespace-scoped</strong> — a Role only applies within a specific namespace. A Role in "dev" namespace doesn't affect "prod" namespace.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--roleD)">⚡</div><div class="bt"><strong>Verbs = allowed actions</strong> — <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">get</code> <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">list</code> <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">watch</code> <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">create</code> <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">update</code> <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">delete</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--roleD)">🎯</div><div class="bt"><strong>Resources = what the role controls</strong> — pods, deployments, services, secrets, configmaps, nodes, namespaces, and more</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⚠</div><div class="bt"><strong>Role alone does nothing</strong> — a Role just defines permissions. Without a RoleBinding, no user has that Role. They must be linked.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--roleD);border:1px solid var(--roleB)">
+          <span style="font-size:10px;font-weight:700;color:#DDD6FE">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">A Role = a job description 📄. It lists what a person in that job is allowed to do — but doesn't assign anyone to it yet.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--roleD);border:2px solid var(--roleB);box-shadow:0 0 22px rgba(124,58,237,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Role YAML Example</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(124,58,237,.2);font-family:monospace;font-size:7.5px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">apiVersion:</span> <span style="color:#86EFAC">rbac.authorization.k8s.io/v1</span></div>
+              <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">Role</span></div>
+              <div><span style="color:#7C3AED">metadata:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#DDD6FE">pod-reader</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">namespace:</span> <span style="color:#FDE068">dev</span></div>
+              <div><span style="color:#7C3AED">rules:</span></div>
+              <div><span style="color:#7C3AED">- apiGroups:</span> <span style="color:#86EFAC">[""]</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">resources:</span> <span style="color:#86EFAC">["pods"]</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">verbs:</span> <span style="color:#00D4FF">["get","list","watch"]</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Can: GET a specific pod</div>
+              <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Can: LIST all pods in namespace</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Cannot: DELETE pods</div>
+              <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">❌ Cannot: access other namespaces</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 ROLEBINDING -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">RoleBinding Object</div>
+        <div class="stitle">What is a <span style="color:#67E8F9">RoleBinding?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">🔗</div><div class="bt"><strong>RoleBinding links a user to a Role</strong> — it's the bridge that says "Alice gets the pod-reader Role in the dev namespace"</div></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">👤</div><div class="bt"><strong>Subject = who receives the permissions</strong> — can be a User (human), Group (team), or ServiceAccount (application/bot)</div></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">📋</div><div class="bt"><strong>References an existing Role by name</strong> — the RoleBinding just points to the Role. Change the Role → all bound users automatically get updated permissions</div></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">🗺</div><div class="bt"><strong>Also namespace-scoped</strong> — a RoleBinding in the "dev" namespace grants permissions only within "dev". It cannot grant access to "prod".</div></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">♻️</div><div class="bt"><strong>One Role, many RoleBindings</strong> — create one "developer" Role, then bind multiple users to it. No need to duplicate permission rules.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--bindD);border:1px solid var(--bindB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">RoleBinding = HR letter assigning Alice to the "Developer" job role 📄. The role exists, now Alice officially has it.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--bindD);border:2px solid var(--bindB);box-shadow:0 0 22px rgba(0,212,255,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">RoleBinding YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(0,212,255,.2);font-family:monospace;font-size:7.5px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">RoleBinding</span></div>
+              <div><span style="color:#7C3AED">metadata:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#67E8F9">read-pods-alice</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">namespace:</span> <span style="color:#FDE068">dev</span></div>
+              <div><span style="color:#7C3AED">subjects:</span></div>
+              <div><span style="color:#7C3AED">- kind:</span> <span style="color:#86EFAC">User</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#F9A8D4">alice</span></div>
+              <div><span style="color:#7C3AED">roleRef:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">Role</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#DDD6FE">pod-reader</span></div>
+            </div>
+            <div style="display:flex;gap:5px;margin-bottom:5px">
+              <div class="usr-box" style="flex:1;padding:6px"><div style="font-size:8px;font-weight:700;color:#F9A8D4">👤 alice</div></div>
+              <div style="display:flex;align-items:center;font-size:11px;color:var(--bind)">→</div>
+              <div class="bind-box" style="flex:1;padding:6px"><div style="font-size:8px;font-weight:700;color:#67E8F9">🔗 RoleBinding</div></div>
+              <div style="display:flex;align-items:center;font-size:11px;color:var(--purpleL)">→</div>
+              <div class="role-box" style="flex:1;padding:6px"><div style="font-size:8px;font-weight:700;color:#DDD6FE">📋 Role</div></div>
+            </div>
+            <div style="padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">✅ alice can GET/LIST pods in dev</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 HOW RBAC WORKS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Access Decision Flow</div>
+      <div class="stitle">How RBAC Works — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--usrD);border:1px solid var(--usrB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--usr),var(--pink));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#F9A8D4">User/SA sends request to Kubernetes API</div><div style="font-size:9px;color:#94A3B8">e.g. <code style="color:#86EFAC;font-size:8px">kubectl get pods -n dev</code> — API server receives request with user identity</div></div>
+            <span style="margin-left:auto;font-size:13px">👤</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--bind)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--rbD);border:1px solid var(--rbB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--rb),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Authentication — who is this?</div><div style="font-size:9px;color:#94A3B8">API server verifies identity via certificate, token, or OIDC. Confirms the user is alice.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔐</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--bind)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--bindD);border:1px solid var(--bindB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--bind),var(--rb));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Find RoleBinding for alice in dev namespace</div><div style="font-size:9px;color:#94A3B8">K8s looks for RoleBindings that reference alice as subject in the dev namespace.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔗</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--purpleL)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--roleD);border:1px solid var(--roleB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--role),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Check Role permissions — is GET pods allowed?</div><div style="font-size:9px;color:#94A3B8">K8s loads the referenced Role (pod-reader) and checks if "get" on "pods" is in the rules list.</div></div>
+            <span style="margin-left:auto;font-size:13px">📋</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--ok)">↓</div>
+          <div style="display:flex;gap:5px">
+            <div style="flex:1;display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--okD);border:1px solid var(--okB)">
+              <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ok),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">✅</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Allowed — request succeeds</div><div style="font-size:9px;color:#94A3B8">Pod list returned to alice</div></div>
+            </div>
+            <div style="flex:1;display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+              <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--fail),#B91C1C);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">❌</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">Denied — 403 Forbidden</div><div style="font-size:9px;color:#94A3B8">Not in Role rules</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:185px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(50,108,229,.03);border:1.5px dashed var(--rbB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Decision Tree</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--usrD);border:1px solid var(--usrB);text-align:center"><div style="font-size:8.5px;font-weight:600;color:#F9A8D4">👤 alice: kubectl get pods</div></div>
+              <div style="font-size:10px;color:var(--bind)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--rbD);border:1px solid var(--rbB);text-align:center"><div style="font-size:8.5px;font-weight:600;color:#BAE6FD">🔐 Authenticated ✓</div></div>
+              <div style="font-size:10px;color:var(--bind)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--bindD);border:1px solid var(--bindB);text-align:center"><div style="font-size:8.5px;font-weight:600;color:#67E8F9">🔗 RoleBinding found</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--roleD);border:1px solid var(--roleB);text-align:center"><div style="font-size:8.5px;font-weight:600;color:#DDD6FE">📋 get pods = ✓ in Role</div></div>
+              <div style="font-size:10px;color:var(--ok)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);text-align:center"><div style="font-size:8.5px;font-weight:700;color:#86EFAC">✅ 200 OK — list returned</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 CLUSTERROLE -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Cluster-Wide Scope</div>
+      <div class="stitle">ClusterRole &amp; ClusterRoleBinding</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- Namespace Role side -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--roleD);border:2px solid var(--roleB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📋</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Role + RoleBinding</div><div style="font-size:8px;color:var(--muted)">Namespace-scoped</div></div>
+            <span class="tag" style="background:rgba(124,58,237,.2);color:#DDD6FE;border:1px solid var(--roleB);margin-left:auto;font-size:7px;padding:3px 7px">🗺 Namespace</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Permissions apply only within a <strong style="color:#DDD6FE">specific namespace</strong>. A Role in "dev" cannot access "prod". Ideal for team or environment isolation.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(124,58,237,.2);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">Role</span></div>
+            <div><span style="color:#7C3AED">namespace:</span> <span style="color:#FDE068">dev</span> <span style="color:#94A3B8"># only in dev</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Use for team namespaces</div>
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Isolate dev/test/prod</div>
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Most common for developers</div>
+          </div>
+        </div>
+        <!-- Separator -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:5px 8px;border-radius:8px;background:var(--rbD);border:1px solid var(--rbB);font-size:9px;font-weight:700;color:#BAE6FD;text-align:center">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- ClusterRole side -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--rbD);border:2px solid var(--rbB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">ClusterRole + ClusterRoleBinding</div><div style="font-size:8px;color:var(--muted)">Cluster-wide scope</div></div>
+            <span class="tag" style="background:rgba(50,108,229,.2);color:#BAE6FD;border:1px solid var(--rbB);margin-left:auto;font-size:7px;padding:3px 7px">🌐 All namespaces</span>
+          </div>
+          <div style="flex:1;font-size:9px;color:#CBD5E1;line-height:1.5">Permissions apply <strong style="color:#BAE6FD">across all namespaces</strong> or cluster-level resources (nodes, namespaces, PVs). Use for admins and global operations.</div>
+          <div style="border-radius:8px;padding:8px;background:rgba(6,10,16,.5);border:1px solid rgba(50,108,229,.2);font-family:monospace;font-size:7.5px">
+            <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">ClusterRole</span></div>
+            <div><span style="color:#94A3B8"># no namespace field = cluster-wide</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Cluster admins</div>
+            <div style="font-size:8px;color:#86EFAC;padding:3px 8px;background:rgba(34,197,94,.1);border-radius:4px">✅ Node and PV management</div>
+            <div style="font-size:8px;color:#FCA5A5;padding:3px 8px;background:rgba(239,68,68,.1);border-radius:4px">⚠ Use sparingly — powerful</div>
+          </div>
+        </div>
+        <!-- Summary -->
+        <div style="width:170px;flex-shrink:0;display:flex;flex-direction:column;gap:7px;justify-content:center">
+          <div style="font-size:9px;font-weight:700;color:var(--bind);text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Quick Reference</div>
+          <div style="border-radius:8px;padding:8px;background:var(--roleD);border:1px solid var(--roleB)">
+            <div style="font-size:8px;font-weight:700;color:#DDD6FE;margin-bottom:3px">📋 Role</div>
+            <div style="font-size:7.5px;color:#94A3B8">Permissions in 1 namespace</div>
+          </div>
+          <div style="border-radius:8px;padding:8px;background:var(--bindD);border:1px solid var(--bindB)">
+            <div style="font-size:8px;font-weight:700;color:#67E8F9;margin-bottom:3px">🔗 RoleBinding</div>
+            <div style="font-size:7.5px;color:#94A3B8">Assigns Role in 1 namespace</div>
+          </div>
+          <div style="border-radius:8px;padding:8px;background:var(--rbD);border:1px solid var(--rbB)">
+            <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:3px">🌐 ClusterRole</div>
+            <div style="font-size:7.5px;color:#94A3B8">Permissions cluster-wide</div>
+          </div>
+          <div style="border-radius:8px;padding:8px;background:rgba(50,108,229,.14);border:1px solid rgba(50,108,229,.35)">
+            <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:3px">🌐 ClusterRoleBinding</div>
+            <div style="font-size:7.5px;color:#94A3B8">Assigns ClusterRole globally</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Real-World Example</div>
+        <div class="stitle">Developer RBAC <span style="color:var(--bind)">in Action</span></div>
+        <div class="bi"><div class="ico" style="background:var(--rbD)">🧑‍💻</div><div class="bt"><strong>Scenario:</strong> Alice is a backend developer who needs access to the "api" namespace to debug and monitor her application</div></div>
+        <div class="bi"><div class="ico" style="background:var(--roleD)">📋</div><div class="bt"><strong>Role created:</strong> "dev-role" allows <code style="color:#DDD6FE;background:rgba(124,58,237,.1);padding:1px 5px;border-radius:4px">get/list/watch</code> on pods, logs, and deployments — nothing destructive</div></div>
+        <div class="bi"><div class="ico" style="background:var(--bindD)">🔗</div><div class="bt"><strong>RoleBinding created:</strong> "alice-dev-binding" links alice to "dev-role" in the "api" namespace only</div></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">✅</div><div class="bt"><strong>Alice can:</strong> view pods, check logs, see deployments — everything needed to debug. Fast and effective.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">❌</div><div class="bt"><strong>Alice cannot:</strong> delete pods, access secrets, touch other namespaces, or escalate her own privileges</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--rbD);border:1px solid var(--rbB)">
+          <span style="font-size:10px;font-weight:700;color:#BAE6FD">Result: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Alice can do her job effectively. Even if her credentials are compromised, the attacker can only read pods in "api" namespace. Blast radius contained.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--rbD);border:2px solid var(--rbB);box-shadow:0 0 22px rgba(50,108,229,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Alice's Access Dashboard</div>
+            <div class="usr-box" style="margin-bottom:6px">
+              <div style="font-size:9px;font-weight:700;color:#F9A8D4">👤 alice — namespace: api</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:7px">
+              <div style="font-size:8px;font-weight:600;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>✅</span> kubectl get pods -n api</div>
+              <div style="font-size:8px;font-weight:600;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>✅</span> kubectl logs &lt;pod&gt; -n api</div>
+              <div style="font-size:8px;font-weight:600;color:#86EFAC;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>✅</span> kubectl get deployments -n api</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>❌</span> kubectl delete pod -n api → 403</div>
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>❌</span> kubectl get secrets -n api → 403</div>
+              <div style="font-size:8px;font-weight:600;color:#FCA5A5;padding:4px 8px;background:rgba(239,68,68,.1);border-radius:5px;display:flex;gap:6px;align-items:center"><span>❌</span> kubectl get pods -n prod → 403</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(50,108,229,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Best Practices</div>
+      <div class="stitle">RBAC Security Best Practices</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;padding-top:8px">
+        <div style="border-radius:12px;padding:12px;background:var(--okD);border:2px solid var(--okB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎯</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#86EFAC;margin-bottom:4px">Always Least Privilege</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Grant only the permissions needed for the job. Start with minimal access and add more only if required. Never start with admin and restrict later.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--failD);border:2px solid var(--failB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚫</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FCA5A5;margin-bottom:4px">Avoid Wildcard Permissions</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45"><code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 5px;border-radius:4px">verbs: ["*"]</code> and <code style="color:#FCA5A5;background:rgba(239,68,68,.1);padding:1px 5px;border-radius:4px">resources: ["*"]</code> are dangerous anti-patterns. Always specify exactly what's needed.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--roleD);border:2px solid var(--roleB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👥</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#DDD6FE;margin-bottom:4px">Bind Groups, Not Users</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Bind RoleBindings to Groups instead of individual users. Add/remove users from the group. Easier to maintain at scale.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--bindD);border:2px solid var(--bindB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#67E8F9;margin-bottom:4px">Use ServiceAccounts for Apps</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Never use human user credentials for applications. Create dedicated ServiceAccounts for each workload with minimal permissions.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--cmD);border:2px solid var(--cmB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔍</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#FDE068;margin-bottom:4px">Audit RBAC Regularly</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Run <code style="color:#FDE068;background:rgba(245,158,11,.1);padding:1px 5px;border-radius:4px">kubectl auth can-i --list</code> to review permissions. Remove stale RoleBindings for departed employees.</div>
+          </div>
+        </div>
+        <div style="border-radius:12px;padding:12px;background:var(--rbD);border:2px solid var(--rbB);display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📏</div>
+          <div>
+            <div style="font-size:11px;font-weight:800;color:#BAE6FD;margin-bottom:4px">Prefer Role over ClusterRole</div>
+            <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45">Use namespace-scoped Roles by default. Only escalate to ClusterRole when truly needed (admins, monitoring agents, node-level access).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">RBAC — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--roleD);border:1.5px solid var(--roleB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">📋</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Role</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Job description</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Lists what actions are allowed. Written once, reused many times.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--bindD);border:1.5px solid var(--bindB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--bind),var(--rb));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Bridge</div>
+              <div style="font-size:26px;margin-top:4px">🔗</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">RoleBinding</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Assigning employee to job</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Links Alice to the Developer role. She gets those permissions.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:26px">✅</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:8.5px;color:var(--muted);font-weight:600">= Controlled, auditable access</div>
+              <div style="font-size:8.5px;color:#94A3B8;line-height:1.35">Right people, right access, right time. Breaches are contained.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:9px 10px;border-radius:9px;background:var(--roleD);border:1px solid var(--roleB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📋</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Role</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Defines what actions are allowed</div></div>
+            </div>
+            <div style="padding:9px 10px;border-radius:9px;background:var(--bindD);border:1px solid var(--bindB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔗</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#67E8F9">RoleBinding</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Links user to Role</div></div>
+            </div>
+            <div style="padding:9px 10px;border-radius:9px;background:var(--rbD);border:1px solid var(--rbB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🌐</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">ClusterRole</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Cluster-wide permissions</div></div>
+            </div>
+            <div style="padding:9px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Least privilege</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Minimum access needed</div></div>
+            </div>
+            <div style="padding:9px 10px;border-radius:9px;background:var(--failD);border:1px solid var(--failB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚫</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">No wildcards</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Never * on verbs/resources</div></div>
+            </div>
+            <div style="padding:9px 10px;border-radius:9px;background:var(--cmD);border:1px solid var(--cmB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔍</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FDE068">Audit regularly</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Review and revoke stale access</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#DDD6FE">Role = job description</span>. <span style="color:#67E8F9">RoleBinding = assigning employee to that job</span>. Control access like a responsible employer."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--rbD);border:1.5px solid var(--rbB)">
+            <div style="font-size:9px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bind)">◆</span>RBAC = who can do what</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bind)">◆</span>Role defines permissions</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bind)">◆</span>RoleBinding assigns Role</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bind)">◆</span>ClusterRole = global scope</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--bind)">◆</span>Always least privilege</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.28);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#DDD6FE;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Service Accounts</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Identities for Pods<br>and workloads</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--rb),var(--role));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#BAE6FD;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>

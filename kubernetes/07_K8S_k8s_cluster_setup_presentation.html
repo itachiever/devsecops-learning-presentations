@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --mk:#22C55E;--mkD:rgba(34,197,94,.1);--mkB:rgba(34,197,94,.32);
+  --ka:#326CE5;--kaD:rgba(50,108,229,.11);--kaB:rgba(50,108,229,.34);
+  --mg:#7C3AED;--mgD:rgba(124,58,237,.11);--mgB:rgba(124,58,237,.34);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--blue);color:var(--blue)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(50,108,229,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(50,108,229,.2);border-color:var(--blue)}
+.nbtn.pri{background:linear-gradient(135deg,var(--blue),var(--purple));border:none}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(50,108,229,.15)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(50,108,229,.15);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(50,108,229,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(50,108,229,.05) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(50,108,229,.17);transition:all .25s}
+.bi:hover{background:rgba(50,108,229,.07);border-color:rgba(50,108,229,.35);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.tag-mk{background:rgba(34,197,94,.18);color:#86EFAC;border:1px solid var(--mkB)}
+.tag-ka{background:rgba(50,108,229,.18);color:#BAE6FD;border:1px solid var(--kaB)}
+.tag-mg{background:rgba(124,58,237,.18);color:#DDD6FE;border:1px solid var(--mgB)}
+/* K8s Logo SVG inline */
+.k8s-logo{display:block}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.15) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <!-- K8s logo + series badge -->
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg class="k8s-logo" width="52" height="52" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(18px,4vw,40px);font-weight:900;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--blue) 50%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Cluster Setup</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Minikube vs Kubeadm vs Managed Kubernetes<br>— Choose the right setup for your needs</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag tag-mk" style="padding:4px 11px;font-size:9px">💻 Minikube</span>
+          <span class="tag tag-ka" style="padding:4px 11px;font-size:9px">🔧 Kubeadm</span>
+          <span class="tag tag-mg" style="padding:4px 11px;font-size:9px">☁️ Managed K8s</span>
+        </div>
+      </div>
+      <!-- right: 3 environment visual -->
+      <div style="flex:1;display:flex;justify-content:center">
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:280px">
+          <div style="border-radius:11px;padding:11px;background:var(--mkD);border:1.5px solid var(--mkB);display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💻</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">Minikube</div><div style="font-size:9px;color:var(--muted)">Local laptop — Learning & testing</div></div>
+            <span class="tag tag-mk" style="margin-left:auto">Beginner</span>
+          </div>
+          <div style="border-radius:11px;padding:11px;background:var(--kaD);border:1.5px solid var(--kaB);display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🖥</div>
+            <div><div style="font-size:11px;font-weight:800;color:#7EB3FF">Kubeadm</div><div style="font-size:9px;color:var(--muted)">On-premise servers — Full control</div></div>
+            <span class="tag tag-ka" style="margin-left:auto">Intermediate</span>
+          </div>
+          <div style="border-radius:11px;padding:11px;background:var(--mgD);border:1.5px solid var(--mgB);display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">☁️</div>
+            <div><div style="font-size:11px;font-weight:800;color:#C084FC">Managed K8s</div><div style="font-size:9px;color:var(--muted)">Cloud — EKS · AKS · GKE</div></div>
+            <span class="tag tag-mg" style="margin-left:auto">Production</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 WHAT IS A K8S CLUSTER ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Foundation</div>
+        <div class="stitle">What is a Kubernetes Cluster?</div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">🔗</div><div class="bt"><strong>A group of machines (nodes)</strong> working together as one unified system running Kubernetes</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(50,108,229,.2)">🧠</div><div class="bt"><strong>Control Plane</strong> — the brain. Makes all decisions about scheduling, scaling, and healing</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(34,197,94,.18)">💪</div><div class="bt"><strong>Worker Nodes</strong> — the muscle. Runs your containerized applications inside Pods</div></div>
+        <div class="bi"><div class="ico" style="background:rgba(0,212,255,.13)">📦</div><div class="bt"><strong>Runs containerized apps</strong> — automatically manages deployment, scaling and recovery</div></div>
+        <div style="margin-top:10px;padding:9px 13px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25)">
+          <span style="font-size:10px;font-weight:700;color:var(--cyan)">Think of it as: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"> A well-organised company — Control Plane is management, Worker Nodes are the team doing the work</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border:1.5px dashed rgba(50,108,229,.3);border-radius:14px;padding:12px;background:rgba(50,108,229,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">☸ Kubernetes Cluster</div>
+            <div style="border-radius:10px;padding:9px;background:rgba(50,108,229,.13);border:1.5px solid rgba(50,108,229,.35);margin-bottom:7px">
+              <div style="font-size:8px;font-weight:800;color:#7EB3FF;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">🧠 Control Plane</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center">
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">API Server</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">Scheduler</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">etcd</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">Ctrl Mgr</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;margin-bottom:5px"><span style="font-size:10px;color:var(--cyan)">↕</span><span style="font-size:10px;color:var(--cyan)">↕</span><span style="font-size:10px;color:var(--cyan)">↕</span></div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:3px">💪 Node 1</div>
+                <div style="font-size:9px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:3px">💪 Node 2</div>
+                <div style="font-size:9px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:3px">💪 Node 3</div>
+                <div style="font-size:9px">📦📦</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHY DIFFERENT OPTIONS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">The Need</div>
+      <div class="stitle">Why Different Setup Options?</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- learning -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:var(--mkD);border:2px solid var(--mkB);display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:7px;border-radius:8px;background:rgba(34,197,94,.18);border:1px solid var(--mkB)">
+            <div style="font-size:24px;margin-bottom:3px">💻</div>
+            <div style="font-size:10px;font-weight:800;color:#86EFAC">Learning & Testing</div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">You just want to <strong style="color:#86EFAC">understand Kubernetes</strong> — practice commands, try deployments locally without any cost</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2)">✅ Single machine setup</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2)">✅ Free, runs on laptop</div>
+          </div>
+          <div style="text-align:center;padding:5px;border-radius:7px;background:rgba(34,197,94,.18);font-size:9px;font-weight:700;color:#86EFAC">→ Use Minikube</div>
+        </div>
+        <!-- on-premise -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:var(--kaD);border:2px solid var(--kaB);display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:7px;border-radius:8px;background:rgba(50,108,229,.18);border:1px solid var(--kaB)">
+            <div style="font-size:24px;margin-bottom:3px">🖥</div>
+            <div style="font-size:10px;font-weight:800;color:#7EB3FF">Custom / On-Premise</div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">You want <strong style="color:#7EB3FF">full control</strong> — build the cluster yourself on real servers, understand every layer</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(50,108,229,.12);border-radius:5px;border:1px solid rgba(50,108,229,.25)">✅ Multi-node setup</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(50,108,229,.12);border-radius:5px;border:1px solid rgba(50,108,229,.25)">✅ Complete configuration control</div>
+          </div>
+          <div style="text-align:center;padding:5px;border-radius:7px;background:rgba(50,108,229,.18);font-size:9px;font-weight:700;color:#7EB3FF">→ Use Kubeadm</div>
+        </div>
+        <!-- production -->
+        <div style="flex:1;border-radius:12px;padding:14px;background:var(--mgD);border:2px solid var(--mgB);display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:7px;border-radius:8px;background:rgba(124,58,237,.18);border:1px solid var(--mgB)">
+            <div style="font-size:24px;margin-bottom:3px">☁️</div>
+            <div style="font-size:10px;font-weight:800;color:#C084FC">Production Systems</div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.5;flex:1">You need <strong style="color:#C084FC">reliability and scale</strong> — cloud provider manages the hard parts, you focus on your app</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(124,58,237,.12);border-radius:5px;border:1px solid rgba(124,58,237,.25)">✅ Fully managed control plane</div>
+            <div style="font-size:9px;color:#94A3B8;padding:4px 8px;background:rgba(124,58,237,.12);border-radius:5px;border:1px solid rgba(124,58,237,.25)">✅ Auto-scaling, HA built-in</div>
+          </div>
+          <div style="text-align:center;padding:5px;border-radius:7px;background:rgba(124,58,237,.18);font-size:9px;font-weight:700;color:#C084FC">→ Use Managed K8s</div>
+        </div>
+      </div>
+      <div style="margin-top:9px;padding:8px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+        <span style="font-size:10px;font-weight:700;color:var(--cyan)">Key insight: </span><span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">There is no single "best" option — the right choice depends on your <strong style="color:var(--cyan)">goal, team, and environment</strong></span>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 MINIKUBE ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(34,197,94,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Option 1 — Local Setup</div>
+        <div class="stitle" style="color:#86EFAC">Minikube <span style="font-size:.65em;color:var(--muted)">— Your Laptop Cluster</span></div>
+        <div class="bi" style="background:var(--mkD);border-color:var(--mkB)"><div class="ico" style="background:rgba(34,197,94,.22)">💻</div><div class="bt"><strong>Runs Kubernetes on a single machine</strong> — spins up a mini cluster right on your laptop</div></div>
+        <div class="bi" style="background:var(--mkD);border-color:var(--mkB)"><div class="ico" style="background:rgba(34,197,94,.22)">🎓</div><div class="bt"><strong>Perfect for learning & practice</strong> — try all K8s commands without needing real servers</div></div>
+        <div class="bi" style="background:var(--mkD);border-color:var(--mkB)"><div class="ico" style="background:rgba(34,197,94,.22)">⚡</div><div class="bt"><strong>Easy to install</strong> — one command to start: <code style="background:rgba(34,197,94,.15);padding:1px 6px;border-radius:4px;font-size:10px;color:#86EFAC">minikube start</code></div></div>
+        <div class="bi" style="background:var(--mkD);border-color:var(--mkB)"><div class="ico" style="background:rgba(34,197,94,.22)">🔬</div><div class="bt"><strong>Supports all core K8s features</strong> — Deployments, Services, Ingress, Helm — all work locally</div></div>
+        <div class="bi" style="background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.25)"><div class="ico" style="background:rgba(239,68,68,.2)">⚠️</div><div class="bt"><strong>Not for production</strong> — single node only, no high availability, not scalable</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:250px">
+          <div style="border-radius:14px;padding:14px;background:var(--mkD);border:2px solid var(--mkB);box-shadow:0 0 30px rgba(34,197,94,.13)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">💻 Minikube — Local</div>
+            <!-- laptop visual -->
+            <div style="border-radius:10px;padding:10px;background:rgba(34,197,94,.1);border:1.5px solid var(--mkB);margin-bottom:8px;text-align:center">
+              <div style="font-size:32px;margin-bottom:4px">💻</div>
+              <div style="font-size:9px;font-weight:700;color:#86EFAC">Your Laptop / VM</div>
+              <div style="margin-top:8px;border-radius:8px;padding:7px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3)">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC;text-align:center;margin-bottom:5px">☸ Single-Node Cluster</div>
+                <div style="display:flex;gap:4px;justify-content:center;margin-bottom:5px">
+                  <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.2);font-size:7px;font-weight:700;color:#BAE6FD">Control Plane</div>
+                  <div style="padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.18);font-size:7px;font-weight:700;color:#86EFAC">Worker</div>
+                </div>
+                <div style="font-size:8px;color:var(--muted);text-align:center">Both on same machine</div>
+              </div>
+            </div>
+            <!-- quick start -->
+            <div style="padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid rgba(34,197,94,.2)">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:5px">⚡ Quick Start</div>
+              <div style="font-size:8px;color:#94A3B8;font-family:monospace;line-height:1.7">
+                <div><span style="color:#86EFAC">$</span> minikube start</div>
+                <div><span style="color:#86EFAC">$</span> kubectl get nodes</div>
+                <div><span style="color:#86EFAC">$</span> minikube dashboard</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 KUBEADM ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(50,108,229,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Option 2 — Manual Setup</div>
+        <div class="stitle" style="color:#7EB3FF">Kubeadm <span style="font-size:.65em;color:var(--muted)">— Build It Yourself</span></div>
+        <div class="bi" style="background:var(--kaD);border-color:var(--kaB)"><div class="ico" style="background:rgba(50,108,229,.22)">🔧</div><div class="bt"><strong>Official Kubernetes tool</strong> for bootstrapping a cluster on your own machines — the "right" way to do it manually</div></div>
+        <div class="bi" style="background:var(--kaD);border-color:var(--kaB)"><div class="ico" style="background:rgba(50,108,229,.22)">🖥</div><div class="bt"><strong>Works on VMs or bare-metal servers</strong> — on-premise data centres or cloud VMs you control</div></div>
+        <div class="bi" style="background:var(--kaD);border-color:var(--kaB)"><div class="ico" style="background:rgba(50,108,229,.22)">⚙️</div><div class="bt"><strong>Full control over configuration</strong> — networking, CNI, storage, RBAC — all your decisions</div></div>
+        <div class="bi" style="background:var(--kaD);border-color:var(--kaB)"><div class="ico" style="background:rgba(50,108,229,.22)">📚</div><div class="bt"><strong>Excellent for deep learning</strong> — understand every step: init, join, networking, certificates</div></div>
+        <div class="bi" style="background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.28)"><div class="ico" style="background:rgba(245,158,11,.2)">⚠️</div><div class="bt"><strong>More maintenance needed</strong> — upgrades, certs, HA setup — all done by you</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:260px">
+          <div style="border-radius:14px;padding:14px;background:var(--kaD);border:2px solid var(--kaB);box-shadow:0 0 30px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#7EB3FF;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🔧 Kubeadm — Multi-Node</div>
+            <!-- master node -->
+            <div style="border-radius:9px;padding:9px;background:rgba(50,108,229,.14);border:1.5px solid var(--kaB);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#7EB3FF;text-align:center;margin-bottom:5px">🧠 Master Node</div>
+              <div style="font-size:7px;color:var(--muted);text-align:center;margin-bottom:4px">kubeadm init</div>
+              <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center">
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">API Server</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">etcd</div>
+                <div style="padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.22);font-size:7px;font-weight:700;color:#BAE6FD">Scheduler</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:9px;color:var(--cyan);margin-bottom:4px">↕ kubeadm join ↕</div>
+            <!-- worker nodes -->
+            <div style="display:flex;gap:5px;margin-bottom:8px">
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px;margin-bottom:2px">🖥</div>
+                <div style="font-size:7px;font-weight:700;color:#86EFAC">Worker 1</div>
+                <div style="font-size:8px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px;margin-bottom:2px">🖥</div>
+                <div style="font-size:7px;font-weight:700;color:#86EFAC">Worker 2</div>
+                <div style="font-size:8px">📦📦</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px;margin-bottom:2px">🖥</div>
+                <div style="font-size:7px;font-weight:700;color:#86EFAC">Worker 3</div>
+                <div style="font-size:8px">📦📦</div>
+              </div>
+            </div>
+            <!-- commands -->
+            <div style="padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid rgba(50,108,229,.2)">
+              <div style="font-size:8px;font-weight:700;color:#7EB3FF;margin-bottom:5px">⚡ Setup Steps</div>
+              <div style="font-size:8px;color:#94A3B8;font-family:monospace;line-height:1.7">
+                <div><span style="color:#7EB3FF">$</span> kubeadm init</div>
+                <div><span style="color:#7EB3FF">$</span> kubeadm join &lt;master&gt;</div>
+                <div><span style="color:#7EB3FF">$</span> kubectl apply -f cni.yaml</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 MANAGED K8S ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:55%;height:65%;background:radial-gradient(ellipse,rgba(124,58,237,.2) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Option 3 — Cloud Setup</div>
+        <div class="stitle" style="color:#C084FC">Managed Kubernetes <span style="font-size:.65em;color:var(--muted)">— Cloud-Native</span></div>
+        <div class="bi" style="background:var(--mgD);border-color:var(--mgB)"><div class="ico" style="background:rgba(124,58,237,.22)">☁️</div><div class="bt"><strong>Provided by cloud platforms</strong> — AWS EKS, Azure AKS, Google GKE — one-click cluster creation</div></div>
+        <div class="bi" style="background:var(--mgD);border-color:var(--mgB)"><div class="ico" style="background:rgba(124,58,237,.22)">🧠</div><div class="bt"><strong>Cloud provider manages Control Plane</strong> — no need to install, configure, or patch the master node</div></div>
+        <div class="bi" style="background:var(--mgD);border-color:var(--mgB)"><div class="ico" style="background:rgba(124,58,237,.22)">📈</div><div class="bt"><strong>Easy to scale</strong> — add more worker nodes with a slider or CLI command in seconds</div></div>
+        <div class="bi" style="background:var(--mgD);border-color:var(--mgB)"><div class="ico" style="background:rgba(124,58,237,.22)">🏆</div><div class="bt"><strong>Best for production</strong> — high availability, auto-upgrades, monitoring all included</div></div>
+        <div class="bi" style="background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.28)"><div class="ico" style="background:rgba(245,158,11,.2)">💰</div><div class="bt"><strong>Costs money</strong> — pay per node/hour but saves massive operational effort</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:255px">
+          <div style="border-radius:14px;padding:13px;background:var(--mgD);border:2px solid var(--mgB);box-shadow:0 0 30px rgba(124,58,237,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#C084FC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">☁️ Managed Kubernetes</div>
+            <!-- cloud providers -->
+            <div style="display:flex;gap:5px;margin-bottom:7px">
+              <div style="flex:1;border-radius:8px;padding:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);text-align:center">
+                <div style="font-size:13px;margin-bottom:2px">🟠</div>
+                <div style="font-size:8px;font-weight:700;color:#FDE068">AWS EKS</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:8px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.3);text-align:center">
+                <div style="font-size:13px;margin-bottom:2px">🔵</div>
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">Azure AKS</div>
+              </div>
+              <div style="flex:1;border-radius:8px;padding:8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);text-align:center">
+                <div style="font-size:13px;margin-bottom:2px">🟢</div>
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">GCP GKE</div>
+              </div>
+            </div>
+            <!-- managed diagram -->
+            <div style="border-radius:9px;padding:8px;background:rgba(124,58,237,.12);border:1px solid var(--mgB);margin-bottom:6px">
+              <div style="font-size:8px;font-weight:700;color:#C084FC;text-align:center;margin-bottom:5px">🧠 Control Plane — Managed by Cloud</div>
+              <div style="text-align:center;font-size:8px;color:var(--muted);background:rgba(124,58,237,.1);padding:4px;border-radius:5px">You don't touch this — cloud handles it!</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--cyan);margin-bottom:4px">↓ You manage only ↓</div>
+            <div style="display:flex;gap:5px">
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px">🖥</div><div style="font-size:7px;font-weight:700;color:#86EFAC">Worker 1</div><div style="font-size:8px">📦</div>
+              </div>
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px">🖥</div><div style="font-size:7px;font-weight:700;color:#86EFAC">Worker 2</div><div style="font-size:8px">📦</div>
+              </div>
+              <div style="flex:1;border-radius:7px;padding:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);text-align:center">
+                <div style="font-size:9px">🖥</div><div style="font-size:7px;font-weight:700;color:#86EFAC">+N more</div><div style="font-size:8px">📦</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 COMPARISON TABLE ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Head-to-Head</div>
+      <div class="stitle">Minikube vs Kubeadm vs Managed K8s</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;padding-top:8px">
+        <!-- table header -->
+        <div style="display:flex;gap:8px">
+          <div style="flex:1.4;padding:7px 10px;border-radius:8px 8px 0 0;background:rgba(255,255,255,.03);border:1px solid var(--border);border-bottom:none;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Criteria</div>
+          <div style="flex:1;padding:7px 10px;border-radius:8px 8px 0 0;background:var(--mkD);border:1px solid var(--mkB);border-bottom:none;font-size:9px;font-weight:800;color:#86EFAC;text-align:center">💻 Minikube</div>
+          <div style="flex:1;padding:7px 10px;border-radius:8px 8px 0 0;background:var(--kaD);border:1px solid var(--kaB);border-bottom:none;font-size:9px;font-weight:800;color:#7EB3FF;text-align:center">🔧 Kubeadm</div>
+          <div style="flex:1;padding:7px 10px;border-radius:8px 8px 0 0;background:var(--mgD);border:1px solid var(--mgB);border-bottom:none;font-size:9px;font-weight:800;color:#C084FC;text-align:center">☁️ Managed K8s</div>
+        </div>
+        <!-- rows -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">⚙️</span>Setup Difficulty</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">🟢 Very Easy</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">🟡 Medium</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">🟢 Easy (UI/CLI)</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">🖥</span>Environment</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#BAE6FD">Local Machine</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#BAE6FD">VMs / Bare-metal</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#BAE6FD">AWS / Azure / GCP</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">📈</span>Scalability</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FCA5A5">❌ Single Node</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">🟡 Manual</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Auto-scale</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">🏭</span>Production Ready</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FCA5A5">❌ No</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">⚠️ With effort</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Yes</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">💰</span>Cost</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">✅ Free</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FDE068">Server costs</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#FCA5A5">💲 Pay per use</span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1.4;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:#CBD5E1;display:flex;align-items:center;gap:6px"><span style="font-size:12px">🎯</span>Best For</div>
+            <div style="flex:1;padding:7px;background:var(--mkD);border:1px solid var(--mkB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#86EFAC">Learning</span></div>
+            <div style="flex:1;padding:7px;background:var(--kaD);border:1px solid var(--kaB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#7EB3FF">Deep control</span></div>
+            <div style="flex:1;padding:7px;background:var(--mgD);border:1px solid var(--mgB);border-radius:6px;text-align:center"><span style="font-size:9px;font-weight:700;color:#C084FC">Production</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 WHEN TO USE WHAT ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:20%;width:55%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Decision Guide</div>
+      <div class="stitle">When to Use What?</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- decision flow left -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <!-- question box -->
+          <div style="padding:10px 14px;border-radius:10px;background:rgba(0,212,255,.07);border:1.5px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:4px">🤔 Ask yourself:</div>
+            <div style="font-size:10px;color:#CBD5E1">"What am I trying to achieve?"</div>
+          </div>
+          <!-- 3 paths -->
+          <div style="display:flex;gap:8px;flex:1;align-items:stretch">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--mkD);border:1.5px solid var(--mkB);display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px">
+                <div style="font-size:20px">💻</div>
+                <div style="font-size:11px;font-weight:800;color:#86EFAC">Minikube</div>
+              </div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:2px">Choose when you want to...</div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2);display:flex;gap:4px;align-items:center"><span>🎓</span>Learn Kubernetes basics</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2);display:flex;gap:4px;align-items:center"><span>🧪</span>Test apps locally</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2);display:flex;gap:4px;align-items:center"><span>🏃</span>Get started in minutes</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(34,197,94,.1);border-radius:5px;border:1px solid rgba(34,197,94,.2);display:flex;gap:4px;align-items:center"><span>💸</span>Zero cost practice</div>
+              </div>
+              <div style="padding:5px;border-radius:7px;background:rgba(34,197,94,.18);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">Perfect for Beginners ⭐</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--kaD);border:1.5px solid var(--kaB);display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px">
+                <div style="font-size:20px">🔧</div>
+                <div style="font-size:11px;font-weight:800;color:#7EB3FF">Kubeadm</div>
+              </div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:2px">Choose when you want to...</div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(50,108,229,.1);border-radius:5px;border:1px solid rgba(50,108,229,.22);display:flex;gap:4px;align-items:center"><span>🏗</span>Build a real multi-node cluster</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(50,108,229,.1);border-radius:5px;border:1px solid rgba(50,108,229,.22);display:flex;gap:4px;align-items:center"><span>🎛</span>Full config control</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(50,108,229,.1);border-radius:5px;border:1px solid rgba(50,108,229,.22);display:flex;gap:4px;align-items:center"><span>📚</span>Deep K8s knowledge</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(50,108,229,.1);border-radius:5px;border:1px solid rgba(50,108,229,.22);display:flex;gap:4px;align-items:center"><span>🏢</span>On-premise deployment</div>
+              </div>
+              <div style="padding:5px;border-radius:7px;background:rgba(50,108,229,.18);text-align:center;font-size:9px;font-weight:700;color:#7EB3FF">For Intermediate Users</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--mgD);border:1.5px solid var(--mgB);display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px">
+                <div style="font-size:20px">☁️</div>
+                <div style="font-size:11px;font-weight:800;color:#C084FC">Managed K8s</div>
+              </div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:2px">Choose when you want to...</div>
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(124,58,237,.1);border-radius:5px;border:1px solid rgba(124,58,237,.22);display:flex;gap:4px;align-items:center"><span>🏭</span>Run production workloads</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(124,58,237,.1);border-radius:5px;border:1px solid rgba(124,58,237,.22);display:flex;gap:4px;align-items:center"><span>⚡</span>Auto-scale on demand</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(124,58,237,.1);border-radius:5px;border:1px solid rgba(124,58,237,.22);display:flex;gap:4px;align-items:center"><span>🔒</span>High availability & SLA</div>
+                <div style="font-size:9px;color:#CBD5E1;padding:4px 8px;background:rgba(124,58,237,.1);border-radius:5px;border:1px solid rgba(124,58,237,.22);display:flex;gap:4px;align-items:center"><span>🚀</span>Fastest time to deploy</div>
+              </div>
+              <div style="padding:5px;border-radius:7px;background:rgba(124,58,237,.18);text-align:center;font-size:9px;font-weight:700;color:#C084FC">For Production Teams ⭐</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary</div>
+      <div class="stitle">Kubernetes Runs Everywhere — Your Journey</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- left: journey + recap -->
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- journey visual -->
+          <div style="display:flex;align-items:center;gap:4px;padding:10px 14px;border-radius:11px;background:rgba(255,255,255,.02);border:1px solid var(--border)">
+            <div style="flex:1;border-radius:9px;padding:9px;background:var(--mkD);border:1.5px solid var(--mkB);text-align:center">
+              <div style="font-size:20px;margin-bottom:3px">💻</div>
+              <div style="font-size:9px;font-weight:800;color:#86EFAC">Local</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Minikube</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px">
+              <div style="font-size:14px;color:var(--cyan)">→</div>
+              <div style="font-size:7px;color:var(--muted)">grow</div>
+            </div>
+            <div style="flex:1;border-radius:9px;padding:9px;background:var(--kaD);border:1.5px solid var(--kaB);text-align:center">
+              <div style="font-size:20px;margin-bottom:3px">🖥</div>
+              <div style="font-size:9px;font-weight:800;color:#7EB3FF">On-Premise</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Kubeadm</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px">
+              <div style="font-size:14px;color:var(--cyan)">→</div>
+              <div style="font-size:7px;color:var(--muted)">scale</div>
+            </div>
+            <div style="flex:1;border-radius:9px;padding:9px;background:var(--mgD);border:1.5px solid var(--mgB);text-align:center">
+              <div style="font-size:20px;margin-bottom:3px">☁️</div>
+              <div style="font-size:9px;font-weight:800;color:#C084FC">Cloud</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">Managed K8s</div>
+            </div>
+          </div>
+          <!-- key takeaways -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:10px 12px;border-radius:9px;background:var(--mkD);border:1px solid var(--mkB);display:flex;gap:8px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">💻</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Minikube</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.4">Your first step — learn and practice K8s locally for free</div></div>
+            </div>
+            <div style="padding:10px 12px;border-radius:9px;background:var(--kaD);border:1px solid var(--kaB);display:flex;gap:8px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔧</div>
+              <div><div style="font-size:10px;font-weight:700;color:#7EB3FF">Kubeadm</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.4">Understand every layer — build a real cluster from scratch</div></div>
+            </div>
+            <div style="padding:10px 12px;border-radius:9px;background:var(--mgD);border:1px solid var(--mgB);display:flex;gap:8px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">☁️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#C084FC">Managed K8s</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.4">Production power — cloud handles control plane, you focus on apps</div></div>
+            </div>
+            <div style="padding:10px 12px;border-radius:9px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);display:flex;gap:8px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--cyan)">Choose wisely</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.4">Pick based on your goal — learning, control, or production scale</div></div>
+            </div>
+          </div>
+          <!-- closing -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(50,108,229,.08);border:1px solid rgba(50,108,229,.25);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white)">"<span style="background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Master the tool that matches your goal</span> — then grow from there"</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:9px;font-weight:700;color:var(--mk);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Quick Recap</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-mk" style="flex-shrink:0">Minikube</span>Learning</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-ka" style="flex-shrink:0">Kubeadm</span>Control</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span class="tag tag-mg" style="flex-shrink:0">Managed</span>Production</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">kubectl Basics & Commands</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">get · apply · describe · logs · exec</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(50,108,229,.07);border:1px solid rgba(50,108,229,.22);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7EB3FF;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

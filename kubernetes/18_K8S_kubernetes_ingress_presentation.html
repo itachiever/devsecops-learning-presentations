@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --ing:#00D4FF;--ingD:rgba(0,212,255,.1);--ingB:rgba(0,212,255,.32);
+  --s1:#326CE5;--s1D:rgba(50,108,229,.11);--s1B:rgba(50,108,229,.35);
+  --s2:#7C3AED;--s2D:rgba(124,58,237,.11);--s2B:rgba(124,58,237,.35);
+  --s3:#22C55E;--s3D:rgba(34,197,94,.1);--s3B:rgba(34,197,94,.3);
+  --lb:#F59E0B;--lbD:rgba(245,158,11,.1);--lbB:rgba(245,158,11,.3);
+  --user:#EC4899;--userD:rgba(236,72,153,.1);--userB:rgba(236,72,153,.3);
+  --pod:#A855F7;--podD:rgba(168,85,247,.09);--podB:rgba(168,85,247,.28);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--cyan);border-color:var(--cyan);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--cyan);color:var(--cyan)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(0,212,255,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(0,212,255,.18);border-color:var(--cyan)}
+.nbtn.pri{background:linear-gradient(135deg,var(--cyan),var(--blue));border:none;color:#000}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(0,212,255,.13)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;align-items:center;border-top:1px solid rgba(0,212,255,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ing);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(0,212,255,.14);transition:all .25s}
+.bi:hover{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+/* Ingress block */
+.ing-box{border-radius:10px;padding:9px 12px;background:var(--ingD);border:2px solid var(--ingB);text-align:center}
+.ing-title{font-size:10px;font-weight:800;color:#67E8F9;letter-spacing:.5px}
+/* svc blocks */
+.svc1{border-radius:8px;padding:7px 9px;background:var(--s1D);border:1.5px solid var(--s1B);text-align:center}
+.svc2{border-radius:8px;padding:7px 9px;background:var(--s2D);border:1.5px solid var(--s2B);text-align:center}
+.svc3{border-radius:8px;padding:7px 9px;background:var(--s3D);border:1.5px solid var(--s3B);text-align:center}
+/* pod chip */
+.pod-chip{border-radius:7px;padding:5px 7px;background:var(--podD);border:1px solid var(--podB);text-align:center;font-size:7px;font-weight:700;color:#DDD6FE}
+/* tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+/* url pill */
+.url-pill{padding:4px 10px;border-radius:20px;background:rgba(0,0,0,.35);border:1px solid var(--border);font-family:monospace;font-size:9px;color:#86EFAC;display:inline-block}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(0,212,255,.18) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--ing);padding:3px 12px;border:1px solid rgba(0,212,255,.25);border-radius:20px;background:rgba(0,212,255,.06)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(24px,5vw,50px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--cyan) 55%,var(--blue) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Kubernetes<br>Ingress</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Managing External Access to Applications<br>— Smart traffic routing with one entry point</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--ingD);color:#67E8F9;border:1px solid var(--ingB);padding:4px 11px;font-size:9px">🌐 HTTP/HTTPS</span>
+          <span class="tag" style="background:var(--s1D);color:#BAE6FD;border:1px solid var(--s1B);padding:4px 11px;font-size:9px">📍 Path routing</span>
+          <span class="tag" style="background:var(--s2D);color:#DDD6FE;border:1px solid var(--s2B);padding:4px 11px;font-size:9px">🏷 Host routing</span>
+          <span class="tag" style="background:var(--s3D);color:#86EFAC;border:1px solid var(--s3B);padding:4px 11px;font-size:9px">🔐 TLS/SSL</span>
+        </div>
+      </div>
+      <!-- right: title visual -->
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(0,212,255,.25);border-radius:14px;padding:12px;background:rgba(0,212,255,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Internet → Kubernetes</div>
+            <!-- internet users -->
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:6px">
+              <div style="padding:4px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600;display:flex;align-items:center;gap:3px"><span>👤</span>app.com/api</div>
+              <div style="padding:4px 8px;border-radius:7px;background:var(--userD);border:1px solid var(--userB);font-size:8px;color:#F9A8D4;font-weight:600;display:flex;align-items:center;gap:3px"><span>👤</span>app.com/web</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ing);margin-bottom:4px">↓</div>
+            <!-- ingress -->
+            <div class="ing-box" style="margin-bottom:6px;box-shadow:0 0 18px rgba(0,212,255,.15)">
+              <div class="ing-title">🌐 Ingress</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">checks rules → routes correctly</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:11px;color:var(--cyan);margin-bottom:5px">↙ ↘</div>
+            <div style="display:flex;gap:6px">
+              <div class="svc1" style="flex:1"><div style="font-size:8px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+              <div class="svc2" style="flex:1"><div style="font-size:8px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why One <span style="color:var(--red)">LoadBalancer Each</span> Doesn't Scale</div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">💰</div><div class="bt"><strong>One LoadBalancer per Service is expensive</strong> — cloud providers charge per LB. 10 services = 10 bills every month</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🌐</div><div class="bt"><strong>Multiple external IPs are confusing</strong> — users need to remember different IPs or domains for every single app</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">🔐</div><div class="bt"><strong>SSL certs must be managed per LB</strong> — HTTPS setup repeated for each service. Nightmare to maintain.</div></div>
+        <div class="bi" style="background:var(--failD);border-color:var(--failB)"><div class="ico" style="background:rgba(239,68,68,.2)">⚙️</div><div class="bt"><strong>No centralized routing rules</strong> — path-based or domain-based routing is impossible with plain LoadBalancers</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Solution: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1"><strong style="color:#67E8F9">Ingress</strong> — one entry point, smart routing rules, one IP for all your apps</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:280px">
+          <div style="border-radius:13px;padding:13px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#FCA5A5;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">❌ Without Ingress — Chaos!</div>
+            <!-- 3 apps with separate LBs -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--lbD);border:1px solid var(--lbB);text-align:center"><div style="font-size:9px">☁️</div><div style="font-size:7px;font-weight:700;color:#FDE068">LB1</div><div style="font-size:6px;color:#94A3B8">34.1.2.3</div></div>
+                <div style="font-size:9px;color:var(--amber)">→</div>
+                <div class="svc1" style="flex:1"><div style="font-size:8px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">web-svc</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--lbD);border:1px solid var(--lbB);text-align:center"><div style="font-size:9px">☁️</div><div style="font-size:7px;font-weight:700;color:#FDE068">LB2</div><div style="font-size:6px;color:#94A3B8">34.1.5.8</div></div>
+                <div style="font-size:9px;color:var(--amber)">→</div>
+                <div class="svc2" style="flex:1"><div style="font-size:8px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">api-svc</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:var(--lbD);border:1px solid var(--lbB);text-align:center"><div style="font-size:9px">☁️</div><div style="font-size:7px;font-weight:700;color:#FDE068">LB3</div><div style="font-size:6px;color:#94A3B8">34.1.9.2</div></div>
+                <div style="font-size:9px;color:var(--amber)">→</div>
+                <div class="svc3" style="flex:1"><div style="font-size:8px">⚙</div><div style="font-size:7px;font-weight:700;color:#86EFAC">auth-svc</div></div>
+              </div>
+            </div>
+            <div style="margin-top:8px;padding:7px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid var(--failB)">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5;text-align:center">3 cloud LBs = 3× cost 💸</div>
+              <div style="font-size:8px;color:var(--muted);text-align:center;margin-top:2px">3 IPs to manage · 3 SSL certs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS INGRESS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is <span style="color:var(--ing)">Ingress?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">🌐</div><div class="bt"><strong>Kubernetes object for external HTTP/HTTPS traffic</strong> — manages how the outside world reaches your apps</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">🎯</div><div class="bt"><strong>Routes traffic to correct Services</strong> — using URL paths, domains, or headers to decide where each request goes</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">🧠</div><div class="bt"><strong>Smart traffic manager</strong> — like an intelligent receptionist who reads the request and directs it to the right team</div></div>
+        <div class="bi"><div class="ico" style="background:var(--ingD)">☝️</div><div class="bt"><strong>One entry point for all apps</strong> — one IP, one domain, multiple applications. Clean and cost-effective.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB)">
+          <span style="font-size:10px;font-weight:700;color:#67E8F9">Important: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Ingress is just the <strong style="color:#67E8F9">rules object</strong>. You need an <strong style="color:#DDD6FE">Ingress Controller</strong> (e.g. nginx, traefik) to actually execute those rules.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--ingD);border:2px solid var(--ingB);box-shadow:0 0 22px rgba(0,212,255,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">One Entry Point</div>
+            <!-- internet -->
+            <div style="padding:6px;border-radius:8px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.28);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#F9A8D4">🌍 Internet</div>
+              <div style="font-size:8px;color:var(--muted)">example.com</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ing);margin-bottom:3px">↓ all traffic</div>
+            <!-- ONE LB -->
+            <div style="padding:6px;border-radius:8px;background:var(--lbD);border:1px solid var(--lbB);text-align:center;margin-bottom:5px">
+              <div style="font-size:9px;font-weight:700;color:#FDE068">☁️ Single LoadBalancer</div>
+              <div style="font-size:8px;color:var(--muted)">ONE external IP</div>
+            </div>
+            <div style="text-align:center;font-size:12px;color:var(--ing);margin-bottom:3px">↓</div>
+            <!-- ingress -->
+            <div class="ing-box" style="margin-bottom:5px;box-shadow:0 0 14px rgba(0,212,255,.18)">
+              <div class="ing-title">🌐 Ingress</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:1px">reads rules → routes request</div>
+            </div>
+            <div style="display:flex;justify-content:space-around;font-size:10px;color:var(--cyan);margin-bottom:4px">↙ ↓ ↘</div>
+            <!-- 3 services -->
+            <div style="display:flex;gap:4px">
+              <div class="svc1" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:6px;font-weight:700;color:#BAE6FD">web-svc</div></div>
+              <div class="svc2" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:6px;font-weight:700;color:#DDD6FE">api-svc</div></div>
+              <div class="svc3" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:6px;font-weight:700;color:#86EFAC">auth-svc</div></div>
+            </div>
+            <div style="margin-top:7px;text-align:center;font-size:8px;font-weight:700;color:#86EFAC">1 IP · 1 cert · infinite apps ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 HOW INGRESS WORKS ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Request Flow</div>
+      <div class="stitle">How Ingress Routes a Request</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <!-- steps -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:rgba(236,72,153,.09);border:1px solid rgba(236,72,153,.28)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--pink),#DB2777);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#F9A8D4">User makes a request</div><div style="font-size:9px;color:#94A3B8">Browser visits: https://example.com/api/users</div></div>
+            <div style="margin-left:auto;font-size:13px">👤</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--ing)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--lbD);border:1px solid rgba(245,158,11,.28)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--amber),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Hits the Ingress Controller</div><div style="font-size:9px;color:#94A3B8">LoadBalancer forwards to nginx/traefik ingress controller</div></div>
+            <div style="margin-left:auto;font-size:13px">☁️</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--ing)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Ingress checks routing rules</div><div style="font-size:9px;color:#94A3B8">Reads Ingress YAML rules: path /api → api-service</div></div>
+            <div style="margin-left:auto;font-size:13px">📋</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--s1)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--s1D);border:1px solid var(--s1B)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Forwards to matched Service</div><div style="font-size:9px;color:#94A3B8">api-service receives the forwarded request</div></div>
+            <div style="margin-left:auto;font-size:13px">⚙</div>
+          </div>
+          <div style="padding-left:18px;font-size:12px;color:var(--s3)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:9px;background:var(--s3D);border:1px solid var(--s3B)">
+            <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--green),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Service routes to Pod</div><div style="font-size:9px;color:#94A3B8">Pod handles the request and returns response to user</div></div>
+            <div style="margin-left:auto;font-size:13px">📦</div>
+          </div>
+        </div>
+        <!-- right: compact flow diagram -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(0,212,255,.04);border:1.5px dashed var(--ingB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Full Request Path</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:9px;font-weight:600;color:#F9A8D4">👤 User Browser</div><div style="font-size:7px;color:var(--muted)">example.com/api</div></div>
+              <div style="font-size:10px;color:var(--amber)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--lbD);border:1px solid var(--lbB);text-align:center"><div style="font-size:9px;font-weight:600;color:#FDE068">☁️ LB / Ingress Ctrl</div></div>
+              <div style="font-size:10px;color:var(--cyan)">↓ rules</div>
+              <div style="width:100%;padding:6px;border-radius:7px;background:var(--ingD);border:1.5px solid var(--ingB);text-align:center"><div style="font-size:9px;font-weight:700;color:#67E8F9">🌐 Ingress</div><div style="font-size:7px;color:var(--muted)">/api → api-svc</div></div>
+              <div style="font-size:10px;color:var(--s1)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--s1D);border:1px solid var(--s1B);text-align:center"><div style="font-size:9px;font-weight:600;color:#BAE6FD">⚙ api-service</div></div>
+              <div style="font-size:10px;color:var(--s3)">↓</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px;font-weight:600;color:#DDD6FE">📦 api-pod</div><div style="font-size:7px;color:#86EFAC">Response ✓</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 KEY FEATURES ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Features</div>
+      <div class="stitle">Key Features of Kubernetes Ingress</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;padding-top:8px">
+        <!-- path routing -->
+        <div style="border-radius:12px;padding:13px;background:var(--s1D);border:2px solid var(--s1B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">📍</div>
+            <div><div style="font-size:11px;font-weight:800;color:#BAE6FD">Path-Based Routing</div><div style="font-size:8px;color:var(--muted)">Route by URL path</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">One domain, different paths go to different services based on the URL path after the domain.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="url-pill">example.com<span style="color:#BAE6FD">/api</span> → api-svc</div>
+            <div class="url-pill">example.com<span style="color:#DDD6FE">/web</span> → web-svc</div>
+          </div>
+        </div>
+        <!-- host routing -->
+        <div style="border-radius:12px;padding:13px;background:var(--s2D);border:2px solid var(--s2B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🏷</div>
+            <div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Host-Based Routing</div><div style="font-size:8px;color:var(--muted)">Route by subdomain</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Different subdomains or hostnames route to completely different services in the cluster.</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="url-pill"><span style="color:#DDD6FE">api.</span>example.com → api-svc</div>
+            <div class="url-pill"><span style="color:#F9A8D4">app.</span>example.com → web-svc</div>
+          </div>
+        </div>
+        <!-- SSL -->
+        <div style="border-radius:12px;padding:13px;background:var(--s3D);border:2px solid var(--s3B);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🔐</div>
+            <div><div style="font-size:11px;font-weight:800;color:#86EFAC">TLS/SSL Termination</div><div style="font-size:8px;color:var(--muted)">HTTPS at the edge</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Handle HTTPS at the Ingress layer. Backend services can stay plain HTTP — Ingress decrypts for them.</div>
+          <div style="padding:6px 10px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25)">
+            <div style="font-size:8px;color:#86EFAC;font-weight:600">HTTPS → Ingress → HTTP → Pods</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:1px">Certificate managed in one place</div>
+          </div>
+        </div>
+        <!-- centralized -->
+        <div style="border-radius:12px;padding:13px;background:var(--ingD);border:2px solid var(--ingB);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:34px;height:34px;border-radius:9px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🎛</div>
+            <div><div style="font-size:11px;font-weight:800;color:#67E8F9">Centralized Management</div><div style="font-size:8px;color:var(--muted)">All traffic in one place</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Define all your routing rules in one YAML file. Easy to review, update, and version control.</div>
+          <div style="padding:6px 10px;border-radius:7px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.22)">
+            <div style="font-size:8px;color:#67E8F9;font-weight:600">One Ingress YAML rules everything</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:1px">GitOps friendly, auditable</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 PATH ROUTING ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Feature Deep Dive</div>
+        <div class="stitle">Path-Based <span style="color:#BAE6FD">Routing</span> Explained</div>
+        <div class="bi"><div class="ico" style="background:var(--s1D)">📍</div><div class="bt"><strong>Same domain, different paths</strong> — one domain (<code style="font-size:10px;color:#BAE6FD">example.com</code>) serves multiple apps based on URL path</div></div>
+        <div class="bi"><div class="ico" style="background:var(--s1D)">🔀</div><div class="bt"><strong>Ingress matches the path prefix</strong> — checks if request starts with <code style="font-size:10px;color:#BAE6FD">/api</code>, <code style="font-size:10px;color:#DDD6FE">/web</code>, or <code style="font-size:10px;color:#86EFAC">/auth</code></div></div>
+        <div class="bi"><div class="ico" style="background:var(--s1D)">🎯</div><div class="bt"><strong>Forwards to the matching Service</strong> — path prefix determines which backend Service receives the traffic</div></div>
+        <div class="bi"><div class="ico" style="background:var(--s1D)">🌍</div><div class="bt"><strong>User sees one clean URL</strong> — all hidden behind <code style="font-size:10px;color:#BAE6FD">example.com</code>. Microservices stay transparent.</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px;line-height:1.7">
+          <div style="color:var(--muted);font-size:7px;margin-bottom:3px"># Ingress YAML rules</div>
+          <div><span style="color:var(--cyan)">- path:</span> <span style="color:#BAE6FD">/api</span> &nbsp;<span style="color:var(--cyan)">→ backend:</span> <span style="color:#86EFAC">api-service:8080</span></div>
+          <div><span style="color:var(--cyan)">- path:</span> <span style="color:#DDD6FE">/web</span> &nbsp;<span style="color:var(--cyan)">→ backend:</span> <span style="color:#86EFAC">web-service:80</span></div>
+          <div><span style="color:var(--cyan)">- path:</span> <span style="color:#86EFAC">/auth</span> <span style="color:var(--cyan)">→ backend:</span> <span style="color:#86EFAC">auth-service:3000</span></div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:275px">
+          <div style="border-radius:13px;padding:13px;background:var(--s1D);border:2px solid var(--s1B);box-shadow:0 0 22px rgba(50,108,229,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">📍 Path-Based Routing</div>
+            <!-- three requests -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <!-- request 1 -->
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:8px;color:#F9A8D4;font-weight:600">👤 /api/users</div></div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div class="svc1" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+                <div style="font-size:10px;color:var(--s1)">→</div>
+                <div class="pod-chip" style="flex:1;padding:4px"><div style="font-size:8px">📦</div><div>api-pod</div></div>
+              </div>
+              <!-- request 2 -->
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:8px;color:#F9A8D4;font-weight:600">👤 /web/home</div></div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div class="svc2" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+                <div style="font-size:10px;color:var(--s2)">→</div>
+                <div class="pod-chip" style="flex:1;padding:4px;border-color:var(--s2B);background:var(--s2D)"><div style="font-size:8px">📦</div><div style="color:#DDD6FE">web-pod</div></div>
+              </div>
+              <!-- request 3 -->
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1;padding:5px;border-radius:7px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.25);text-align:center"><div style="font-size:8px;color:#F9A8D4;font-weight:600">👤 /auth/login</div></div>
+                <div style="font-size:10px;color:var(--cyan)">→</div>
+                <div class="svc3" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#86EFAC">auth-svc</div></div>
+                <div style="font-size:10px;color:var(--s3)">→</div>
+                <div class="pod-chip" style="flex:1;padding:4px;border-color:var(--s3B);background:var(--s3D)"><div style="font-size:8px">📦</div><div style="color:#86EFAC">auth-pod</div></div>
+              </div>
+            </div>
+            <!-- all via same ingress -->
+            <div style="margin-top:8px;padding:6px;border-radius:7px;background:var(--ingD);border:1px solid var(--ingB);text-align:center">
+              <div style="font-size:9px;font-weight:700;color:#67E8F9">All go through one Ingress — example.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 HOST ROUTING ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Feature Deep Dive</div>
+        <div class="stitle">Host-Based <span style="color:#DDD6FE">Routing</span> Explained</div>
+        <div class="bi"><div class="ico" style="background:var(--s2D)">🏷</div><div class="bt"><strong>Different subdomains, different apps</strong> — <code style="font-size:10px;color:#DDD6FE">api.example.com</code> and <code style="font-size:10px;color:#F9A8D4">app.example.com</code> are two different apps</div></div>
+        <div class="bi"><div class="ico" style="background:var(--s2D)">🌐</div><div class="bt"><strong>Ingress reads the Host header</strong> — every HTTP request carries a Host header. Ingress matches it to its rules.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--s2D)">🏢</div><div class="bt"><strong>Perfect for multi-tenant systems</strong> — each team has their own subdomain, each routed to their own Service</div></div>
+        <div class="bi"><div class="ico" style="background:var(--s2D)">🔗</div><div class="bt"><strong>Can combine with path routing</strong> — <code style="font-size:10px;color:#DDD6FE">api.example.com/v1</code> and <code style="font-size:10px;color:#DDD6FE">api.example.com/v2</code> for versioning</div></div>
+        <div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);font-family:monospace;font-size:9px;line-height:1.7">
+          <div style="color:var(--muted);font-size:7px;margin-bottom:3px"># Ingress YAML — host routing</div>
+          <div><span style="color:var(--cyan)">- host:</span> <span style="color:#DDD6FE">api.example.com</span> <span style="color:var(--cyan)">→</span> <span style="color:#86EFAC">api-service</span></div>
+          <div><span style="color:var(--cyan)">- host:</span> <span style="color:#F9A8D4">app.example.com</span> <span style="color:var(--cyan)">→</span> <span style="color:#86EFAC">web-service</span></div>
+          <div><span style="color:var(--cyan)">- host:</span> <span style="color:#86EFAC">admin.example.com</span> <span style="color:var(--cyan)">→</span> <span style="color:#86EFAC">admin-service</span></div>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:275px">
+          <div style="border-radius:13px;padding:13px;background:var(--s2D);border:2px solid var(--s2B);box-shadow:0 0 22px rgba(124,58,237,.15)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#DDD6FE;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">🏷 Host-Based Routing</div>
+            <!-- 3 host requests -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1.2;padding:5px;border-radius:7px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.28);text-align:center"><div style="font-size:7px;color:#BAE6FD;font-weight:700">api.example.com</div></div>
+                <div style="font-size:10px;color:var(--ing)">→</div>
+                <div class="svc1" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#BAE6FD">api-svc</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1.2;padding:5px;border-radius:7px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);text-align:center"><div style="font-size:7px;color:#DDD6FE;font-weight:700">app.example.com</div></div>
+                <div style="font-size:10px;color:var(--ing)">→</div>
+                <div class="svc2" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#DDD6FE">web-svc</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="flex:1.2;padding:5px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center"><div style="font-size:7px;color:#86EFAC;font-weight:700">admin.example.com</div></div>
+                <div style="font-size:10px;color:var(--ing)">→</div>
+                <div class="svc3" style="flex:1;padding:5px"><div style="font-size:9px">⚙</div><div style="font-size:7px;font-weight:700;color:#86EFAC">admin-svc</div></div>
+              </div>
+            </div>
+            <!-- ingress in middle -->
+            <div style="margin-top:7px;padding:7px;border-radius:8px;background:var(--ingD);border:1px solid var(--ingB)">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;text-align:center;margin-bottom:4px">Ingress checks Host: header</div>
+              <div style="font-size:8px;color:var(--muted);text-align:center">All DNS points to ONE IP</div>
+              <div style="font-size:8px;color:var(--muted);text-align:center">Ingress handles the split</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 INGRESS vs LB ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(0,212,255,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle">Ingress vs LoadBalancer</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <!-- LoadBalancer -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--lbD);border:2px solid var(--lbB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">☁️</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">LoadBalancer Service</div><div style="font-size:8px;color:var(--muted)">One service, one cloud LB</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>1️⃣</span>Exposes ONE service per LB</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🌍</span>Gets its own external IP</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>💰</span>Costs money per service</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🔀</span>No path/host routing</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:#FDE068;display:flex;gap:5px;align-items:center"><span>🔐</span>SSL per LB separately</div>
+          </div>
+          <!-- visual: 3 LBs -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">3 apps = 3 LBs = 3× cost</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="display:flex;align-items:center;gap:5px;font-size:8px">
+                <div style="padding:2px 6px;border-radius:4px;background:rgba(245,158,11,.15);color:#FDE068;font-weight:600">LB 34.1.1</div>
+                <span style="color:var(--amber)">→</span>
+                <div class="svc1" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#BAE6FD">web-svc</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:8px">
+                <div style="padding:2px 6px;border-radius:4px;background:rgba(245,158,11,.15);color:#FDE068;font-weight:600">LB 34.1.2</div>
+                <span style="color:var(--amber)">→</span>
+                <div class="svc2" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#DDD6FE">api-svc</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:8px">
+                <div style="padding:2px 6px;border-radius:4px;background:rgba(245,158,11,.15);color:#FDE068;font-weight:600">LB 34.1.3</div>
+                <span style="color:var(--amber)">→</span>
+                <div class="svc3" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#86EFAC">auth-svc</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- VS -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)">VS</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <!-- Ingress -->
+        <div style="flex:1;border-radius:13px;padding:14px;background:var(--ingD);border:2px solid var(--ingB);display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,212,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">Ingress</div><div style="font-size:8px;color:var(--muted)">One entry for all services</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;flex:1">
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>♾</span>Routes to MANY services</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>☝️</span>One external IP for all</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>💚</span>Much cheaper at scale</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9;display:flex;gap:5px;align-items:center"><span>🎯</span>Path & host routing</div>
+            <div style="font-size:9px;padding:5px 9px;border-radius:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);color:#67E8F9;display:flex;gap=5px;align-items:center"><span>🔐</span>Single SSL cert / termination</div>
+          </div>
+          <!-- visual: 1 ingress -->
+          <div style="border-radius:9px;padding:8px;background:rgba(0,0,0,.2);border:1px solid var(--border)">
+            <div style="font-size:8px;color:var(--muted);text-align:center;margin-bottom:5px">1 Ingress → all apps</div>
+            <div class="ing-box" style="margin-bottom:4px;padding:5px"><div style="font-size:8px;font-weight:700;color:#67E8F9">🌐 Ingress — 34.1.1.x</div></div>
+            <div style="display:flex;gap:3px">
+              <div class="svc1" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#BAE6FD">web</div>
+              <div class="svc2" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#DDD6FE">api</div>
+              <div class="svc3" style="flex:1;padding:3px;font-size:7px;text-align:center;color:#86EFAC">auth</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.17) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary & Analogy</div>
+      <div class="stitle">Kubernetes Ingress — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy card -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--ingD);border:1.5px solid var(--ingB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--cyan),var(--blue));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:28px;margin-top:4px">🏢</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">Ingress = Receptionist</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">All visitors enter through the front door (one IP). The receptionist reads their request and directs them to the right department (Service).</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--s1D);border:1.5px solid var(--s1B);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">📍</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Path Routing</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Floor directory</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">"Go to /api for engineering, /web for sales" — same building, different rooms</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--s2D);border:1.5px solid var(--s2B);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🏷</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">Host Routing</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Branch offices</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">"api.corp.com for devs, admin.corp.com for managers" — different doors, same building</div>
+            </div>
+          </div>
+          <!-- 4 facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--ingD);border:1px solid var(--ingB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">☝️</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">One entry point</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Single IP and domain for all apps</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--s3D);border:1px solid var(--s3B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">💰</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Cost-efficient</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">One LB for unlimited services</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--s1D);border:1px solid var(--s1B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🔐</div>
+              <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">SSL termination</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">One cert covers all, managed centrally</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--s2D);border:1px solid var(--s2B);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🎛</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Centralized rules</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">All routing logic in one YAML</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"Ingress = <span style="color:var(--cyan)">smart front door</span> for your cluster — one entrance, rules decide who goes where."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--ingD);border:1.5px solid var(--ingB)">
+            <div style="font-size:9px;font-weight:700;color:#67E8F9;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>One IP for all apps</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Path & host routing</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>TLS/SSL in one place</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Needs Ingress Controller</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--cyan)">◆</span>Cheaper than multiple LBs</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.3);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purpleL);margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Ingress Controller</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">nginx · traefik · Kong — the engine behind Ingress</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#67E8F9;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

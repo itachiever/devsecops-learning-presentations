@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;--pink:#EC4899;
+  --sc:#22C55E;--scD:rgba(34,197,94,.09);--scB:rgba(34,197,94,.3);
+  --pvc:#00D4FF;--pvcD:rgba(0,212,255,.09);--pvcB:rgba(0,212,255,.28);
+  --pv:#7C3AED;--pvD:rgba(124,58,237,.1);--pvB:rgba(124,58,237,.32);
+  --pod:#326CE5;--podD:rgba(50,108,229,.11);--podB:rgba(50,108,229,.35);
+  --fail:#EF4444;--failD:rgba(239,68,68,.1);--failB:rgba(239,68,68,.3);
+  --aws:#F59E0B;--awsD:rgba(245,158,11,.09);--awsB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--sc);border-color:var(--sc);color:#000;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--sc);color:var(--sc)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(34,197,94,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(34,197,94,.18);border-color:var(--sc)}
+.nbtn.pri{background:linear-gradient(135deg,var(--sc),var(--blue));border:none;color:#000;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(34,197,94,.1)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(34,197,94,.13);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--sc);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(34,197,94,.14);transition:all .25s}
+.bi:hover{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.32);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.15vw,12px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.sc-box{border-radius:10px;padding:9px 12px;background:var(--scD);border:2px solid var(--scB);text-align:center}
+.sc-title{font-size:10px;font-weight:800;color:#86EFAC}
+.pvc-box{border-radius:10px;padding:9px 12px;background:var(--pvcD);border:1.5px solid var(--pvcB);text-align:center}
+.pvc-title{font-size:10px;font-weight:800;color:#67E8F9}
+.pv-box{border-radius:10px;padding:9px 12px;background:var(--pvD);border:1.5px solid var(--pvB);text-align:center}
+.pv-title{font-size:10px;font-weight:800;color:#DDD6FE}
+.pod-box{border-radius:10px;padding:9px 12px;background:var(--podD);border:1.5px solid var(--podB);text-align:center}
+.pod-title{font-size:10px;font-weight:800;color:#BAE6FD}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- ══ S1 TITLE ══ -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.18) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/>
+            <polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/>
+            <line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/>
+            <circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/>
+          </svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--sc);padding:3px 12px;border:1px solid rgba(34,197,94,.25);border-radius:20px;background:rgba(34,197,94,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(20px,4.5vw,46px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--sc) 55%,var(--cyan) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Storage<br>Class</div>
+        <div style="font-size:clamp(10px,1.6vw,15px);color:var(--muted);margin-bottom:18px;line-height:1.5">Dynamic Storage Provisioning in Kubernetes<br>— Storage created automatically, on demand</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--scD);color:#86EFAC;border:1px solid var(--scB);padding:4px 11px;font-size:9px">⚡ Auto-provision</span>
+          <span class="tag" style="background:var(--pvcD);color:#67E8F9;border:1px solid var(--pvcB);padding:4px 11px;font-size:9px">📋 PVC-driven</span>
+          <span class="tag" style="background:var(--pvD);color:#DDD6FE;border:1px solid var(--pvB);padding:4px 11px;font-size:9px">🗄 Dynamic PV</span>
+          <span class="tag" style="background:var(--awsD);color:#FDE068;border:1px solid var(--awsB);padding:4px 11px;font-size:9px">☁ Cloud-native</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:310px">
+          <div style="border:1.5px dashed rgba(34,197,94,.25);border-radius:14px;padding:12px;background:rgba(34,197,94,.03)">
+            <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Dynamic Provisioning Flow</div>
+            <div class="pod-box" style="margin-bottom:5px"><div class="pod-title">📦 Pod — needs storage</div></div>
+            <div style="text-align:center;font-size:10px;color:var(--pvc);margin:3px 0">↓ uses</div>
+            <div class="pvc-box" style="margin-bottom:5px"><div class="pvc-title">📋 PVC — "I need 20GB SSD"</div><div style="font-size:8px;color:var(--muted);margin-top:1px">storageClassName: fast-ssd</div></div>
+            <div style="text-align:center;font-size:10px;color:var(--sc);margin:3px 0">↓ triggers</div>
+            <div class="sc-box" style="margin-bottom:5px;box-shadow:0 0 16px rgba(34,197,94,.18)"><div class="sc-title">⚙ Storage Class — auto-provisions</div><div style="font-size:8px;color:var(--muted);margin-top:1px">provisioner: aws/ebs · type: gp3</div></div>
+            <div style="text-align:center;font-size:10px;color:var(--purpleL);margin:3px 0">↓ creates</div>
+            <div class="pv-box"><div class="pv-title">🗄 PV — created automatically ✅</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 09</span></div>
+  </div>
+
+  <!-- ══ S2 PROBLEM ══ -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Manual PV Creation <span style="color:var(--fail)">Doesn't Scale</span></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">👨‍💼</div><div class="bt"><strong>Admin must manually create every PV</strong> — for every app that needs storage, an admin must provision a disk, configure it, and create a PV object</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">⏱</div><div class="bt"><strong>Time-consuming at scale</strong> — a cluster with 50 apps needing storage means 50+ manual PV configurations. Impossible to maintain.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🐢</div><div class="bt"><strong>Slows down deployments</strong> — developers are blocked waiting for admins to provision storage. DevOps velocity drops significantly.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">💥</div><div class="bt"><strong>Human error prone</strong> — wrong disk size, wrong access mode, wrong region — manual steps introduce mistakes in production</div></div>
+        <div class="bi"><div class="ico" style="background:var(--failD)">🔄</div><div class="bt"><strong>No dynamic elasticity</strong> — if an app needs more storage suddenly, manual intervention is required every single time</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--failD);border:1px solid var(--failB)">
+          <span style="font-size:10px;font-weight:700;color:#FCA5A5">The fix: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Storage Class tells Kubernetes <em style="color:#86EFAC">how</em> to create storage automatically whenever a PVC requests it. Zero manual work.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:278px;display:flex;flex-direction:column;gap:8px">
+          <div style="border-radius:12px;padding:12px;background:var(--failD);border:1.5px solid var(--failB)">
+            <div style="font-size:9px;font-weight:800;color:#FCA5A5;text-align:center;margin-bottom:8px">❌ Without Storage Class — Manual</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);font-size:8px;color:#FCA5A5">👨‍💼 Admin creates AWS EBS disk manually</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);font-size:8px;color:#FCA5A5">👨‍💼 Admin writes PV YAML by hand</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);font-size:8px;color:#FCA5A5">👨‍💼 Dev waits… waits… waits…</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);font-size:8px;color:#FCA5A5">⏱ Repeated for every app, every env</div>
+            </div>
+            <div style="margin-top:6px;text-align:center;font-size:8px;font-weight:700;color:#FCA5A5">Not scalable for modern clusters 😱</div>
+          </div>
+          <div style="border-radius:12px;padding:12px;background:var(--scD);border:1.5px solid var(--scB)">
+            <div style="font-size:9px;font-weight:800;color:#86EFAC;text-align:center;margin-bottom:8px">✅ With Storage Class — Automatic</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-size:8px;color:#86EFAC">👨‍💻 Dev creates PVC with storageClassName</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-size:8px;color:#86EFAC">⚙ K8s auto-provisions disk instantly</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-size:8px;color:#86EFAC">🗄 PV created automatically in seconds</div>
+              <div style="padding:5px 9px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-size:8px;color:#86EFAC">📦 Pod gets storage. Deploy continues.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 09</span></div>
+  </div>
+
+  <!-- ══ S3 WHAT IS STORAGE CLASS ══ -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.14) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is a <span style="color:var(--sc)">Storage Class?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">📚</div><div class="bt"><strong>Defines a "type" of storage</strong> — like a menu of storage options. Fast SSD, slow HDD, NFS, cloud-managed — each is a StorageClass.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">⚡</div><div class="bt"><strong>Enables dynamic provisioning</strong> — when a PVC references a StorageClass, Kubernetes automatically creates a matching PV. No admin needed.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🤖</div><div class="bt"><strong>Uses a Provisioner</strong> — built-in plugin (e.g. aws-ebs, gce-pd) that knows how to create the actual disk on the target platform</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🔗</div><div class="bt"><strong>Referenced by PVC</strong> — PVC specifies <code style="color:#86EFAC;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:4px">storageClassName: fast-ssd</code> and K8s handles everything else</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🌐</div><div class="bt"><strong>Works across cloud providers</strong> — same PVC YAML, different StorageClass per environment. AWS in prod, local in dev.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Analogy: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">StorageClass = a restaurant menu 🍽. Each item (SSD, HDD, NFS) is a different option. You order via PVC, kitchen (K8s) prepares it automatically.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(34,197,94,.16)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">StorageClass YAML</div>
+            <div style="border-radius:8px;padding:10px;background:rgba(6,10,16,.7);border:1px solid rgba(34,197,94,.2);font-family:monospace;font-size:8px;margin-bottom:8px">
+              <div><span style="color:#7C3AED">apiVersion:</span> <span style="color:#86EFAC">storage.k8s.io/v1</span></div>
+              <div><span style="color:#7C3AED">kind:</span> <span style="color:#86EFAC">StorageClass</span></div>
+              <div><span style="color:#7C3AED">metadata:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">name:</span> <span style="color:#FDE068">fast-ssd</span></div>
+              <div><span style="color:#7C3AED">provisioner:</span> <span style="color:#00D4FF">kubernetes.io/aws-ebs</span></div>
+              <div><span style="color:#7C3AED">parameters:</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">type:</span> <span style="color:#FCA5A5">gp3</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">fsType:</span> <span style="color:#FCA5A5">ext4</span></div>
+              <div><span style="color:#7C3AED">reclaimPolicy:</span> <span style="color:#86EFAC">Delete</span></div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-bottom:6px">
+              <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#86EFAC;font-weight:600">⚙ provisioner</span>
+              <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#FDE068;font-weight:600">🔧 parameters</span>
+              <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.28);color:#DDD6FE;font-weight:600">♻ reclaimPolicy</span>
+            </div>
+            <div style="padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">PVC references this by name ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 09</span></div>
+  </div>
+
+  <!-- ══ S4 HOW IT WORKS ══ -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Dynamic Provisioning Flow</div>
+      <div class="stitle">How Storage Class Works — Step by Step</div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--sc),#16A34A);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Admin creates a StorageClass (once)</div><div style="font-size:9px;color:#94A3B8">StorageClass YAML defines provisioner type, disk tier, reclaim policy. Done once — reused forever.</div></div>
+            <span style="margin-left:auto;font-size:13px">👨‍💼</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pvc)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--pvcD);border:1px solid var(--pvcB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pvc),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Developer creates PVC referencing StorageClass</div><div style="font-size:9px;color:#94A3B8">PVC specifies size + storageClassName: "fast-ssd". No need to know underlying disk details.</div></div>
+            <span style="margin-left:auto;font-size:13px">📋</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--sc)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--sc),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Kubernetes triggers the Provisioner</div><div style="font-size:9px;color:#94A3B8">K8s reads the StorageClass and calls the provisioner plugin — e.g. aws-ebs creates a new EBS disk automatically.</div></div>
+            <span style="margin-left:auto;font-size:13px">⚙</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--purpleL)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pv),var(--purpleL));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">PV created automatically — bound to PVC</div><div style="font-size:9px;color:#94A3B8">Kubernetes creates the PV object, binds it to the PVC. Status: PVC = Bound, PV = Bound. Seconds.</div></div>
+            <span style="margin-left:auto;font-size:13px">🗄</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pod)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--podD);border:1px solid var(--podB)">
+            <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pod),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Pod mounts PVC — storage ready</div><div style="font-size:9px;color:#94A3B8">Pod gets /data path backed by the auto-provisioned PV. Zero manual steps by admin. Deploy complete ✅</div></div>
+            <span style="margin-left:auto;font-size:13px">📦</span>
+          </div>
+        </div>
+        <div style="width:190px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(34,197,94,.03);border:1.5px dashed var(--scB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Full Auto Flow</div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--scD);border:1.5px solid var(--scB);text-align:center"><div style="font-size:9px;font-weight:700;color:#86EFAC">⚙ StorageClass</div><div style="font-size:7px;color:var(--muted)">defined once by admin</div></div>
+              <div style="font-size:10px;color:var(--pvc)">↕ referenced by</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--pvcD);border:1px solid var(--pvcB);text-align:center"><div style="font-size:9px;font-weight:700;color:#67E8F9">📋 PVC</div><div style="font-size:7px;color:var(--muted)">storageClassName: fast-ssd</div></div>
+              <div style="font-size:10px;color:var(--sc)">↓ auto-triggers</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--scD);border:1px solid var(--scB);text-align:center"><div style="font-size:9px;font-weight:700;color:#86EFAC">🤖 Provisioner</div><div style="font-size:7px;color:var(--muted)">creates EBS disk</div></div>
+              <div style="font-size:10px;color:var(--purpleL)">↓ creates</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--pvD);border:1px solid var(--pvB);text-align:center"><div style="font-size:9px;font-weight:700;color:#DDD6FE">🗄 PV (auto)</div></div>
+              <div style="font-size:10px;color:var(--pod)">↓ mount</div>
+              <div style="width:100%;padding:5px;border-radius:7px;background:var(--podD);border:1px solid var(--podB);text-align:center"><div style="font-size:9px;font-weight:700;color:#BAE6FD">📦 Pod ✅</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 09</span></div>
+  </div>
+
+  <!-- ══ S5 KEY COMPONENTS ══ -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.12) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Architecture</div>
+      <div class="stitle">Key Components — How They Fit Together</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:stretch">
+        <!-- 4 components -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+          <!-- StorageClass -->
+          <div style="flex:1;border-radius:12px;padding:12px;background:var(--scD);border:2px solid var(--scB);display:flex;gap:10px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📚</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#86EFAC">Storage Class</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(34,197,94,.2);color:#86EFAC;font-weight:700;border:1px solid var(--scB)">Blueprint</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;line-height:1.45">Defines the <strong style="color:#86EFAC">type and tier</strong> of storage. Sets provisioner, parameters, reclaim policy. Written once, used many times.</div>
+            </div>
+          </div>
+          <!-- Provisioner -->
+          <div style="flex:1;border-radius:12px;padding:12px;background:var(--pvcD);border:2px solid var(--pvcB);display:flex;gap:10px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤖</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#67E8F9">Provisioner</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(0,212,255,.18);color:#67E8F9;font-weight:700;border:1px solid var(--pvcB)">⭐ Auto-creator</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;line-height:1.45">The plugin that <strong style="color:#67E8F9">physically creates the disk</strong>. e.g. <code style="color:#86EFAC;font-size:8px">kubernetes.io/aws-ebs</code> or <code style="color:#86EFAC;font-size:8px">kubernetes.io/gce-pd</code>. Runs inside cluster.</div>
+            </div>
+          </div>
+          <!-- PVC -->
+          <div style="flex:1;border-radius:12px;padding:12px;background:var(--pvD);border:2px solid var(--pvB);display:flex;gap:10px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#DDD6FE">PVC</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(124,58,237,.2);color:#DDD6FE;font-weight:700;border:1px solid var(--pvB)">Request</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;line-height:1.45">Developer's <strong style="color:#DDD6FE">storage request</strong>. References StorageClass by name. Specifies size + access mode. Triggers auto-provisioning.</div>
+            </div>
+          </div>
+          <!-- PV -->
+          <div style="flex:1;border-radius:12px;padding:12px;background:var(--podD);border:2px solid var(--podB);display:flex;gap:10px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🗄</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+                <div style="font-size:11px;font-weight:800;color:#BAE6FD">PV — Persistent Volume</div>
+                <span style="font-size:7px;padding:2px 7px;border-radius:8px;background:rgba(50,108,229,.2);color:#BAE6FD;font-weight:700;border:1px solid var(--podB)">Auto-created</span>
+              </div>
+              <div style="font-size:9px;color:#CBD5E1;line-height:1.45">The <strong style="color:#BAE6FD">actual storage resource</strong>. Created automatically by the Provisioner. Bound to PVC. Used by Pod.</div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: relationship diagram -->
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:13px;background:rgba(34,197,94,.03);border:1.5px dashed var(--scB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Component Roles</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="border-radius:8px;padding:8px;background:var(--scD);border:1px solid var(--scB)">
+                <div style="font-size:9px;font-weight:700;color:#86EFAC">📚 StorageClass</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Who + How to create storage</div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--sc)">↓ calls</div>
+              <div style="border-radius:8px;padding:8px;background:var(--pvcD);border:1px solid var(--pvcB)">
+                <div style="font-size:9px;font-weight:700;color:#67E8F9">🤖 Provisioner</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Creates the actual disk</div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--purpleL)">↓ triggered by</div>
+              <div style="border-radius:8px;padding:8px;background:var(--pvD);border:1px solid var(--pvB)">
+                <div style="font-size:9px;font-weight:700;color:#DDD6FE">📋 PVC</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">App's storage request</div>
+              </div>
+              <div style="text-align:center;font-size:10px;color:var(--pod)">↓ results in</div>
+              <div style="border-radius:8px;padding:8px;background:var(--podD);border:1px solid var(--podB)">
+                <div style="font-size:9px;font-weight:700;color:#BAE6FD">🗄 PV (auto)</div>
+                <div style="font-size:7.5px;color:#94A3B8;margin-top:2px">Ready-to-use storage</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 09</span></div>
+  </div>
+
+  <!-- ══ S6 COMMON STORAGE CLASSES ══ -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Ecosystem</div>
+      <div class="stitle">Common Storage Classes — Cloud & On-Prem</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;flex:1;padding-top:8px">
+        <!-- AWS gp2/gp3 -->
+        <div style="border-radius:12px;padding:13px;background:var(--awsD);border:2px solid var(--awsB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FDE068">AWS gp2 / gp3</div><div style="font-size:8px;color:var(--muted)">Amazon EBS · General Purpose</div></div>
+            <span class="tag" style="background:rgba(245,158,11,.2);color:#FDE068;border:1px solid rgba(245,158,11,.35);margin-left:auto;font-size:7px;padding:3px 7px">⭐ Popular</span>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">AWS Elastic Block Store SSD tiers. <strong style="color:#FDE068">gp3</strong> is the modern default — better performance, lower cost than gp2. Used in EKS clusters.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">✅ High IOPS SSD performance</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);color:#FDE068">✅ EKS default StorageClass</div>
+          </div>
+        </div>
+        <!-- Azure -->
+        <div style="border-radius:12px;padding:13px;background:var(--podD);border:2px solid var(--podB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔷</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Azure Managed Disk</div><div style="font-size:8px;color:var(--muted)">Azure · AKS clusters</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Azure's managed block storage for AKS. Tiers include Standard HDD, Standard SSD, and Premium SSD (P-series) for high-perf workloads.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD">✅ Standard · Premium SSD</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.25);color:#BAE6FD">✅ AKS-native integration</div>
+          </div>
+        </div>
+        <!-- GCP -->
+        <div style="border-radius:12px;padding:13px;background:var(--scD);border:2px solid var(--scB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(34,197,94,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🟢</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">GCP Persistent Disk</div><div style="font-size:8px;color:var(--muted)">Google Cloud · GKE</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Google's managed block storage for GKE. Standard (HDD) and SSD options. Auto-encrypted, globally redundant.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ pd-standard / pd-ssd</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ GKE default StorageClass</div>
+          </div>
+        </div>
+        <!-- NFS -->
+        <div style="border-radius:12px;padding:13px;background:var(--pvcD);border:2px solid var(--pvcB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#67E8F9">NFS-based Storage</div><div style="font-size:8px;color:var(--muted)">Network File System</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Network-attached storage accessible by many Pods across nodes. Great for shared file storage with RWX access mode.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">✅ ReadWriteMany support</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:#67E8F9">✅ On-prem / hybrid cloud</div>
+          </div>
+        </div>
+        <!-- SSD tier -->
+        <div style="border-radius:12px;padding:13px;background:var(--pvD);border:2px solid var(--pvB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⚡</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">SSD Storage Tier</div><div style="font-size:8px;color:var(--muted)">High performance local SSD</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Local NVMe SSDs for ultra-low latency. Ideal for caching layers (Redis), high-throughput databases with extreme IOPS needs.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">✅ Ultra-low latency</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#DDD6FE">✅ Max IOPS workloads</div>
+          </div>
+        </div>
+        <!-- HDD tier -->
+        <div style="border-radius:12px;padding:13px;background:rgba(100,116,139,.1);border:2px solid rgba(100,116,139,.3);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:38px;height:38px;border-radius:10px;background:rgba(100,116,139,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💿</div>
+            <div><div style="font-size:12px;font-weight:800;color:#CBD5E1">HDD Storage Tier</div><div style="font-size:8px;color:var(--muted)">Slow but cost-effective</div></div>
+          </div>
+          <div style="font-size:10px;color:#CBD5E1;line-height:1.45;flex:1">Standard spinning disk storage. Lower cost per GB. Perfect for backups, archival data, or workloads where speed isn't critical.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:#CBD5E1">✅ Low cost per GB</div>
+            <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.3);color:#CBD5E1">✅ Backups &amp; archival</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 09</span></div>
+  </div>
+
+  <!-- ══ S7 BENEFITS ══ -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.13) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Benefits</div>
+        <div class="stitle">Why Use <span style="color:var(--sc)">Storage Classes?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🤖</div><div class="bt"><strong>Automatic storage provisioning</strong> — developer creates a PVC and Kubernetes provisions the disk in seconds. Zero manual admin steps.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🚀</div><div class="bt"><strong>Faster deployments</strong> — no waiting for admin to create PVs. Dev writes PVC → K8s provisions storage → Pod deploys. End-to-end automation.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">📈</div><div class="bt"><strong>Better scalability</strong> — 1 StorageClass serves unlimited apps. Whether 1 Pod or 1000 Pods need storage, the same class handles it.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">⚡</div><div class="bt"><strong>Choose storage performance tiers</strong> — SSD for databases, HDD for backups, NFS for shared files. Right tool for the right job.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🔓</div><div class="bt"><strong>Decouples app from infrastructure</strong> — change StorageClass without changing app code. Swap AWS EBS for GCP disk with one YAML change.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Before vs After: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Before StorageClass: Admin creates PV manually for every app. After: Dev writes PVC → K8s does everything automatically.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px">
+          <div style="border-radius:13px;padding:13px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Scale Impact</div>
+            <!-- Manual bar -->
+            <div style="margin-bottom:10px">
+              <div style="font-size:9px;font-weight:700;color:#FCA5A5;margin-bottom:4px">❌ Manual PV (10 apps)</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Admin work</div><div style="flex:1;height:10px;border-radius:4px;background:rgba(239,68,68,.5);border:1px solid rgba(239,68,68,.5)"></div><div style="font-size:8px;color:#FCA5A5;width:28px">HIGH</div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Speed</div><div style="flex:1;height:10px;border-radius:4px;background:rgba(239,68,68,.25);width:25%;border:1px solid rgba(239,68,68,.3)"></div><div style="font-size:8px;color:#FCA5A5;width:28px">SLOW</div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Scale</div><div style="flex:1;height:10px;border-radius:4px;background:rgba(239,68,68,.2);width:20%;border:1px solid rgba(239,68,68,.3)"></div><div style="font-size:8px;color:#FCA5A5;width:28px">POOR</div></div>
+              </div>
+            </div>
+            <!-- Auto bar -->
+            <div style="margin-bottom:10px">
+              <div style="font-size:9px;font-weight:700;color:#86EFAC;margin-bottom:4px">✅ StorageClass (10 apps)</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Admin work</div><div style="height:10px;border-radius:4px;background:rgba(34,197,94,.4);width:15%;border:1px solid rgba(34,197,94,.4)"></div><div style="font-size:8px;color:#86EFAC;width:28px">ZERO</div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Speed</div><div style="flex:1;height:10px;border-radius:4px;background:rgba(34,197,94,.5);border:1px solid rgba(34,197,94,.5)"></div><div style="font-size:8px;color:#86EFAC;width:28px">FAST</div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="font-size:8px;color:#94A3B8;width:50px">Scale</div><div style="flex:1;height:10px;border-radius:4px;background:rgba(34,197,94,.5);border:1px solid rgba(34,197,94,.5)"></div><div style="font-size:8px;color:#86EFAC;width:28px">∞</div></div>
+              </div>
+            </div>
+            <div style="padding:6px;border-radius:7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center;font-size:9px;font-weight:700;color:#86EFAC">StorageClass = zero-touch automation ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 09</span></div>
+  </div>
+
+  <!-- ══ S8 REAL WORLD EXAMPLE ══ -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.12) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Real-World Example</div>
+        <div class="stitle">DB App Requesting <span style="color:var(--sc)">SSD via StorageClass</span></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">🗄</div><div class="bt"><strong>Scenario:</strong> A high-traffic PostgreSQL database needs fast SSD storage in an EKS cluster</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">📋</div><div class="bt"><strong>Developer writes PVC:</strong> 50Gi storage, storageClassName: "fast-ssd-gp3". No AWS console. No disk ID. Just YAML.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">⚙</div><div class="bt"><strong>StorageClass triggers aws-ebs provisioner:</strong> K8s calls the EBS plugin which creates a new gp3 SSD disk in AWS automatically</div></div>
+        <div class="bi"><div class="ico" style="background:var(--pvD)">🗄</div><div class="bt"><strong>PV auto-created and bound:</strong> 50GB gp3 EBS disk → PV created → PVC bound. Takes ~10 seconds. Zero admin effort.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--scD)">✅</div><div class="bt"><strong>PostgreSQL Pod gets SSD storage instantly:</strong> Mounts /var/lib/postgresql/data. High-speed reads/writes. Production ready.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--scD);border:1px solid var(--scB)">
+          <span style="font-size:10px;font-weight:700;color:#86EFAC">Net result: </span>
+          <span style="font-size:clamp(9px,1.2vw,12px);color:#CBD5E1">Developer wrote a 6-line PVC YAML. Kubernetes provisioned an SSD disk, created a PV, and mounted it. Fully automated.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:13px;background:var(--scD);border:2px solid var(--scB);box-shadow:0 0 22px rgba(34,197,94,.14)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">PostgreSQL EKS — Auto Flow</div>
+            <!-- Dev PVC -->
+            <div style="border-radius:8px;padding:8px;background:var(--pvcD);border:1.5px solid var(--pvcB);margin-bottom:5px">
+              <div style="font-size:8px;font-weight:700;color:#67E8F9;margin-bottom:4px">👨‍💻 Developer writes PVC</div>
+              <div style="font-family:monospace;font-size:7.5px;color:#94A3B8">
+                <div><span style="color:#00D4FF">storage:</span> <span style="color:#FCA5A5">50Gi</span></div>
+                <div><span style="color:#00D4FF">storageClassName:</span> <span style="color:#86EFAC">fast-ssd-gp3</span></div>
+                <div><span style="color:#00D4FF">accessModes:</span> <span style="color:#FDE068">ReadWriteOnce</span></div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--sc);margin:3px 0">↓ K8s reads storageClassName</div>
+            <!-- StorageClass activates -->
+            <div style="border-radius:8px;padding:7px;background:var(--scD);border:1.5px solid var(--scB);margin-bottom:5px;text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#86EFAC">⚙ StorageClass: fast-ssd-gp3</div>
+              <div style="font-size:7px;color:var(--muted);margin-top:2px">provisioner: kubernetes.io/aws-ebs</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--awsB);margin:3px 0">↓ calls AWS EBS provisioner</div>
+            <!-- AWS creates disk -->
+            <div style="border-radius:8px;padding:7px;background:var(--awsD);border:1.5px solid var(--awsB);margin-bottom:5px;text-align:center">
+              <div style="font-size:8px;font-weight:700;color:#FDE068">☁ AWS EBS gp3 · 50GB</div>
+              <div style="font-size:7px;color:#86EFAC;margin-top:2px">Created in ~10s ✅</div>
+            </div>
+            <div style="text-align:center;font-size:10px;color:var(--purpleL);margin:3px 0">↓ PV auto-created + bound</div>
+            <!-- Pod ready -->
+            <div style="border-radius:8px;padding:8px;background:var(--podD);border:1.5px solid var(--podB);margin-bottom:5px">
+              <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:4px">📦 PostgreSQL Pod running</div>
+              <div style="display:flex;gap:5px">
+                <div style="flex:1;padding:4px;border-radius:5px;background:var(--scD);border:1px solid var(--scB);text-align:center;font-size:7px;color:#86EFAC;font-weight:600">🗄 SSD PV<br>mounted ✅</div>
+                <div style="flex:1;padding:4px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid var(--podB);text-align:center;font-size:7px;color:#BAE6FD;font-weight:600">📱 PG container<br>running</div>
+              </div>
+            </div>
+            <div style="padding:5px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);text-align:center;font-size:8px;font-weight:700;color:#86EFAC">✅ Fast SSD — zero manual steps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 09</span></div>
+  </div>
+
+  <!-- ══ S9 SUMMARY ══ -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Storage Class — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <!-- analogy trio -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--scD);border:1.5px solid var(--scB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">🍽</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">StorageClass</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Storage catalog / menu</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Lists available storage options — SSD, HDD, NFS. Admin defines it once.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--pvcD);border:1.5px solid var(--pvcB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--pvc),var(--sc));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#000;white-space:nowrap">⭐ The Trigger</div>
+              <div style="font-size:28px;margin-top:4px">📝</div>
+              <div style="font-size:10px;font-weight:800;color:#67E8F9">PVC</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Order request</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Dev places an order — "I want 20GB SSD". References StorageClass by name.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:12px;background:var(--pvD);border:1.5px solid var(--pvB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px">
+              <div style="font-size:28px">📦</div>
+              <div style="font-size:10px;font-weight:800;color:#DDD6FE">PV</div>
+              <div style="font-size:9px;color:var(--muted);font-weight:600">= Delivered storage</div>
+              <div style="font-size:9px;color:#94A3B8;line-height:1.35">Order arrives — disk provisioned and ready. Pod receives it automatically.</div>
+            </div>
+          </div>
+          <!-- 4 key facts -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1">
+            <div style="padding:9px 12px;border-radius:9px;background:var(--scD);border:1px solid var(--scB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚡</div>
+              <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Dynamic provisioning</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">PVC → StorageClass → PV auto-created</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--pvcD);border:1px solid var(--pvcB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">🤖</div>
+              <div><div style="font-size:10px;font-weight:700;color:#67E8F9">Zero admin needed</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">Dev writes PVC · K8s does the rest</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--awsD);border:1px solid var(--awsB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">☁</div>
+              <div><div style="font-size:10px;font-weight:700;color:#FDE068">Multi-cloud support</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">AWS · GCP · Azure · NFS · Local</div></div>
+            </div>
+            <div style="padding:9px 12px;border-radius:9px;background:var(--pvD);border:1px solid var(--pvB);display:flex;gap:7px;align-items:flex-start">
+              <div style="font-size:16px;flex-shrink:0">⚖</div>
+              <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Storage tiers</div><div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.3">SSD · HDD · NFS — right tier per app</div></div>
+            </div>
+          </div>
+          <!-- quote -->
+          <div style="padding:9px 14px;border-radius:9px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.22);text-align:center">
+            <div style="font-size:clamp(10px,1.3vw,13px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#86EFAC">StorageClass = menu</span>. <span style="color:#67E8F9">PVC = order</span>. <span style="color:#DDD6FE">PV = what gets delivered</span>. Kubernetes is the automated kitchen."</div>
+          </div>
+        </div>
+        <!-- right panel -->
+        <div style="width:185px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--scD);border:1.5px solid var(--scB)">
+            <div style="font-size:9px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sc)">◆</span>Automates PV creation</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sc)">◆</span>Referenced by PVC YAML</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sc)">◆</span>Uses Provisioner plugin</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sc)">◆</span>Multi-cloud compatible</div>
+              <div style="font-size:9px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--sc)">◆</span>SSD · HDD · NFS tiers</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:11px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">ConfigMap</div>
+            <div style="font-size:9px;color:var(--muted);margin-bottom:9px">Managing configuration<br>data in Kubernetes</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--pv));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#86EFAC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 09</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=9;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===1?' on':'');
+  d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);
+}
+function gt(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));
+  document.querySelector('[data-s="'+n+'"]').classList.add('on');
+  c=n;
+}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+</script>
+</body>
+</html>

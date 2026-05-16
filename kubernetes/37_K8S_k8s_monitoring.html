@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --pr:#F97316;--prD:rgba(249,115,22,.1);--prB:rgba(249,115,22,.32);
+  --gr:#22C55E;--grD:rgba(34,197,94,.09);--grB:rgba(34,197,94,.28);
+  --al:#EF4444;--alD:rgba(239,68,68,.1);--alB:rgba(239,68,68,.3);
+  --mt:#7C3AED;--mtD:rgba(124,58,237,.1);--mtB:rgba(124,58,237,.32);
+  --cn:#00D4FF;--cnD:rgba(0,212,255,.09);--cnB:rgba(0,212,255,.28);
+  --nd:#326CE5;--ndD:rgba(50,108,229,.1);--ndB:rgba(50,108,229,.32);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--pr);border-color:var(--pr);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--pr);color:var(--pr)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(249,115,22,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(249,115,22,.18);border-color:var(--pr)}
+.nbtn.pri{background:linear-gradient(135deg,var(--pr),var(--purple));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(249,115,22,.08)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(249,115,22,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(249,115,22,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--pr);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(249,115,22,.13);transition:all .25s}
+.bi:hover{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.metric-bar{height:10px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:3px}
+.metric-fill{height:100%;border-radius:5px;transition:width .3s}
+.spark{display:flex;align-items:flex-end;gap:2px;height:30px}
+.spark-bar{width:6px;border-radius:2px 2px 0 0;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(249,115,22,.15) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--pr);padding:3px 12px;border:1px solid rgba(249,115,22,.25);border-radius:20px;background:rgba(249,115,22,.07)">Kubernetes Series</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,32px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--pr) 55%,var(--purpleL) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Monitoring in<br>Kubernetes</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Observing Cluster Health &amp; Performance<br>— Metrics, dashboards, and alerts at scale</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--prD);color:#FED7AA;border:1px solid var(--prB);padding:4px 11px;font-size:9px">📊 Prometheus</span>
+          <span class="tag" style="background:var(--grD);color:#86EFAC;border:1px solid var(--grB);padding:4px 11px;font-size:9px">📈 Grafana</span>
+          <span class="tag" style="background:var(--alD);color:#FCA5A5;border:1px solid var(--alB);padding:4px 11px;font-size:9px">🔔 Alertmanager</span>
+          <span class="tag" style="background:var(--mtD);color:#DDD6FE;border:1px solid var(--mtB);padding:4px 11px;font-size:9px">📡 Metrics Server</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(249,115,22,.22);border-radius:14px;padding:12px;background:rgba(249,115,22,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Live Cluster Dashboard</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px">
+            <div style="border-radius:8px;padding:7px;background:var(--grD);border:1px solid var(--grB)">
+              <div style="font-size:7.5px;color:#86EFAC;font-weight:700">CPU Usage</div>
+              <div style="font-size:16px;font-weight:800;color:#86EFAC">42%</div>
+              <div class="metric-bar"><div class="metric-fill" style="width:42%;background:#22C55E"></div></div>
+              <div style="font-size:6.5px;color:var(--muted);margin-top:2px">↓ from 68% · stable</div>
+            </div>
+            <div style="border-radius:8px;padding:7px;background:var(--wnD);border:1px solid var(--wnB)">
+              <div style="font-size:7.5px;color:#FDE068;font-weight:700">Memory</div>
+              <div style="font-size:16px;font-weight:800;color:#FDE068">71%</div>
+              <div class="metric-bar"><div class="metric-fill" style="width:71%;background:#F59E0B"></div></div>
+              <div style="font-size:6.5px;color:var(--muted);margin-top:2px">↑ trending up · watch</div>
+            </div>
+            <div style="border-radius:8px;padding:7px;background:var(--grD);border:1px solid var(--grB)">
+              <div style="font-size:7.5px;color:#86EFAC;font-weight:700">Pods Running</div>
+              <div style="font-size:16px;font-weight:800;color:#86EFAC">47/48</div>
+              <div class="metric-bar"><div class="metric-fill" style="width:98%;background:#22C55E"></div></div>
+              <div style="font-size:6.5px;color:var(--muted);margin-top:2px">1 pod pending</div>
+            </div>
+            <div style="border-radius:8px;padding:7px;background:var(--grD);border:1px solid var(--grB)">
+              <div style="font-size:7.5px;color:#86EFAC;font-weight:700">Node Health</div>
+              <div style="font-size:16px;font-weight:800;color:#86EFAC">3/3</div>
+              <div class="metric-bar"><div class="metric-fill" style="width:100%;background:#22C55E"></div></div>
+              <div style="font-size:6.5px;color:var(--muted);margin-top:2px">all nodes ready ✅</div>
+            </div>
+          </div>
+          <div style="border-radius:7px;padding:5px 9px;background:var(--prD);border:1px solid var(--prB);text-align:center;font-size:7.5px;color:#FED7AA">📊 Prometheus → Grafana · updated every 15s</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 10</span></div>
+  </div>
+
+  <!-- S2 WHY MONITORING -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Observability</div>
+        <div class="stitle">Why <span style="color:var(--pr)">Monitoring</span> is Important</div>
+        <div class="bi"><div class="ico" style="background:var(--prD)">🏥</div><div class="bt"><strong>Infrastructure must stay healthy 24/7</strong> — Kubernetes clusters run dozens of microservices. Without monitoring, you're flying blind. You need visibility into every component.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--alD)">⚡</div><div class="bt"><strong>Detect failures before users do</strong> — monitoring catches a CPU spike, Pod crash, or disk pressure in seconds. Without it, users file bug reports before your team even knows.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--grD)">📈</div><div class="bt"><strong>Improve uptime and reliability</strong> — SLA targets like 99.9% uptime require real-time visibility. Every minute of downtime has a cost. Monitoring is your early warning system.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--prD)">🔮</div><div class="bt"><strong>Proactive issue detection</strong> — spot a memory leak trending upward over days, not hours. Catch resource exhaustion before it becomes an outage. Fix before it breaks.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--mtD)">📋</div><div class="bt"><strong>Capacity planning and optimization</strong> — understand actual usage vs allocated resources. Right-size your Pods, cut cloud costs, and plan for growth with real data.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+          <span style="font-size:10px;font-weight:700;color:#FED7AA">Analogy: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Monitoring = a <strong style="color:#fff">car dashboard</strong> 🚗 — speedometer, fuel gauge, engine warning lights. Without it, you'd never know you're running out of fuel or overheating until you break down.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--alD);border:1.5px solid var(--alB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:7px">😱 Without Monitoring</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">🔥 Node OOM — nobody knows</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">❓ Pod crash-looping silently</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">📱 Users report it on Twitter first</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">⏱ Hours of blind debugging</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--grD);border:1.5px solid var(--grB)">
+            <div style="font-size:8.5px;font-weight:800;color:#86EFAC;margin-bottom:7px">✅ With Monitoring</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86EFAC">🔔 Alert fires at 85% memory</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86EFAC">📊 Grafana shows the spike</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86EFAC">⚡ Team scales up in 2 min</div>
+              <div style="font-size:8px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86EFAC">✅ Zero user impact</div>
+            </div>
+          </div>
+          <div style="border-radius:10px;padding:9px;background:var(--wnD);border:1px solid var(--wnB);text-align:center">
+            <div style="font-size:8px;color:#FDE068;font-weight:700">Mean Time to Detect (MTTD)</div>
+            <div style="display:flex;justify-content:space-between;margin-top:5px">
+              <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#FCA5A5">60m+</div><div style="font-size:7px;color:var(--muted)">No monitoring</div></div>
+              <div style="font-size:16px;color:var(--muted);display:flex;align-items:center">→</div>
+              <div style="text-align:center"><div style="font-size:14px;font-weight:800;color:#86EFAC">&lt;30s</div><div style="font-size:7px;color:var(--muted)">With Prometheus</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 10</span></div>
+  </div>
+
+  <!-- S3 WHAT IS MONITORING -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(249,115,22,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Definition</div>
+        <div class="stitle">What is <span style="color:var(--pr)">Monitoring?</span></div>
+        <div class="bi"><div class="ico" style="background:var(--prD)">📡</div><div class="bt"><strong>Continuous collection of system metrics</strong> — monitoring scrapes numbers from your cluster every few seconds: CPU%, memory bytes, request counts, error rates. A constant pulse check.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--grD)">📊</div><div class="bt"><strong>Visualization on dashboards</strong> — raw numbers become time-series graphs in Grafana. See trends, compare today vs yesterday, spot anomalies visually at a glance.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--alD)">🔔</div><div class="bt"><strong>Automated alerting on thresholds</strong> — define rules like "alert if CPU &gt; 80% for 5 minutes". Alertmanager sends Slack/PagerDuty/email notifications instantly.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--mtD)">🔢</div><div class="bt"><strong>Key metric types</strong> — CPU usage, memory utilization, Pod restart count, network bytes, request latency, error rate. Each tells a different story about your system.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+          <span style="font-size:10px;font-weight:700;color:#FED7AA">Key difference from Logging: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1"><strong style="color:#fff">Logs</strong> = what happened (events, errors, messages). <strong style="color:#fff">Metrics</strong> = how much / how fast / how healthy (numbers over time). Both work together.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:278px">
+          <div style="border-radius:13px;padding:12px;background:var(--prD);border:2px solid var(--prB);box-shadow:0 0 22px rgba(249,115,22,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Live Metrics Flow</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:8px;padding:7px 9px;background:var(--ndD);border:1px solid var(--ndB)">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD;margin-bottom:4px">📡 Metrics Exported by Components</div>
+                <div style="display:flex;gap:3px;flex-wrap:wrap">
+                  <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(50,108,229,.15);color:#BAE6FD;border:1px solid rgba(50,108,229,.25)">kubelet</span>
+                  <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(50,108,229,.15);color:#BAE6FD;border:1px solid rgba(50,108,229,.25)">api-server</span>
+                  <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(50,108,229,.15);color:#BAE6FD;border:1px solid rgba(50,108,229,.25)">node-exporter</span>
+                  <span style="font-size:7px;padding:2px 6px;border-radius:4px;background:rgba(50,108,229,.15);color:#BAE6FD;border:1px solid rgba(50,108,229,.25)">app /metrics</span>
+                </div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--pr)">↓ scraped every 15s</div>
+              <div style="border-radius:8px;padding:7px 9px;background:var(--prD);border:1.5px solid var(--prB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#FED7AA">🔥 Prometheus</div>
+                <div style="font-size:7px;color:var(--muted)">stores time-series data</div>
+              </div>
+              <div style="text-align:center;font-size:9px;color:var(--pr)">↓ queries via PromQL</div>
+              <div style="border-radius:8px;padding:7px 9px;background:var(--grD);border:1.5px solid var(--grB);text-align:center">
+                <div style="font-size:8.5px;font-weight:700;color:#86EFAC">📊 Grafana Dashboards</div>
+                <div style="font-size:7px;color:var(--muted)">visualize + alert</div>
+              </div>
+              <div style="border-radius:8px;padding:7px;background:rgba(6,10,16,.7);border:1px solid rgba(249,115,22,.18);font-family:monospace;font-size:7.5px">
+                <div style="color:#FED7AA">PromQL example:</div>
+                <div style="color:#86EFAC;margin-top:2px">rate(http_requests_total[5m])</div>
+                <div style="color:#94A3B8;font-size:7px;margin-top:1px">→ req/sec over last 5 min</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 10</span></div>
+  </div>
+
+  <!-- S4 WHAT CAN BE MONITORED -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Scope</div>
+      <div class="stitle">What Can Be <span style="color:var(--purpleL)">Monitored?</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <!-- Nodes -->
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--ndD);border:2px solid var(--ndB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🖥</div>
+            <div><div style="font-size:12px;font-weight:800;color:#BAE6FD">Nodes</div><div style="font-size:7.5px;color:var(--muted)">Physical/virtual machines</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD">CPU cores usage %</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD">RAM used / available</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD">Disk I/O &amp; storage</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD">Node Ready status</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.22);color:#BAE6FD">Network bytes in/out</div>
+          </div>
+          <div style="font-size:7.5px;padding:3px 8px;border-radius:5px;background:rgba(50,108,229,.12);border:1px solid rgba(50,108,229,.2);color:#BAE6FD;text-align:center">🔧 node-exporter</div>
+        </div>
+        <!-- Pods -->
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--prD);border:2px solid var(--prB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(249,115,22,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FED7AA">Pods</div><div style="font-size:7.5px;color:var(--muted)">Running workloads</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:#FED7AA">Pod status (Running/Failed)</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:#FED7AA">Restart count</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:#FED7AA">CPU &amp; memory per Pod</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:#FED7AA">Pending / CrashLoopBackOff</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.22);color:#FED7AA">Resource requests vs limits</div>
+          </div>
+          <div style="font-size:7.5px;padding:3px 8px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA;text-align:center">🔧 kube-state-metrics</div>
+        </div>
+        <!-- Apps -->
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--grD);border:2px solid var(--grB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌐</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Applications</div><div style="font-size:7.5px;color:var(--muted)">Business-level metrics</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">HTTP request rate (req/s)</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">Error rate (4xx / 5xx %)</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">Response latency (p50/p99)</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">Queue depth / backlog</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86EFAC">DB connections / cache hits</div>
+          </div>
+          <div style="font-size:7.5px;padding:3px 8px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">🔧 custom /metrics endpoint</div>
+        </div>
+        <!-- Cluster -->
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--mtD);border:2px solid var(--mtB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:36px;height:36px;border-radius:9px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⎈</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Cluster</div><div style="font-size:7.5px;color:var(--muted)">Control plane health</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">API server latency</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">etcd health &amp; size</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">Scheduler latency</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">Total resource capacity</div>
+            <div style="font-size:8px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">Namespace quotas</div>
+          </div>
+          <div style="font-size:7.5px;padding:3px 8px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);color:#DDD6FE;text-align:center">🔧 Metrics Server</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 10</span></div>
+  </div>
+
+  <!-- S5 ARCHITECTURE -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(249,115,22,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Architecture</div>
+      <div class="stitle">End-to-End <span style="color:var(--pr)">Monitoring Architecture</span></div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--nd),var(--cn));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Cluster components expose metrics</div><div style="font-size:8.5px;color:#94A3B8">Nodes, kubelet, Pods, apps export metrics at <code style="color:#67E8F9;font-size:8px">/metrics</code> endpoint in Prometheus format</div></div>
+            <span style="margin-left:auto;font-size:13px">📡</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pr),#EA580C);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FED7AA">Prometheus scrapes metrics every 15s</div><div style="font-size:8.5px;color:#94A3B8">Prometheus pulls (not pushed) data from all configured targets. Stores as time-series in its TSDB.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔥</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--grD);border:1px solid var(--grB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gr),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Grafana queries and visualizes</div><div style="font-size:8.5px;color:#94A3B8">Grafana sends PromQL queries to Prometheus. Renders beautiful time-series dashboards for the team.</div></div>
+            <span style="margin-left:auto;font-size:13px">📊</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--alD);border:1px solid var(--alB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--al),#DC2626);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FCA5A5">Alertmanager fires notifications</div><div style="font-size:8.5px;color:#94A3B8">Alert rules in Prometheus trigger Alertmanager. Routes to Slack, PagerDuty, email, or webhooks instantly.</div></div>
+            <span style="margin-left:auto;font-size:13px">🔔</span>
+          </div>
+          <div style="padding-left:17px;font-size:11px;color:var(--pr)">↓</div>
+          <div style="display:flex;gap:9px;align-items:center;padding:8px 11px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pr),var(--gr));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FED7AA">Team investigates and resolves</div><div style="font-size:8.5px;color:#94A3B8">On-call engineer opens Grafana, drills into the metric, correlates with logs, identifies and fixes root cause.</div></div>
+            <span style="margin-left:auto;font-size:13px">🛠</span>
+          </div>
+        </div>
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:12px;background:rgba(249,115,22,.03);border:1.5px dashed var(--prB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Pull Model</div>
+            <div style="border-radius:8px;padding:9px;background:rgba(6,10,16,.7);border:1px solid rgba(249,115,22,.18);font-family:monospace;font-size:7.5px;margin-bottom:7px;color:#94A3B8">
+              <div style="color:#FED7AA;margin-bottom:3px"># prometheus.yaml</div>
+              <div><span style="color:#7C3AED">scrape_configs:</span></div>
+              <div>- <span style="color:#7C3AED">job_name:</span> <span style="color:#86EFAC">kubernetes</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">scrape_interval:</span> <span style="color:#FED7AA">15s</span></div>
+              <div>&nbsp;&nbsp;<span style="color:#7C3AED">metrics_path:</span> <span style="color:#67E8F9">/metrics</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:7.5px;color:#86EFAC;padding:2px 7px;background:rgba(34,197,94,.1);border-radius:4px">✅ Prometheus pulls data</div>
+              <div style="font-size:7.5px;color:#FCA5A5;padding:2px 7px;background:rgba(239,68,68,.1);border-radius:4px">✗ Not push (unlike StatsD)</div>
+              <div style="font-size:7.5px;color:#FED7AA;padding:2px 7px;background:rgba(249,115,22,.1);border-radius:4px">⏱ 15s scrape interval</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 10</span></div>
+  </div>
+
+  <!-- S6 POPULAR TOOLS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(249,115,22,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Ecosystem</div>
+      <div class="stitle">Popular <span style="color:var(--pr)">Monitoring Tools</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--prD);border:2px solid var(--prB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(249,115,22,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🔥</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FED7AA">Prometheus</div><div style="font-size:8px;color:var(--muted)">Metrics collection &amp; storage</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">The de-facto Kubernetes monitoring standard. Scrapes metrics from all cluster components, stores time-series data, and evaluates alert rules.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">⚡ Pull-based scraping model</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">📊 Powerful PromQL query language</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA">🏷 Service discovery built-in</div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:6px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:#FED7AA;text-align:center">CNCF Graduated Project ⭐</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--grD);border:2px solid var(--grB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📊</div>
+            <div><div style="font-size:12px;font-weight:800;color:#86EFAC">Grafana</div><div style="font-size:8px;color:var(--muted)">Visualization &amp; dashboards</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Industry-leading dashboard platform. Connects to Prometheus (and 50+ data sources), renders beautiful time-series graphs, heatmaps, and stat panels.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC">🎨 Drag-and-drop dashboard builder</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC">🔔 Built-in alerting rules</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC">📦 Pre-built K8s dashboards</div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">Open Source + Cloud 🌐</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--alD);border:2px solid var(--alB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(239,68,68,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🔔</div>
+            <div><div style="font-size:12px;font-weight:800;color:#FCA5A5">Alertmanager</div><div style="font-size:8px;color:var(--muted)">Alert routing &amp; silencing</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Receives alerts from Prometheus and intelligently routes them. Deduplicates, groups, and silences noisy alerts. Sends to Slack, PagerDuty, and more.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">📬 Slack / PagerDuty / email</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">🔕 Silencing &amp; inhibition rules</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5">📦 Alert grouping</div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#FCA5A5;text-align:center">Ships with Prometheus 📦</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--mtD);border:2px solid var(--mtB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,58,237,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📡</div>
+            <div><div style="font-size:12px;font-weight:800;color:#DDD6FE">Supporting Tools</div><div style="font-size:8px;color:var(--muted)">Exporters &amp; collectors</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.45;flex:1">Metrics Server, node-exporter, and kube-state-metrics extend Prometheus to cover every corner of the cluster.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">📦 Metrics Server → HPA/VPA</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">🖥 node-exporter → Node stats</div>
+            <div style="font-size:7.5px;padding:3px 7px;border-radius:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.22);color:#DDD6FE">⎈ kube-state-metrics → K8s objects</div>
+          </div>
+          <div style="font-size:8px;padding:3px 8px;border-radius:6px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);color:#DDD6FE;text-align:center">Deployed as DaemonSets 🔄</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 10</span></div>
+  </div>
+
+  <!-- S7 PROMETHEUS + GRAFANA -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(249,115,22,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Core Stack</div>
+      <div class="stitle">Prometheus <span style="color:var(--muted)">+</span> Grafana — <span style="color:var(--pr)">How They Work Together</span></div>
+      <div style="display:flex;gap:12px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:6px">
+          <div class="bi" style="border-color:rgba(249,115,22,.2)"><div class="ico" style="background:var(--prD)">🔥</div><div class="bt"><strong>Prometheus collects and stores metrics</strong> — deployed as a Pod in the cluster, it discovers all scrape targets via Kubernetes service discovery. No manual config needed per Pod.</div></div>
+          <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--grD)">📊</div><div class="bt"><strong>Grafana renders dashboards from PromQL</strong> — connects to Prometheus as a data source. Use community dashboards (Grafana.com ID 15760) or build custom ones. Live updates every 30s.</div></div>
+          <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--alD)">🔔</div><div class="bt"><strong>Alert rules defined in Prometheus</strong> — write rules like <code style="color:#FCA5A5;background:rgba(239,68,68,.08);padding:1px 4px;border-radius:3px;font-size:8.5px">ALERT if CPU &gt; 80% for 5m</code>. Fires to Alertmanager which routes to your team's Slack channel.</div></div>
+          <div class="bi" style="border-color:rgba(124,58,237,.2)"><div class="ico" style="background:var(--mtD)">📦</div><div class="bt"><strong>kube-prometheus-stack Helm chart</strong> — installs Prometheus + Grafana + Alertmanager + all exporters in one command. The standard way to deploy monitoring in production K8s clusters.</div></div>
+          <div style="margin-top:6px;padding:9px 13px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FED7AA;margin-bottom:3px">One-liner install</div>
+            <code style="font-size:8px;color:#86EFAC;background:rgba(6,10,16,.7);padding:5px 9px;border-radius:5px;display:block;border:1px solid rgba(34,197,94,.18)">helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack</code>
+          </div>
+        </div>
+        <div style="width:235px;flex-shrink:0">
+          <div style="height:100%;border-radius:13px;padding:12px;background:var(--prD);border:2px solid var(--prB);box-shadow:0 0 22px rgba(249,115,22,.1);display:flex;flex-direction:column;gap:5px">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Grafana Dashboard Preview</div>
+            <!-- Fake dashboard -->
+            <div style="border-radius:8px;padding:8px;background:rgba(6,10,16,.8);border:1px solid rgba(249,115,22,.2);flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px">
+                <div style="border-radius:5px;padding:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);text-align:center">
+                  <div style="font-size:7px;color:#86EFAC;font-weight:700">Nodes Up</div>
+                  <div style="font-size:14px;font-weight:800;color:#86EFAC">3/3</div>
+                </div>
+                <div style="border-radius:5px;padding:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);text-align:center">
+                  <div style="font-size:7px;color:#86EFAC;font-weight:700">Pods OK</div>
+                  <div style="font-size:14px;font-weight:800;color:#86EFAC">47</div>
+                </div>
+                <div style="border-radius:5px;padding:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);text-align:center">
+                  <div style="font-size:7px;color:#FDE068;font-weight:700">Alerts</div>
+                  <div style="font-size:14px;font-weight:800;color:#FDE068">2</div>
+                </div>
+              </div>
+              <!-- Sparkline CPU -->
+              <div style="border-radius:5px;padding:6px;background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15)">
+                <div style="font-size:7.5px;color:#FED7AA;font-weight:700;margin-bottom:4px">CPU Usage — Last 1h</div>
+                <div class="spark">
+                  <div class="spark-bar" style="height:40%;background:#326CE5;opacity:.6"></div>
+                  <div class="spark-bar" style="height:55%;background:#326CE5;opacity:.7"></div>
+                  <div class="spark-bar" style="height:45%;background:#326CE5;opacity:.6"></div>
+                  <div class="spark-bar" style="height:60%;background:#F59E0B;opacity:.8"></div>
+                  <div class="spark-bar" style="height:70%;background:#F59E0B"></div>
+                  <div class="spark-bar" style="height:85%;background:#EF4444"></div>
+                  <div class="spark-bar" style="height:90%;background:#EF4444"></div>
+                  <div class="spark-bar" style="height:75%;background:#F59E0B"></div>
+                  <div class="spark-bar" style="height:60%;background:#326CE5;opacity:.8"></div>
+                  <div class="spark-bar" style="height:42%;background:#22C55E"></div>
+                  <div class="spark-bar" style="height:38%;background:#22C55E"></div>
+                  <div class="spark-bar" style="height:44%;background:#22C55E"></div>
+                </div>
+              </div>
+              <!-- Memory bar -->
+              <div style="border-radius:5px;padding:6px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.18)">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:7.5px;color:#DDD6FE;font-weight:700">Memory</span><span style="font-size:7.5px;color:#DDD6FE">71% · 5.7 GB / 8 GB</span></div>
+                <div class="metric-bar"><div class="metric-fill" style="width:71%;background:linear-gradient(90deg,#7C3AED,#A855F7)"></div></div>
+              </div>
+              <!-- Alerts -->
+              <div style="border-radius:5px;padding:6px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18)">
+                <div style="font-size:7.5px;color:#FCA5A5;font-weight:700;margin-bottom:3px">🔔 Active Alerts</div>
+                <div style="font-size:7px;color:#94A3B8;margin-bottom:2px">🟡 HighMemoryUsage · node-2 · 12m</div>
+                <div style="font-size:7px;color:#94A3B8">🟡 PodPending · api-pod-3 · 5m</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 10</span></div>
+  </div>
+
+  <!-- S8 REAL WORLD -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(249,115,22,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">CPU Spike Detected — <span style="color:var(--pr)">Incident Prevented</span></div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:5px;width:58px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:00</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:10</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:11</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:12</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:15</div>
+              <div style="font-size:7.5px;color:var(--muted);height:32px;display:flex;align-items:center">14:20</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--ndD);border:1px solid var(--ndB);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">📦 API service running normally · CPU avg 32% across 4 Pods</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--wnD);border:1px solid var(--wnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FDE068;font-weight:600">📈 Traffic surge begins · CPU climbs to 78% · Prometheus records spike</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--alD);border:1px solid var(--alB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">🔔 Alert fires: CPU &gt; 75% for 5 min → Alertmanager sends Slack message</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--prD);border:1px solid var(--prB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FED7AA;font-weight:600">🔍 DevOps opens Grafana → sees spike on <em>api-pod-2</em> → unusual query pattern</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--grD);border:1px solid var(--grB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">⚙ HPA scales from 4 → 8 Pods · inefficient query found and optimized</div></div>
+              <div style="height:32px;padding:4px 10px;border-radius:7px;background:var(--grD);border:1px solid var(--grB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ CPU back to 35% · Zero user impact · Incident resolved in 20 min</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:228px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--prD);border:2px solid var(--prB);box-shadow:0 0 18px rgba(249,115,22,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">CPU Timeline</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:38px">14:00</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:32%;background:#22C55E;border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#86EFAC;width:28px">32%</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:38px">14:10</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:78%;background:#F59E0B;border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#FDE068;width:28px">78%</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:38px">14:11</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:88%;background:#EF4444;border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#FCA5A5;width:28px">88% 🔔</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:38px">14:15</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:60%;background:#F59E0B;border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#FDE068;width:28px">60%</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="font-size:7.5px;color:var(--muted);width:38px">14:20</div>
+                <div style="flex:1;height:14px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:35%;background:#22C55E;border-radius:4px"></div></div>
+                <div style="font-size:7.5px;color:#86EFAC;width:28px">35% ✅</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);font-size:7.5px;color:#FCA5A5;text-align:center">🔔 Alert at 88% → team notified</div>
+              <div style="border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);font-size:7.5px;color:#86EFAC;text-align:center">✅ Resolved in 20 min · No outage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 10</span></div>
+  </div>
+
+  <!-- S9 BEST PRACTICES -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Best Practices</div>
+        <div class="stitle">Monitoring <span style="color:var(--pr)">Best Practices</span></div>
+        <div class="bi"><div class="ico" style="background:var(--prD)">🎯</div><div class="bt"><strong>Monitor the Four Golden Signals</strong> — Latency, Traffic, Errors, Saturation. Coined by Google SRE. If these four are healthy, your service is healthy. Start here before adding more metrics.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--alD)">🔔</div><div class="bt"><strong>Set actionable alerts only</strong> — alert fatigue is real. Every alert should require a human action. If an alert fires and you ignore it, delete it. Quality over quantity.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--grD)">📈</div><div class="bt"><strong>Track trends, not just thresholds</strong> — a memory that grows 2% per day will hit 100% in 50 days. Trend-based alerts catch slow leaks before they become emergencies.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--mtD)">🔗</div><div class="bt"><strong>Combine monitoring with logging</strong> — metrics tell you <em style="color:#DDD6FE">something is wrong</em>, logs tell you <em style="color:#DDD6FE">why</em>. Link Grafana dashboards to Loki/Kibana for seamless drill-down.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--wnD)">📋</div><div class="bt"><strong>Build runbooks for every alert</strong> — each alert should have a linked runbook: what it means, who to page, and steps to resolve. Reduces on-call stress and MTTR dramatically.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--prD);border:1px solid var(--prB)">
+          <span style="font-size:10px;font-weight:700;color:#FED7AA">Golden rule: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">If you can't answer <strong style="color:#fff">"is my system healthy?"</strong> in under 30 seconds by looking at your dashboards, your monitoring needs work.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:265px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:11px;padding:11px;background:var(--prD);border:1.5px solid var(--prB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FED7AA;margin-bottom:6px">🎯 Four Golden Signals (Google SRE)</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2)">
+                <div style="font-size:8px;font-weight:700;color:#FED7AA">⏱ Latency</div>
+                <div style="font-size:7px;color:#94A3B8">How long requests take (p50/p99)</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2)">
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD">📈 Traffic</div>
+                <div style="font-size:7px;color:#94A3B8">How many requests per second</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)">
+                <div style="font-size:8px;font-weight:700;color:#FCA5A5">❌ Errors</div>
+                <div style="font-size:7px;color:#94A3B8">Rate of failed requests (4xx/5xx)</div>
+              </div>
+              <div style="border-radius:7px;padding:5px 8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.22)">
+                <div style="font-size:8px;font-weight:700;color:#DDD6FE">💾 Saturation</div>
+                <div style="font-size:7px;color:#94A3B8">How full your system is (CPU/RAM%)</div>
+              </div>
+            </div>
+          </div>
+          <div style="border-radius:11px;padding:10px;background:var(--alD);border:1.5px solid var(--alB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FCA5A5;margin-bottom:5px">🚫 Alert Anti-Patterns</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>Alerting on every CPU spike</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>No runbook linked to alert</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:5px;align-items:flex-start"><span style="color:#FCA5A5;flex-shrink:0">✗</span>100+ alerts nobody responds to</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 10</span></div>
+  </div>
+
+  <!-- S10 SUMMARY -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(249,115,22,.14) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(124,58,237,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Summary &amp; Analogy</div>
+      <div class="stitle">Kubernetes Monitoring — The Complete Picture</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--alD);border:1.5px solid var(--alB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚗</div>
+              <div style="font-size:10px;font-weight:800;color:#FCA5A5">Without Monitoring</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Driving blindfolded</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">No speedometer. No fuel gauge. No warning lights. You only find out something's wrong when the car stops.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--prD);border:1.5px solid var(--prB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--pr),var(--purple));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">🏥</div>
+              <div style="font-size:10px;font-weight:800;color:#FED7AA">Monitoring = Health Checkup</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Vital signs dashboard</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Heart rate, blood pressure, temperature — all tracked in real time. Alarms fire before the patient crashes.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--grD);border:1.5px solid var(--grB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🎯</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Result</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Proactive reliability</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Issues caught in seconds. SLAs met. On-call team sleeps better. Users never notice a problem.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--prD);border:1px solid var(--prB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔥</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FED7AA">Prometheus</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Scrapes + stores metrics</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--grD);border:1px solid var(--grB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📊</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Grafana</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Dashboards + alerts</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--alD);border:1px solid var(--alB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔔</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FCA5A5">Alertmanager</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Route → Slack/PagerDuty</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--mtD);border:1px solid var(--mtB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📡</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Exporters</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">node-exporter · kube-state</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--ndD);border:1px solid var(--ndB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🎯</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">4 Golden Signals</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Latency · Traffic · Errors · Sat.</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--prD);border:1px solid var(--prB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🚀</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#FED7AA">kube-prometheus-stack</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">All-in-one Helm chart</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.2);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#FCA5A5">Unmonitored cluster = ICU patient with no vital signs monitor</span>. <span style="color:#86EFAC">Prometheus + Grafana = the entire control room watching every heartbeat</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--prD);border:1.5px solid var(--prB)">
+            <div style="font-size:8.5px;font-weight:700;color:#FED7AA;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--pr)">◆</span>Monitoring = cluster vital signs</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--pr)">◆</span>Prometheus scrapes metrics</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--pr)">◆</span>Grafana visualizes dashboards</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--pr)">◆</span>Alertmanager routes alerts</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--pr)">◆</span>Use 4 Golden Signals first</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);text-align:center">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#67E8F9;margin-bottom:7px">Next Episode →</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Troubleshooting<br>Kubernetes</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-bottom:9px">Debugging Pods · Events<br>CrashLoopBackOff &amp; more</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));font-size:9px;font-weight:700;color:#fff">Coming Next →</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(249,115,22,.05);border:1px solid rgba(249,115,22,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Found this helpful? 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#FED7AA;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 10</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=10;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>
