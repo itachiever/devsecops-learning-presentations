@@ -25,7 +25,7 @@ It is designed for beginners, students, working professionals, and anyone prepar
 - Kubrnetes Concepts
 - 
 
-# 🔮 Further plan to cover all areas of DevOps/DevSecOps:
+# 🔮 Longterm plan to cover all areas of DevOps/DevSecOps:
 - Linux Fundamentals
 - Networking Basics
 - Git & GitHub
@@ -42,7 +42,9 @@ It is designed for beginners, students, working professionals, and anyone prepar
 - Security Best Practices
 - DevSecOps
 - SAST & DAST
+- SCA & XBOM (SBOM, CBOM, QBOM, AI/ML BOM, HBOM)
 - Container Security
+- Kubernetes Security
 - Secrets Management
 - Policy as Code
 - Infrastructure as Code (IaC)
