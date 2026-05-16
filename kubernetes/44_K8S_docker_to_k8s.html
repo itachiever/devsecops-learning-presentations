@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A10;--blue:#326CE5;--cyan:#00D4FF;--purple:#7C3AED;--purpleL:#A855F7;
+  --green:#22C55E;--amber:#F59E0B;--red:#EF4444;
+  --dk:#2496ED;--dkD:rgba(36,150,237,.1);--dkB:rgba(36,150,237,.32);
+  --k8:#326CE5;--k8D:rgba(50,108,229,.1);--k8B:rgba(50,108,229,.32);
+  --ok:#22C55E;--okD:rgba(34,197,94,.09);--okB:rgba(34,197,94,.28);
+  --er:#EF4444;--erD:rgba(239,68,68,.1);--erB:rgba(239,68,68,.3);
+  --wn:#F59E0B;--wnD:rgba(245,158,11,.09);--wnB:rgba(245,158,11,.28);
+  --mg:#A855F7;--mgD:rgba(168,85,247,.1);--mgB:rgba(168,85,247,.32);
+  --cn:#00D4FF;--cnD:rgba(0,212,255,.09);--cnB:rgba(0,212,255,.28);
+  --white:#EFF6FF;--muted:#7A94C1;--border:#1A3260;--card:rgba(255,255,255,.03);
+}
+body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);overflow:hidden}
+.pres{width:100%;max-width:980px;margin:0 auto;padding:10px}
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dots{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:8px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--dk);border-color:var(--dk);color:#fff;transform:scale(1.1)}
+.dot:hover:not(.on){border-color:var(--dk);color:var(--dk)}
+.nbtn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:rgba(36,150,237,.08);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;transition:all .25s;white-space:nowrap}
+.nbtn:hover{background:rgba(36,150,237,.18);border-color:var(--dk)}
+.nbtn.pri{background:linear-gradient(135deg,var(--dk),var(--k8));border:none;color:#fff;font-weight:700}
+.wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(36,150,237,.08)}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .45s;display:flex;flex-direction:column;background:var(--bg)}
+.slide.on{opacity:1;pointer-events:all}
+.sfooter{position:absolute;bottom:0;left:0;right:0;padding:7px 22px;display:flex;justify-content:flex-end;border-top:1px solid rgba(36,150,237,.12);font-size:10px;color:var(--muted);background:rgba(6,10,16,.75);backdrop-filter:blur(4px)}
+.gbg{position:absolute;inset:0;background-image:linear-gradient(rgba(36,150,237,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(36,150,237,.03) 1px,transparent 1px);background-size:44px 44px}
+.gl{position:absolute;border-radius:50%;pointer-events:none}
+.lbl{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dk);margin-bottom:7px}
+.stitle{font-size:clamp(15px,2.8vw,26px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.L{position:relative;z-index:2;display:flex;height:100%;padding:3.5% 4.5%}
+.ll{flex:1;display:flex;flex-direction:column;justify-content:center;padding-right:3%}
+.lr{flex:1;display:flex;align-items:center;justify-content:center}
+.F{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding:3.2% 4.5%}
+.bi{display:flex;align-items:flex-start;gap:9px;padding:8px 11px;border-radius:9px;margin-bottom:6px;background:var(--card);border:1px solid rgba(36,150,237,.13);transition:all .25s}
+.bi:hover{background:rgba(36,150,237,.05);border-color:rgba(36,150,237,.3);transform:translateX(3px)}
+.ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.bt{font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1;line-height:1.45;padding-top:3px}
+.bt strong{color:var(--white);font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700}
+.step-box{border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.yaml{border-radius:6px;padding:7px 9px;background:rgba(6,10,16,.85);border:1px solid rgba(36,150,237,.18);font-family:monospace;font-size:7.5px;line-height:1.7;color:#94A3B8}
+</style>
+</head>
+<body>
+<div class="pres">
+  <div class="nav-row">
+    <button class="nbtn" onclick="go(-1)">← Prev</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn pri" onclick="go(1)">Next →</button>
+  </div>
+  <div class="wrap">
+
+  <!-- S1 TITLE -->
+  <div class="slide on" data-s="1">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-15%;left:-8%;width:55%;height:70%;background:radial-gradient(ellipse,rgba(36,150,237,.16) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.16) 0%,transparent 65%)"></div>
+    <div style="position:relative;z-index:2;display:flex;height:100%;align-items:center;padding:4% 5%;gap:5%">
+      <div style="flex:1">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:16px">
+          <svg width="50" height="50" viewBox="0 0 100 100"><polygon points="50,5 93,27.5 93,72.5 50,95 7,72.5 7,27.5" fill="none" stroke="#326CE5" stroke-width="3.5"/><polygon points="50,15 83,32.5 83,67.5 50,85 17,67.5 17,32.5" fill="rgba(50,108,229,.1)" stroke="#326CE5" stroke-width="1" stroke-dasharray="4,3"/><circle cx="50" cy="50" r="14" fill="#326CE5"/><circle cx="50" cy="50" r="5.5" fill="#fff"/><line x1="50" y1="36" x2="50" y2="22" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="64" x2="50" y2="78" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="43.5" x2="27" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="56.5" x2="73" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="38.5" y1="56.5" x2="27" y2="63" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><line x1="61.5" y1="43.5" x2="73" y2="37" stroke="#00D4FF" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="21" r="4" fill="#00D4FF"/><circle cx="50" cy="79" r="4" fill="#00D4FF"/><circle cx="25" cy="36" r="4" fill="#00D4FF"/><circle cx="75" cy="64" r="4" fill="#00D4FF"/><circle cx="25" cy="64" r="4" fill="#00D4FF"/><circle cx="75" cy="36" r="4" fill="#00D4FF"/></svg>
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dk);padding:3px 12px;border:1px solid rgba(36,150,237,.25);border-radius:20px;background:rgba(36,150,237,.07)">Kubernetes Series — Final Episode</div>
+        </div>
+        <div style="font-size:clamp(16px,3.5vw,30px);font-weight:900;line-height:1.05;margin-bottom:10px;background:linear-gradient(135deg,#fff 15%,var(--dk) 55%,var(--k8) 95%);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Docker to<br>Kubernetes Migration</div>
+        <div style="font-size:clamp(10px,1.5vw,14px);color:var(--muted);margin-bottom:18px;line-height:1.5">Moving from Containers to Container Orchestration<br>— The journey every DevOps engineer makes</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="tag" style="background:var(--dkD);color:#7DD3FC;border:1px solid var(--dkB);padding:4px 11px;font-size:9px">🐳 Docker</span>
+          <span class="tag" style="background:var(--k8D);color:#BAE6FD;border:1px solid var(--k8B);padding:4px 11px;font-size:9px">→ Migration →</span>
+          <span class="tag" style="background:var(--k8D);color:#C7D2FE;border:1px solid var(--k8B);padding:4px 11px;font-size:9px">⎈ Kubernetes</span>
+          <span class="tag" style="background:var(--okD);color:#86EFAC;border:1px solid var(--okB);padding:4px 11px;font-size:9px">🚀 Orchestration</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center">
+        <div style="width:100%;max-width:315px;border:1.5px dashed rgba(36,150,237,.22);border-radius:14px;padding:13px;background:rgba(36,150,237,.03)">
+          <div style="text-align:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">The Migration Journey</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="border-radius:8px;padding:7px 10px;background:var(--dkD);border:1px solid var(--dkB);display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">🐳</span>
+              <div><div style="font-size:8.5px;font-weight:700;color:#7DD3FC">Docker Era</div><div style="font-size:7px;color:var(--muted)">Manual containers · docker run · docker-compose</div></div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--dk);font-weight:700">↓ scale up → chaos ↓</div>
+            <div style="border-radius:8px;padding:7px 10px;background:var(--erD);border:1px solid var(--erB);display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">😰</span>
+              <div><div style="font-size:8.5px;font-weight:700;color:#FCA5A5">Pain Point</div><div style="font-size:7px;color:var(--muted)">50+ containers · no auto-scaling · no self-healing</div></div>
+            </div>
+            <div style="text-align:center;font-size:11px;color:var(--ok);font-weight:700">↓ migrate ↓</div>
+            <div style="border-radius:8px;padding:7px 10px;background:var(--k8D);border:1px solid var(--k8B);display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px">⎈</span>
+              <div><div style="font-size:8.5px;font-weight:700;color:#BAE6FD">Kubernetes Era</div><div style="font-size:7px;color:var(--muted)">Automated · Scaled · Self-healing · Reliable</div></div>
+            </div>
+            <div style="border-radius:6px;padding:4px 8px;background:var(--okD);border:1px solid var(--okB);text-align:center;font-size:7.5px;color:#86EFAC;font-weight:600">Production-grade container orchestration ✅</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>01 / 11</span></div>
+  </div>
+
+  <!-- S2 WHY DOCKER ALONE FAILS -->
+  <div class="slide" data-s="2">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;right:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(239,68,68,.1) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Problem</div>
+        <div class="stitle">Why Docker Alone <span style="color:#FCA5A5">Becomes Painful</span></div>
+        <div class="bi" style="border-color:rgba(36,150,237,.2)"><div class="ico" style="background:var(--dkD)">🐳</div><div class="bt"><strong>Docker is great — for a few containers</strong> — docker run, docker-compose, a handful of services. Works perfectly for dev, works fine for 5–10 containers in production. Then you add more services…</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">💥</div><div class="bt"><strong>Manual scaling is impossible at scale</strong> — traffic spikes at 9 AM. You need 20 more API containers. With Docker alone: SSH into servers, docker run × 20, hope nothing crashes. Not sustainable.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">😵</div><div class="bt"><strong>No self-healing</strong> — a Docker container crashes at 3 AM. It stays down until a human restarts it. With 100 containers across 10 servers, monitoring and restarting manually is a full-time job.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🔀</div><div class="bt"><strong>Multi-host networking is hard</strong> — distributing containers across multiple servers for HA requires manual network configuration, service discovery, and load balancing. docker-compose doesn't do this.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">📦</div><div class="bt"><strong>Zero-downtime deploys require scripting</strong> — rolling out a new image version across 50 containers without downtime requires complex bash scripts. Kubernetes does this natively in 1 YAML field.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--dkD);border:1px solid var(--dkB)">
+          <span style="font-size:10px;font-weight:700;color:#7DD3FC">The tipping point: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Most teams hit the "Docker wall" at ~20–50 containers across multiple services. That's when <strong style="color:#fff">orchestration stops being optional</strong> and becomes essential.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:7px">
+          <div style="border-radius:12px;padding:11px;background:var(--dkD);border:1.5px solid var(--dkB)">
+            <div style="font-size:8.5px;font-weight:800;color:#7DD3FC;margin-bottom:6px">🐳 Docker — Works Fine Here</div>
+            <svg viewBox="0 0 215 50" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="5" width="44" height="38" rx="7" fill="rgba(36,150,237,.12)" stroke="rgba(36,150,237,.35)" stroke-width="1.5"/>
+              <text x="24" y="18" text-anchor="middle" fill="#7DD3FC" font-size="8" font-weight="700" font-family="Segoe UI">🐳 web</text>
+              <text x="24" y="36" text-anchor="middle" fill="#94A3B8" font-size="7" font-family="Segoe UI">:8080</text>
+              <rect x="52" y="5" width="44" height="38" rx="7" fill="rgba(36,150,237,.12)" stroke="rgba(36,150,237,.35)" stroke-width="1.5"/>
+              <text x="74" y="18" text-anchor="middle" fill="#7DD3FC" font-size="8" font-weight="700" font-family="Segoe UI">🐳 api</text>
+              <text x="74" y="36" text-anchor="middle" fill="#94A3B8" font-size="7" font-family="Segoe UI">:3000</text>
+              <rect x="102" y="5" width="44" height="38" rx="7" fill="rgba(36,150,237,.12)" stroke="rgba(36,150,237,.35)" stroke-width="1.5"/>
+              <text x="124" y="18" text-anchor="middle" fill="#7DD3FC" font-size="8" font-weight="700" font-family="Segoe UI">🐳 db</text>
+              <text x="124" y="36" text-anchor="middle" fill="#94A3B8" font-size="7" font-family="Segoe UI">:5432</text>
+              <text x="165" y="27" fill="#86EFAC" font-size="9" font-weight="700" font-family="Segoe UI">✅ OK</text>
+            </svg>
+          </div>
+          <div style="border-radius:12px;padding:11px;background:var(--erD);border:1.5px solid var(--erB)">
+            <div style="font-size:8.5px;font-weight:800;color:#FCA5A5;margin-bottom:6px">😱 Docker — Chaos at Scale</div>
+            <svg viewBox="0 0 215 65" width="100%" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="17" y="14" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">api-1</text>
+              <rect x="36" y="2" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="51" y="14" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">api-2</text>
+              <rect x="70" y="2" width="30" height="18" rx="4" fill="rgba(239,68,68,.15)" stroke="rgba(239,68,68,.35)" stroke-width="1"/><text x="85" y="14" text-anchor="middle" fill="#FCA5A5" font-size="6" font-family="Segoe UI">💥 api-3</text>
+              <rect x="104" y="2" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="119" y="14" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">api-4</text>
+              <rect x="138" y="2" width="30" height="18" rx="4" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.3)" stroke-width="1"/><text x="153" y="14" text-anchor="middle" fill="#FDE068" font-size="6" font-family="Segoe UI">⚠ api-5</text>
+              <rect x="172" y="2" width="38" height="18" rx="4" fill="rgba(239,68,68,.15)" stroke="rgba(239,68,68,.35)" stroke-width="1"/><text x="191" y="14" text-anchor="middle" fill="#FCA5A5" font-size="6" font-family="Segoe UI">💥 worker</text>
+              <rect x="2" y="26" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="17" y="38" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">web-1</text>
+              <rect x="36" y="26" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="51" y="38" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">web-2</text>
+              <rect x="70" y="26" width="30" height="18" rx="4" fill="rgba(36,150,237,.1)" stroke="rgba(36,150,237,.3)" stroke-width="1"/><text x="85" y="38" text-anchor="middle" fill="#7DD3FC" font-size="6" font-family="Segoe UI">web-3</text>
+              <rect x="104" y="26" width="35" height="18" rx="4" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.3)" stroke-width="1"/><text x="121" y="38" text-anchor="middle" fill="#FDE068" font-size="6" font-family="Segoe UI">⚠ cache</text>
+              <rect x="143" y="26" width="67" height="18" rx="4" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.25)" stroke-width="1"/><text x="176" y="38" text-anchor="middle" fill="#FCA5A5" font-size="6" font-family="Segoe UI">😱 who's down?!</text>
+              <text x="107" y="62" text-anchor="middle" fill="#FCA5A5" font-size="8" font-weight="700" font-family="Segoe UI">No auto-restart · No scaling · No visibility</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>02 / 11</span></div>
+  </div>
+
+  <!-- S3 WHY KUBERNETES -->
+  <div class="slide" data-s="3">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(50,108,229,.11) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">The Solution</div>
+        <div class="stitle">Why <span style="color:#BAE6FD">Kubernetes</span> is Needed</div>
+        <div class="bi" style="border-color:rgba(50,108,229,.2)"><div class="ico" style="background:var(--k8D)">🤖</div><div class="bt"><strong>Automates all container management</strong> — scheduling, restarting, scaling, networking, load balancing, rolling updates. What took a team of engineers and complex scripts, Kubernetes does automatically.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">♻</div><div class="bt"><strong>Self-healing without human intervention</strong> — container crashes? Kubernetes restarts it within seconds. Node fails? Pods are rescheduled to healthy nodes automatically. 3 AM? Nobody wakes up.</div></div>
+        <div class="bi" style="border-color:rgba(50,108,229,.2)"><div class="ico" style="background:var(--k8D)">📈</div><div class="bt"><strong>Scale up and down automatically</strong> — HPA watches CPU/memory. Traffic spikes → Pods added in seconds. Traffic drops → Pods removed → costs reduced. No human involvement needed.</div></div>
+        <div class="bi" style="border-color:rgba(34,197,94,.2)"><div class="ico" style="background:var(--okD)">🔄</div><div class="bt"><strong>Zero-downtime rolling deployments</strong> — new version deployed one Pod at a time. Old Pods serve traffic until new ones are healthy. No maintenance windows. No downtime. One YAML field.</div></div>
+        <div class="bi" style="border-color:rgba(0,212,255,.2)"><div class="ico" style="background:var(--cnD)">🌐</div><div class="bt"><strong>Built-in service discovery and load balancing</strong> — Services automatically route traffic to healthy Pods across nodes. DNS-based discovery. No external load balancer configuration needed.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--k8D);border:2px solid var(--k8B);box-shadow:0 0 22px rgba(50,108,229,.12)">
+            <div style="text-align:center;font-size:9px;font-weight:800;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">K8s vs Manual Docker</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;text-align:center;margin-bottom:3px">
+                <div style="font-size:8px;font-weight:700;color:#7DD3FC;padding:3px;border-radius:5px;background:rgba(36,150,237,.1)">🐳 Docker alone</div>
+                <div style="font-size:8px;font-weight:700;color:#BAE6FD;padding:3px;border-radius:5px;background:rgba(50,108,229,.12)">⎈ Kubernetes</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5">❌ Manual restart</div>
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);font-size:7.5px;color:#86EFAC">✅ Auto-restart</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5">❌ Manual scale</div>
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);font-size:7.5px;color:#86EFAC">✅ HPA auto-scale</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5">❌ Manual LB</div>
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);font-size:7.5px;color:#86EFAC">✅ Service LB</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5">❌ Downtime deploy</div>
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);font-size:7.5px;color:#86EFAC">✅ Rolling update</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);font-size:7.5px;color:#FCA5A5">❌ Single node</div>
+                <div style="border-radius:6px;padding:4px 7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);font-size:7.5px;color:#86EFAC">✅ Multi-node HA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>03 / 11</span></div>
+  </div>
+
+  <!-- S4 DOCKER VS K8S -->
+  <div class="slide" data-s="4">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(36,150,237,.08) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Comparison</div>
+      <div class="stitle"><span style="color:#7DD3FC">Docker</span> vs <span style="color:#BAE6FD">Kubernetes</span> — Understanding the Difference</div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--dkD);border:2px solid var(--dkB);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(36,150,237,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐳</div>
+            <div><div style="font-size:14px;font-weight:800;color:#7DD3FC">Docker</div><div style="font-size:8px;color:var(--muted)">Container runtime &amp; build platform</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.5;flex:1">Docker is the tool that <strong style="color:#7DD3FC">builds and runs</strong> individual containers. It's the engine that packages your app with all its dependencies into a portable container image that runs anywhere.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(36,150,237,.1);border:1px solid rgba(36,150,237,.2);color:#7DD3FC">🔨 Builds container images (Dockerfile)</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(36,150,237,.1);border:1px solid rgba(36,150,237,.2);color:#7DD3FC">▶ Runs individual containers</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(36,150,237,.1);border:1px solid rgba(36,150,237,.2);color:#7DD3FC">📦 Pushes images to registries</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(36,150,237,.1);border:1px solid rgba(36,150,237,.2);color:#7DD3FC">🔗 docker-compose for small clusters</div>
+          </div>
+          <div style="border-radius:7px;padding:6px 9px;background:rgba(36,150,237,.06);border:1px solid rgba(36,150,237,.18)">
+            <div style="font-size:7.5px;color:#7DD3FC;font-weight:700;margin-bottom:2px">Think of Docker as:</div>
+            <div style="font-size:7.5px;color:#94A3B8">A single car 🚗. Reliable, gets you from A to B. But you're the driver — no auto-pilot, no traffic management.</div>
+          </div>
+        </div>
+        <!-- VS divider -->
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 5px">
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+          <div style="padding:6px 10px;border-radius:8px;background:var(--mgD);border:1px solid var(--mgB);font-size:10px;font-weight:800;color:#DDD6FE">vs</div>
+          <div style="width:1px;flex:1;background:linear-gradient(to bottom,transparent,var(--border),transparent)"></div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:12px;background:var(--k8D);border:2px solid var(--k8B);display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:42px;height:42px;border-radius:10px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">⎈</div>
+            <div><div style="font-size:14px;font-weight:800;color:#BAE6FD">Kubernetes</div><div style="font-size:8px;color:var(--muted)">Container orchestration platform</div></div>
+          </div>
+          <div style="font-size:8.5px;color:#CBD5E1;line-height:1.5;flex:1">Kubernetes is the system that <strong style="color:#BAE6FD">manages and orchestrates</strong> hundreds of containers across multiple machines. It uses Docker (or containerd) under the hood but controls everything at scale.</div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2);color:#BAE6FD">📅 Schedules Pods across nodes</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2);color:#BAE6FD">♻ Self-heals crashed containers</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2);color:#BAE6FD">📈 Auto-scales based on load</div>
+            <div style="font-size:8px;padding:4px 8px;border-radius:5px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2);color:#BAE6FD">🔄 Rolling deploys, rollbacks</div>
+          </div>
+          <div style="border-radius:7px;padding:6px 9px;background:rgba(50,108,229,.06);border:1px solid rgba(50,108,229,.18)">
+            <div style="font-size:7.5px;color:#BAE6FD;font-weight:700;margin-bottom:2px">Think of Kubernetes as:</div>
+            <div style="font-size:7.5px;color:#94A3B8">A smart city traffic system 🚦. Manages all cars (containers) automatically — routing, scaling, rerouting around failures. No human drivers needed.</div>
+          </div>
+        </div>
+        <!-- Bottom point -->
+        <div style="width:160px;flex-shrink:0;border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;gap:6px;justify-content:center">
+          <div style="text-align:center;font-size:8.5px;font-weight:700;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Key Insight</div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;text-align:center">Docker and Kubernetes are <strong style="color:#fff">not competitors</strong>. K8s uses Docker to run containers. They work <strong style="color:#86EFAC">together</strong>.</div>
+          <div style="border-radius:7px;padding:5px 7px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);text-align:center;font-size:8px;color:#86EFAC;font-weight:700">Docker builds 🐳<br>K8s orchestrates ⎈</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>04 / 11</span></div>
+  </div>
+
+  <!-- S5 MIGRATION JOURNEY -->
+  <div class="slide" data-s="5">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(168,85,247,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Migration Steps</div>
+      <div class="stitle">The <span style="color:var(--mg)">Migration Journey</span> — Step by Step</div>
+      <div style="display:flex;gap:6px;flex:1;padding-top:8px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+          <div class="step-box" style="background:var(--dkD);border:1.5px solid var(--dkB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--dk),#0EA5E9);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">1</div>
+            <div><div style="font-size:10px;font-weight:700;color:#7DD3FC">Containerize your applications</div><div style="font-size:8.5px;color:#94A3B8">Write Dockerfile for each service. Build images. Test locally with docker run. Ensure apps work correctly in containers before any K8s migration.</div></div>
+            <span style="margin-left:auto;font-size:13px;flex-shrink:0">🐳</span>
+          </div>
+          <div class="step-box" style="background:var(--mgD);border:1.5px solid var(--mgB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--mg),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">2</div>
+            <div><div style="font-size:10px;font-weight:700;color:#DDD6FE">Push images to a container registry</div><div style="font-size:8.5px;color:#94A3B8">Push to Docker Hub, ECR, GCR, or ACR. Tag images properly (never :latest in prod). Kubernetes will pull from here when creating Pods.</div></div>
+            <span style="margin-left:auto;font-size:13px;flex-shrink:0">📦</span>
+          </div>
+          <div class="step-box" style="background:var(--k8D);border:1.5px solid var(--k8B)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--k8),var(--cn));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff">3</div>
+            <div><div style="font-size:10px;font-weight:700;color:#BAE6FD">Write Kubernetes YAML manifests</div><div style="font-size:8.5px;color:#94A3B8">Create Deployment, Service, ConfigMap, and Ingress YAML files. Start with one service at a time. Test in dev/staging namespace first.</div></div>
+            <span style="margin-left:auto;font-size:13px;flex-shrink:0">📋</span>
+          </div>
+          <div class="step-box" style="background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16A34A);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">4</div>
+            <div><div style="font-size:10px;font-weight:700;color:#86EFAC">Deploy and validate workloads</div><div style="font-size:8.5px;color:#94A3B8">kubectl apply -f. Watch Pods come up. Verify logs. Test endpoints. Migrate traffic gradually (canary or blue-green). Verify functionality matches.</div></div>
+            <span style="margin-left:auto;font-size:13px;flex-shrink:0">🚀</span>
+          </div>
+          <div class="step-box" style="background:var(--wnD);border:1.5px solid var(--wnB)">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--wn),#D97706);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#000">5</div>
+            <div><div style="font-size:10px;font-weight:700;color:#FDE068">Configure networking, scaling, monitoring</div><div style="font-size:8.5px;color:#94A3B8">Set up Ingress for external traffic. Configure HPA for autoscaling. Deploy Prometheus/Grafana. Set up alerts. Define NetworkPolicies. Decommission Docker servers.</div></div>
+            <span style="margin-left:auto;font-size:13px;flex-shrink:0">⚙</span>
+          </div>
+        </div>
+        <div style="width:195px;flex-shrink:0;display:flex;align-items:center">
+          <div style="width:100%;border-radius:12px;padding:11px;background:rgba(168,85,247,.03);border:1.5px dashed var(--mgB)">
+            <div style="text-align:center;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">Tools Needed</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="border-radius:6px;padding:5px 8px;background:var(--dkD);border:1px solid var(--dkB);font-size:8px;color:#7DD3FC;font-weight:600">🐳 Docker → build images</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--mgD);border:1px solid var(--mgB);font-size:8px;color:#DDD6FE;font-weight:600">📦 Registry → store images</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--k8D);border:1px solid var(--k8B);font-size:8px;color:#BAE6FD;font-weight:600">⎈ kubectl → manage K8s</div>
+              <div style="border-radius:6px;padding:5px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.22);font-size:8px;color:#6EE7B7;font-weight:600">📦 Helm → package apps</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--wnD);border:1px solid var(--wnB);font-size:8px;color:#FDE068;font-weight:600">📊 Prometheus/Grafana</div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--okD);border:1px solid var(--okB);font-size:8px;color:#86EFAC;font-weight:600">🐙 Argo CD → GitOps</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>05 / 11</span></div>
+  </div>
+
+  <!-- S6 KEY COMPONENTS -->
+  <div class="slide" data-s="6">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.09) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">K8s Concepts You'll Use</div>
+      <div class="stitle">Key Kubernetes Components <span style="color:#BAE6FD">for Migration</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:12px;padding:11px;background:var(--k8D);border:2px solid var(--k8B);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📦</div><div style="font-size:11px;font-weight:800;color:#BAE6FD">Pod</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Smallest K8s unit. Wraps one or more Docker containers. Replaces <code style="color:#BAE6FD;font-size:8px">docker run</code>. Pods are the containers Kubernetes manages.</div>
+          <div class="yaml">apiVersion: v1<br>kind: <span style="color:#BAE6FD">Pod</span><br>spec:<br>&nbsp;&nbsp;containers:<br>&nbsp;&nbsp;- image: <span style="color:#FDE068">myapp:v1</span></div>
+        </div>
+        <div style="flex:1;border-radius:12px;padding:11px;background:var(--mgD);border:2px solid var(--mgB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(168,85,247,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔄</div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Deployment</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Manages replicated Pods. Replaces docker-compose scaling. Handles rolling updates, rollbacks, and desired replica state. The most common K8s resource.</div>
+          <div class="yaml" style="border-color:rgba(168,85,247,.18)">kind: <span style="color:#DDD6FE">Deployment</span><br>spec:<br>&nbsp;&nbsp;replicas: <span style="color:#FDE068">3</span><br>&nbsp;&nbsp;strategy: <span style="color:#86EFAC">RollingUpdate</span></div>
+        </div>
+        <div style="flex:1;border-radius:12px;padding:11px;background:var(--dkD);border:2px solid var(--dkB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(36,150,237,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🌐</div><div style="font-size:11px;font-weight:800;color:#7DD3FC">Service</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Stable network endpoint for a set of Pods. Replaces manual port mapping and docker network. Load balances across all healthy Pods automatically.</div>
+          <div class="yaml">kind: <span style="color:#7DD3FC">Service</span><br>spec:<br>&nbsp;&nbsp;type: <span style="color:#FDE068">ClusterIP</span><br>&nbsp;&nbsp;port: <span style="color:#FDE068">80</span></div>
+        </div>
+        <div style="flex:1;border-radius:12px;padding:11px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔀</div><div style="font-size:11px;font-weight:800;color:#86EFAC">Ingress</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Routes external HTTP/HTTPS traffic to Services. Replaces manual nginx/Traefik configuration. Host-based and path-based routing rules in YAML.</div>
+          <div class="yaml" style="border-color:rgba(34,197,94,.18)">kind: <span style="color:#86EFAC">Ingress</span><br>rules:<br>- host: <span style="color:#FDE068">api.example.com</span><br>&nbsp;&nbsp;path: <span style="color:#FDE068">/</span></div>
+        </div>
+        <div style="flex:1;border-radius:12px;padding:11px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:7px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚙</div><div style="font-size:11px;font-weight:800;color:#FDE068">ConfigMap &amp; Secret</div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Replaces Docker env vars and .env files. ConfigMap for non-sensitive config (DB_HOST, LOG_LEVEL). Secret for passwords, API keys (base64 encoded).</div>
+          <div class="yaml" style="border-color:rgba(245,158,11,.18)">kind: <span style="color:#FDE068">ConfigMap</span><br>data:<br>&nbsp;&nbsp;DB_HOST: <span style="color:#86EFAC">postgres</span><br>&nbsp;&nbsp;LOG_LEVEL: <span style="color:#86EFAC">info</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>06 / 11</span></div>
+  </div>
+
+  <!-- S7 CHALLENGES -->
+  <div class="slide" data-s="7">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(245,158,11,.09) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Migration Challenges</div>
+        <div class="stitle">Challenges <span style="color:var(--wn)">During Migration</span></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">📚</div><div class="bt"><strong>Learning curve — new concepts everywhere</strong> — Pods, Deployments, Services, Ingress, RBAC, namespaces, PVCs. Kubernetes has a steep learning curve. Budget 2–4 weeks of study time before migrating production workloads.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">📄</div><div class="bt"><strong>YAML complexity grows fast</strong> — a simple docker-compose.yml becomes 5+ Kubernetes YAML files. Use Helm or Kustomize to manage this. Keep configs in Git from day one. Tools like Kompose help convert docker-compose to K8s.</div></div>
+        <div class="bi" style="border-color:rgba(245,158,11,.2)"><div class="ico" style="background:var(--wnD)">🌐</div><div class="bt"><strong>Networking model is different</strong> — Docker uses bridge networks and port mappings. Kubernetes uses cluster IPs, Services, and Ingress. DNS works differently. NetworkPolicies add complexity. Allow 1–2 weeks to understand K8s networking.</div></div>
+        <div class="bi" style="border-color:rgba(239,68,68,.2)"><div class="ico" style="background:var(--erD)">💾</div><div class="bt"><strong>Stateful applications need careful planning</strong> — stateless apps (web, APIs) migrate easily. Databases and stateful services need PersistentVolumes, StatefulSets, and data migration planning. Don't rush this step.</div></div>
+        <div style="margin-top:8px;padding:9px 13px;border-radius:9px;background:var(--wnD);border:1px solid var(--wnB)">
+          <span style="font-size:10px;font-weight:700;color:#FDE068">Pro tip: </span>
+          <span style="font-size:clamp(9px,1.1vw,11.5px);color:#CBD5E1">Migrate <strong style="color:#fff">stateless services first</strong> (APIs, web frontends). Leave databases for last. Use managed databases (RDS, Cloud SQL) instead of running DBs in K8s to reduce complexity.</span>
+        </div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px">
+          <div style="border-radius:13px;padding:12px;background:var(--wnD);border:2px solid var(--wnB);box-shadow:0 0 22px rgba(245,158,11,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#FDE068;letter-spacing:1px;text-transform:uppercase;margin-bottom:9px">Challenge → Solution</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="border-radius:8px;padding:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:7.5px;font-weight:700;color:#FCA5A5;margin-bottom:2px">😵 Complex YAML</div>
+                <div style="font-size:7.5px;color:#86EFAC;font-weight:600">→ Use Helm Charts + Kustomize</div>
+              </div>
+              <div style="border-radius:8px;padding:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:7.5px;font-weight:700;color:#FCA5A5;margin-bottom:2px">🌐 Network confusion</div>
+                <div style="font-size:7.5px;color:#86EFAC;font-weight:600">→ Learn Services + Ingress first</div>
+              </div>
+              <div style="border-radius:8px;padding:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:7.5px;font-weight:700;color:#FCA5A5;margin-bottom:2px">💾 Stateful apps</div>
+                <div style="font-size:7.5px;color:#86EFAC;font-weight:600">→ Use managed databases</div>
+              </div>
+              <div style="border-radius:8px;padding:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:7.5px;font-weight:700;color:#FCA5A5;margin-bottom:2px">📚 Learning curve</div>
+                <div style="font-size:7.5px;color:#86EFAC;font-weight:600">→ Start with minikube + labs</div>
+              </div>
+              <div style="border-radius:8px;padding:7px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2)">
+                <div style="font-size:7.5px;font-weight:700;color:#FCA5A5;margin-bottom:2px">🔍 Debugging K8s</div>
+                <div style="font-size:7.5px;color:#86EFAC;font-weight:600">→ kubectl describe + logs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>07 / 11</span></div>
+  </div>
+
+  <!-- S8 BENEFITS -->
+  <div class="slide" data-s="8">
+    <div class="gbg"></div>
+    <div class="gl" style="bottom:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(34,197,94,.1) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">After Migration</div>
+      <div class="stitle">Benefits <span style="color:var(--ok)">After Migration</span></div>
+      <div style="display:flex;gap:9px;flex:1;padding-top:8px">
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--okD);border:2px solid var(--okB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:8px;background:rgba(34,197,94,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div><div><div style="font-size:11px;font-weight:800;color:#86EFAC">Auto Scaling</div><div style="font-size:7.5px;color:var(--muted)">Zero manual intervention</div></div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">HPA automatically adds Pods when CPU/memory spikes. Cluster Autoscaler adds nodes when Pods can't fit. Scale from 5 to 500 Pods without a single manual command.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86EFAC;text-align:center">Before: manual ssh + docker run × N</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--k8D);border:2px solid var(--k8B);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:8px;background:rgba(50,108,229,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">♻</div><div><div style="font-size:11px;font-weight:800;color:#BAE6FD">High Availability</div><div style="font-size:7.5px;color:var(--muted)">Self-healing cluster</div></div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Container crashes? Automatically restarted. Node fails? Pods rescheduled to healthy nodes. Multiple replicas across AZs. 99.9%+ uptime becomes achievable without heroic effort.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.2);color:#BAE6FD;text-align:center">Before: alert → ssh → docker restart</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--mgD);border:2px solid var(--mgB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:8px;background:rgba(168,85,247,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔄</div><div><div style="font-size:11px;font-weight:800;color:#DDD6FE">Rolling Updates</div><div style="font-size:7.5px;color:var(--muted)">Zero-downtime deploys</div></div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Deploy new version one Pod at a time. Users never see downtime. Rollback in seconds if issues detected. No maintenance windows, no customer impact, no 2 AM deploy anxiety.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:#DDD6FE;text-align:center">Before: stop all → deploy → pray</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--dkD);border:2px solid var(--dkB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:8px;background:rgba(36,150,237,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div><div><div style="font-size:11px;font-weight:800;color:#7DD3FC">Resource Efficiency</div><div style="font-size:7.5px;color:var(--muted)">Bin-packing nodes</div></div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">K8s scheduler packs Pods onto nodes efficiently using resource requests. Fewer wasted VMs, lower cloud bills. Spot instances used automatically for non-critical workloads.</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(36,150,237,.1);border:1px solid rgba(36,150,237,.2);color:#7DD3FC;text-align:center">Before: 1 app per VM = 10% utilization</div>
+        </div>
+        <div style="flex:1;border-radius:13px;padding:11px;background:var(--wnD);border:2px solid var(--wnB);display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:8px;background:rgba(245,158,11,.22);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div><div><div style="font-size:11px;font-weight:800;color:#FDE068">Full Automation</div><div style="font-size:7.5px;color:var(--muted)">GitOps + CI/CD</div></div></div>
+          <div style="font-size:8px;color:#CBD5E1;line-height:1.5;flex:1">Git push triggers pipeline → build → test → deploy to K8s. Argo CD keeps cluster in sync with Git. Engineers focus on features, not operations. Deploys become boring (the good kind).</div>
+          <div style="font-size:7.5px;padding:3px 7px;border-radius:4px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:#FDE068;text-align:center">Before: 5 manual steps per deploy</div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>08 / 11</span></div>
+  </div>
+
+  <!-- S9 REAL WORLD -->
+  <div class="slide" data-s="9">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;left:20%;width:55%;height:50%;background:radial-gradient(ellipse,rgba(36,150,237,.07) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Real-World Example</div>
+      <div class="stitle">E-Commerce Company — <span style="color:var(--ok)">Migration Success Story</span></div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px;align-items:center">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:9px;align-items:stretch">
+            <div style="display:flex;flex-direction:column;gap:5px;width:65px;flex-shrink:0">
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Before</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Problem</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Decision</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Migration</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">After 6mo</div>
+              <div style="font-size:7.5px;color:var(--muted);height:30px;display:flex;align-items:center">Black Friday</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--dkD);border:1px solid var(--dkB);display:flex;align-items:center"><div style="font-size:8.5px;color:#7DD3FC;font-weight:600">🐳 12 Docker containers on 3 bare-metal servers · manual docker-compose up</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--erD);border:1px solid var(--erB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FCA5A5;font-weight:600">💥 Peak traffic: crashes · 45-min outage · $180K lost · CEO angry</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--wnD);border:1px solid var(--wnB);display:flex;align-items:center"><div style="font-size:8.5px;color:#FDE068;font-weight:600">📋 3-month K8s migration plan · Migrate stateless apps first · EKS on AWS</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--k8D);border:1px solid var(--k8B);display:flex;align-items:center"><div style="font-size:8.5px;color:#BAE6FD;font-weight:600">⎈ Web → API → Workers → Finally: database (RDS, not K8s)</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">✅ HPA configured · Argo CD for GitOps · Prometheus/Grafana monitoring</div></div>
+              <div style="height:30px;padding:4px 10px;border-radius:7px;background:var(--okD);border:1px solid var(--okB);display:flex;align-items:center"><div style="font-size:8.5px;color:#86EFAC;font-weight:600">🎉 10× traffic spike → K8s auto-scales to 80 Pods · Zero downtime · $2.1M revenue</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="width:222px;flex-shrink:0">
+          <div style="border-radius:13px;padding:12px;background:var(--okD);border:2px solid var(--okB);box-shadow:0 0 18px rgba(34,197,94,.1)">
+            <div style="text-align:center;font-size:8.5px;font-weight:800;color:#86EFAC;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Before vs After</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="border-radius:6px;padding:5px;background:var(--erD);border:1px solid var(--erB);text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:#FCA5A5;margin-bottom:2px">Before</div>
+                  <div style="font-size:12px;font-weight:800;color:#FCA5A5">12</div>
+                  <div style="font-size:7px;color:#94A3B8">containers</div>
+                </div>
+                <div style="border-radius:6px;padding:5px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:#86EFAC;margin-bottom:2px">After Peak</div>
+                  <div style="font-size:12px;font-weight:800;color:#86EFAC">80</div>
+                  <div style="font-size:7px;color:#94A3B8">pods (auto)</div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#94A3B8">Downtime/mo</span>
+                <span style="font-size:8px;color:#FCA5A5;text-decoration:line-through">45min</span>
+                <span style="font-size:8px;color:#86EFAC;font-weight:700">→ 0 min ✅</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#94A3B8">Deploy time</span>
+                <span style="font-size:8px;color:#FCA5A5;text-decoration:line-through">30min</span>
+                <span style="font-size:8px;color:#86EFAC;font-weight:700">→ 5 min ✅</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;border-radius:6px;padding:4px 8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+                <span style="font-size:8px;color:#94A3B8">On-call pages</span>
+                <span style="font-size:8px;color:#FCA5A5;text-decoration:line-through">12/mo</span>
+                <span style="font-size:8px;color:#86EFAC;font-weight:700">→ 1/mo ✅</span>
+              </div>
+              <div style="border-radius:6px;padding:5px 8px;background:var(--okD);border:1px solid var(--okB);text-align:center">
+                <div style="font-size:8px;font-weight:700;color:#86EFAC">Migration ROI: positive in 4 months ✅</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>09 / 11</span></div>
+  </div>
+
+  <!-- S10 BEST PRACTICES -->
+  <div class="slide" data-s="10">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-5%;right:10%;width:50%;height:55%;background:radial-gradient(ellipse,rgba(34,197,94,.08) 0%,transparent 65%)"></div>
+    <div class="L">
+      <div class="ll">
+        <div class="lbl">Migration Best Practices</div>
+        <div class="stitle">How to Migrate <span style="color:var(--ok)">Successfully</span></div>
+        <div class="bi"><div class="ico" style="background:var(--okD)">🐾</div><div class="bt"><strong>Start small — one service at a time</strong> — don't migrate everything at once. Pick your simplest, least critical stateless service first. Learn the K8s workflow. Fix issues. Then migrate the next service. Crawl, walk, run.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--k8D)">🔄</div><div class="bt"><strong>Set up CI/CD before migrating prod</strong> — before any production workload touches K8s, have your pipeline working: code push → build → test → deploy to K8s automatically. Manual kubectl in prod = future problems.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--dkD)">📊</div><div class="bt"><strong>Monitor from day one</strong> — deploy Prometheus + Grafana before your first app hits K8s. You need to see what's happening. Add liveness and readiness probes to every container before migrating.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--erD)">🔐</div><div class="bt"><strong>Apply security best practices immediately</strong> — RBAC, non-root containers, image scanning. Don't "add security later." In Kubernetes, security posture is much easier to set correctly from the start than to retrofit.</div></div>
+        <div class="bi"><div class="ico" style="background:var(--wnD)">☁</div><div class="bt"><strong>Use managed Kubernetes (EKS/GKE/AKS)</strong> — don't run your own K8s control plane when learning to migrate. Managed services let you focus on apps, not Kubernetes infrastructure. You can always self-host later if needed.</div></div>
+      </div>
+      <div class="lr">
+        <div style="width:100%;max-width:268px;display:flex;flex-direction:column;gap:6px">
+          <div style="border-radius:12px;padding:11px;background:var(--okD);border:1.5px solid var(--okB)">
+            <div style="font-size:8.5px;font-weight:700;color:#86EFAC;margin-bottom:6px">✅ Migration Checklist</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Apps containerized + images pushed</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Dev K8s cluster set up (minikube/kind)</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>YAML manifests written + tested</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Health probes configured</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Resource requests/limits set</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>CI/CD pipeline to K8s working</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Monitoring deployed + alerts set</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px;align-items:center"><span style="font-size:10px">□</span>Rollback plan tested</div>
+            </div>
+          </div>
+          <div style="border-radius:12px;padding:10px;background:var(--dkD);border:1.5px solid var(--dkB)">
+            <div style="font-size:8.5px;font-weight:700;color:#7DD3FC;margin-bottom:5px">⏱ Typical Timeline</div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px"><span style="color:#7DD3FC;font-weight:700">Week 1–2:</span> Learn K8s basics</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px"><span style="color:#7DD3FC;font-weight:700">Week 3–4:</span> Migrate 1st service</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px"><span style="color:#7DD3FC;font-weight:700">Month 2:</span> Migrate remaining stateless</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px"><span style="color:#7DD3FC;font-weight:700">Month 3:</span> Stateful + databases</div>
+              <div style="font-size:8px;color:#CBD5E1;display:flex;gap:6px"><span style="color:#7DD3FC;font-weight:700">Month 4+:</span> Optimize + decommission</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>10 / 11</span></div>
+  </div>
+
+  <!-- S11 SUMMARY — SERIES FINALE -->
+  <div class="slide" data-s="11">
+    <div class="gbg"></div>
+    <div class="gl" style="top:-10%;left:-5%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(36,150,237,.15) 0%,transparent 65%)"></div>
+    <div class="gl" style="bottom:-10%;right:-5%;width:45%;height:55%;background:radial-gradient(ellipse,rgba(50,108,229,.14) 0%,transparent 65%)"></div>
+    <div class="F">
+      <div class="lbl">Series Finale — Summary &amp; Analogy</div>
+      <div class="stitle">Docker → Kubernetes — <span style="color:var(--dk)">The Complete Picture</span></div>
+      <div style="display:flex;gap:10px;flex:1;padding-top:8px">
+        <div style="flex:1.3;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--dkD);border:1.5px solid var(--dkB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🚗</div>
+              <div style="font-size:10px;font-weight:800;color:#7DD3FC">Docker</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Individual vehicles</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Each car (container) works. But you're the driver. No GPS, no auto-routing, no traffic management.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--k8D);border:1.5px solid var(--k8B);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;position:relative">
+              <div style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--dk),var(--k8));padding:2px 10px;border-radius:12px;font-size:8px;font-weight:800;color:#fff;white-space:nowrap">⭐ The Analogy</div>
+              <div style="font-size:26px;margin-top:4px">🚦</div>
+              <div style="font-size:10px;font-weight:800;color:#BAE6FD">Kubernetes</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Smart city traffic system</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Manages all vehicles automatically. Routes traffic. Reroutes around failures. Scales capacity. No human drivers needed.</div>
+            </div>
+            <div style="flex:1;border-radius:11px;padding:11px;background:var(--okD);border:1.5px solid var(--okB);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px">
+              <div style="font-size:26px">🎯</div>
+              <div style="font-size:10px;font-weight:800;color:#86EFAC">Migration</div>
+              <div style="font-size:7.5px;color:var(--muted)">= Upgrading to smart city</div>
+              <div style="font-size:7.5px;color:#94A3B8;line-height:1.35">Takes planning and learning. Once done, your "city" runs itself reliably at any scale.</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1">
+            <div style="padding:8px 10px;border-radius:9px;background:var(--dkD);border:1px solid var(--dkB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🐳</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#7DD3FC">Docker builds</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Images + containers</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--k8D);border:1px solid var(--k8B);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">⎈</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#BAE6FD">K8s orchestrates</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Schedules + heals + scales</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">📈</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">HPA auto-scales</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Based on metrics</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--mgD);border:1px solid var(--mgB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🔄</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#DDD6FE">Rolling updates</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">Zero downtime deploys</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--dkD);border:1px solid var(--dkB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">🐾</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#7DD3FC">Start small</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">One service at a time</div></div>
+            </div>
+            <div style="padding:8px 10px;border-radius:9px;background:var(--okD);border:1px solid var(--okB);display:flex;gap:6px;align-items:flex-start">
+              <div style="font-size:14px;flex-shrink:0">☁</div>
+              <div><div style="font-size:9.5px;font-weight:700;color:#86EFAC">Managed K8s</div><div style="font-size:8px;color:#94A3B8;margin-top:1px;line-height:1.3">EKS · GKE · AKS</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 14px;border-radius:9px;background:rgba(36,150,237,.06);border:1px solid rgba(36,150,237,.22);text-align:center">
+            <div style="font-size:clamp(9.5px,1.2vw,12.5px);font-weight:700;color:var(--white);line-height:1.4">"<span style="color:#7DD3FC">Docker = individual smart cars</span>. <span style="color:#86EFAC">Kubernetes = the intelligent city traffic system that manages all cars automatically — routing, scaling, healing, 24/7</span>."</div>
+          </div>
+        </div>
+        <div style="width:183px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;justify-content:center">
+          <div style="padding:11px;border-radius:11px;background:var(--k8D);border:1.5px solid var(--k8B)">
+            <div style="font-size:8.5px;font-weight:700;color:#BAE6FD;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Key Takeaways</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--dk)">◆</span>Docker runs · K8s orchestrates</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--dk)">◆</span>Migrate stateless apps first</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--dk)">◆</span>CI/CD + GitOps from day 1</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--dk)">◆</span>Health probes + resource limits</div>
+              <div style="font-size:8.5px;color:#CBD5E1;display:flex;gap:5px;align-items:center"><span style="color:var(--dk)">◆</span>Monitor everything always</div>
+            </div>
+          </div>
+          <div style="padding:11px;border-radius:12px;background:linear-gradient(135deg,rgba(36,150,237,.12),rgba(50,108,229,.15));border:2px solid rgba(36,150,237,.35);text-align:center">
+            <div style="font-size:18px;margin-bottom:5px">🎓</div>
+            <div style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#7DD3FC;margin-bottom:7px">Series Complete!</div>
+            <div style="font-size:10px;font-weight:700;color:var(--white);line-height:1.4;margin-bottom:6px">Kubernetes<br>Complete Course</div>
+            <div style="font-size:8px;color:var(--muted);margin-bottom:8px">From Pods to Production<br>All topics covered ✅</div>
+            <div style="padding:6px 10px;border-radius:7px;background:linear-gradient(135deg,var(--dk),var(--k8));font-size:9px;font-weight:700;color:#fff">🏆 Congratulations!</div>
+          </div>
+          <div style="padding:9px 12px;border-radius:10px;background:rgba(36,150,237,.05);border:1px solid rgba(36,150,237,.18);text-align:center">
+            <div style="font-size:9px;color:var(--muted)">Completed the full series! 🙌</div>
+            <div style="font-size:10px;font-weight:700;color:#7DD3FC;margin-top:3px">Like · Subscribe · 🔔 Bell</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sfooter"><span>11 / 11</span></div>
+  </div>
+
+  </div>
+</div>
+<script>
+let c=1,t=11;
+const de=document.getElementById('dots');
+for(let i=1;i<=t;i++){const d=document.createElement('button');d.className='dot'+(i===1?' on':'');d.textContent=i;d.onclick=()=>gt(i);de.appendChild(d);}
+function gt(n){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===n));document.querySelector('[data-s="'+n+'"]').classList.add('on');c=n;}
+function go(d){let n=c+d;if(n<1)n=t;if(n>t)n=1;gt(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>
+</body>
+</html>
