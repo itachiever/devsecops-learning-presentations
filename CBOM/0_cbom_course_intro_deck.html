@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Complete Course – From Basics to Advanced DevSecOps</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#060818 0%,#0c0e48 48%,#080a30 100%);}
+  .s2{background:linear-gradient(145deg,#08060e 0%,#180820 50%,#0c060e 100%);}
+  .s3{background:linear-gradient(145deg,#060a14 0%,#071a2c 50%,#060e1e 100%);}
+  .s4{background:linear-gradient(145deg,#070618 0%,#110828 50%,#090620 100%);}
+  .s5{background:linear-gradient(145deg,#060c0a 0%,#071a10 50%,#060d0c 100%);}
+  .s6{background:linear-gradient(145deg,#060810 0%,#0a0e30 50%,#070c22 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.17;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.28);}
+  .tg-red{color:#f87171;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);border:1px solid rgba(45,212,191,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.8rem,5vw,3.6rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.75rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:54px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.76rem,1.55vw,1.12rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.64rem,1.18vw,.86rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2.2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);color:#5eead4;}
+  .tb-c{background:rgba(96,165,250,.09);border:1px solid rgba(96,165,250,.3);color:#93c5fd;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-red{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-sky{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-r{color:#f87171;}.sl-s{color:#38bdf8;}
+  .sl-v{color:#c084fc;}.sl-t{color:#2dd4bf;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+  .as{color:#38bdf8;font-weight:700;}.av{color:#c084fc;font-weight:700;}
+  .at{color:#2dd4bf;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════════════
+     S2 – WHY THIS SERIES
+  ═══════════════════════════ */
+  .problem-strip{display:flex;gap:1%;width:100%;margin-bottom:.85%;}
+  .pstrip{flex:1;border-radius:.75vw;padding:1.1% 1.2%;display:flex;align-items:flex-start;gap:.9%;}
+  .pstrip .psi{font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;}
+  .pstrip h4{font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#e2e8f0;margin-bottom:.5%;}
+  .pstrip p{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.45;}
+  .ps-1{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);}
+  .ps-2{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.22);}
+  .ps-3{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);}
+
+  /* ── Stat boxes ── */
+  .stat-row{display:flex;gap:1%;width:100%;margin-bottom:.85%;}
+  .sbox{flex:1;border-radius:.7vw;padding:1% 1.1%;text-align:center;}
+  .sbox .sv{font-size:clamp(.9rem,1.7vw,1.25rem);font-weight:800;}
+  .sbox .sl2{font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-top:2%;}
+  .sb-r{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.22);}
+  .sb-o{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);}
+  .sb-y{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.18);}
+  .sb-b{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);}
+  .sb-g{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);}
+
+  /* ═══════════════════════════
+     S3 – WHAT YOU LEARN
+  ═══════════════════════════ */
+  .learn-track{display:flex;flex-direction:column;gap:.8%;width:100%;margin-bottom:.85%;}
+  .lt-item{
+    display:flex;align-items:center;gap:1.2%;
+    border-radius:.7vw;padding:1% 1.3%;
+    border:1px solid;
+    transition:transform .22s;
+  }
+  .lt-item:hover{transform:translateX(4px);}
+  .lt-num{
+    width:clamp(20px,2.8vw,32px);height:clamp(20px,2.8vw,32px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(.5rem,.92vw,.68rem);font-weight:800;flex-shrink:0;
+  }
+  .lt-ico{font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;}
+  .lt-content{flex:1;}
+  .lt-content h4{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;margin-bottom:.3%;}
+  .lt-content p {font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;line-height:1.4;}
+  .lt-badge{font-size:clamp(.38rem,.68vw,.52rem);font-weight:700;padding:.18em .6em;border-radius:999px;white-space:nowrap;flex-shrink:0;}
+
+  .lt-1{background:rgba(56,189,248,.06);border-color:rgba(56,189,248,.24);}
+  .lt-2{background:rgba(192,132,252,.06);border-color:rgba(192,132,252,.22);}
+  .lt-3{background:rgba(45,212,191,.06);border-color:rgba(45,212,191,.22);}
+  .lt-4{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.22);}
+  .lt-5{background:rgba(129,140,248,.06);border-color:rgba(129,140,248,.22);}
+  .lt-6{background:rgba(251,146,60,.05);border-color:rgba(251,146,60,.2);}
+
+  .ltn-1{background:rgba(56,189,248,.2);color:#38bdf8;}
+  .ltn-2{background:rgba(192,132,252,.2);color:#c084fc;}
+  .ltn-3{background:rgba(45,212,191,.18);color:#2dd4bf;}
+  .ltn-4{background:rgba(74,222,128,.18);color:#4ade80;}
+  .ltn-5{background:rgba(129,140,248,.2);color:#818cf8;}
+  .ltn-6{background:rgba(251,146,60,.18);color:#fb923c;}
+
+  .ltb-beg{background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid rgba(56,189,248,.28);}
+  .ltb-int{background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);}
+  .ltb-adv{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);}
+
+  /* ═══════════════════════════
+     S4 – PLAYLIST ROADMAP
+  ═══════════════════════════ */
+  .roadmap{width:100%;margin-bottom:.85%;}
+  .rm-phase{border-radius:.8vw;padding:1% 1.3%;margin-bottom:.7%;display:flex;align-items:flex-start;gap:1.2%;}
+  .rm-phase:last-child{margin-bottom:0;}
+  .rm-num{
+    flex-shrink:0;
+    display:flex;flex-direction:column;align-items:center;gap:.3%;
+  }
+  .rm-circle{
+    width:clamp(28px,3.8vw,44px);height:clamp(28px,3.8vw,44px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(.6rem,1.1vw,.8rem);font-weight:800;flex-shrink:0;
+  }
+  .rm-line{width:2px;background:rgba(255,255,255,.1);flex:1;min-height:clamp(8px,1.2%,16px);}
+  .rm-content{flex:1;}
+  .rm-content h3{font-size:clamp(.6rem,1.12vw,.82rem);font-weight:700;color:#e2e8f0;margin-bottom:.5%;}
+  .rm-content p {font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;line-height:1.45;margin-bottom:.5%;}
+  .rm-episodes{display:flex;flex-wrap:wrap;gap:.4%;}
+  .ep-chip{font-size:clamp(.38rem,.68vw,.5rem);font-weight:700;padding:.15em .55em;border-radius:999px;}
+
+  .rp-1{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);}
+  .rp-2{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);}
+  .rp-3{background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);}
+  .rp-4{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);}
+
+  .rc-1{background:rgba(56,189,248,.2);color:#38bdf8;}
+  .rc-2{background:rgba(192,132,252,.2);color:#c084fc;}
+  .rc-3{background:rgba(45,212,191,.18);color:#2dd4bf;}
+  .rc-4{background:rgba(74,222,128,.18);color:#4ade80;}
+
+  .ec-1{background:rgba(56,189,248,.12);color:#38bdf8;border:1px solid rgba(56,189,248,.25);}
+  .ec-2{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.23);}
+  .ec-3{background:rgba(45,212,191,.1);color:#2dd4bf;border:1px solid rgba(45,212,191,.22);}
+  .ec-4{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.22);}
+
+  /* ═══════════════════════════
+     S5 – ADVANCED TOPICS
+  ═══════════════════════════ */
+  .adv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .abox{border-radius:.8vw;padding:1.3% 1.5%;background:rgba(255,255,255,.04);}
+  .abox-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .abox-top .ai2{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .abox-top h3{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .abox-items{display:flex;flex-direction:column;gap:.4%;}
+  .ai-row{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;padding:.4% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .ai-row:last-child{border-bottom:none;}
+  .ab-1{border:1px solid rgba(192,132,252,.22);}
+  .ab-2{border:1px solid rgba(45,212,191,.2);}
+  .ab-3{border:1px solid rgba(74,222,128,.2);}
+  .ab-4{border:1px solid rgba(56,189,248,.22);}
+  .ab-5{border:1px solid rgba(251,146,60,.2);}
+  .ab-6{border:1px solid rgba(129,140,248,.22);}
+
+  /* ── Episode count bar ── */
+  .ep-bar{width:100%;margin:.5% 0;}
+  .ep-track{height:clamp(16px,2.2%,24px);border-radius:999px;overflow:hidden;position:relative;background:linear-gradient(90deg,rgba(56,189,248,.2) 0%,rgba(192,132,252,.25) 35%,rgba(45,212,191,.2) 65%,rgba(74,222,128,.3) 100%);border:1px solid rgba(255,255,255,.08);}
+  .ep-labels{display:flex;justify-content:space-between;margin-top:.3%;font-size:clamp(.4rem,.73vw,.54rem);color:#475569;font-weight:600;}
+
+  /* ═══════════════════════════
+     S6 – VALUE & TAKEAWAYS
+  ═══════════════════════════ */
+  .value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .vbox{border-radius:.8vw;padding:1.4% 1.5%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);text-align:center;transition:transform .22s;}
+  .vbox:hover{transform:translateY(-3px);}
+  .vbox .vbi{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .vbox h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .vbox p{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.45;}
+
+  .start-box{
+    width:100%;border-radius:.9vw;padding:1.6% 2.2%;
+    background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(45,212,191,.12));
+    border:2px solid rgba(129,140,248,.45);
+    display:flex;align-items:center;justify-content:space-between;gap:2%;
+    margin-bottom:.85%;
+  }
+  .start-box .sb-left h3{font-size:clamp(.68rem,1.28vw,.94rem);font-weight:800;color:#e2e8f0;margin-bottom:.6%;}
+  .start-box .sb-left p {font-size:clamp(.52rem,.97vw,.71rem);color:#a5b4fc;line-height:1.5;}
+  .start-btn{
+    background:linear-gradient(135deg,#6366f1,#14b8a6);
+    color:#fff;font-weight:800;font-size:clamp(.56rem,1.05vw,.78rem);
+    padding:.6em 1.6em;border-radius:999px;white-space:nowrap;
+    flex-shrink:0;box-shadow:0 6px 20px rgba(99,102,241,.45);
+    animation:pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(99,102,241,.45);}50%{box-shadow:0 6px 30px rgba(99,102,241,.7);}}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:38%;height:38%;top:-9%;left:-6%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:16%;height:16%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-ind">🎓 Complete Learning Series</div>
+    <h1>CBOM Complete Course</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">From Basics to Advanced DevSecOps — Master Cryptographic Bill of Materials</p>
+    <p class="tagline">✦ 17+ Episodes · Beginner to Advanced · 100% Practical ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">📚 <span>Learn</span></div>
+      <div class="tb tb-b">🗺️ <span>Roadmap</span></div>
+      <div class="tb tb-c">🛡️ <span>Security</span></div>
+    </div>
+
+    <!-- Audience strip -->
+    <div style="width:90%;display:flex;gap:.9%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">👶</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#38bdf8;margin-top:2%;">Complete Beginners</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">No prior knowledge needed</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚙️</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#c084fc;margin-top:2%;">DevOps Engineers</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Add security to your skillset</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(45,212,191,.07);border:1.5px solid rgba(45,212,191,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🛡️</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#2dd4bf;margin-top:2%;">Security Engineers</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Master cryptographic governance</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.07);border:1.5px solid rgba(74,222,128,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🎓</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#4ade80;margin-top:2%;">Students & Professionals</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Interview-ready knowledge</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>This series takes you on a complete journey through <strong>Cryptographic Bill of Materials (CBOM)</strong> — from understanding what cryptography is, to implementing enterprise-grade CBOM governance in a real DevSecOps pipeline. Everything you need, structured in <strong>one comprehensive playlist</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · Why This Series?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#dc2626;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-red">🚨 The Problem · Slide 2 of 6</div>
+    <h2>Why This Series Exists — The Hidden Crisis in Application Security</h2>
+
+    <div class="hbox hb-red" style="margin-bottom:.85%;">
+      <p>📖 Every application you build, deploy, or operate runs cryptographic components — algorithms that protect passwords, certificates that secure connections, protocols that encrypt data in transit. <strong>Most organizations have no idea what those components are</strong>, which are outdated, which have known vulnerabilities, or which are about to expire. This series teaches you how to fix that.</p>
+    </div>
+
+    <!-- Three problems -->
+    <div class="problem-strip" style="margin-bottom:.85%;">
+      <div class="pstrip ps-1">
+        <span class="psi">💀</span>
+        <div>
+          <h4 class="ar">Weak Encryption in Production</h4>
+          <p>MD5, SHA-1, DES — algorithms broken years ago — still silently run inside millions of production applications. Without visibility, teams can't even detect the risk.</p>
+        </div>
+      </div>
+      <div class="pstrip ps-2">
+        <span class="psi">⏰</span>
+        <div>
+          <h4 class="ao">Expired Certificate Outages</h4>
+          <p>A certificate expires at 2 AM. The payment gateway goes down. Hundreds of thousands in revenue lost. The fix takes 4 hours because nobody knew the cert existed.</p>
+        </div>
+      </div>
+      <div class="pstrip ps-3">
+        <span class="psi">🔍</span>
+        <div>
+          <h4 class="ay">Zero Cryptographic Visibility</h4>
+          <p>Your Docker image ships OpenSSL 1.1.1 with a known Critical CVE. You never explicitly installed it. Your team doesn't know it's there. Attackers do.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sl sl-r" style="text-align:center;">📊 The Scale of the Problem — Industry Reality</div>
+    <div class="stat-row">
+      <div class="sbox sb-r"><span class="sv" style="color:#f87171;">74%</span><span class="sl2">Apps with<br>unknown crypto libs</span></div>
+      <div class="sbox sb-o"><span class="sv" style="color:#fb923c;">60%</span><span class="sl2">Orgs experience<br>cert expiry outages</span></div>
+      <div class="sbox sb-y"><span class="sv" style="color:#fbbf24;">$4.5M</span><span class="sl2">Avg cost of<br>a data breach (2024)</span></div>
+      <div class="sbox sb-b"><span class="sv" style="color:#38bdf8;">CBOM</span><span class="sl2">The solution to<br>all three problems</span></div>
+      <div class="sbox sb-g"><span class="sv" style="color:#4ade80;">FREE</span><span class="sl2">This complete<br>course — all episodes</span></div>
+    </div>
+
+    <div class="hbox hb-ind" style="margin-top:.85%;margin-bottom:0;">
+      <p>💡 <strong>CBOM (Cryptographic Bill of Materials)</strong> is the industry-standard solution — a structured inventory of all cryptographic components in your software. This series teaches you everything from the ground up, with real-world examples and hands-on DevSecOps applications throughout.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · What You Will Learn
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">📚 Learning Journey · Slide 3 of 6</div>
+    <h2>What You Will Learn — End-to-End Knowledge Path</h2>
+
+    <div class="learn-track">
+      <div class="lt-item lt-1">
+        <div class="lt-num ltn-1">1</div>
+        <span class="lt-ico">🔒</span>
+        <div class="lt-content">
+          <h4 class="as">Cybersecurity &amp; Application Security Fundamentals</h4>
+          <p>Why security matters, what encryption protects, how attacks exploit weak cryptography — building the mental model before writing a single line of security code.</p>
+        </div>
+        <span class="lt-badge ltb-beg">Beginner</span>
+      </div>
+      <div class="lt-item lt-2">
+        <div class="lt-num ltn-2">2</div>
+        <span class="lt-ico">🔐</span>
+        <div class="lt-content">
+          <h4 class="av">Cryptography Basics — Encryption, Hashing, Protocols</h4>
+          <p>AES, RSA, SHA-256, TLS — what they do, how they work, why some are broken, and which ones you should use in 2024 and beyond.</p>
+        </div>
+        <span class="lt-badge ltb-beg">Beginner</span>
+      </div>
+      <div class="lt-item lt-3">
+        <div class="lt-num ltn-3">3</div>
+        <span class="lt-ico">📋</span>
+        <div class="lt-content">
+          <h4 class="at">CBOM Concepts, Components &amp; Data Fields</h4>
+          <p>What a CBOM is, what it contains, how it's structured, and why every field matters — from CERT-In requirements to CycloneDX JSON format deep dives.</p>
+        </div>
+        <span class="lt-badge ltb-int">Intermediate</span>
+      </div>
+      <div class="lt-item lt-4">
+        <div class="lt-num ltn-4">4</div>
+        <span class="lt-ico">⚙️</span>
+        <div class="lt-content">
+          <h4 class="ag">CBOM Generation, CI/CD Integration &amp; Automation</h4>
+          <p>How to generate CBOM automatically on every build, integrate into GitHub Actions/Jenkins pipelines, and enforce policy gates that block weak crypto before deployment.</p>
+        </div>
+        <span class="lt-badge ltb-int">Intermediate</span>
+      </div>
+      <div class="lt-item lt-5">
+        <div class="lt-num ltn-5">5</div>
+        <span class="lt-ico">🏛️</span>
+        <div class="lt-content">
+          <h4 class="ai">Governance, Compliance &amp; CERT-In Guidelines</h4>
+          <p>Enterprise cryptographic governance frameworks, India's CERT-In CBOM mandate, compliance with PCI-DSS 4.0, HIPAA, and FIPS 140-3 using CBOM as the foundation.</p>
+        </div>
+        <span class="lt-badge ltb-adv">Advanced</span>
+      </div>
+      <div class="lt-item lt-6">
+        <div class="lt-num ltn-6">6</div>
+        <span class="lt-ico">🚀</span>
+        <div class="lt-content">
+          <h4 class="ao">Real-World DevSecOps Implementation &amp; Tools</h4>
+          <p>Hands-on scenarios, industry tool evaluation, case studies from real security failures, and full enterprise implementation strategies for cloud-native environments.</p>
+        </div>
+        <span class="lt-badge ltb-adv">Advanced</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Complete Playlist Overview
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-vio">🗺️ Full Roadmap · Slide 4 of 6</div>
+    <h2>Complete Playlist Coverage — Structured Roadmap</h2>
+
+    <div class="roadmap">
+      <!-- Phase 1 -->
+      <div class="rm-phase rp-1">
+        <div class="rm-num"><div class="rm-circle rc-1">01</div><div class="rm-line"></div></div>
+        <div class="rm-content">
+          <h3 class="as">🔵 FOUNDATIONS — Cybersecurity &amp; Cryptography Basics (Ep 1–3)</h3>
+          <p>Introduction to CBOM · Why security matters · Cryptography fundamentals (encryption, hashing, protocols)</p>
+          <div class="rm-episodes">
+            <span class="ep-chip ec-1">Ep 1: What is CBOM?</span>
+            <span class="ep-chip ec-1">Ep 2: Why Security Matters</span>
+            <span class="ep-chip ec-1">Ep 3: Cryptography Basics</span>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 2 -->
+      <div class="rm-phase rp-2">
+        <div class="rm-num"><div class="rm-circle rc-2">02</div><div class="rm-line"></div></div>
+        <div class="rm-content">
+          <h3 class="av">🟣 CORE CBOM — Concepts, Components &amp; Structure (Ep 4–8)</h3>
+          <p>CBOM concepts · SBOM vs CBOM vs SCA · Components · Data fields (CERT-In) · Structure &amp; Format</p>
+          <div class="rm-episodes">
+            <span class="ep-chip ec-2">Ep 4: Why CBOM</span>
+            <span class="ep-chip ec-2">Ep 5: SBOM vs SCA vs CBOM</span>
+            <span class="ep-chip ec-2">Ep 6: Components</span>
+            <span class="ep-chip ec-2">Ep 7: Data Fields</span>
+            <span class="ep-chip ec-2">Ep 8: Structure</span>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 3 -->
+      <div class="rm-phase rp-3">
+        <div class="rm-num"><div class="rm-circle rc-3">03</div><div class="rm-line"></div></div>
+        <div class="rm-content">
+          <h3 class="at">🟢 TECHNICAL — Generation, Pipeline &amp; Cloud (Ep 9–11)</h3>
+          <p>How CBOM is generated · CI/CD DevSecOps integration · Containers &amp; cloud environments</p>
+          <div class="rm-episodes">
+            <span class="ep-chip ec-3">Ep 9: Generation</span>
+            <span class="ep-chip ec-3">Ep 10: DevSecOps Pipeline</span>
+            <span class="ep-chip ec-3">Ep 11: Containers &amp; Cloud</span>
+          </div>
+        </div>
+      </div>
+      <!-- Phase 4 -->
+      <div class="rm-phase rp-4">
+        <div class="rm-num"><div class="rm-circle rc-4">04</div></div>
+        <div class="rm-content">
+          <h3 class="ag">🟡 ADVANCED — Risk, Compliance &amp; Real-World (Ep 12–17+)</h3>
+          <p>Weak crypto detection · Certificate management · Vulnerability management · CERT-In compliance · Governance · Tools · Case studies</p>
+          <div class="rm-episodes">
+            <span class="ep-chip ec-4">Ep 12: Weak Crypto</span>
+            <span class="ep-chip ec-4">Ep 13: Cert Management</span>
+            <span class="ep-chip ec-4">Ep 14: CVE Mapping</span>
+            <span class="ep-chip ec-4">Ep 15: CERT-In</span>
+            <span class="ep-chip ec-4">Ep 16: Governance</span>
+            <span class="ep-chip ec-4">Ep 17: Tools</span>
+            <span class="ep-chip ec-4">Ep 18: Case Studies</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-vio" style="margin-bottom:0;">
+      <p>📌 <strong>Structured for All Levels:</strong> Each phase builds on the last. Start from Episode 1 if you're new — or jump to Phase 3/4 if you already understand cryptography basics. Every episode is self-contained with visual slides that work without audio narration.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Advanced Topics Covered
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-grn">🚀 Advanced Topics · Slide 5 of 6</div>
+    <h2>Advanced Topics — Industry-Focused &amp; Career-Ready</h2>
+
+    <div class="hbox hb-grn" style="margin-bottom:.85%;">
+      <p>📖 The advanced section goes beyond theory — covering <strong>enterprise implementation, regulatory compliance, and real-world DevSecOps scenarios</strong> that you will encounter in professional roles. Each topic is drawn directly from industry challenges that organizations face today.</p>
+    </div>
+
+    <div class="adv-grid" style="margin-bottom:.85%;">
+      <div class="abox ab-1">
+        <div class="abox-top"><span class="ai2">🇮🇳</span><h3 class="av">CERT-In Compliance</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>India's national CBOM mandate explained field by field</div></div>
+          <div class="ai-row"><span>▸</span><div>Mandatory vs required vs recommended data fields</div></div>
+          <div class="ai-row"><span>▸</span><div>How to achieve &amp; prove compliance in an audit</div></div>
+        </div>
+      </div>
+      <div class="abox ab-2">
+        <div class="abox-top"><span class="ai2">🐛</span><h3 class="at">Vulnerability Management</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>CVE mapping — CBOM → NVD → risk scoring</div></div>
+          <div class="ai-row"><span>▸</span><div>CVSS severity prioritisation framework</div></div>
+          <div class="ai-row"><span>▸</span><div>Real CVE examples: Log4Shell, OpenSSL CVEs</div></div>
+        </div>
+      </div>
+      <div class="abox ab-3">
+        <div class="abox-top"><span class="ai2">📜</span><h3 class="ag">Certificate Management</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>Full TLS certificate lifecycle governance</div></div>
+          <div class="ai-row"><span>▸</span><div>Automated expiry alerting and cert-manager renewal</div></div>
+          <div class="ai-row"><span>▸</span><div>Real outage case study: 4-hour payment gateway down</div></div>
+        </div>
+      </div>
+      <div class="abox ab-4">
+        <div class="abox-top"><span class="ai2">🏛️</span><h3 class="as">Governance &amp; Asset Mgmt</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>Enterprise crypto governance policy frameworks</div></div>
+          <div class="ai-row"><span>▸</span><div>Cryptographic Asset Management (CAM) disciplines</div></div>
+          <div class="ai-row"><span>▸</span><div>Executive CISO dashboard and compliance reporting</div></div>
+        </div>
+      </div>
+      <div class="abox ab-5">
+        <div class="abox-top"><span class="ai2">🛠️</span><h3 class="ao">CBOM Tools & Ecosystem</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>Tool evaluation framework — coverage, accuracy, compliance</div></div>
+          <div class="ai-row"><span>▸</span><div>Integration with SAST, SCA, DAST, SIEM, KMS</div></div>
+          <div class="ai-row"><span>▸</span><div>Open-source vs commercial tool selection criteria</div></div>
+        </div>
+      </div>
+      <div class="abox ab-6">
+        <div class="abox-top"><span class="ai2">📚</span><h3 class="ai">Case Studies & Real World</h3></div>
+        <div class="abox-items">
+          <div class="ai-row"><span>▸</span><div>3 real-world security failure scenarios with full analysis</div></div>
+          <div class="ai-row"><span>▸</span><div>Before CBOM vs After CBOM — measurable outcomes</div></div>
+          <div class="ai-row"><span>▸</span><div>Lessons learned: what to implement in your org today</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Episode progress bar -->
+    <div class="sl sl-g" style="text-align:center;">📊 Series Coverage — 17+ Episodes Spanning Beginner to Advanced</div>
+    <div class="ep-bar">
+      <div class="ep-track"></div>
+      <div class="ep-labels">
+        <span class="as">Ep 1–3: Foundations</span>
+        <span class="av">Ep 4–8: Core CBOM</span>
+        <span class="at">Ep 9–11: Technical</span>
+        <span class="ag">Ep 12–18+: Advanced</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Final Value & CTA
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🎯 Your Outcome · Slide 6 of 6</div>
+    <h2>What You Will Gain — Complete CBOM Mastery</h2>
+
+    <div class="value-grid" style="margin-bottom:.85%;">
+      <div class="vbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="vbi">🧠</span>
+        <h4 class="as">Practical Knowledge</h4>
+        <p>Every concept is taught with real examples, visual diagrams, and self-explanatory slides. Not just theory — skills you can apply on your next project from Day 1.</p>
+      </div>
+      <div class="vbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="vbi">🌍</span>
+        <h4 class="av">Real-World Understanding</h4>
+        <p>Case studies, industry scenarios, and live examples from banking, healthcare, and cloud — you'll understand exactly how CBOM applies in professional environments.</p>
+      </div>
+      <div class="vbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="vbi">🏆</span>
+        <h4 class="at">Interview Readiness</h4>
+        <p>CBOM, DevSecOps, cryptographic governance, CERT-In compliance — high-demand topics in 2024 security roles. Stand out in interviews with rare, specific expertise.</p>
+      </div>
+      <div class="vbox" style="border-color:rgba(74,222,128,.24);">
+        <span class="vbi">🛡️</span>
+        <h4 class="ag">Security Engineering Skills</h4>
+        <p>Build, integrate, and govern CBOM in CI/CD pipelines. Detect weak crypto automatically. Manage certificate lifecycles. Skills that directly improve your team's security posture.</p>
+      </div>
+      <div class="vbox" style="border-color:rgba(129,140,248,.24);">
+        <span class="vbi">📋</span>
+        <h4 class="ai">Compliance Expertise</h4>
+        <p>Understand CERT-In guidelines, PCI-DSS 4.0, FIPS 140-3, and HIPAA crypto requirements. Know how to generate audit-ready CBOM evidence without manual effort.</p>
+      </div>
+      <div class="vbox" style="border-color:rgba(251,146,60,.22);">
+        <span class="vbi">⚛️</span>
+        <h4 class="ao">Future-Ready Thinking</h4>
+        <p>Understand post-quantum cryptography threats and how CBOM enables PQC migration planning. Stay ahead of the next wave of cryptographic challenges before they arrive.</p>
+      </div>
+    </div>
+
+    <div class="start-box">
+      <div class="sb-left">
+        <h3>🚀 Start Your Journey from Episode 1</h3>
+        <p>Every episode builds on the last. Whether you're a complete beginner or an experienced engineer, this series has exactly what you need. <strong>No prerequisites required — start watching now.</strong></p>
+      </div>
+      <div class="start-btn">▶ Begin Episode 1</div>
+    </div>
+
+    <div style="width:100%;display:flex;gap:.8%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#a5b4fc;font-weight:600;">17+ Episodes<br><span style="font-weight:400;color:#475569;font-size:.9em;">Comprehensive coverage</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#5eead4;font-weight:600;">Visual Slides<br><span style="font-weight:400;color:#475569;font-size:.9em;">Self-explanatory format</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#4ade80;font-weight:600;">Beginner → Advanced<br><span style="font-weight:400;color:#475569;font-size:.9em;">Structured progression</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#fca5a5;font-weight:600;">Real-World Focus<br><span style="font-weight:400;color:#475569;font-size:.9em;">Industry-applicable skills</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#fed7aa;font-weight:600;">CERT-In Aligned<br><span style="font-weight:400;color:#475569;font-size:.9em;">Compliance ready</span></div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weak Cryptography Detection & Risk Management using CBOM</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03020c;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#100507 0%,#2a0810 48%,#140a06 100%);}
+  .s2{background:linear-gradient(145deg,#0c0608 0%,#1e0810 50%,#100608 100%);}
+  .s3{background:linear-gradient(145deg,#08060a 0%,#180820 50%,#0c0610 100%);}
+  .s4{background:linear-gradient(145deg,#060810 0%,#081828 50%,#060e1a 100%);}
+  .s5{background:linear-gradient(145deg,#060c0a 0%,#071c14 50%,#060e0c 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#090f2c 50%,#060c20 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.18;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-red {color:#f87171;background:rgba(248,113,113,.1);  border:1px solid rgba(248,113,113,.3);}
+  .tg-ora {color:#fb923c;background:rgba(251,146,60,.09);  border:1px solid rgba(251,146,60,.28);}
+  .tg-vio {color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-sky {color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-grn {color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+  .tg-ind {color:#818cf8;background:rgba(129,140,248,.09); border:1px solid rgba(129,140,248,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.8rem,4.9vw,3.5rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#fca5a5,#f472b6,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#fca5a5;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-r{background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.32);color:#fca5a5;}
+  .tb-o{background:rgba(251,146,60,.1); border:1px solid rgba(251,146,60,.3); color:#fed7aa;}
+  .tb-v{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.3);color:#e9d5ff;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-red {background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-ora {background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.24);}
+  .hb-ora p{color:#fed7aa;}.hb-ora strong{color:#fb923c;}
+  .hb-vio {background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-sky {background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-tel {background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn {background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd {background:linear-gradient(135deg,rgba(248,113,113,.1),rgba(192,132,252,.08));border:1px solid rgba(248,113,113,.3);}
+  .hb-grd p{color:#fecaca;}.hb-grd strong{color:#f87171;}
+  .hb-grd2{background:linear-gradient(135deg,rgba(56,189,248,.09),rgba(45,212,191,.08));border:1px solid rgba(56,189,248,.28);}
+  .hb-grd2 p{color:#bae6fd;}.hb-grd2 strong{color:#38bdf8;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-r{color:#f87171;}.sl-o{color:#fb923c;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ar{color:#f87171;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ab{color:#60a5fa;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ai{color:#818cf8;font-weight:700;}
+  .as{color:#38bdf8;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.88% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════════
+     WEAK ALGO CARDS (S2)
+  ═══════════════════════ */
+  .algo-cards{display:flex;gap:1.2%;width:100%;margin-bottom:.9%;}
+  .acard{flex:1;border-radius:.8vw;padding:1.5% 1.6%;position:relative;overflow:hidden;}
+  .ac-dead{background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.35);}
+  .ac-brk {background:rgba(251,146,60,.08); border:1.5px solid rgba(251,146,60,.32);}
+  .ac-dep {background:rgba(251,191,36,.07); border:1.5px solid rgba(251,191,36,.28);}
+  .ac-ok  {background:rgba(74,222,128,.07); border:1.5px solid rgba(74,222,128,.28);}
+  .acard .ac-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8%;}
+  .acard .ac-name{font-size:clamp(.7rem,1.35vw,.98rem);font-weight:800;color:#e2e8f0;}
+  .acard .ac-badge{font-size:clamp(.38rem,.7vw,.52rem);font-weight:700;padding:.2em .65em;border-radius:999px;}
+  .ab-dead{background:rgba(248,113,113,.18);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+  .ab-brk {background:rgba(251,146,60,.16); color:#fb923c;border:1px solid rgba(251,146,60,.28);}
+  .ab-dep {background:rgba(251,191,36,.14); color:#fbbf24;border:1px solid rgba(251,191,36,.26);}
+  .ab-ok  {background:rgba(74,222,128,.14); color:#4ade80;border:1px solid rgba(74,222,128,.26);}
+  .acard .ac-desc{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;margin-bottom:.7%;}
+  .acard .ac-used{font-size:clamp(.46rem,.84vw,.62rem);color:#64748b;}
+  .acard .ac-yr  {position:absolute;bottom:.6%;right:.8%;font-size:clamp(.38rem,.68vw,.5rem);color:#334155;font-weight:700;}
+
+  /* ═══════════════════════
+     RISK CARDS (S3)
+  ═══════════════════════ */
+  .risk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1%;width:100%;}
+  .rcard{border-radius:.8vw;padding:1.4% 1.7%;background:rgba(255,255,255,.04);}
+  .rcard-head{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .rcard-head .ri{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .rcard-head h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .rcard-head .rsev{margin-left:auto;font-size:clamp(.38rem,.68vw,.5rem);font-weight:700;padding:.2em .6em;border-radius:999px;}
+  .rsev-crit{background:rgba(248,113,113,.18);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+  .rsev-high{background:rgba(251,146,60,.16); color:#fb923c;border:1px solid rgba(251,146,60,.28);}
+  .rcard-body{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;}
+  .rcard-ex{margin-top:.5%;font-size:clamp(.46rem,.84vw,.62rem);color:#64748b;font-style:italic;}
+  .rcard-ex span{font-style:normal;background:rgba(255,255,255,.06);padding:.1em .4em;border-radius:.3vw;color:#94a3b8;}
+  .rc-1{border:1px solid rgba(248,113,113,.26);}
+  .rc-2{border:1px solid rgba(251,146,60,.24);}
+  .rc-3{border:1px solid rgba(192,132,252,.22);}
+  .rc-4{border:1px solid rgba(251,191,36,.2);}
+
+  /* ═══════════════════════
+     DETECTION FLOW (S4)
+  ═══════════════════════ */
+  .det-flow{display:flex;align-items:stretch;width:100%;gap:0;margin-bottom:.9%;}
+  .dfstage{flex:1;border-radius:.8vw;padding:1.4% 1.2%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3%;transition:transform .22s;}
+  .dfstage:hover{transform:translateY(-3px);}
+  .dfstage .ds-ico{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .dfstage h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .dfstage p {font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+  .df-trk{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .df-det{background:rgba(251,146,60,.08); border:1px solid rgba(251,146,60,.26);}
+  .df-rsk{background:rgba(248,113,113,.09);border:1.5px solid rgba(248,113,113,.38);}
+  .df-act{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.26);}
+  .df-arr{display:flex;align-items:center;font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;padding:0 .2%;}
+
+  /* ── CBOM scan results table ── */
+  .scan-tbl{width:100%;border-collapse:collapse;}
+  .scan-tbl th,.scan-tbl td{padding:clamp(5px,1%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.48rem,.88vw,.64rem);vertical-align:middle;}
+  .scan-tbl thead tr{background:rgba(255,255,255,.05);}
+  .scan-tbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;}
+  .scan-tbl tbody tr:last-child td{border-bottom:none;}
+  .scan-tbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .st-crit{color:#f87171;font-weight:700;}
+  .st-high{color:#fb923c;font-weight:700;}
+  .st-med {color:#fbbf24;font-weight:700;}
+  .st-ok  {color:#4ade80;font-weight:700;}
+  .sev-pill{padding:.15em .55em;border-radius:999px;font-weight:700;font-size:.9em;}
+  .sp-c{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);}
+  .sp-h{background:rgba(251,146,60,.12); color:#fb923c;border:1px solid rgba(251,146,60,.26);}
+  .sp-m{background:rgba(251,191,36,.12); color:#fbbf24;border:1px solid rgba(251,191,36,.24);}
+  .sp-ok{background:rgba(74,222,128,.12);color:#4ade80; border:1px solid rgba(74,222,128,.26);}
+
+  /* ═══════════════════════
+     REMEDIATION (S5)
+  ═══════════════════════ */
+  .rem-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1%;width:100%;margin-bottom:.9%;}
+  .rbox{border-radius:.8vw;padding:1.4% 1.7%;background:rgba(255,255,255,.04);}
+  .rbox-top{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .rbox-top .rbico{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .rbox-top h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .rbox-top .rbadge{margin-left:auto;font-size:clamp(.38rem,.68vw,.5rem);font-weight:700;padding:.2em .6em;border-radius:999px;}
+  .from-to{display:flex;align-items:center;gap:.8%;margin:.5% 0;font-size:clamp(.48rem,.88vw,.64rem);}
+  .ft-from{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.24);padding:.25em .7em;border-radius:.4vw;color:#fca5a5;font-weight:600;flex-shrink:0;}
+  .ft-arr {color:#334155;flex-shrink:0;font-size:1.1em;}
+  .ft-to  {background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.24); padding:.25em .7em;border-radius:.4vw;color:#bbf7d0;font-weight:600;flex-shrink:0;}
+  .rbox-note{font-size:clamp(.46rem,.84vw,.62rem);color:#64748b;line-height:1.45;margin-top:.5%;}
+  .rb-1{border:1px solid rgba(248,113,113,.22);}
+  .rb-2{border:1px solid rgba(251,146,60,.2);}
+  .rb-3{border:1px solid rgba(45,212,191,.2);}
+  .rb-4{border:1px solid rgba(74,222,128,.2);}
+
+  /* ── Proactive cycle ── */
+  .cycle{display:flex;align-items:center;width:100%;gap:.8%;}
+  .cnode{flex:1;border-radius:.7vw;padding:1% 1.1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2%;}
+  .cn-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .cn-2{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .cn-3{background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.24);}
+  .cn-4{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .cn-5{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .cnode .cni{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .cnode h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .cnode p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.35;}
+  .carr{font-size:clamp(.65rem,1.2vw,.88rem);color:#334155;flex-shrink:0;}
+
+  /* ═══════════════════════
+     SUMMARY (S6)
+  ═══════════════════════ */
+  .sum4{display:grid;grid-template-columns:repeat(4,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s4b{border-radius:.75vw;padding:1.5% 1.2%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s4b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s4b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s4b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(248,113,113,.22);border-color:#f87171;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#f87171;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#dc2626;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#9333ea;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#ea580c;width:18%;height:18%;bottom:12%;left:24%;"></div>
+
+    <div class="tag tg-red">🚨 CBOM Series · Episode 11</div>
+    <h1>Weak Cryptography Detection</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#f87171,#c084fc,#fb923c);"></div>
+    <p class="subtitle">Risk Management using CBOM — Identify &amp; Fix Hidden Security Risks</p>
+    <p class="tagline">✦ Detect · Prioritise · Remediate · Monitor ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-r">🚨 <span>Risk</span></div>
+      <div class="tb tb-o">🛡️ <span>Detection</span></div>
+      <div class="tb tb-v">🔧 <span>Remediation</span></div>
+    </div>
+
+    <!-- Risk summary strip -->
+    <div style="width:88%;display:flex;gap:1%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.1);border:1.5px solid rgba(248,113,113,.3);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">💀</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#f87171;margin-top:2%;">MD5 / SHA-1</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Completely broken</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,146,60,.09);border:1.5px solid rgba(251,146,60,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚡</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fb923c;margin-top:2%;">TLS 1.0 / 1.1</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Deprecated protocols</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,191,36,.08);border:1.5px solid rgba(251,191,36,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔓</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fbbf24;margin-top:2%;">RSA-1024</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Insufficient key length</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.24);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🗝️</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fca5a5;margin-top:2%;">DES / 3DES</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Retired encryption</div>
+      </div>
+      <div style="flex:1.3;border-radius:.65vw;padding:.9% 1%;background:linear-gradient(135deg,rgba(192,132,252,.12),rgba(45,212,191,.1));border:1.5px solid rgba(192,132,252,.38);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#d8b4fe;margin-top:2%;">CBOM Detects All</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#5eead4;margin-top:1%;">Automated risk scanning</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>Weak cryptography is <strong>the most common and preventable security risk</strong> in modern software. Legacy algorithms still run silently inside millions of applications. CBOM makes these risks visible — so they can be <strong>detected, prioritised, and eliminated</strong> before attackers exploit them.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is Weak Cryptography?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#dc2626;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#9333ea;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-red">💀 Definition · Slide 2 of 6</div>
+    <h2>What is Weak Cryptography?</h2>
+
+    <div class="hbox hb-red" style="margin-bottom:.9%;">
+      <p>📖 <strong>Weak cryptography</strong> refers to cryptographic algorithms, protocols, or key configurations that are <strong>mathematically broken, computationally crackable, or officially deprecated</strong> by standards bodies (NIST, IETF, ENISA). They may have worked when first designed but are no longer safe against modern attacks — yet they persist in production systems worldwide.</p>
+    </div>
+
+    <div class="algo-cards" style="margin-bottom:.9%;">
+      <div class="acard ac-dead">
+        <div class="ac-top">
+          <span class="ac-name">💀 MD5</span>
+          <span class="ac-badge ab-dead">BROKEN — Never Use</span>
+        </div>
+        <div class="ac-desc">Message Digest 5 — designed in 1991. <strong>Collision attacks proven in 2004.</strong> Two completely different inputs can produce the same MD5 hash, making signatures and integrity checks worthless.</div>
+        <div class="ac-used">Still found in: legacy password storage · file checksums · token generation in old APIs</div>
+        <div class="ac-yr">1991 / Broken 2004</div>
+      </div>
+      <div class="acard ac-brk">
+        <div class="ac-top">
+          <span class="ac-name">⚡ SHA-1</span>
+          <span class="ac-badge ab-brk">BROKEN — Migrate Now</span>
+        </div>
+        <div class="ac-desc">Secure Hash Algorithm 1 — <strong>Google's SHAttered attack (2017)</strong> generated two PDFs with identical SHA-1 hashes for only $110,000. Certificate authorities stopped issuing SHA-1 certificates in 2016.</div>
+        <div class="ac-used">Still found in: legacy TLS certs · old Git objects · software signing in legacy pipelines</div>
+        <div class="ac-yr">1995 / Broken 2017</div>
+      </div>
+      <div class="acard ac-dep">
+        <div class="ac-top">
+          <span class="ac-name">🔌 TLS 1.0 / 1.1</span>
+          <span class="ac-badge ab-dep">DEPRECATED — Disable</span>
+        </div>
+        <div class="ac-desc">TLS 1.0 (1999) and TLS 1.1 (2006) use weak cipher suites and have known attack vectors (POODLE, BEAST). <strong>RFC 8996 officially deprecated both in March 2021.</strong> Major browsers removed support.</div>
+        <div class="ac-used">Still found in: legacy APIs · IoT devices · old load balancers · enterprise middleware</div>
+        <div class="ac-yr">Deprecated March 2021</div>
+      </div>
+      <div class="acard ac-dead">
+        <div class="ac-top">
+          <span class="ac-name">🗝️ DES / 3DES</span>
+          <span class="ac-badge ab-dead">RETIRED — Remove</span>
+        </div>
+        <div class="ac-desc">DES (56-bit key) was cracked in 22 hours in 1999. 3DES (Triple-DES) was NIST-deprecated in 2023 — vulnerable to SWEET32 birthday attack and too slow for modern applications.</div>
+        <div class="ac-used">Still found in: banking mainframes · legacy payment systems · old VPN configs · PKCS#12 files</div>
+        <div class="ac-yr">DES: Broken 1999 / 3DES: Deprecated 2023</div>
+      </div>
+    </div>
+
+    <div class="two" style="gap:1.4%;">
+      <div class="hbox hb-red" style="margin-bottom:0;flex:1;">
+        <p>⚠️ <strong>Short Keys:</strong> RSA-512 can be factored in hours on commodity hardware. RSA-1024 in weeks. NIST minimum: <span class="ar">RSA-2048</span> until 2030, then RSA-3072+ required. CBOM flags any key below minimum safe length.</p>
+      </div>
+      <div class="hbox hb-ora" style="margin-bottom:0;flex:1;">
+        <p>⚠️ <strong>Weak Modes:</strong> Even strong algorithms become weak with bad configuration. AES in <span class="ao">ECB mode</span> reveals data patterns visually. CBOM tracks algorithm mode, not just algorithm name.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Risks of Weak Cryptography
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#7c3aed;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#dc2626;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-ora">🚨 Risk Landscape · Slide 3 of 6</div>
+    <h2>Risks of Weak Cryptography — Real-World Impact</h2>
+
+    <div class="hbox hb-ora" style="margin-bottom:.9%;">
+      <p>📖 Weak cryptography is not a theoretical risk — <strong>it is actively exploited every day</strong>. When an organisation unknowingly uses broken algorithms, attackers have a proven, repeatable method to compromise data, impersonate services, and breach systems — often without leaving any trace.</p>
+    </div>
+
+    <div class="risk-grid">
+      <div class="rcard rc-1">
+        <div class="rcard-head">
+          <span class="ri">💥</span>
+          <h3 class="ar">Data Breaches</h3>
+          <span class="rsev rsev-crit">🔴 Critical</span>
+        </div>
+        <div class="rcard-body">If a database of MD5-hashed passwords is stolen, attackers use <strong>rainbow table lookups</strong> to reverse millions of hashes in seconds. No brute-force needed — it's a simple lookup in a pre-computed table of known hash-to-password mappings.</div>
+        <div class="rcard-ex">Real incident: <span>2012 LinkedIn breach — 117M MD5 passwords cracked within days of the dump being published online.</span></div>
+      </div>
+
+      <div class="rcard rc-2">
+        <div class="rcard-head">
+          <span class="ri">🕵️</span>
+          <h3 class="ao">Man-in-the-Middle Attacks</h3>
+          <span class="rsev rsev-crit">🔴 Critical</span>
+        </div>
+        <div class="rcard-body">TLS 1.0 is vulnerable to the <strong>POODLE attack</strong> — an attacker in the network path can force a protocol downgrade and then decrypt the session. All data transmitted — passwords, session tokens, card numbers — becomes readable.</div>
+        <div class="rcard-ex">Real impact: <span>Public Wi-Fi + TLS 1.0 endpoint = attacker on same network can read all traffic with freely available tools.</span></div>
+      </div>
+
+      <div class="rcard rc-3">
+        <div class="rcard-head">
+          <span class="ri">🔓</span>
+          <h3 class="av">Password &amp; Signature Forgery</h3>
+          <span class="rsev rsev-high">🟠 High</span>
+        </div>
+        <div class="rcard-body">SHA-1 collision vulnerabilities allow attackers to create a <strong>forged document or certificate</strong> with the same hash as a legitimate one. A software update signed with SHA-1 could be replaced with malware — and verification passes.</div>
+        <div class="rcard-ex">Real incident: <span>SHAttered (2017) — first practical SHA-1 collision creating two different PDFs with identical signatures.</span></div>
+      </div>
+
+      <div class="rcard rc-4">
+        <div class="rcard-head">
+          <span class="ri">📋</span>
+          <h3 class="ay">Compliance Failures &amp; Fines</h3>
+          <span class="rsev rsev-high">🟠 High</span>
+        </div>
+        <div class="rcard-body">PCI-DSS 4.0, HIPAA, FIPS 140-3, and GDPR all mandate specific minimum cryptographic standards. Using MD5 for any security function or TLS 1.0 for cardholder data transmission is an <strong>automatic compliance violation</strong> — even if no breach has occurred.</div>
+        <div class="rcard-ex">Real impact: <span>PCI-DSS audit failure for TLS 1.0 usage can result in suspension of card processing and fines up to $100K/month.</span></div>
+      </div>
+    </div>
+
+    <div class="hbox hb-vio" style="margin-top:.7%;margin-bottom:0;">
+      <p>⚛️ <strong>The Quantum Threat — The Next Wave:</strong> Quantum computers will break RSA-2048 and ECC-256 in minutes using Shor's algorithm. Organisations need to <span class="av">map their current crypto now</span> using CBOM to plan migration to post-quantum algorithms (CRYSTALS-Kyber, CRYSTALS-Dilithium) before quantum hardware becomes accessible.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · How CBOM Detects Weak Crypto
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#dc2626;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">📋 Detection Engine · Slide 4 of 6</div>
+    <h2>How CBOM Detects Weak Cryptography</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.9%;">
+      <p>📖 CBOM acts as a <strong>continuous cryptographic audit engine</strong>. It doesn't just list what's installed — it evaluates every component against an approved-algorithm policy and assigns risk levels automatically. The result: a live, prioritised list of cryptographic weaknesses ready for the security team to act on.</p>
+    </div>
+
+    <!-- Detection flow -->
+    <div class="det-flow" style="margin-bottom:.85%;">
+      <div class="dfstage df-trk">
+        <span class="ds-ico">🔍</span>
+        <h4 class="as">Track</h4>
+        <p>CBOM inventories every algorithm, key, cert, and protocol in use across code, containers, and cloud.</p>
+      </div>
+      <div class="df-arr">→</div>
+      <div class="dfstage df-det">
+        <span class="ds-ico">🚨</span>
+        <h4 class="ao">Detect</h4>
+        <p>Each component matched against NIST, FIPS, and CERT-In approved-algorithm policy lists. Non-compliant = flagged.</p>
+      </div>
+      <div class="df-arr">→</div>
+      <div class="dfstage df-rsk">
+        <span class="ds-ico">⚡</span>
+        <h4 class="ar">Risk Score</h4>
+        <p>Severity assigned: Critical (MD5/DES), High (SHA-1/TLS 1.0), Medium (TLS 1.2 weak ciphers), Low (compliant).</p>
+      </div>
+      <div class="df-arr">→</div>
+      <div class="dfstage df-act">
+        <span class="ds-ico">🔧</span>
+        <h4 class="ag">Action</h4>
+        <p>Owner notified. CI/CD gate blocks deployment. Remediation ticket auto-created with fix recommendation.</p>
+      </div>
+    </div>
+
+    <!-- CBOM scan results table -->
+    <div class="sl sl-b" style="text-align:center;">📊 Sample CBOM Weak Crypto Scan Output — Payment Service</div>
+    <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;">
+      <table class="scan-tbl">
+        <thead>
+          <tr>
+            <th style="width:20%;">Component</th>
+            <th style="width:16%;">Algorithm / Protocol</th>
+            <th style="width:12%;">Issue</th>
+            <th style="width:10%;">Severity</th>
+            <th style="width:22%;">Location</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="st-crit">🔐 password-utils.js</td>
+            <td class="st-crit">MD5</td>
+            <td>Broken hash</td>
+            <td><span class="sev-pill sp-c">Critical</span></td>
+            <td>auth-service · /login handler</td>
+            <td class="ag">→ Replace with bcrypt / Argon2</td>
+          </tr>
+          <tr>
+            <td class="st-high">🌐 api-gateway config</td>
+            <td class="st-high">TLS 1.0 / 1.1</td>
+            <td>Deprecated protocol</td>
+            <td><span class="sev-pill sp-h">High</span></td>
+            <td>nginx ingress · port 443</td>
+            <td class="ag">→ Enforce TLS 1.2 minimum / TLS 1.3</td>
+          </tr>
+          <tr>
+            <td class="st-crit">📜 legacy-payment.p12</td>
+            <td class="st-crit">SHA-1 signed cert</td>
+            <td>Broken signature alg</td>
+            <td><span class="sev-pill sp-c">Critical</span></td>
+            <td>payment-processor · cert store</td>
+            <td class="ag">→ Reissue with SHA-256 signature</td>
+          </tr>
+          <tr>
+            <td class="st-med">🗝️ encryption-service</td>
+            <td class="st-med">AES-128 / ECB mode</td>
+            <td>Weak mode</td>
+            <td><span class="sev-pill sp-m">Medium</span></td>
+            <td>data-encryption-svc · encrypt()</td>
+            <td class="ag">→ Upgrade to AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="st-ok">🔑 jwt-service</td>
+            <td class="st-ok">RS256 / RSA-2048</td>
+            <td>—</td>
+            <td><span class="sev-pill sp-ok">✅ Good</span></td>
+            <td>auth-service · token issuer</td>
+            <td class="ab">Compliant — no action needed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Risk Management & Remediation
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-grn">🔧 Remediation · Slide 5 of 6</div>
+    <h2>Risk Management &amp; Remediation Playbook</h2>
+
+    <div class="hbox hb-grn" style="margin-bottom:.85%;">
+      <p>📖 Detection without action is meaningless. CBOM provides the <strong>visibility layer</strong>; the remediation playbook provides the <strong>action layer</strong>. For each category of weak cryptography, there is a clear, proven migration path — and CBOM tracks each one to completion.</p>
+    </div>
+
+    <div class="rem-grid">
+      <div class="rbox rb-1">
+        <div class="rbox-top">
+          <span class="rbico">💀</span>
+          <h3>Replace Broken Hash Algorithms</h3>
+          <span class="rbadge" style="background:rgba(248,113,113,.15);color:#f87171;border:1px solid rgba(248,113,113,.28);">Priority: Critical</span>
+        </div>
+        <div class="from-to"><span class="ft-from">MD5</span><span class="ft-arr">→</span><span class="ft-to">SHA-256 / SHA-3</span></div>
+        <div class="from-to"><span class="ft-from">SHA-1</span><span class="ft-arr">→</span><span class="ft-to">SHA-256 / SHA-512</span></div>
+        <div class="from-to"><span class="ft-from">MD5 passwords</span><span class="ft-arr">→</span><span class="ft-to">bcrypt / Argon2id</span></div>
+        <div class="rbox-note">CBOM tracks: old algorithm removed ✓ · new algorithm verified ✓ · all call sites updated ✓</div>
+      </div>
+
+      <div class="rbox rb-2">
+        <div class="rbox-top">
+          <span class="rbico">🔌</span>
+          <h3>Upgrade TLS Versions &amp; Ciphers</h3>
+          <span class="rbadge" style="background:rgba(251,146,60,.14);color:#fb923c;border:1px solid rgba(251,146,60,.26);">Priority: High</span>
+        </div>
+        <div class="from-to"><span class="ft-from">TLS 1.0 / 1.1</span><span class="ft-arr">→</span><span class="ft-to">TLS 1.3 preferred</span></div>
+        <div class="from-to"><span class="ft-from">AES-CBC suites</span><span class="ft-arr">→</span><span class="ft-to">AES-256-GCM suites</span></div>
+        <div class="from-to"><span class="ft-from">RSA key exchange</span><span class="ft-arr">→</span><span class="ft-to">ECDHE (forward secrecy)</span></div>
+        <div class="rbox-note">CBOM verifies: new protocol active in runtime scan · old version disabled · cipher suite policy enforced</div>
+      </div>
+
+      <div class="rbox rb-3">
+        <div class="rbox-top">
+          <span class="rbico">🗝️</span>
+          <h3>Key Rotation &amp; Strengthening</h3>
+          <span class="rbadge" style="background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.26);">Priority: Medium</span>
+        </div>
+        <div class="from-to"><span class="ft-from">RSA-1024</span><span class="ft-arr">→</span><span class="ft-to">RSA-2048 / RSA-4096</span></div>
+        <div class="from-to"><span class="ft-from">Never-rotated keys</span><span class="ft-arr">→</span><span class="ft-to">90-day rotation policy</span></div>
+        <div class="from-to"><span class="ft-from">Hardcoded keys</span><span class="ft-arr">→</span><span class="ft-to">HSM / KMS managed</span></div>
+        <div class="rbox-note">CBOM tracks: key age · last rotation date · storage location · rotation policy compliance</div>
+      </div>
+
+      <div class="rbox rb-4">
+        <div class="rbox-top">
+          <span class="rbico">📜</span>
+          <h3>Certificate Lifecycle Management</h3>
+          <span class="rbadge" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.26);">Ongoing</span>
+        </div>
+        <div class="from-to"><span class="ft-from">SHA-1 signed certs</span><span class="ft-arr">→</span><span class="ft-to">SHA-256 reissued certs</span></div>
+        <div class="from-to"><span class="ft-from">Manual renewal</span><span class="ft-arr">→</span><span class="ft-to">cert-manager auto-renew</span></div>
+        <div class="from-to"><span class="ft-from">Expired cert in prod</span><span class="ft-arr">→</span><span class="ft-to">30-day expiry alert</span></div>
+        <div class="rbox-note">CBOM continuously monitors: expiry countdown · issuer validity · chain integrity · OCSP revocation status</div>
+      </div>
+    </div>
+
+    <!-- Proactive security cycle -->
+    <div class="sl sl-g" style="text-align:center;">🔄 Proactive Security Lifecycle — Continuous Improvement</div>
+    <div class="cycle">
+      <div class="cnode cn-1"><span class="cni">🔍</span><h4 class="as">Scan</h4><p>CBOM auto-generated on every build</p></div>
+      <div class="carr">→</div>
+      <div class="cnode cn-2"><span class="cni">🚨</span><h4 class="ar">Detect</h4><p>Weak crypto flagged instantly</p></div>
+      <div class="carr">→</div>
+      <div class="cnode cn-3"><span class="cni">📊</span><h4 class="ay">Prioritise</h4><p>CVSS + business impact scoring</p></div>
+      <div class="carr">→</div>
+      <div class="cnode cn-4"><span class="cni">🔧</span><h4 class="ag">Remediate</h4><p>Fix applied, CBOM re-scanned</p></div>
+      <div class="carr">→</div>
+      <div class="cnode cn-5"><span class="cni">📡</span><h4 class="at">Monitor</h4><p>Runtime drift alerts continuously</p></div>
+      <div class="carr">↺</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum4" style="margin-bottom:.85%;">
+      <div class="s4b" style="border-color:rgba(248,113,113,.26);">
+        <span class="si">💀</span>
+        <h4 class="ar">Weak Crypto = Real Risk</h4>
+        <p>MD5, SHA-1, TLS 1.0, DES, and short keys are actively exploited. They cause data breaches, MitM attacks, compliance failures, and identity forgery.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">📋</span>
+        <h4 class="as">CBOM Detects Everything</h4>
+        <p>Tracks every algorithm, key, cert, and protocol. Compares against approved-algorithm policy. Assigns severity scores. Notifies owners automatically.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(74,222,128,.24);">
+        <span class="si">🔧</span>
+        <h4 class="ag">Clear Remediation Paths</h4>
+        <p>Every weak component has a proven replacement: MD5→bcrypt, TLS 1.0→TLS 1.3, RSA-1024→RSA-2048. CBOM tracks each migration to completion.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">🔄</span>
+        <h4 class="at">Continuous, Not One-Time</h4>
+        <p>CBOM runs on every build and monitors runtime continuously. New weak crypto introduced by a dependency update is caught before reaching production.</p>
+      </div>
+    </div>
+
+    <div class="two" style="gap:1.4%;margin-bottom:.85%;">
+      <div class="hbox hb-red" style="margin-bottom:0;flex:1;">
+        <p>⚠️ <strong>Risk Reduction:</strong> Organisations that implement CBOM-driven crypto monitoring reduce their cryptographic attack surface by <span class="ar">identifying and removing known-weak components</span> before they are exploited — shifting from reactive incident response to proactive security.</p>
+      </div>
+      <div class="hbox hb-grn" style="margin-bottom:0;flex:1;">
+        <p>✅ <strong>Compliance on Autopilot:</strong> CBOM auto-generates the cryptographic evidence required for <span class="ag">PCI-DSS 4.0, FIPS 140-3, HIPAA, ISO 27001, and CERT-In</span> audits — turning annual manual reviews into a continuous, always-ready compliance posture.</p>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>Certificate Management using CBOM — tracking TLS certificate lifecycle, expiry automation, revocation monitoring, and certificate governance at scale</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Implementation Strategy – Enterprise Adoption Roadmap</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#06061e 0%,#0c0e46 48%,#08092c 100%);}
+  .s2{background:linear-gradient(145deg,#060a14 0%,#071e2c 50%,#060e1e 100%);}
+  .s3{background:linear-gradient(145deg,#060818 0%,#0f0828 50%,#09061c 100%);}
+  .s4{background:linear-gradient(145deg,#060c0a 0%,#071c12 50%,#060e0c 100%);}
+  .s5{background:linear-gradient(145deg,#080610 0%,#120824 50%,#0a0618 100%);}
+  .s6{background:linear-gradient(145deg,#060810 0%,#090f2c 50%,#060c20 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-ora{color:#fb923c;background:rgba(251,146,60,.09);  border:1px solid rgba(251,146,60,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.75rem,4.8vw,3.5rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:52px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.76rem,1.55vw,1.12rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.64rem,1.18vw,.86rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2.2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);color:#5eead4;}
+  .tb-c{background:rgba(251,146,60,.09);border:1px solid rgba(251,146,60,.3);color:#fed7aa;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-ora{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.24);}
+  .hb-ora p{color:#fed7aa;}.hb-ora strong{color:#fb923c;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-g{color:#4ade80;}.sl-o{color:#fb923c;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ag{color:#4ade80;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════
+     S1 – HORIZONTAL 4-STEP STRIP
+  ═══════════════════ */
+  .step-strip{display:flex;align-items:center;width:100%;gap:0;margin-bottom:.9%;}
+  .ss-step{
+    flex:1;border-radius:.75vw;padding:1.1% 1%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+    transition:transform .22s;
+  }
+  .ss-step:hover{transform:translateY(-3px);}
+  .ss-step .ssi{font-size:clamp(.95rem,1.8vw,1.35rem);}
+  .ss-step .ssn{font-size:clamp(.38rem,.68vw,.52rem);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1%;}
+  .ss-step h4{font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#e2e8f0;}
+  .ss-step p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.35;}
+  .ss-arr{font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;padding:0 .3%;}
+
+  .ss-1{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.26);}
+  .ss-2{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.26);}
+  .ss-3{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.25);}
+  .ss-4{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.25);}
+  .ss-1 .ssn{color:#38bdf8;}.ss-2 .ssn{color:#c084fc;}
+  .ss-3 .ssn{color:#2dd4bf;}.ss-4 .ssn{color:#4ade80;}
+
+  /* ═══════════════════
+     S2 – SCOPE
+  ═══════════════════ */
+  .scope-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .sg-box{border-radius:.8vw;padding:1.3% 1.5%;background:rgba(255,255,255,.04);}
+  .sg-box-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .sg-box-top .sgi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .sg-box-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .sg-rows{display:flex;flex-direction:column;gap:.4%;}
+  .sg-r{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;padding:.45% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .sg-r:last-child{border-bottom:none;}
+  .sgb-1{border:1px solid rgba(56,189,248,.24);}
+  .sgb-2{border:1px solid rgba(192,132,252,.22);}
+  .sgb-3{border:1px solid rgba(45,212,191,.2);}
+
+  /* ── RACI table ── */
+  .raci{width:100%;border-collapse:collapse;}
+  .raci th,.raci td{padding:clamp(4px,.85%,9px) clamp(5px,1%,11px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.45rem,.82vw,.6rem);vertical-align:middle;}
+  .raci thead tr{background:rgba(255,255,255,.05);}
+  .raci th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.4rem,.73vw,.55rem);color:#64748b;}
+  .raci tbody tr:last-child td{border-bottom:none;}
+  .raci tbody tr:hover{background:rgba(255,255,255,.02);}
+  .rp{padding:.15em .55em;border-radius:999px;font-weight:700;font-size:.9em;}
+  .r-r{background:rgba(129,140,248,.14);color:#818cf8;border:1px solid rgba(129,140,248,.26);}
+  .r-a{background:rgba(56,189,248,.12); color:#38bdf8;border:1px solid rgba(56,189,248,.24);}
+  .r-c{background:rgba(45,212,191,.11); color:#2dd4bf;border:1px solid rgba(45,212,191,.24);}
+  .r-i{background:rgba(74,222,128,.1);  color:#4ade80;border:1px solid rgba(74,222,128,.22);}
+  .r-n{color:#334155;font-size:.85em;text-align:center;}
+
+  /* ═══════════════════
+     S3 – TOOL SELECTION
+  ═══════════════════ */
+  .tool-matrix{width:100%;border-collapse:collapse;margin-bottom:.85%;}
+  .tool-matrix th,.tool-matrix td{padding:clamp(5px,.95%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.46rem,.85vw,.62rem);vertical-align:middle;}
+  .tool-matrix thead tr{background:rgba(255,255,255,.05);}
+  .tool-matrix th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.41rem,.75vw,.56rem);color:#64748b;}
+  .tool-matrix tbody tr:last-child td{border-bottom:none;}
+  .tool-matrix tbody tr:hover{background:rgba(255,255,255,.02);}
+  .ck{color:#4ade80;font-weight:700;text-align:center;}
+  .cx{color:#f87171;text-align:center;}
+  .cp{color:#fbbf24;text-align:center;}
+
+  /* ── Integration flow ── */
+  .int-flow{display:flex;align-items:center;width:100%;gap:.7%;margin-bottom:.85%;}
+  .if-node{
+    flex:1;border-radius:.7vw;padding:1% 1.1%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+  }
+  .if-node .ifn{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .if-node h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;}
+  .if-node p{font-size:clamp(.43rem,.78vw,.57rem);color:#94a3b8;line-height:1.35;}
+  .ifn-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .ifn-2{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.26);}
+  .ifn-3{background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(129,140,248,.1));border:1.5px solid rgba(45,212,191,.38);}
+  .ifn-4{background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.26);}
+  .ifn-5{background:rgba(251,146,60,.08); border:1px solid rgba(251,146,60,.24);}
+  .if-arr{font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;}
+
+  /* ═══════════════════
+     S4 – DATA COLLECTION
+  ═══════════════════ */
+  .scan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .scan-box{border-radius:.8vw;padding:1.3% 1.5%;background:rgba(255,255,255,.04);}
+  .sb-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .sb-top .sbi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .sb-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .sb-rows{display:flex;flex-direction:column;gap:.4%;}
+  .sb-r{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;padding:.45% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .sb-r:last-child{border-bottom:none;}
+  .sbb-1{border:1px solid rgba(56,189,248,.24);}
+  .sbb-2{border:1px solid rgba(192,132,252,.22);}
+  .sbb-3{border:1px solid rgba(45,212,191,.2);}
+
+  /* ── Quality checklist ── */
+  .qual-row{display:flex;gap:.8%;width:100%;}
+  .qbox{flex:1;border-radius:.7vw;padding:1% 1.2%;display:flex;align-items:center;gap:.8%;}
+  .qbox .qi{font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;}
+  .qbox h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;margin-bottom:.4%;}
+  .qbox p{font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;line-height:1.35;}
+  .qb-1{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.22);}
+  .qb-2{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);}
+  .qb-3{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.22);}
+  .qb-4{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);}
+
+  /* ═══════════════════
+     S5 – GOVERNANCE
+  ═══════════════════ */
+  .gov-cycle{display:flex;align-items:center;width:100%;gap:.8%;margin-bottom:.85%;}
+  .gc-node{flex:1;border-radius:.8vw;padding:1.3% 1.1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2%;transition:transform .22s;}
+  .gc-node:hover{transform:translateY(-3px);}
+  .gc-node .gci{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .gc-node h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .gc-node p{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+  .gcn-1{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.26);}
+  .gcn-2{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);}
+  .gcn-3{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);}
+  .gcn-4{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.26);}
+  .gcn-5{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .gc-arr{font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;}
+
+  /* ── Policy bands ── */
+  .pol-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .pol-box{border-radius:.75vw;padding:1.1% 1.3%;background:rgba(255,255,255,.04);}
+  .pol-box-top{display:flex;align-items:center;gap:.9%;margin-bottom:.6%;padding-bottom:.45%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .pol-box-top .pbi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .pol-box-top h3{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .pol-rows{display:flex;flex-direction:column;gap:.35%;}
+  .pol-r{display:flex;align-items:flex-start;gap:.6%;font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;padding:.4% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .pol-r:last-child{border-bottom:none;}
+  .pb-v{border:1px solid rgba(192,132,252,.22);}
+  .pb-s{border:1px solid rgba(56,189,248,.22);}
+  .pb-t{border:1px solid rgba(45,212,191,.2);}
+  .pb-g{border:1px solid rgba(74,222,128,.2);}
+
+  /* ═══════════════════
+     S6 – SUMMARY
+  ═══════════════════ */
+  .sum4{display:grid;grid-template-columns:repeat(4,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s4b{border-radius:.75vw;padding:1.5% 1.2%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s4b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s4b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s4b p{font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{width:100%;border-radius:.8vw;padding:1.3% 2%;background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.35);text-align:center;margin-bottom:.85%;}
+  .closing h3{font-size:clamp(.66rem,1.25vw,.92rem);font-weight:800;color:#e2e8f0;margin-bottom:.5%;}
+  .closing p{font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.5;}
+
+  .outcome-row{display:flex;gap:.8%;width:100%;}
+  .out{flex:1;border-radius:.65vw;padding:.9% 1.1%;display:flex;align-items:center;gap:.8%;}
+  .out .oi{font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;}
+  .out h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;margin-bottom:.3%;}
+  .out p{font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;line-height:1.35;}
+  .out-1{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);}
+  .out-2{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);}
+  .out-3{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.22);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:25%;height:25%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:15%;height:15%;bottom:13%;left:25%;"></div>
+
+    <div class="tag tg-ind">🏛️ CBOM Series · Episode 18</div>
+    <h1>CBOM Implementation Strategy</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Enterprise Adoption Roadmap — From Concept to Execution</p>
+    <p class="tagline">✦ Define · Integrate · Generate · Govern · Scale ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🗺️ <span>Roadmap</span></div>
+      <div class="tb tb-b">⚙️ <span>Strategy</span></div>
+      <div class="tb tb-c">🛡️ <span>Security</span></div>
+    </div>
+
+    <!-- 4-step master flow -->
+    <div class="step-strip" style="margin-bottom:.9%;">
+      <div class="ss-step ss-1">
+        <span class="ssi">🎯</span>
+        <span class="ssn">Step 1</span>
+        <h4>Scope &amp; Objectives</h4>
+        <p>Define what to protect and why</p>
+      </div>
+      <div class="ss-arr">→</div>
+      <div class="ss-step ss-2">
+        <span class="ssi">🛠️</span>
+        <span class="ssn">Step 2</span>
+        <h4>Tool Selection &amp; Integration</h4>
+        <p>Choose tools and embed in pipelines</p>
+      </div>
+      <div class="ss-arr">→</div>
+      <div class="ss-step ss-3">
+        <span class="ssi">📋</span>
+        <span class="ssn">Step 3</span>
+        <h4>Data Collection &amp; Generation</h4>
+        <p>Scan and produce accurate CBOMs</p>
+      </div>
+      <div class="ss-arr">→</div>
+      <div class="ss-step ss-4">
+        <span class="ssi">🏛️</span>
+        <span class="ssn">Step 4</span>
+        <h4>Governance &amp; Monitoring</h4>
+        <p>Enforce policies and monitor continuously</p>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:82%;text-align:center;margin-bottom:0;">
+      <p>CBOM adoption is not a one-time project — it is a <strong>structured, phased programme</strong> that requires strategic planning, the right toolchain, reliable data, and continuous governance. This episode provides a <strong>practical, enterprise-ready implementation playbook</strong> for organizations at any stage of their security maturity.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · Step 1 – Scope & Objectives
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🎯 Step 1 of 4 · Slide 2 of 6</div>
+    <h2>Step 1 — Define Scope &amp; Objectives</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.85%;">
+      <p>📖 Before deploying a single tool, <strong>clear scope and measurable objectives</strong> must be defined at the leadership level. Organizations that skip this step generate CBOM data with no policy to evaluate it against, no owners to act on findings, and no success metrics to show stakeholders. <strong>Clear scope is the critical first enabler.</strong></p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-s">🗂️ Define What You Are Scanning</div>
+        <div class="scope-grid" style="margin-bottom:.85%;">
+          <div class="scan-box sgb-1">
+            <div class="sb-top"><span class="sbi">💻</span><h3 class="as">Applications</h3></div>
+            <div class="sb-rows">
+              <div class="sg-r"><span>▸</span><div>All production-serving applications — web, API, mobile backends, and batch services</div></div>
+              <div class="sg-r"><span>▸</span><div>Internal tooling and developer platforms that handle sensitive data or credentials</div></div>
+              <div class="sg-r"><span>▸</span><div>Third-party integrations and partner APIs receiving or transmitting protected data</div></div>
+            </div>
+          </div>
+          <div class="scan-box sgb-2">
+            <div class="sb-top"><span class="sbi">🐳</span><h3 class="av">Containers &amp; Infra</h3></div>
+            <div class="sb-rows">
+              <div class="sg-r"><span>▸</span><div>All Docker images in production registries — including base OS layers and framework runtimes</div></div>
+              <div class="sg-r"><span>▸</span><div>Kubernetes clusters — pods, secrets, ingress TLS, and service mesh mTLS configurations</div></div>
+              <div class="sg-r"><span>▸</span><div>CI/CD artefact stores — built images, deployment packages, and signing keys</div></div>
+            </div>
+          </div>
+          <div class="scan-box sgb-3">
+            <div class="sb-top"><span class="sbi">☁️</span><h3 class="at">Cloud &amp; Runtime</h3></div>
+            <div class="sb-rows">
+              <div class="sg-r"><span>▸</span><div>Cloud-managed services — AWS KMS, ACM, RDS encryption, S3 SSE, Azure Key Vault</div></div>
+              <div class="sg-r"><span>▸</span><div>All live TLS certificates across public-facing and internal endpoints</div></div>
+              <div class="sg-r"><span>▸</span><div>Legacy on-premises systems that interact with or feed data to cloud services</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sl sl-s">🎯 Define Your Objectives — Measurable Goals</div>
+        <ul class="ilist">
+          <li><span class="ico">👁️</span><div><span class="as">Visibility:</span> "100% of production services will have a CBOM generated on every deployment within 90 days."</div></li>
+          <li><span class="ico">🛡️</span><div><span class="as">Risk Management:</span> "All Critical crypto findings remediated within 24h; High within 5 business days — tracked to closure."</div></li>
+          <li><span class="ico">📋</span><div><span class="as">Compliance:</span> "CERT-In / PCI-DSS compliant CBOM submitted within 30 days of any regulatory audit request."</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-s">👥 Ownership — RACI Matrix</div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;margin-bottom:.85%;">
+          <table class="raci">
+            <thead><tr><th>Activity</th><th>CISO</th><th>DevSecOps</th><th>Dev Team</th><th>Compliance</th></tr></thead>
+            <tbody>
+              <tr><td>Define scope &amp; policy</td><td><span class="rp r-r">R</span></td><td><span class="rp r-c">C</span></td><td><span class="rp r-i">I</span></td><td><span class="rp r-a">A</span></td></tr>
+              <tr><td>Tool selection &amp; setup</td><td><span class="rp r-a">A</span></td><td><span class="rp r-r">R</span></td><td><span class="rp r-c">C</span></td><td><span class="rp r-i">I</span></td></tr>
+              <tr><td>CBOM generation &amp; scan</td><td><span class="rp r-i">I</span></td><td><span class="rp r-r">R</span></td><td><span class="rp r-r">R</span></td><td class="r-n">—</td></tr>
+              <tr><td>Remediate findings</td><td><span class="rp r-a">A</span></td><td><span class="rp r-c">C</span></td><td><span class="rp r-r">R</span></td><td><span class="rp r-i">I</span></td></tr>
+              <tr><td>Compliance reporting</td><td><span class="rp r-r">R</span></td><td><span class="rp r-c">C</span></td><td><span class="rp r-i">I</span></td><td><span class="rp r-r">R</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hbox hb-sky" style="margin-bottom:0;">
+          <p>💡 <strong>Enterprise Tip:</strong> Appoint a named <span class="as">CBOM Programme Owner</span> — a senior security role with budget authority, team access, and executive sponsorship. Without a named owner, CBOM becomes nobody's responsibility and nobody's priority.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Step 2 – Tool Selection
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">🛠️ Step 2 of 4 · Slide 3 of 6</div>
+    <h2>Step 2 — Tool Selection &amp; Integration</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 Selecting the right CBOM toolchain requires evaluating <strong>coverage breadth, detection accuracy, standard format support, and CI/CD integration depth</strong>. The best tool configuration combines a static scanner for build-time generation with a runtime probe for live environment discovery — creating complete coverage across the full software lifecycle.</p>
+    </div>
+
+    <div class="sl sl-v" style="text-align:center;">⚙️ Recommended Toolchain Configuration — Build-Time + Runtime Coverage</div>
+    <div class="int-flow" style="margin-bottom:.85%;">
+      <div class="if-node ifn-1">
+        <span class="ifn">🔎</span>
+        <h4 class="as">Static Scanner</h4>
+        <p>Syft / cdxgen — scans source code, manifests, container image layers. Produces CycloneDX JSON at build time.</p>
+      </div>
+      <div class="if-arr">+</div>
+      <div class="if-node ifn-2">
+        <span class="ifn">🌐</span>
+        <h4 class="av">Runtime Probe</h4>
+        <p>Trivy / custom K8s scanner — discovers live TLS, pod crypto configs, and cloud API crypto settings in production.</p>
+      </div>
+      <div class="if-arr">→</div>
+      <div class="if-node ifn-3">
+        <span class="ifn">📋</span>
+        <h4 class="at">CBOM Engine</h4>
+        <p>Merges static + runtime findings into a single signed CycloneDX 1.5+ CBOM document per service.</p>
+      </div>
+      <div class="if-arr">→</div>
+      <div class="if-node ifn-4">
+        <span class="ifn">📡</span>
+        <h4 class="ag">Dependency-Track</h4>
+        <p>Receives CBOM via API. Matches components against NVD / OSS Advisory. Generates risk dashboard.</p>
+      </div>
+      <div class="if-arr">→</div>
+      <div class="if-node ifn-5">
+        <span class="ifn">🚦</span>
+        <h4 class="ao">Policy Gate</h4>
+        <p>CI/CD step checks CBOM against approved-algorithm policy. Fails build if Critical findings present.</p>
+      </div>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-v">📊 Tool Evaluation Matrix — Key Selection Criteria</div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;">
+          <table class="tool-matrix">
+            <thead><tr><th style="width:26%;">Capability</th><th>Must Have</th><th>Source Scan</th><th>Container Scan</th><th>Runtime Scan</th><th>Cloud API</th></tr></thead>
+            <tbody>
+              <tr><td>CycloneDX 1.5+ output</td><td class="ck">✅</td><td class="ck">✅</td><td class="ck">✅</td><td class="cp">⚠️</td><td class="ck">✅</td></tr>
+              <tr><td>Transitive dependency detection</td><td class="ck">✅</td><td class="ck">✅</td><td class="ck">✅</td><td class="cx">✗</td><td class="cx">✗</td></tr>
+              <tr><td>CVE database auto-query</td><td class="ck">✅</td><td class="cp">⚠️</td><td class="ck">✅</td><td class="cp">⚠️</td><td class="ck">✅</td></tr>
+              <tr><td>CI/CD native plugin</td><td class="ck">✅</td><td class="ck">✅</td><td class="ck">✅</td><td class="cx">✗</td><td class="cp">⚠️</td></tr>
+              <tr><td>Certificate expiry tracking</td><td class="ck">✅</td><td class="cx">✗</td><td class="cp">⚠️</td><td class="ck">✅</td><td class="ck">✅</td></tr>
+              <tr><td>Digital signature on output</td><td class="ck">✅</td><td class="ck">✅</td><td class="ck">✅</td><td class="cp">⚠️</td><td class="cx">✗</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col">
+        <div class="sl sl-v">🔌 CI/CD Integration Checklist</div>
+        <ul class="ilist">
+          <li><span class="ico">✅</span><div>Add CBOM generation as a <span class="av">dedicated pipeline stage</span> — runs after build, before any deployment step</div></li>
+          <li><span class="ico">✅</span><div>Store signed CBOM as a <span class="av">build artefact</span> alongside the container image in OCI registry with matching digest</div></li>
+          <li><span class="ico">✅</span><div>Configure <span class="av">policy-as-code gate</span> — define approved algorithms in a versioned config file checked into the repo</div></li>
+          <li><span class="ico">✅</span><div>Push CBOM to <span class="av">Dependency-Track</span> or equivalent via REST API for continuous CVE matching and dashboard visibility</div></li>
+          <li><span class="ico">✅</span><div>Set up <span class="av">webhook notifications</span> to Slack / PagerDuty for Critical and High findings — with direct link to the specific CBOM entry</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Step 3 – Data Collection
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">📋 Step 3 of 4 · Slide 4 of 6</div>
+    <h2>Step 3 — Data Collection &amp; CBOM Generation</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.85%;">
+      <p>📖 CBOM data quality is the foundation of every downstream decision — risk prioritisation, compliance reporting, and remediation planning. <strong>Incomplete or stale CBOM data is worse than no CBOM</strong> — it creates false confidence. This step establishes the scanning discipline that ensures every CBOM produced is accurate, complete, and current.</p>
+    </div>
+
+    <div class="scan-grid" style="margin-bottom:.85%;">
+      <div class="scan-box sbb-1">
+        <div class="sb-top"><span class="sbi">📂</span><h3 class="as">Static Code &amp; Manifest Scan</h3></div>
+        <div class="sb-rows">
+          <div class="sb-r"><span>▸</span><div><span class="as">What:</span> Parse all package manifests (package.json, pom.xml, go.mod, Pipfile.lock, Cargo.lock) and source code for crypto API calls</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="as">When:</span> Every commit to main branch and every pull request — before merge approval</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="as">Output:</span> Component list with name, version, PURL, algorithm type, and crypto-specific properties per service</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="as">Tool:</span> cdxgen, Syft — supports 15+ language ecosystems with multi-language monorepo handling</div></div>
+        </div>
+      </div>
+      <div class="scan-box sbb-2">
+        <div class="sb-top"><span class="sbi">🐳</span><h3 class="av">Container Image Layer Scan</h3></div>
+        <div class="sb-rows">
+          <div class="sb-r"><span>▸</span><div><span class="av">What:</span> Scan every layer of container images — base OS, runtime, framework, and application — for installed crypto packages and bundled certificates</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="av">When:</span> Every image build and every base image update — automated via registry webhook trigger</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="av">Output:</span> Layer-attributed component list showing which layer introduced each crypto component for targeted remediation</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="av">Tool:</span> Trivy, Grype — full layer decomposition with OS package database cross-reference</div></div>
+        </div>
+      </div>
+      <div class="scan-box sbb-3">
+        <div class="sb-top"><span class="sbi">📡</span><h3 class="at">Runtime &amp; Cloud Discovery</h3></div>
+        <div class="sb-rows">
+          <div class="sb-r"><span>▸</span><div><span class="at">What:</span> Probe live environments — Kubernetes pods, cloud KMS inventories, ACM certificate stores, and active TLS configurations on load balancers</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="at">When:</span> Continuous scheduled scan (every 6–24 hours) and triggered on deployment events via Kubernetes admission webhook</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="at">Output:</span> Live crypto state — actual negotiated TLS versions and cipher suites, active certificates with expiry countdown, and KMS key rotation status</div></div>
+          <div class="sb-r"><span>▸</span><div><span class="at">Tool:</span> Custom K8s DaemonSet scanner, AWS Config rules, cloud-native security posture management (CSPM)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality checklist -->
+    <div class="sl sl-t" style="text-align:center;">✅ CBOM Data Quality Standards — Accuracy &amp; Completeness Requirements</div>
+    <div class="qual-row">
+      <div class="qbox qb-1">
+        <span class="qi">🎯</span>
+        <div><h4 class="at">Completeness</h4><p>All 4 mandatory CERT-In field groups populated. Zero fields marked "unknown" — blanks are treated as findings.</p></div>
+      </div>
+      <div class="qbox qb-2">
+        <span class="qi">⏱️</span>
+        <div><h4 class="ag">Currency</h4><p>CBOM timestamp ≤ 24h old for production services. Stale CBOMs automatically flagged in governance dashboard.</p></div>
+      </div>
+      <div class="qbox qb-3">
+        <span class="qi">🔏</span>
+        <div><h4 class="ai">Integrity</h4><p>Every CBOM signed with JWS. Signature verified by Dependency-Track before ingestion. Unsigned CBOMs rejected.</p></div>
+      </div>
+      <div class="qbox qb-4">
+        <span class="qi">📍</span>
+        <div><h4 class="ao">Attribution</h4><p>Every component entry includes usage location and named owner. Findings without an owner cannot be prioritised or resolved.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Step 4 – Governance
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:4%;"></div>
+
+    <div class="tag tg-ora">🏛️ Step 4 of 4 · Slide 5 of 6</div>
+    <h2>Step 4 — Governance &amp; Continuous Monitoring</h2>
+
+    <div class="hbox hb-ora" style="margin-bottom:.85%;">
+      <p>📖 CBOM generation without governance is a reporting exercise, not a security programme. <strong>Governance transforms CBOM data into enforceable controls</strong> — policies that block weak crypto at the gate, SLAs that ensure findings are remediated, and dashboards that give executives real-time visibility into their cryptographic security posture. And it runs <strong>continuously — not quarterly.</strong></p>
+    </div>
+
+    <!-- Governance continuous cycle -->
+    <div class="sl sl-o" style="text-align:center;">🔄 Governance Operating Cycle — Runs on Every Build, Every Day</div>
+    <div class="gov-cycle" style="margin-bottom:.85%;">
+      <div class="gc-node gcn-1"><span class="gci">📋</span><h4 class="av">Policy Definition</h4><p>Approved algorithm list, key minimums, TLS version floor — defined as code, versioned in Git.</p></div>
+      <div class="gc-arr">→</div>
+      <div class="gc-node gcn-2"><span class="gci">🚨</span><h4 class="ar">Risk Detection</h4><p>CBOM evaluated against policy on every scan. Violations auto-classified by severity and assigned to owner.</p></div>
+      <div class="gc-arr">→</div>
+      <div class="gc-node gcn-3"><span class="gci">📊</span><h4 class="ay">Prioritisation</h4><p>Critical within 24h · High within 5 days · Medium in next sprint · Low in backlog — automated SLA tracking.</p></div>
+      <div class="gc-arr">→</div>
+      <div class="gc-node gcn-4"><span class="gci">🔧</span><h4 class="as">Remediation</h4><p>Ticket auto-created with CVE details, fix version, and affected services. Re-scan confirms closure.</p></div>
+      <div class="gc-arr">→</div>
+      <div class="gc-node gcn-5"><span class="gci">📡</span><h4 class="ag">Monitoring</h4><p>Continuous runtime scanning detects drift. New CVEs trigger instant re-evaluation of all CBOM entries.</p></div>
+      <div class="gc-arr">↺</div>
+    </div>
+
+    <div class="pol-grid">
+      <div class="pol-box pb-v">
+        <div class="pol-box-top"><span class="pbi">📋</span><h3 class="av">Policy Enforcement Controls</h3></div>
+        <div class="pol-rows">
+          <div class="pol-r"><span>🔴</span><div>CI/CD gate <span class="av">blocks deployment</span> if any Critical crypto finding present in CBOM — no exceptions without CISO sign-off</div></div>
+          <div class="pol-r"><span>🟠</span><div>High findings generate <span class="av">mandatory Jira ticket</span> automatically with 5-day SLA and daily escalation to team lead if overdue</div></div>
+          <div class="pol-r"><span>🟡</span><div>Approved-algorithm policy stored as <span class="av">versioned YAML</span> in Git — policy changes require security team PR approval</div></div>
+          <div class="pol-r"><span>🟢</span><div>Exception process documented — temporary risk acceptance requires CISO approval and 30-day review checkpoint</div></div>
+        </div>
+      </div>
+      <div class="pol-box pb-s">
+        <div class="pol-box-top"><span class="pbi">📊</span><h3 class="as">Monitoring &amp; Reporting Cadence</h3></div>
+        <div class="pol-rows">
+          <div class="pol-r"><span>⚡</span><div><span class="as">Real-time:</span> New CVE published → all CBOM components re-queried within 1 hour → affected owners notified</div></div>
+          <div class="pol-r"><span>📅</span><div><span class="as">Daily:</span> Certificate expiry dashboard refreshed — owners of certs expiring in ≤ 30 days receive automated email</div></div>
+          <div class="pol-r"><span>📆</span><div><span class="as">Weekly:</span> CBOM posture summary sent to DevSecOps leads — open findings count, SLA breach rate, trend vs last week</div></div>
+          <div class="pol-r"><span>🗓️</span><div><span class="as">Quarterly:</span> Executive risk review — crypto maturity score, compliance evidence package, PQC migration progress update</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum4" style="margin-bottom:.85%;">
+      <div class="s4b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🎯</span>
+        <h4 class="as">Step 1 — Strategy</h4>
+        <p>Define scope (apps, containers, cloud), set measurable objectives, assign named owners with a RACI matrix. Clear scope is the critical first enabler of all subsequent steps.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🛠️</span>
+        <h4 class="av">Step 2 — Tools</h4>
+        <p>Select static + runtime tool combination. Integrate into CI/CD with policy-as-code gate. Push CBOM to Dependency-Track for CVE matching and governance dashboard.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">📋</span>
+        <h4 class="at">Step 3 — Data</h4>
+        <p>Scan all environments — source code, container layers, runtime, and cloud APIs. Enforce completeness, currency, integrity, and attribution standards on every CBOM generated.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(251,146,60,.22);">
+        <span class="si">🏛️</span>
+        <h4 class="ao">Step 4 — Governance</h4>
+        <p>Apply policy gates, enforce SLA-based remediation, monitor continuously. Run the governance cycle on every build — not as a quarterly audit. Risk never sleeps.</p>
+      </div>
+    </div>
+
+    <div class="closing">
+      <h3>🔐 CBOM is a Continuous Enterprise Security Process</h3>
+      <p>A successful CBOM programme is never "done" — it is a <strong>living, continuous discipline</strong> that evolves with your codebase, your threat landscape, and your regulatory requirements. Organizations that implement all four steps build a <strong>self-sustaining cryptographic governance capability</strong> that delivers ongoing security posture improvement, audit-ready compliance evidence, and measurable risk reduction at enterprise scale.</p>
+    </div>
+
+    <div class="outcome-row">
+      <div class="out out-1">
+        <span class="oi">👁️</span>
+        <div><h4 class="as">Complete Visibility</h4><p>Every crypto component — algorithms, keys, certificates, protocols — visible across all environments in a single governance dashboard</p></div>
+      </div>
+      <div class="out out-2">
+        <span class="oi">🛡️</span>
+        <div><h4 class="av">Enforced Security</h4><p>Policy gates block weak crypto before deployment. CVE findings trigger immediate owner notification. No silent risks reach production</p></div>
+      </div>
+      <div class="out out-3">
+        <span class="oi">📋</span>
+        <div><h4 class="ag">Compliance Confidence</h4><p>Signed, timestamped CBOM evidence ready for CERT-In, PCI-DSS 4.0, HIPAA, and FIPS 140-3 audit submissions on demand</p></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

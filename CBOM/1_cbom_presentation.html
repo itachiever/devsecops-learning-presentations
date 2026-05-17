@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is CBOM? – Cryptographic Bill of Materials</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: min(100vw, calc(100vh * 16/9));
+    height: min(100vh, calc(100vw * 9/16));
+    overflow: hidden;
+  }
+
+  /* ── Slide base ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5% 5%;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── Shared gradients ── */
+  .slide-1 { background: linear-gradient(135deg, #0d0d2b 0%, #0f2460 40%, #1a1060 100%); }
+  .slide-2 { background: linear-gradient(135deg, #060c1f 0%, #091b3d 45%, #0c2233 100%); }
+  .slide-3 { background: linear-gradient(135deg, #07131e 0%, #0b2040 50%, #112244 100%); }
+  .slide-4 { background: linear-gradient(135deg, #0c0a25 0%, #1a0a4a 50%, #0f1a50 100%); }
+  .slide-5 { background: linear-gradient(135deg, #080c1e 0%, #0d1f3c 50%, #0c1e2e 100%); }
+  .slide-6 { background: linear-gradient(135deg, #060d20 0%, #0b2040 45%, #0d1f3a 100%); }
+
+  /* ── Decorative orbs ── */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .orb-blue  { background: #3b82f6; }
+  .orb-purple{ background: #8b5cf6; }
+  .orb-teal  { background: #14b8a6; }
+  .orb-pink  { background: #ec4899; }
+
+  /* ── Typography ── */
+  .slide-tag {
+    font-size: clamp(0.55rem, 1.1vw, 0.75rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #60a5fa;
+    background: rgba(96,165,250,0.12);
+    border: 1px solid rgba(96,165,250,0.3);
+    padding: 0.3em 0.9em;
+    border-radius: 999px;
+    margin-bottom: 1.2%;
+  }
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    text-align: center;
+    background: linear-gradient(135deg, #93c5fd, #c4b5fd, #5eead4);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1%;
+  }
+  h2 {
+    font-size: clamp(1.3rem, 2.8vw, 2.1rem);
+    font-weight: 800;
+    color: #e2e8f0;
+    margin-bottom: 2%;
+    text-align: center;
+  }
+  .subtitle {
+    font-size: clamp(0.85rem, 1.8vw, 1.3rem);
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 0.8%;
+  }
+  .tagline {
+    font-size: clamp(0.75rem, 1.4vw, 1rem);
+    color: #5eead4;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Cards grid ── */
+  .cards { display: flex; gap: 1.5%; width: 100%; }
+  .card {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1vw;
+    padding: 2.5% 2.5%;
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s;
+  }
+  .card:hover { transform: translateY(-3px); }
+  .card-icon { font-size: clamp(1.4rem, 2.8vw, 2.2rem); margin-bottom: 4%; display: block; }
+  .card h3 {
+    font-size: clamp(0.75rem, 1.5vw, 1.05rem);
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 3%;
+  }
+  .card p, .card li {
+    font-size: clamp(0.6rem, 1.1vw, 0.82rem);
+    color: #94a3b8;
+    line-height: 1.55;
+  }
+  .card ul { list-style: none; padding: 0; }
+  .card li { padding: 1.5% 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .card li:last-child { border-bottom: none; }
+  .card li::before { content: "▸ "; color: #60a5fa; font-size: 0.9em; }
+
+  /* ── Highlight box ── */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 0.8vw;
+    padding: 1.8% 2.5%;
+    width: 100%;
+    margin-bottom: 1.5%;
+  }
+  .highlight-box p {
+    font-size: clamp(0.65rem, 1.2vw, 0.88rem);
+    color: #c4b5fd;
+    line-height: 1.55;
+  }
+  .highlight-box strong { color: #a78bfa; }
+
+  /* ── Pill / badge ── */
+  .pill {
+    display: inline-block;
+    background: rgba(94,234,212,0.15);
+    color: #5eead4;
+    border: 1px solid rgba(94,234,212,0.3);
+    padding: 0.2em 0.7em;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+
+  /* ── Two-col layout ── */
+  .two-col { display: flex; gap: 2%; width: 100%; }
+  .col { flex: 1; }
+  .col-wide { flex: 1.4; }
+
+  /* ── List items ── */
+  .item-list { list-style: none; padding: 0; width: 100%; }
+  .item-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1%;
+    padding: 1.2% 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: clamp(0.6rem, 1.15vw, 0.85rem);
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .item-list li:last-child { border-bottom: none; }
+  .item-list .ico { font-size: 1.15em; flex-shrink: 0; margin-top: 0.1em; }
+
+  /* ── Accent text ── */
+  .accent-blue   { color: #60a5fa; font-weight: 700; }
+  .accent-purple { color: #c4b5fd; font-weight: 700; }
+  .accent-teal   { color: #5eead4; font-weight: 700; }
+  .accent-pink   { color: #f472b6; font-weight: 700; }
+  .accent-yellow { color: #fbbf24; font-weight: 700; }
+
+  /* ── Section label ── */
+  .sec-label {
+    font-size: clamp(0.55rem, 1vw, 0.7rem);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #5eead4;
+    margin-bottom: 1.5%;
+  }
+
+  /* ── Icon row (slide 1) ── */
+  .icon-row { display: flex; gap: 3vw; margin: 2.5% 0; }
+  .icon-bubble {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5em;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    width: clamp(60px, 9vw, 90px);
+    height: clamp(60px, 9vw, 90px);
+    justify-content: center;
+    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .icon-bubble:nth-child(2) { animation-delay: 0.5s; }
+  .icon-bubble:nth-child(3) { animation-delay: 1s; }
+  .icon-bubble:nth-child(4) { animation-delay: 1.5s; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+  }
+
+  /* ── Divider ── */
+  .divider { width: 60px; height: 3px; background: linear-gradient(90deg,#3b82f6,#8b5cf6); border-radius: 999px; margin: 1.2% auto; }
+
+  /* ── CBOM component boxes ── */
+  .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2%; width: 100%; }
+  .comp-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.8vw;
+    padding: 1.8% 2%;
+    display: flex; align-items: flex-start; gap: 2%;
+  }
+  .comp-box .ci { font-size: clamp(1.1rem, 2.2vw, 1.7rem); flex-shrink: 0; }
+  .comp-box h4 { font-size: clamp(0.65rem, 1.2vw, 0.88rem); font-weight: 700; color: #e2e8f0; margin-bottom: 2%; }
+  .comp-box p  { font-size: clamp(0.55rem, 1vw, 0.75rem); color: #94a3b8; line-height: 1.5; }
+
+  /* ── Problem vs Solution (slide 5) ── */
+  .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5%; width: 100%; }
+  .problem-box, .solution-box {
+    border-radius: 0.8vw;
+    padding: 2% 2.2%;
+  }
+  .problem-box {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .solution-box {
+    background: rgba(20,184,166,0.08);
+    border: 1px solid rgba(20,184,166,0.3);
+  }
+  .problem-box .box-title { color: #f87171; font-size: clamp(0.65rem, 1.2vw, 0.88rem); font-weight: 700; margin-bottom: 2%; display: flex; align-items: center; gap: 0.4em; }
+  .solution-box .box-title { color: #5eead4; font-size: clamp(0.65rem, 1.2vw, 0.88rem); font-weight: 700; margin-bottom: 2%; display: flex; align-items: center; gap: 0.4em; }
+  .vs-list { list-style: none; padding: 0; }
+  .vs-list li { font-size: clamp(0.58rem, 1.05vw, 0.78rem); color: #cbd5e1; padding: 1.2% 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.5; }
+  .vs-list li:last-child { border-bottom: none; }
+  .vs-list li span { font-weight: 600; }
+
+  /* ── Summary slide ── */
+  .recap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2%; width: 100%; margin-bottom: 1.5%; }
+  .recap-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.8vw;
+    padding: 2% 1.8%;
+    text-align: center;
+  }
+  .recap-box .ri { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin-bottom: 4%; display: block; }
+  .recap-box h4 { font-size: clamp(0.62rem, 1.15vw, 0.84rem); font-weight: 700; color: #e2e8f0; margin-bottom: 2%; }
+  .recap-box p  { font-size: clamp(0.55rem, 0.95vw, 0.7rem); color: #94a3b8; line-height: 1.5; }
+
+  .cta-box {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(139,92,246,0.18));
+    border: 1px solid rgba(139,92,246,0.4);
+    border-radius: 0.8vw;
+    padding: 1.5% 2.5%;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 2%;
+  }
+  .cta-box .cta-left h3 { font-size: clamp(0.7rem, 1.3vw, 0.95rem); color: #e2e8f0; font-weight: 700; margin-bottom: 1%; }
+  .cta-box .cta-left p  { font-size: clamp(0.55rem, 1vw, 0.73rem); color: #94a3b8; }
+  .cta-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff;
+    font-weight: 700;
+    font-size: clamp(0.6rem, 1.1vw, 0.8rem);
+    padding: 0.6em 1.4em;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+  }
+
+  /* ── Progress dots ── */
+  .progress {
+    position: fixed;
+    bottom: 1.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .dot.active { background: #60a5fa; transform: scale(1.4); }
+
+  /* ── Nav buttons ── */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e2e8f0;
+    width: clamp(32px, 3.5vw, 46px);
+    height: clamp(32px, 3.5vw, 46px);
+    border-radius: 50%;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.2s;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { background: rgba(96,165,250,0.25); border-color: #60a5fa; }
+  #prev-btn { left: 0.8%; }
+  #next-btn { right: 0.8%; }
+
+  /* ── Slide number ── */
+  .slide-num {
+    position: fixed; bottom: 1.5%; right: 2%;
+    font-size: clamp(0.5rem, 0.9vw, 0.65rem);
+    color: rgba(255,255,255,0.3);
+    z-index: 100;
+  }
+
+  /* ── Analogy box ── */
+  .analogy {
+    background: rgba(251,191,36,0.07);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 0.8vw;
+    padding: 1.5% 2%;
+    width: 100%;
+    margin-top: 1.2%;
+  }
+  .analogy p { font-size: clamp(0.6rem, 1.1vw, 0.8rem); color: #fde68a; line-height: 1.55; }
+  .analogy strong { color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 1 – Title Slide
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-1 active" id="slide-1">
+    <div class="orb orb-blue"  style="width:35%;height:35%;top:-5%;left:-5%;"></div>
+    <div class="orb orb-purple"style="width:30%;height:30%;bottom:0%;right:0%;"></div>
+    <div class="orb orb-teal"  style="width:20%;height:20%;bottom:10%;left:20%;"></div>
+
+    <div class="slide-tag">🔐 DevSecOps Series • Episode 1</div>
+
+    <h1>What is CBOM?</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Cryptographic Bill of Materials — Explained Simply</p>
+    <p class="tagline">✦ From Basics to Real-World Understanding ✦</p>
+
+    <div class="icon-row" style="margin-top: 3%;">
+      <div class="icon-bubble">🔒</div>
+      <div class="icon-bubble">🔑</div>
+      <div class="icon-bubble">🛡️</div>
+      <div class="icon-bubble">📋</div>
+    </div>
+
+    <div class="highlight-box" style="max-width:70%; margin-top:2%; text-align:center;">
+      <p>A <strong>CBOM</strong> is like an <strong>ingredient list for the security</strong> inside your software.
+        Just as a food label lists what's in your meal, a CBOM lists all cryptographic components in an application.</p>
+    </div>
+
+    <p style="font-size:clamp(0.55rem,1vw,0.72rem); color:#475569; margin-top:1.5%; text-align:center;">
+      Beginner-Friendly &nbsp;|&nbsp; Also Useful for DevOps / DevSecOps Professionals
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 2 – Why Security & Encryption Matter
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-2" id="slide-2">
+    <div class="orb orb-blue"  style="width:30%;height:30%;top:-5%;right:5%;"></div>
+    <div class="orb orb-teal"  style="width:25%;height:25%;bottom:0%;left:0%;"></div>
+
+    <div class="slide-tag">🌐 Foundation — Slide 2 of 6</div>
+    <h2>Why Do Applications Need Security?</h2>
+
+    <div class="two-col" style="align-items:flex-start; margin-top: 0.5%;">
+      <div class="col">
+        <div class="sec-label">⚠️ Without Encryption — Real Danger</div>
+        <ul class="item-list">
+          <li><span class="ico">🏦</span><div><span class="accent-blue">Banking:</span> Without encryption, your account number &amp; password travel as plain readable text — anyone on the network can steal it.</div></li>
+          <li><span class="ico">🔐</span><div><span class="accent-purple">Login Pages:</span> Your username &amp; password could be captured by hackers using simple "packet sniffing" tools.</div></li>
+          <li><span class="ico">📧</span><div><span class="accent-teal">Emails:</span> Without encryption, every email you send can be read by your Internet Service Provider or anyone in between.</div></li>
+          <li><span class="ico">🛒</span><div><span class="accent-pink">Online Shopping:</span> Credit card details would be visible in plain text — identity theft in seconds.</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sec-label">✅ With Encryption — You Are Protected</div>
+        <div class="card" style="margin-bottom:1.2%;">
+          <span class="card-icon">🔒 HTTPS</span>
+          <h3>Secure Web Browsing</h3>
+          <p>When you see <span class="accent-teal">https://</span> in your browser, it means all data between you and the website is <strong>encrypted</strong>. A hacker can see you visited the site, but <em>not</em> what you typed.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon">🗝️ Passwords</span>
+          <h3>Password Hashing</h3>
+          <p>Websites never store your actual password. They store a <span class="accent-purple">hash</span> — a scrambled fingerprint. Even if hackers steal the database, they can't reverse-engineer your original password easily.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <p>💡 <strong>Simple Analogy:</strong> Encryption is like writing a letter in a secret language only the intended reader knows. Even if someone intercepts the envelope, they just see gibberish.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 3 – What is Cryptography
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-3" id="slide-3">
+    <div class="orb orb-purple" style="width:28%;height:28%;top:0%;right:10%;"></div>
+    <div class="orb orb-blue"   style="width:22%;height:22%;bottom:5%;left:5%;"></div>
+
+    <div class="slide-tag">🔬 Core Concept — Slide 3 of 6</div>
+    <h2>What is Cryptography?</h2>
+
+    <div class="highlight-box" style="margin-bottom:1.5%;">
+      <p>📖 <strong>Cryptography</strong> is the science of <strong>protecting information</strong> by transforming it into an unreadable form — so only authorized people can read it. It's the backbone of all digital security.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <span class="card-icon">🔄</span>
+        <h3>Encryption</h3>
+        <p style="margin-bottom:4%;">Converts readable data (<span class="accent-blue">plaintext</span>) into scrambled data (<span class="accent-purple">ciphertext</span>) using a key. Only someone with the correct key can decrypt it back.</p>
+        <ul class="card">
+          <li>AES-256 — used in HTTPS, VPNs</li>
+          <li>RSA — used in digital certificates</li>
+          <li>ChaCha20 — used in modern TLS</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🧮</span>
+        <h3>Hashing</h3>
+        <p style="margin-bottom:4%;">A <span class="accent-teal">one-way function</span> — converts data into a fixed-size fingerprint. You can't reverse it. Used to verify integrity, not for secrecy.</p>
+        <ul class="card">
+          <li>SHA-256 — blockchain, certificates</li>
+          <li>bcrypt / Argon2 — password storage</li>
+          <li>❌ MD5 / SHA-1 — <span class="accent-pink">outdated, weak!</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <span class="card-icon">🌍</span>
+        <h3>Real-World Usage</h3>
+        <ul class="card">
+          <li>🌐 HTTPS websites use <span class="accent-blue">TLS</span> (encryption)</li>
+          <li>🔑 SSH login uses <span class="accent-purple">RSA/Ed25519</span> keys</li>
+          <li>🛡️ WhatsApp uses <span class="accent-teal">E2E encryption</span></li>
+          <li>💳 Banking uses <span class="accent-yellow">AES + RSA</span></li>
+          <li>🖊️ Code signing uses <span class="accent-pink">digital certs</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="analogy" style="margin-top:1.2%;">
+      <p>💡 <strong>Think of it this way:</strong> <strong>Encryption</strong> = a lockbox you can open. <strong>Hashing</strong> = a fingerprint scanner — unique per input, impossible to reverse. Both protect, but in different ways.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 4 – What is CBOM (Core Concept)
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-4" id="slide-4">
+    <div class="orb orb-purple" style="width:35%;height:35%;top:-10%;left:0%;"></div>
+    <div class="orb orb-teal"   style="width:25%;height:25%;bottom:5%;right:5%;"></div>
+
+    <div class="slide-tag">📋 The Main Topic — Slide 4 of 6</div>
+    <h2>What is CBOM?</h2>
+
+    <div class="highlight-box" style="margin-bottom:1.5%;">
+      <p>📖 A <strong>Cryptographic Bill of Materials (CBOM)</strong> is a structured <strong>inventory</strong> of all cryptographic components used inside a software application or system — algorithms, keys, certificates, and protocols — all in one place.</p>
+    </div>
+
+    <div class="two-col" style="align-items:flex-start; gap:2%;">
+      <div class="col-wide">
+        <div class="sec-label">🗂️ What Does a CBOM Track?</div>
+        <div class="comp-grid">
+          <div class="comp-box">
+            <span class="ci">⚙️</span>
+            <div>
+              <h4><span class="accent-blue">Algorithms</span></h4>
+              <p>Which encryption methods are in use — e.g., AES-256, RSA-2048, SHA-256. Weak algorithms (MD5, DES) are flagged.</p>
+            </div>
+          </div>
+          <div class="comp-box">
+            <span class="ci">🗝️</span>
+            <div>
+              <h4><span class="accent-purple">Keys</span></h4>
+              <p>Tracks encryption keys — their type, length, and where they are used. Short or weak keys are a risk.</p>
+            </div>
+          </div>
+          <div class="comp-box">
+            <span class="ci">📜</span>
+            <div>
+              <h4><span class="accent-teal">Certificates</span></h4>
+              <p>SSL/TLS certificates used by services — who issued them, when they expire, and if they're still valid.</p>
+            </div>
+          </div>
+          <div class="comp-box">
+            <span class="ci">🔗</span>
+            <div>
+              <h4><span class="accent-yellow">Protocols</span></h4>
+              <p>Which security protocols are in use — e.g., TLS 1.2, TLS 1.3, SSH. Old protocols like SSLv3 are dangerous.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col" style="display:flex;flex-direction:column;gap:1.2%;">
+        <div class="sec-label">🍔 Real-World Analogy</div>
+        <div class="analogy" style="margin-top:0;">
+          <p>💡 Just like a <strong>food product's ingredient label</strong> tells you exactly what's inside (fats, sugar, additives), a <strong>CBOM tells you exactly what crypto is inside your software</strong> — so you know if it's safe to "consume".</p>
+        </div>
+        <div class="card" style="flex:1;">
+          <span class="card-icon">🏗️</span>
+          <h3>Who Creates a CBOM?</h3>
+          <ul class="card">
+            <li>Security teams during code audits</li>
+            <li>DevSecOps engineers in CI/CD pipelines</li>
+            <li>Automated scanning tools (e.g., Syft, cdxgen)</li>
+            <li>Software vendors for compliance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 5 – Why CBOM is Important
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-5" id="slide-5">
+    <div class="orb orb-blue"  style="width:28%;height:28%;top:5%;right:5%;"></div>
+    <div class="orb orb-pink"  style="width:22%;height:22%;bottom:5%;left:5%;"></div>
+
+    <div class="slide-tag">🚨 Why It Matters — Slide 5 of 6</div>
+    <h2>Why is CBOM Important?</h2>
+
+    <div class="vs-grid" style="margin-top:0.5%;">
+      <div class="problem-box">
+        <div class="box-title">❌ Problems Without CBOM</div>
+        <ul class="vs-list">
+          <li>🔓 <span class="accent-pink">Weak algorithms still in use</span> — MD5 &amp; SHA-1 are broken, yet many apps still use them unknowingly.</li>
+          <li>📅 <span class="accent-pink">Expired TLS certificates</span> — cause outages, trust failures, and security gaps. Often discovered too late.</li>
+          <li>🕵️ <span class="accent-pink">Unknown crypto usage</span> — developers don't know which crypto libraries third-party code is using.</li>
+          <li>⚠️ <span class="accent-pink">Quantum risk exposure</span> — many current algorithms will be broken by quantum computers. You can't migrate what you haven't mapped.</li>
+          <li>🚫 <span class="accent-pink">Compliance failures</span> — regulations (FIPS, PCI-DSS, HIPAA) require approved algorithms. Without CBOM, audits fail.</li>
+        </ul>
+      </div>
+
+      <div class="solution-box">
+        <div class="box-title">✅ How CBOM Helps</div>
+        <ul class="vs-list">
+          <li>👁️ <span class="accent-teal">Full Visibility</span> — Know every single cryptographic component used — no hidden surprises. Complete audit trail.</li>
+          <li>🔧 <span class="accent-teal">Risk Reduction</span> — Identify and replace weak/outdated crypto before attackers exploit it. Proactive security.</li>
+          <li>⏰ <span class="accent-teal">Certificate Monitoring</span> — Get alerts before certificates expire. Prevent unexpected service outages.</li>
+          <li>⚛️ <span class="accent-teal">Quantum Readiness</span> — Map current crypto to plan migration to post-quantum algorithms (PQC) in advance.</li>
+          <li>✅ <span class="accent-teal">Compliance Ready</span> — Prove to auditors exactly which approved algorithms are in use. Faster, cleaner audits.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:1.2%;">
+      <p>🎯 <strong>Bottom Line:</strong> You can't fix what you don't know. CBOM gives security teams <strong>complete visibility</strong> into their cryptographic landscape — turning unknown risks into <strong>manageable, trackable items</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SLIDE 6 – Summary + What's Next
+  ═══════════════════════════════════════════════════ -->
+  <div class="slide slide-6" id="slide-6">
+    <div class="orb orb-purple" style="width:30%;height:30%;top:-5%;right:10%;"></div>
+    <div class="orb orb-teal"   style="width:25%;height:25%;bottom:0%;left:5%;"></div>
+
+    <div class="slide-tag">🏁 Recap & Next Steps — Slide 6 of 6</div>
+    <h2>Summary + What's Next</h2>
+
+    <div class="recap-grid" style="margin-top:0.5%;">
+      <div class="recap-box">
+        <span class="ri">🔒</span>
+        <h4><span class="accent-blue">Cryptography Basics</span></h4>
+        <p>Encryption scrambles data. Hashing creates fingerprints. Both protect applications and user data from attackers.</p>
+      </div>
+      <div class="recap-box">
+        <span class="ri">📋</span>
+        <h4><span class="accent-purple">What is CBOM</span></h4>
+        <p>An inventory of all cryptographic components — algorithms, keys, certificates, &amp; protocols — used in your software.</p>
+      </div>
+      <div class="recap-box">
+        <span class="ri">🛡️</span>
+        <h4><span class="accent-teal">Why CBOM Matters</span></h4>
+        <p>Provides visibility, reduces risk, ensures compliance, and prepares organizations for the quantum computing era.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-bottom:1.2%;">
+      <p>🚀 <strong>In the next videos we will cover:</strong> &nbsp;
+        <span class="pill">Cryptography Deep Dive</span> &nbsp;
+        <span class="pill">SBOM vs CBOM</span> &nbsp;
+        <span class="pill">Real DevSecOps CBOM Usage</span> &nbsp;
+        <span class="pill">CBOM Tools &amp; Automation</span>
+      </p>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-left">
+
+        <p>Get notified for upcoming episodes on DevSecOps, SBOM, CBOM, Cryptography, and Cloud Security — explained simply for everyone.</p>
+      </div>
+      <div class="cta-btn">👍 Like &nbsp;•&nbsp; Subscribe &nbsp;•&nbsp; Share</div>
+    </div>
+
+    <p style="font-size:clamp(0.5rem,0.9vw,0.65rem); color:#475569; margin-top:1%; text-align:center;">
+      CBOM Series &nbsp;|&nbsp; Episode 1 of Many
+    </p>
+  </div>
+
+</div><!-- /.deck -->
+
+<!-- Navigation -->
+<button class="nav-btn" id="prev-btn" onclick="navigate(-1)">‹</button>
+<button class="nav-btn" id="next-btn" onclick="navigate(1)">›</button>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slide-num"></div>
+
+<script>
+  const total = 6;
+  let current = 1;
+
+  const progress = document.getElementById('progress');
+  const slideNum = document.getElementById('slide-num');
+
+  // Build dots
+  for (let i = 1; i <= total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 1 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    progress.appendChild(d);
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > total) return;
+    document.getElementById('slide-' + current).classList.remove('active');
+    progress.children[current - 1].classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    progress.children[current - 1].classList.add('active');
+    slideNum.textContent = current + ' / ' + total;
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  // Keyboard support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+
+  // Init label
+  slideNum.textContent = '1 / ' + total;
+</script>
+</body>
+</html>

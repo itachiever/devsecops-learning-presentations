@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM for Containers & Cloud – Modern DevSecOps Security</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03030d;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#07071e 0%,#0a0f48 48%,#080a2e 100%);}
+  .s2{background:linear-gradient(145deg,#060c10 0%,#071c2c 50%,#060e1c 100%);}
+  .s3{background:linear-gradient(145deg,#06080e 0%,#090e28 50%,#06081e 100%);}
+  .s4{background:linear-gradient(145deg,#060a14 0%,#071a2c 50%,#060e1e 100%);}
+  .s5{background:linear-gradient(145deg,#060818 0%,#081030 50%,#07091e 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#090f2c 50%,#060c20 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.8rem,4.9vw,3.5rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#93c5fd;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(56,189,248,.1); border:1px solid rgba(56,189,248,.3); color:#7dd3fc;}
+  .tb-b{background:rgba(129,140,248,.09);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-c{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-blu{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);}
+  .hb-blu p{color:#bfdbfe;}.hb-blu strong{color:#60a5fa;}
+  .hb-red{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-grd{background:linear-gradient(135deg,rgba(56,189,248,.09),rgba(45,212,191,.08));border:1px solid rgba(56,189,248,.3);}
+  .hb-grd p{color:#bae6fd;}.hb-grd strong{color:#38bdf8;}
+  .hb-grd2{background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd2 p{color:#c7d2fe;}.hb-grd2 strong{color:#a5b4fc;}
+
+  /* ── Two-col ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+
+  /* ── Sec label ── */
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ab{color:#60a5fa;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+  .ao{color:#fb923c;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.88% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ── Cards ── */
+  .cards{display:flex;gap:1.3%;width:100%;}
+  .card{flex:1;border-radius:.8vw;padding:1.8% 1.9%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);transition:transform .22s;}
+  .card:hover{transform:translateY(-3px);}
+  .card .ci{font-size:clamp(1rem,1.9vw,1.4rem);margin-bottom:3%;display:block;}
+  .card h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;margin-bottom:2%;}
+  .card p,.card li{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;}
+  .card ul{list-style:none;padding:0;}
+  .card li{padding:.9% 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .card li:last-child{border-bottom:none;}
+  .card li::before{content:"▸ ";}
+
+  /* ══════════════════════════════════════
+     CONTAINER LAYER DIAGRAM (S3)
+  ══════════════════════════════════════ */
+  .container-diagram{
+    width:100%;display:flex;gap:1.5%;align-items:stretch;
+  }
+  .docker-box{
+    flex:1;border-radius:.9vw;overflow:hidden;
+    border:1.5px solid rgba(56,189,248,.35);
+    display:flex;flex-direction:column;
+  }
+  .docker-header{
+    background:rgba(56,189,248,.15);
+    padding:.8% 1.2%;
+    display:flex;align-items:center;gap:.8%;
+    font-size:clamp(.54rem,1vw,.74rem);font-weight:700;color:#38bdf8;
+    border-bottom:1px solid rgba(56,189,248,.2);
+  }
+  .docker-header .dh-ico{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .docker-layers{display:flex;flex-direction:column;gap:0;flex:1;}
+  .dlayer{
+    padding:.75% 1.2%;display:flex;align-items:center;gap:1%;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.48rem,.88vw,.64rem);
+  }
+  .dlayer:last-child{border-bottom:none;}
+  .dlayer .dl-ico{font-size:1.1em;flex-shrink:0;}
+  .dlayer .dl-name{font-weight:600;flex:0 0 38%;color:#e2e8f0;}
+  .dlayer .dl-info{color:#64748b;font-size:.9em;}
+  .dlayer .dl-badge{
+    margin-left:auto;font-size:.85em;padding:.15em .55em;
+    border-radius:999px;font-weight:700;white-space:nowrap;flex-shrink:0;
+  }
+  .db-ok  {background:rgba(74,222,128,.12); color:#4ade80; border:1px solid rgba(74,222,128,.26);}
+  .db-warn{background:rgba(251,191,36,.1);  color:#fbbf24; border:1px solid rgba(251,191,36,.24);}
+  .db-bad {background:rgba(248,113,113,.12);color:#f87171; border:1px solid rgba(248,113,113,.26);}
+  .dl-app {background:rgba(129,140,248,.08);}
+  .dl-fw  {background:rgba(56,189,248,.07);}
+  .dl-lib {background:rgba(192,132,252,.07);}
+  .dl-ssl {background:rgba(45,212,191,.07);}
+  .dl-os  {background:rgba(96,165,250,.06);}
+  .dl-base{background:rgba(74,222,128,.05);}
+
+  /* ══════════════════════════════════════
+     KUBERNETES DIAGRAM (S4)
+  ══════════════════════════════════════ */
+  .k8s-cluster{
+    width:100%;border:1.5px solid rgba(56,189,248,.3);
+    border-radius:.9vw;padding:1.2% 1.5%;
+    background:rgba(56,189,248,.04);
+  }
+  .k8s-header{
+    display:flex;align-items:center;gap:.8%;
+    font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#38bdf8;
+    margin-bottom:1%;padding-bottom:.6%;
+    border-bottom:1px solid rgba(56,189,248,.15);
+  }
+  .k8s-ns{
+    display:flex;gap:1.1%;margin-bottom:.9%;
+  }
+  .ns-box{
+    flex:1;border-radius:.6vw;padding:1% 1.1%;
+    border:1px dashed rgba(255,255,255,.12);
+    background:rgba(255,255,255,.02);
+  }
+  .ns-label{font-size:clamp(.42rem,.77vw,.56rem);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-bottom:.6%;}
+  .pod-row{display:flex;gap:.7%;flex-wrap:wrap;}
+  .pod{
+    border-radius:.45vw;padding:.55% .9%;
+    display:flex;align-items:center;gap:.5%;
+    font-size:clamp(.44rem,.8vw,.59rem);font-weight:600;
+    border:1px solid;
+  }
+  .pod-icon{font-size:1em;}
+  .pod-app {background:rgba(129,140,248,.1);border-color:rgba(129,140,248,.3);color:#a5b4fc;}
+  .pod-db  {background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.28);color:#5eead4;}
+  .pod-gw  {background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.26);color:#fbbf24;}
+  .pod-warn{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.26);color:#f87171;}
+  .k8s-crypto-row{
+    display:flex;gap:1%;align-items:stretch;
+  }
+  .kc-box{
+    flex:1;border-radius:.6vw;padding:.9% 1.1%;
+    font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;
+    display:flex;align-items:flex-start;gap:.8%;
+  }
+  .kc-box .ki{font-size:1.1em;flex-shrink:0;}
+  .kc-box h4{font-size:clamp(.46rem,.84vw,.62rem);font-weight:700;color:#e2e8f0;margin-bottom:.4%;}
+  .kc-box p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.4;}
+  .kc-mtls{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.22);}
+  .kc-sec {background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);}
+  .kc-ing {background:rgba(56,189,248,.07); border:1px solid rgba(56,189,248,.22);}
+  .kc-sm  {background:rgba(251,191,36,.06); border:1px solid rgba(251,191,36,.2);}
+
+  /* ══════════════════════════════════════
+     CLOUD ARCH (S4 side / S5)
+  ══════════════════════════════════════ */
+  .cloud-row{display:flex;gap:1%;width:100%;margin-bottom:.85%;}
+  .cloud-box{
+    flex:1;border-radius:.75vw;padding:1.2% 1.3%;
+    background:rgba(255,255,255,.04);
+  }
+  .cloud-box .cbh{
+    display:flex;align-items:center;gap:.8%;
+    font-size:clamp(.56rem,1.02vw,.74rem);font-weight:700;color:#e2e8f0;
+    margin-bottom:.8%;padding-bottom:.5%;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .cloud-box .cbhi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .cloud-box .cf{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.04);
+    font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;
+  }
+  .cloud-box .cf:last-child{border-bottom:none;}
+  .cf-k{color:#64748b;font-weight:600;flex:0 0 50%;}
+  .cf-v{font-weight:500;}
+  .cbb-aws{border:1px solid rgba(251,191,36,.22);}
+  .cbb-gcp{border:1px solid rgba(56,189,248,.2);}
+  .cbb-az {border:1px solid rgba(129,140,248,.22);}
+
+  /* ══════════════════════════════════════
+     BENEFITS (S5)
+  ══════════════════════════════════════ */
+  .ben5{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .b5box{border-radius:.8vw;padding:1.4% 1.5%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);text-align:center;}
+  .b5box .bi{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .b5box h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .b5box p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  /* ══════════════════════════════════════
+     SUMMARY (S6)
+  ══════════════════════════════════════ */
+  .sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .sbox{border-radius:.75vw;padding:1.5% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .sbox .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .sbox h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .sbox p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  /* ── Coverage bar ── */
+  .cov-row{display:flex;gap:.8%;width:100%;margin-bottom:.85%;}
+  .cov-item{
+    flex:1;border-radius:.7vw;padding:1% 1.2%;
+    display:flex;align-items:center;gap:.9%;
+  }
+  .cov-item .cvi{font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;}
+  .cov-item h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;margin-bottom:.4%;}
+  .cov-item p{font-size:clamp(.43rem,.78vw,.58rem);color:#94a3b8;line-height:1.4;}
+  .cv-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .cv-2{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.24);}
+  .cv-3{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.22);}
+  .cv-4{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.22);}
+
+  /* ── Next box ── */
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(56,189,248,.11),rgba(45,212,191,.09));border:1px solid rgba(56,189,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#0891b2,#0d9488);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(14,165,233,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(56,189,248,.22);border-color:#38bdf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#38bdf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#0891b2;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:13%;left:26%;"></div>
+
+    <div class="tag tg-sky">☁️ CBOM Series · Episode 10</div>
+    <h1>CBOM for Containers &amp; Cloud</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#38bdf8,#818cf8,#2dd4bf);"></div>
+    <p class="subtitle">Modern DevSecOps Security — Securing Cloud-Native Applications</p>
+    <p class="tagline">✦ Containers · Kubernetes · Cloud Environments · Zero Blind Spots ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🐳 <span>Containers</span></div>
+      <div class="tb tb-b">☸️ <span>Kubernetes</span></div>
+      <div class="tb tb-c">☁️ <span>Cloud</span></div>
+    </div>
+
+    <!-- Mini architecture preview -->
+    <div style="width:88%;display:flex;gap:1%;align-items:center;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1%;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.95rem,1.8vw,1.35rem);">🐳</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#7dd3fc;margin-top:2%;">Docker Image</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Layers with crypto libs</div>
+      </div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">→</div>
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1%;background:rgba(129,140,248,.09);border:1px solid rgba(129,140,248,.28);text-align:center;">
+        <div style="font-size:clamp(.95rem,1.8vw,1.35rem);">☸️</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#a5b4fc;margin-top:2%;">Kubernetes</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">mTLS between pods</div>
+      </div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">→</div>
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1%;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.28);text-align:center;">
+        <div style="font-size:clamp(.95rem,1.8vw,1.35rem);">☁️</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#5eead4;margin-top:2%;">Cloud Services</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">KMS, ACM, certs</div>
+      </div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">→</div>
+      <div style="flex:1.3;border-radius:.7vw;padding:1.1% 1%;background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(45,212,191,.1));border:1.5px solid rgba(45,212,191,.4);text-align:center;">
+        <div style="font-size:clamp(.95rem,1.8vw,1.35rem);">📋</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#a7f3d0;margin-top:2%;">CBOM Covers All</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#5eead4;margin-top:1%;">Complete visibility</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>Modern applications don't run on a single server — they run as <strong>containers, orchestrated by Kubernetes, on cloud platforms</strong>. Cryptographic components exist at every layer of this stack. CBOM extends beyond code to cover the <strong>entire cloud-native footprint</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · Why Containers & Cloud Need CBOM
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">⚠️ The Problem · Slide 2 of 6</div>
+    <h2>Why Containers &amp; Cloud Need CBOM</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.9%;">
+      <p>📖 In traditional server deployments, a team knew which OS and libraries were installed. In <strong>container and cloud environments</strong>, applications are composed of dozens of images, microservices, and managed cloud services — each bringing their own cryptographic components. <strong>Hidden crypto risks multiply at every layer.</strong></p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="sl sl-s">🔍 Where Crypto Hides in Modern Applications</div>
+        <ul class="ilist" style="margin-bottom:.9%;">
+          <li><span class="ico">🐳</span><div><span class="as">Container base images</span> — every Docker image inherits its parent image's crypto libraries. A <code style="background:rgba(255,255,255,.07);padding:.1em .35em;border-radius:.3vw;font-size:.9em;">node:18-alpine</code> image includes OpenSSL and TLS libraries you may never have explicitly chosen.</div></li>
+          <li><span class="ico">🔗</span><div><span class="as">Microservice APIs</span> — each service communicates over TLS. In a 50-service architecture, that means 50+ TLS configurations, each with its own certificate and cipher suite choices.</div></li>
+          <li><span class="ico">☁️</span><div><span class="as">Cloud managed services</span> — AWS S3, RDS, DynamoDB — all use encryption at rest and in transit. The encryption algorithm and key management policies are cloud-controlled but still need to be inventoried.</div></li>
+          <li><span class="ico">🔑</span><div><span class="as">Cloud key management</span> — AWS KMS, Azure Key Vault, GCP KMS — keys are cloud-managed but their algorithm type, key length, and rotation policy still need to appear in CBOM for compliance.</div></li>
+          <li><span class="ico">📡</span><div><span class="as">Service mesh traffic</span> — Istio and Linkerd encrypt all pod-to-pod traffic using mTLS. The certificates for this mesh are auto-rotated but must still be tracked in CBOM for audit purposes.</div></li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="sl sl-s">🚨 Hidden Crypto Risks in Cloud</div>
+        <div class="cards" style="flex-direction:column;gap:1%;">
+          <div class="card" style="border-color:rgba(248,113,113,.22);padding:1.3% 1.7%;">
+            <span class="ci">👻</span>
+            <h3 class="ar">Ghost Libraries</h3>
+            <p>A base image like <code style="background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.2vw;">python:3.11-slim</code> includes <span class="ar">OpenSSL 1.1.1</span> (end-of-life since Sept 2023). Nobody explicitly installed it — it came with the image. Without CBOM scanning, it runs silently in production.</p>
+          </div>
+          <div class="card" style="border-color:rgba(251,191,36,.2);padding:1.3% 1.7%;">
+            <span class="ci">📅</span>
+            <h3 class="ay">Cert Sprawl</h3>
+            <p>A Kubernetes cluster with 20 services can have <span class="ay">60+ certificates</span> — service certs, ingress certs, internal CA certs, mesh certs. Manual tracking is impossible. CBOM automates the entire inventory.</p>
+          </div>
+          <div class="card" style="border-color:rgba(248,113,113,.2);padding:1.3% 1.7%;">
+            <span class="ci">🔓</span>
+            <h3 class="ar">Misconfigured Cloud Crypto</h3>
+            <p>An S3 bucket configured with <span class="ar">SSE-S3 (AES-128)</span> instead of the required <span class="ag">SSE-KMS (AES-256)</span> is a compliance violation. CBOM surfaces this during every scan.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · CBOM in Container Images
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#4f46e5;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-ind">🐳 Container Scanning · Slide 3 of 6</div>
+    <h2>CBOM in Container Images</h2>
+
+    <div class="hbox hb-ind" style="margin-bottom:.9%;">
+      <p>📖 A Docker image is built in <strong>layers</strong> — each layer adding files, libraries, and configurations on top of the previous one. Cryptographic components exist across multiple layers, often introduced by the base image, not by the application developer. CBOM scanning <strong>inspects every layer</strong> to build a complete crypto inventory.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-i">🔬 Container Image — Layer-by-Layer CBOM Scan</div>
+        <div class="container-diagram">
+          <div class="docker-box" style="width:100%;">
+            <div class="docker-header">
+              <span class="dh-ico">🐳</span>
+              payment-service:v2.3 — CBOM Scan Results
+              <span style="margin-left:auto;font-size:.85em;color:#0891b2;">📋 14 crypto components found</span>
+            </div>
+            <div class="docker-layers">
+              <div class="dlayer dl-app">
+                <span class="dl-ico">🏢</span>
+                <span class="dl-name">App Layer</span>
+                <span class="dl-info">payment-service code — uses OpenSSL via Node.js crypto API</span>
+                <span class="dl-badge db-ok">✅ AES-256</span>
+              </div>
+              <div class="dlayer dl-fw">
+                <span class="dl-ico">🌐</span>
+                <span class="dl-name">Framework Layer</span>
+                <span class="dl-info">Express.js · axios — TLS 1.3 for outbound connections</span>
+                <span class="dl-badge db-ok">✅ TLS 1.3</span>
+              </div>
+              <div class="dlayer dl-lib">
+                <span class="dl-ico">📦</span>
+                <span class="dl-name">Node.js Runtime</span>
+                <span class="dl-info">Node 18 — bundles OpenSSL 3.0.7 for all crypto operations</span>
+                <span class="dl-badge db-ok">✅ OpenSSL 3.0.7</span>
+              </div>
+              <div class="dlayer dl-ssl" style="border-left:2px solid rgba(251,191,36,.5);">
+                <span class="dl-ico">🔐</span>
+                <span class="dl-name">OS Crypto Libs</span>
+                <span class="dl-info">libssl · libcrypto — system-level TLS and hashing libraries</span>
+                <span class="dl-badge db-warn">⚠️ SHA-1 present</span>
+              </div>
+              <div class="dlayer dl-os" style="border-left:2px solid rgba(248,113,113,.5);">
+                <span class="dl-ico">🐧</span>
+                <span class="dl-name">Base OS Layer</span>
+                <span class="dl-info">Debian Bullseye — includes OpenSSL 1.1.1 (EOL Sept 2023)</span>
+                <span class="dl-badge db-bad">❌ EOL OpenSSL</span>
+              </div>
+              <div class="dlayer dl-base">
+                <span class="dl-ico">🔩</span>
+                <span class="dl-name">System Trust Store</span>
+                <span class="dl-info">CA bundle — 132 trusted root certificates, 3 expiring soon</span>
+                <span class="dl-badge db-warn">⚠️ 3 expiring</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-i">⚙️ How Container CBOM Scanning Works</div>
+        <ul class="ilist" style="margin-bottom:.9%;">
+          <li><span class="ico">1️⃣</span><div><span class="ai">Pull image</span> — scanner pulls the container image from the registry (Docker Hub, ECR, GCR, ACR).</div></li>
+          <li><span class="ico">2️⃣</span><div><span class="ai">Extract layers</span> — each image layer (tar archive) is extracted and all files are made accessible for analysis.</div></li>
+          <li><span class="ico">3️⃣</span><div><span class="ai">Scan manifests</span> — package databases (dpkg, apk, rpm) are read to enumerate all installed packages with versions.</div></li>
+          <li><span class="ico">4️⃣</span><div><span class="ai">Detect crypto</span> — crypto libraries, binaries, and certs are identified and mapped to their layer of origin.</div></li>
+          <li><span class="ico">5️⃣</span><div><span class="ai">Generate CBOM</span> — structured CBOM produced with layer attribution, risk scores, and remediation guidance.</div></li>
+        </ul>
+
+        <div class="sl sl-i">🛠️ Tools for Container CBOM</div>
+        <div style="display:flex;flex-direction:column;gap:.7%;">
+          <div style="background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);border-radius:.6vw;padding:.8% 1.1%;font-size:clamp(.48rem,.88vw,.64rem);color:#bae6fd;"><span class="as">Trivy</span> — fast, open-source — scans images for crypto libs + CVEs in one pass</div>
+          <div style="background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.22);border-radius:.6vw;padding:.8% 1.1%;font-size:clamp(.48rem,.88vw,.64rem);color:#c7d2fe;"><span class="ai">Syft</span> — generates CycloneDX CBOM directly from container image or OCI tarball</div>
+          <div style="background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);border-radius:.6vw;padding:.8% 1.1%;font-size:clamp(.48rem,.88vw,.64rem);color:#99f6e4;"><span class="at">Grype</span> — vulnerability matcher — matches CBOM components against NVD and OSS advisories</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · CBOM in Kubernetes & Runtime
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e3a8a;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">☸️ Runtime Discovery · Slide 4 of 6</div>
+    <h2>CBOM in Kubernetes &amp; Runtime Environments</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.9%;">
+      <p>📖 Container image scanning finds static crypto. But <strong>runtime discovery finds what's actually happening</strong> — which TLS versions are being negotiated between pods, which certificates are mounted in workloads, and which keys are actively in use. Kubernetes adds its own cryptographic layer on top of what's inside each container.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-t">☸️ Kubernetes Cluster — Crypto in Every Layer</div>
+        <div class="k8s-cluster">
+          <div class="k8s-header">
+            <span style="font-size:clamp(.9rem,1.7vw,1.2rem);">☸️</span>
+            production-cluster.example.com — Live Crypto Inventory
+          </div>
+          <div class="k8s-ns">
+            <div class="ns-box">
+              <div class="ns-label">Namespace: payments</div>
+              <div class="pod-row">
+                <div class="pod pod-app"><span class="pod-icon">📦</span>checkout-svc</div>
+                <div class="pod pod-app"><span class="pod-icon">📦</span>payment-api</div>
+                <div class="pod pod-warn"><span class="pod-icon">⚠️</span>legacy-processor</div>
+              </div>
+            </div>
+            <div class="ns-box">
+              <div class="ns-label">Namespace: auth</div>
+              <div class="pod-row">
+                <div class="pod pod-db"><span class="pod-icon">🔐</span>auth-service</div>
+                <div class="pod pod-gw"><span class="pod-icon">🌐</span>api-gateway</div>
+              </div>
+            </div>
+            <div class="ns-box">
+              <div class="ns-label">Namespace: data</div>
+              <div class="pod-row">
+                <div class="pod pod-db"><span class="pod-icon">🗄️</span>postgres-primary</div>
+                <div class="pod pod-app"><span class="pod-icon">📦</span>redis-cache</div>
+              </div>
+            </div>
+          </div>
+          <div class="k8s-crypto-row">
+            <div class="kc-box kc-mtls">
+              <span class="ki">🔗</span>
+              <div><h4 class="at">mTLS (Istio)</h4><p>All pod-to-pod traffic encrypted with TLS 1.3. Certs auto-rotated every 24h via Istio CA.</p></div>
+            </div>
+            <div class="kc-box kc-sec">
+              <span class="ki">🔑</span>
+              <div><h4 class="av">K8s Secrets</h4><p>etcd encrypted at rest with AES-256-CBC. Secrets containing TLS certs and API keys tracked in CBOM.</p></div>
+            </div>
+            <div class="kc-box kc-ing">
+              <span class="ki">🌐</span>
+              <div><h4 class="as">Ingress TLS</h4><p>Nginx ingress terminates TLS 1.3. cert-manager auto-renews Let's Encrypt certs every 60 days.</p></div>
+            </div>
+            <div class="kc-box kc-sm">
+              <span class="ki">⚠️</span>
+              <div><h4 class="ay">Risk Found</h4><p>legacy-processor pod uses TLS 1.1 for outbound calls. CBOM flags as High risk — flagged for next sprint.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-t">📡 What Runtime CBOM Discovers</div>
+        <ul class="ilist">
+          <li><span class="ico">🔄</span><div><span class="at">Live TLS negotiation</span> — actual cipher suites and protocol versions negotiated between services, not just what config files declare.</div></li>
+          <li><span class="ico">📜</span><div><span class="at">Mounted certificates</span> — TLS certs mounted as Kubernetes Secrets into pods, including expiry dates and issuer information.</div></li>
+          <li><span class="ico">🗝️</span><div><span class="at">Active key usage</span> — which KMS-managed keys are being called by which pods, tracked via cloud provider audit logs (CloudTrail, Cloud Audit Logs).</div></li>
+          <li><span class="ico">🔁</span><div><span class="at">Cert rotation state</span> — cert-manager and Istio auto-rotate certs; CBOM tracks rotation history and alerts if a rotation fails silently.</div></li>
+        </ul>
+
+        <div class="hbox hb-tel" style="margin-top:.5%;margin-bottom:0;">
+          <p>🎯 <strong>Real-Time Visibility:</strong> CBOM runtime scanning runs continuously as a cluster DaemonSet — every node, every pod, every service is scanned on a schedule. No manual effort, no blind spots in running workloads.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Cloud Security & CBOM Benefits
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#1e3a8a;width:28%;height:28%;top:-3%;right:5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-blu">☁️ Cloud Security · Slide 5 of 6</div>
+    <h2>Cloud Security &amp; CBOM Benefits</h2>
+
+    <div class="hbox hb-blu" style="margin-bottom:.85%;">
+      <p>📖 Major cloud providers — AWS, GCP, and Azure — all expose cryptographic services and configurations that need to be tracked in CBOM. CBOM integrates with cloud provider APIs to <strong>automatically inventory encryption settings, key management policies, and certificate stores</strong> across your entire cloud footprint.</p>
+    </div>
+
+    <div class="cloud-row">
+      <div class="cloud-box cbb-aws">
+        <div class="cbh"><span class="cbhi">🟡</span><span class="ay">AWS</span></div>
+        <div class="cf"><span class="cf-k">KMS Keys</span><span class="cf-v at">AES-256 CMK — tracked</span></div>
+        <div class="cf"><span class="cf-k">ACM Certs</span><span class="cf-v ay">2 expiring in 30d</span></div>
+        <div class="cf"><span class="cf-k">S3 Encryption</span><span class="cf-v ag">SSE-KMS on all buckets</span></div>
+        <div class="cf"><span class="cf-k">RDS at Rest</span><span class="cf-v ag">AES-256 enabled</span></div>
+        <div class="cf"><span class="cf-k">CloudFront TLS</span><span class="cf-v at">TLS 1.2+ policy</span></div>
+      </div>
+      <div class="cloud-box cbb-gcp">
+        <div class="cbh"><span class="cbhi">🔵</span><span class="as">GCP</span></div>
+        <div class="cf"><span class="cf-k">Cloud KMS</span><span class="cf-v at">RSA-2048 + AES-256</span></div>
+        <div class="cf"><span class="cf-k">GCM Certs</span><span class="cf-v ag">Auto-renewed</span></div>
+        <div class="cf"><span class="cf-k">GCS Encryption</span><span class="cf-v ag">CMEK enabled</span></div>
+        <div class="cf"><span class="cf-k">Cloud SQL</span><span class="cf-v ag">TLS 1.3 enforced</span></div>
+        <div class="cf"><span class="cf-k">Workload ID</span><span class="cf-v at">ECDSA-256 keys</span></div>
+      </div>
+      <div class="cloud-box cbb-az">
+        <div class="cbh"><span class="cbhi">🔷</span><span class="ai">Azure</span></div>
+        <div class="cf"><span class="cf-k">Key Vault</span><span class="cf-v at">RSA-4096 keys</span></div>
+        <div class="cf"><span class="cf-k">App Service Certs</span><span class="cf-v ar">1 expired — alert</span></div>
+        <div class="cf"><span class="cf-k">Storage Encrypt.</span><span class="cf-v ag">AES-256 at rest</span></div>
+        <div class="cf"><span class="cf-k">SQL TLS</span><span class="cf-v ay">TLS 1.2 min enforced</span></div>
+        <div class="cf"><span class="cf-k">App Gateway</span><span class="cf-v ag">TLS 1.3 policy</span></div>
+      </div>
+    </div>
+
+    <div class="ben5">
+      <div class="b5box" style="border-color:rgba(56,189,248,.24);">
+        <span class="bi">🔍</span>
+        <h4 class="as">Detect Weak Crypto</h4>
+        <p>Automatically flags any cloud service using deprecated algorithms, short keys, or outdated TLS across all cloud accounts and regions.</p>
+      </div>
+      <div class="b5box" style="border-color:rgba(45,212,191,.24);">
+        <span class="bi">📅</span>
+        <h4 class="at">Track Certs &amp; Keys</h4>
+        <p>Continuous monitoring of ACM, Azure Key Vault, and GCM certificate expiry — alerts 30, 14, and 7 days before expiry.</p>
+      </div>
+      <div class="b5box" style="border-color:rgba(74,222,128,.24);">
+        <span class="bi">📋</span>
+        <h4 class="ag">Ensure Compliance</h4>
+        <p>Auto-generates compliance evidence for PCI-DSS 4.0, HIPAA, ISO 27001, and CERT-In — covering all cloud encryption requirements.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#0891b2;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-grn">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-grid" style="margin-bottom:.85%;">
+      <div class="sbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🐳</span>
+        <h4 class="as">Container Images</h4>
+        <p>CBOM scans every layer — base OS, runtime, frameworks, app code. Finds EOL libraries, weak algorithms, and bundled certificates that no developer explicitly installed.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(129,140,248,.24);">
+        <span class="si">☸️</span>
+        <h4 class="ai">Kubernetes Runtime</h4>
+        <p>Runtime discovery finds live mTLS configurations, mounted secrets, ingress certificates, and active cipher suite negotiations across all pods and namespaces.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">☁️</span>
+        <h4 class="at">Cloud Environments</h4>
+        <p>CBOM integrates with AWS, GCP, and Azure APIs to inventory KMS keys, ACM certificates, storage encryption settings, and TLS policies across all cloud services.</p>
+      </div>
+    </div>
+
+    <div class="cov-row">
+      <div class="cov-item cv-1">
+        <span class="cvi">👁️</span>
+        <div>
+          <h4 class="as">Complete Visibility</h4>
+          <p>No crypto component — whether in a container layer, a running pod, or a cloud-managed service — is invisible to CBOM. Zero blind spots across the full stack.</p>
+        </div>
+      </div>
+      <div class="cov-item cv-2">
+        <span class="cvi">🚨</span>
+        <div>
+          <h4 class="ai">Automated Risk Detection</h4>
+          <p>EOL libraries, expired certificates, deprecated protocols, and weak key lengths are flagged automatically — no manual audit needed in complex cloud environments.</p>
+        </div>
+      </div>
+      <div class="cov-item cv-3">
+        <span class="cvi">📋</span>
+        <div>
+          <h4 class="at">Compliance Coverage</h4>
+          <p>CBOM provides a single, auditable crypto inventory spanning containers, Kubernetes, and multi-cloud — satisfying all major regulatory frameworks in one document.</p>
+        </div>
+      </div>
+      <div class="cov-item cv-4">
+        <span class="cvi">🔄</span>
+        <div>
+          <h4 class="ab">Always Current</h4>
+          <p>CBOM refreshes on every image build, every deployment, and continuously at runtime — the inventory reflects the real state of your cloud-native estate at all times.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>Weak Cryptography Detection &amp; Risk Management — identifying, prioritising, and remediating cryptographic weaknesses across your entire software portfolio</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

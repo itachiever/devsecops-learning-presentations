@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM in Interviews – DevSecOps Focus: Questions, Answers & Scenarios</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.7% 4.6%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(12px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#060818 0%,#0d0e46 48%,#080a2c 100%);}
+  .s2{background:linear-gradient(145deg,#060a14 0%,#071c2e 50%,#060e1e 100%);}
+  .s3{background:linear-gradient(145deg,#080618 0%,#0f0828 50%,#09061c 100%);}
+  .s4{background:linear-gradient(145deg,#060c0a 0%,#071c12 50%,#060e0c 100%);}
+  .s5{background:linear-gradient(145deg,#08060e 0%,#130828 50%,#0a060e 100%);}
+  .s6{background:linear-gradient(145deg,#060810 0%,#090e2c 50%,#060c1e 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-ora{color:#fb923c;background:rgba(251,146,60,.09);  border:1px solid rgba(251,146,60,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.8rem,5vw,3.6rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1%;}
+  .divl{width:52px;height:3px;border-radius:999px;margin:.65% auto 1%;}
+  .subtitle{font-size:clamp(.76rem,1.55vw,1.12rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.64rem,1.18vw,.86rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2.2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);color:#5eead4;}
+  .tb-c{background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.3);color:#bbf7d0;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.1% 1.7%;width:100%;margin-bottom:.8%;}
+  .hbox p{font-size:clamp(.51rem,.98vw,.73rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-ora{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.24);}
+  .hb-ora p{color:#fed7aa;}.hb-ora strong{color:#fb923c;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.5%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.8%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-g{color:#4ade80;}.sl-o{color:#fb923c;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ag{color:#4ade80;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ═══════════════
+     Q&A BLOCK — core reusable component
+  ═══════════════ */
+  .qa-block{
+    border-radius:.8vw;overflow:hidden;
+    margin-bottom:.8%;width:100%;
+    transition:transform .2s;
+  }
+  .qa-block:hover{transform:translateX(3px);}
+  .qa-block:last-child{margin-bottom:0;}
+
+  .qa-q{
+    display:flex;align-items:flex-start;gap:.9%;
+    padding:.8% 1.3%;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .qa-q .qq{
+    width:clamp(18px,2.3vw,26px);height:clamp(18px,2.3vw,26px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(.48rem,.88vw,.64rem);font-weight:800;
+    flex-shrink:0;margin-top:.1em;
+  }
+  .qa-q .q-text{font-size:clamp(.56rem,1.05vw,.77rem);font-weight:700;color:#e2e8f0;line-height:1.4;}
+
+  .qa-a{
+    display:flex;align-items:flex-start;gap:.9%;
+    padding:.75% 1.3%;
+  }
+  .qa-a .aa{
+    font-size:clamp(.48rem,.88vw,.64rem);font-weight:800;
+    color:#4ade80;flex-shrink:0;margin-top:.1em;
+    width:clamp(18px,2.3vw,26px);text-align:center;
+  }
+  .qa-a .a-text{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;}
+  .qa-a .a-text strong{font-weight:700;}
+
+  /* Color variants for blocks */
+  .qab-sky{background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);}
+  .qab-sky .qa-q{background:rgba(56,189,248,.1);}
+  .qab-sky .qq{background:rgba(56,189,248,.2);color:#38bdf8;}
+
+  .qab-vio{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.2);}
+  .qab-vio .qa-q{background:rgba(192,132,252,.1);}
+  .qab-vio .qq{background:rgba(192,132,252,.2);color:#c084fc;}
+
+  .qab-tel{background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);}
+  .qab-tel .qa-q{background:rgba(45,212,191,.09);}
+  .qab-tel .qq{background:rgba(45,212,191,.2);color:#2dd4bf;}
+
+  .qab-grn{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);}
+  .qab-grn .qa-q{background:rgba(74,222,128,.09);}
+  .qab-grn .qq{background:rgba(74,222,128,.2);color:#4ade80;}
+
+  .qab-ora{background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);}
+  .qab-ora .qa-q{background:rgba(251,146,60,.09);}
+  .qab-ora .qq{background:rgba(251,146,60,.2);color:#fb923c;}
+
+  .qab-ind{background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.22);}
+  .qab-ind .qa-q{background:rgba(129,140,248,.1);}
+  .qab-ind .qq{background:rgba(129,140,248,.2);color:#818cf8;}
+
+  /* ── Difficulty badge ── */
+  .diff-badge{
+    display:inline-block;font-size:clamp(.38rem,.68vw,.52rem);
+    font-weight:700;padding:.18em .6em;border-radius:999px;
+    margin-left:auto;flex-shrink:0;
+  }
+  .db-easy{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.26);}
+  .db-mid {background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.24);}
+  .db-adv {background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.26);}
+  .db-scen{background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);}
+
+  /* ── Keyword chip ── */
+  .kchip{
+    display:inline-block;font-size:clamp(.38rem,.68vw,.52rem);
+    font-weight:700;padding:.15em .55em;border-radius:999px;margin:.1% .2%;
+  }
+  .kc-s{background:rgba(56,189,248,.12);color:#38bdf8;border:1px solid rgba(56,189,248,.24);}
+  .kc-v{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.24);}
+  .kc-t{background:rgba(45,212,191,.1);color:#2dd4bf;border:1px solid rgba(45,212,191,.22);}
+  .kc-g{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.22);}
+  .kc-o{background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.2);}
+
+  /* ═══════════════
+     SCENARIO STEPS (S5)
+  ═══════════════ */
+  .scenario-box{border-radius:.85vw;overflow:hidden;width:100%;margin-bottom:.8%;}
+  .scen-header{padding:.8% 1.3%;display:flex;align-items:center;gap:.9%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .scen-header .shi{font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;}
+  .scen-header h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .scen-header .sh-badge{margin-left:auto;}
+  .scen-body{display:flex;gap:0;}
+  .scen-situation{flex:1;padding:.8% 1.2%;border-right:1px solid rgba(255,255,255,.07);}
+  .scen-steps{flex:1.4;padding:.8% 1.2%;}
+  .scen-situation h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;margin-bottom:.6%;}
+  .scen-steps h4  {font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;margin-bottom:.6%;}
+  .scen-situation p{font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;line-height:1.5;}
+  .step-list{display:flex;flex-direction:column;gap:.4%;}
+  .step-item{display:flex;align-items:flex-start;gap:.8%;font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;padding:.35% 0;}
+  .step-num{
+    width:clamp(14px,1.9vw,20px);height:clamp(14px,1.9vw,20px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:.82em;font-weight:800;flex-shrink:0;
+  }
+  .scen-1{background:rgba(248,113,113,.06);border:1.5px solid rgba(248,113,113,.28);}
+  .scen-1 .scen-header{background:rgba(248,113,113,.1);}
+  .scen-1 .scen-header h3{color:#f87171;}
+  .sn-1{background:rgba(248,113,113,.2);color:#f87171;}
+  .scen-2{background:rgba(251,191,36,.05);border:1.5px solid rgba(251,191,36,.26);}
+  .scen-2 .scen-header{background:rgba(251,191,36,.09);}
+  .scen-2 .scen-header h3{color:#fbbf24;}
+  .sn-2{background:rgba(251,191,36,.2);color:#fbbf24;}
+
+  /* ═══════════════
+     S6 – SUMMARY
+  ═══════════════ */
+  .tip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .tbox{border-radius:.8vw;padding:1.3% 1.4%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);text-align:center;}
+  .tbox .tbi{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .tbox h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .tbox p{font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{
+    width:100%;border-radius:.85vw;padding:1.4% 2.2%;
+    background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(74,222,128,.1));
+    border:2px solid rgba(129,140,248,.4);text-align:center;margin-bottom:.85%;
+  }
+  .closing h3{font-size:clamp(.72rem,1.35vw,.98rem);font-weight:900;color:#e2e8f0;margin-bottom:.6%;}
+  .closing p{font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.5;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p{font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:25%;height:25%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:15%;height:15%;bottom:13%;left:25%;"></div>
+
+    <div class="tag tg-ind">🎓 CBOM Series · Episode 20</div>
+    <h1>CBOM in Interviews</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">DevSecOps Focus — Questions, Answers &amp; Scenarios</p>
+    <p class="tagline">✦ Crack Interviews with Confidence ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🎤 <span>Interview</span></div>
+      <div class="tb tb-b">✅ <span>Checklist</span></div>
+      <div class="tb tb-c">🏆 <span>Success</span></div>
+    </div>
+
+    <!-- Difficulty level preview -->
+    <div style="width:90%;display:flex;gap:.9%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.08);border:1.5px solid rgba(74,222,128,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🟢</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#4ade80;margin-top:2%;">Basic Questions</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Slide 2 — Fundamentals</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,191,36,.07);border:1.5px solid rgba(251,191,36,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🟡</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#fbbf24;margin-top:2%;">Intermediate</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Slide 3 — Practical</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔴</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#f87171;margin-top:2%;">Advanced</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Slide 4 — Real-World</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🟣</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#c084fc;margin-top:2%;">Scenario-Based</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Slide 5 — Problem Solving</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:82%;text-align:center;margin-bottom:0;">
+      <p>CBOM knowledge is increasingly tested in <strong>DevSecOps, Cloud Security, and Security Engineering interviews</strong>. This episode gives you precise, interview-ready answers for every difficulty level — from beginner fundamentals to scenario-based problem solving that separates top candidates from the rest.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · Basic Questions
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🟢 Basic Level · Slide 2 of 6</div>
+    <h2>Basic Interview Questions — Fundamentals Matter Most</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.85%;">
+      <p>📌 <strong>Interviewer tip:</strong> Basic questions test conceptual clarity. Avoid over-complicating answers — a concise, accurate definition with one real-world example is more impressive than a long rambling response. Lead with the definition, follow with the purpose, close with an example.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.5%;">
+      <div class="col-w">
+        <div class="qa-block qab-sky">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">What is a CBOM (Cryptographic Bill of Materials)?</span><span class="diff-badge db-easy">Basic</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text">A CBOM is a <strong>structured inventory of all cryptographic components</strong> in a software system — algorithms, keys, certificates, and protocols — captured in a machine-readable format like CycloneDX JSON. It is the "ingredient list" for the security layer of your software. <span class="kchip kc-s">CycloneDX</span><span class="kchip kc-s">Algorithms</span><span class="kchip kc-s">Certificates</span></div></div>
+        </div>
+
+        <div class="qa-block qab-sky">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">Why is CBOM needed in modern software?</span><span class="diff-badge db-easy">Basic</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text">Because <strong>most organizations don't know what cryptographic components are running</strong> in their applications — especially transitive dependencies and container base images. CBOM provides visibility that enables vulnerability detection, certificate lifecycle management, compliance reporting, and post-quantum migration planning. Without it, crypto risks are invisible. <span class="kchip kc-s">Visibility</span><span class="kchip kc-s">Risk</span><span class="kchip kc-s">Compliance</span></div></div>
+        </div>
+
+        <div class="qa-block qab-sky">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">What is the difference between SBOM and CBOM?</span><span class="diff-badge db-easy">Basic</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text"><strong>SBOM</strong> (Software Bill of Materials) inventories <em>all</em> software components — libraries, packages, versions. <strong>CBOM</strong> is a specialized subset that focuses <em>specifically</em> on cryptographic components — algorithms, keys, certs, protocols. CBOM <em>extends</em> SBOM by adding crypto-specific fields that standard SBOM tools don't capture. Think of SBOM as the full ingredient list and CBOM as the security-specific nutrition facts. <span class="kchip kc-s">SBOM</span><span class="kchip kc-s">Subset</span><span class="kchip kc-s">CycloneDX 1.5+</span></div></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-s">💡 How to Frame Strong Basic Answers</div>
+        <ul style="list-style:none;padding:0;">
+          <li style="display:flex;align-items:flex-start;gap:.8%;padding:.7% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.49rem,.9vw,.66rem);color:#cbd5e1;line-height:1.5;">
+            <span style="flex-shrink:0;font-size:1.05em;">🎯</span>
+            <div><span class="as">Structure your answer:</span> Define → Purpose → Example. "A CBOM is [definition]. It is used to [purpose]. For example, [real scenario]."</div>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.8%;padding:.7% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.49rem,.9vw,.66rem);color:#cbd5e1;line-height:1.5;">
+            <span style="flex-shrink:0;font-size:1.05em;">📌</span>
+            <div><span class="as">Use the analogy:</span> "A food product has an ingredient label — CBOM is the ingredient label for the cryptographic components inside software."</div>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.8%;padding:.7% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.49rem,.9vw,.66rem);color:#cbd5e1;line-height:1.5;">
+            <span style="flex-shrink:0;font-size:1.05em;">⚡</span>
+            <div><span class="as">Mention the format:</span> Always say "CycloneDX 1.5+ JSON" — it shows you know the industry standard, not just the concept.</div>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.8%;padding:.7% 0;font-size:clamp(.49rem,.9vw,.66rem);color:#cbd5e1;line-height:1.5;">
+            <span style="flex-shrink:0;font-size:1.05em;">🔗</span>
+            <div><span class="as">Link to compliance:</span> "CERT-In and PCI-DSS 4.0 require organizations to maintain a cryptographic inventory — that's exactly what CBOM provides."</div>
+          </li>
+        </ul>
+
+        <div class="hbox hb-sky" style="margin-top:.7%;margin-bottom:0;">
+          <p>🏆 <strong>Standout move:</strong> When answering SBOM vs CBOM, mention that CBOM was formally introduced as a <strong>cryptographic-asset component type in CycloneDX 1.5</strong> — shows deeper technical knowledge than most candidates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Intermediate Questions
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">🟡 Intermediate Level · Slide 3 of 6</div>
+    <h2>Intermediate Questions — Practical Understanding</h2>
+
+    <div class="two" style="align-items:flex-start;gap:1.5%;">
+      <div class="col">
+        <div class="qa-block qab-vio">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">What are the main components tracked in a CBOM?</span><span class="diff-badge db-mid">Intermediate</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text">A CBOM tracks <strong>four core component types</strong>: (1) <span class="av">Algorithms</span> — encryption, hashing, signing (AES-256, SHA-256, RSA); (2) <span class="av">Keys</span> — type, bit-length, storage location, rotation policy; (3) <span class="av">Certificates</span> — issuer, expiry, signature algorithm, revocation status; (4) <span class="av">Protocols</span> — TLS version, SSH version, cipher suites in use. Each entry includes the component name, version, PURL, owner, and usage location.</div></div>
+        </div>
+
+        <div class="qa-block qab-vio">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">How is a CBOM generated? What tools are used?</span><span class="diff-badge db-mid">Intermediate</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text">CBOM generation happens at <strong>three levels</strong>: (1) <span class="av">Static</span> — tools like <code style="font-family:monospace;font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">cdxgen</code> and <code style="font-family:monospace;font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">Syft</code> scan source code and package manifests at build time; (2) <span class="av">Container</span> — <code style="font-family:monospace;font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">Trivy</code> scans every Docker image layer; (3) <span class="av">Runtime</span> — Kubernetes DaemonSet scanners probe live pods and cloud APIs. Output is a signed CycloneDX 1.5+ JSON artefact stored alongside the container image.</div></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="qa-block qab-vio">
+          <div class="qa-q"><div class="qq">Q</div><span class="q-text">Where does CBOM fit in a CI/CD pipeline?</span><span class="diff-badge db-mid">Intermediate</span></div>
+          <div class="qa-a"><span class="aa">A</span><div class="a-text">CBOM integrates at <strong>multiple CI/CD stages</strong>: (1) <span class="av">Build stage</span> — CBOM generated after compilation, before any deployment; (2) <span class="av">Scan stage</span> — CBOM enriched with CVE matches from Dependency-Track; (3) <span class="av">Policy gate</span> — build fails if CBOM contains Critical findings (deprecated algorithm, expired cert); (4) <span class="av">Artefact store</span> — signed CBOM pushed to registry alongside the image; (5) <span class="av">Runtime monitoring</span> — scheduled re-scan refreshes CBOM continuously in production. <span class="kchip kc-v">GitHub Actions</span><span class="kchip kc-v">Jenkins</span><span class="kchip kc-v">Policy-as-Code</span></div></div>
+        </div>
+
+        <div class="hbox hb-vio" style="margin-bottom:0;">
+          <p>🎯 <strong>Interviewer expects:</strong> For intermediate questions, go beyond definitions. <strong>Name specific tools</strong> (cdxgen, Syft, Trivy, Dependency-Track), <strong>name pipeline platforms</strong> (GitHub Actions, Jenkins), and <strong>describe the flow</strong> — build → scan → gate → store → monitor. Candidates who can describe the end-to-end flow stand out immediately.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Advanced Questions
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">🔴 Advanced Level · Slide 4 of 6</div>
+    <h2>Advanced Questions — Real-World Application</h2>
+
+    <div class="qa-block qab-tel" style="margin-bottom:.8%;">
+      <div class="qa-q"><div class="qq">Q</div><span class="q-text">How does CBOM help in vulnerability management?</span><span class="diff-badge db-adv">Advanced</span></div>
+      <div class="qa-a"><span class="aa">A</span><div class="a-text">CBOM enables <strong>precise, automated CVE mapping</strong>. Each CBOM component entry contains a PURL (Package URL) — e.g., <code style="font-family:monospace;font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">pkg:generic/openssl@3.0.5</code>. Tools like Dependency-Track cross-reference every PURL against NVD, GitHub Advisory, and OSS Index in real time. When a new CVE drops — like CVE-2022-3602 for OpenSSL — all CBOM entries with that version are flagged instantly, owners are notified, and the severity score (CVSS 9.8) drives remediation priority. Without CBOM, the same discovery requires manual investigation that can take weeks. <span class="kchip kc-t">CVE Mapping</span><span class="kchip kc-t">NVD</span><span class="kchip kc-t">CVSS Scoring</span><span class="kchip kc-t">Dependency-Track</span></div></div>
+    </div>
+
+    <div class="qa-block qab-tel" style="margin-bottom:.8%;">
+      <div class="qa-q"><div class="qq">Q</div><span class="q-text">How does CBOM detect weak cryptography?</span><span class="diff-badge db-adv">Advanced</span></div>
+      <div class="qa-a"><span class="aa">A</span><div class="a-text">CBOM stores the <strong>exact algorithm name, mode, and key size</strong> for every crypto component. A <em>policy-as-code</em> file (versioned in Git) defines the approved-algorithm list — e.g., AES-256-GCM approved, AES/ECB flagged, MD5 blocked, TLS 1.0 blocked. On every CBOM scan, each component is evaluated against this policy. Violations are classified by severity: MD5 or DES → Critical; SHA-1 → High; TLS 1.2 with weak cipher suites → Medium. The CI/CD gate blocks deployment on Critical findings. <span class="kchip kc-t">Policy-as-Code</span><span class="kchip kc-t">MD5 / SHA-1</span><span class="kchip kc-t">TLS 1.0</span><span class="kchip kc-t">Build Gate</span></div></div>
+    </div>
+
+    <div class="qa-block qab-tel">
+      <div class="qa-q"><div class="qq">Q</div><span class="q-text">How does CBOM support CERT-In compliance?</span><span class="diff-badge db-adv">Advanced</span></div>
+      <div class="qa-a"><span class="aa">A</span><div class="a-text">CERT-In mandates that organizations maintain a <strong>complete, structured, continuously updated cryptographic inventory</strong>. CBOM directly satisfies this requirement by capturing all four mandatory field groups: component identification, cryptographic details, certificate metadata, and usage/dependency information — in a signed CycloneDX 1.5+ document. The timestamp field proves currency. The digital signature proves authenticity. The PURL enables automated CVE cross-referencing. When a CERT-In auditor requests evidence of cryptographic visibility, the CBOM — generated at every build — provides <strong>timestamped, signed, machine-readable proof</strong> on demand. <span class="kchip kc-t">CERT-In</span><span class="kchip kc-t">CycloneDX 1.5+</span><span class="kchip kc-t">Digital Signature</span><span class="kchip kc-t">Audit Evidence</span></div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Scenario Questions
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-vio">🟣 Scenario-Based · Slide 5 of 6</div>
+    <h2>Scenario-Based Questions — Problem-Solving Mindset</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📌 <strong>Interviewer tip:</strong> Scenario questions test your <strong>structured thinking under pressure</strong>. Always state your approach before diving into steps: "I'd first assess scope, then prioritise by impact, then remediate, then verify." Interviewers reward candidates who think systematically, not just technically.</p>
+    </div>
+
+    <div class="scenario-box scen-1" style="margin-bottom:.8%;">
+      <div class="scen-header">
+        <span class="shi">⏰</span>
+        <h3>Scenario A: Expired Certificate Discovered in Production at 2 AM</h3>
+        <span class="sh-badge"><span class="diff-badge db-scen">Scenario</span></span>
+      </div>
+      <div class="scen-body">
+        <div class="scen-situation">
+          <h4>📍 The Situation</h4>
+          <p>The payment API gateway shows "ERR_CERT_DATE_INVALID". Customers are getting browser security warnings. The on-call engineer receives alerts at 2 AM. No one knows which certificate expired or who owns it. How do you respond — and how would CBOM have prevented this?</p>
+        </div>
+        <div class="scen-steps">
+          <h4>✅ Your Structured Response</h4>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num sn-1">1</div><div><span class="ar">Identify:</span> Query CBOM platform for all certificates with expired/expiring status — find the payment API cert within 30 seconds</div></div>
+            <div class="step-item"><div class="step-num sn-1">2</div><div><span class="ar">Escalate:</span> CBOM owner field shows the responsible team — direct contact in under 2 minutes, not a 30-minute search</div></div>
+            <div class="step-item"><div class="step-num sn-1">3</div><div><span class="ar">Renew:</span> Emergency cert renewal or activate the pre-staged replacement cert. Rollout via CI/CD for traceability</div></div>
+            <div class="step-item"><div class="step-num sn-1">4</div><div><span class="ar">Prevention:</span> CBOM with 90/30/7-day alerts would have triggered automated renewal via cert-manager — this incident should never have happened</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-box scen-2">
+      <div class="scen-header">
+        <span class="shi">💀</span>
+        <h3>Scenario B: Security Scan Reveals MD5 Used for Token Signing in Auth Service</h3>
+        <span class="sh-badge"><span class="diff-badge db-scen">Scenario</span></span>
+      </div>
+      <div class="scen-body">
+        <div class="scen-situation">
+          <h4>📍 The Situation</h4>
+          <p>A CBOM scan flags a Critical finding: the auth service is using MD5 to sign session tokens. MD5 is cryptographically broken. The service handles 500,000 daily active users. How do you handle this — from discovery to remediation?</p>
+        </div>
+        <div class="scen-steps">
+          <h4>✅ Your Structured Response</h4>
+          <div class="step-list">
+            <div class="step-item"><div class="step-num sn-2">1</div><div><span class="ay">Assess impact:</span> CBOM dependency map shows which services consume auth tokens — understand blast radius before acting</div></div>
+            <div class="step-item"><div class="step-num sn-2">2</div><div><span class="ay">Prioritise as Critical:</span> MD5 CVSS equivalent = Critical. 24-hour SLA. No exceptions without CISO-signed risk acceptance</div></div>
+            <div class="step-item"><div class="step-num sn-2">3</div><div><span class="ay">Migrate:</span> Replace MD5 with SHA-256 or HMAC-SHA256. Plan token invalidation strategy for existing sessions</div></div>
+            <div class="step-item"><div class="step-num sn-2">4</div><div><span class="ay">Verify:</span> Re-scan CBOM post-fix — confirm SHA-256 now appears. CBOM gate blocks re-introduction of MD5 in future builds</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏆 Interview Prep Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Interview Tips</h2>
+
+    <div class="tip-grid" style="margin-bottom:.85%;">
+      <div class="tbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="tbi">📚</span>
+        <h4 class="as">Master the Concepts</h4>
+        <p>Know: What CBOM is · Why it exists · SBOM vs CBOM · Components (algorithms, keys, certs, protocols) · CycloneDX 1.5+ format. These 5 topics cover 80% of basic and intermediate questions.</p>
+      </div>
+      <div class="tbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="tbi">⚙️</span>
+        <h4 class="at">Know the Implementation</h4>
+        <p>Name specific tools: cdxgen, Syft, Trivy, Dependency-Track. Describe the CI/CD flow: build → scan → gate → store → monitor. Mention CycloneDX, PURL, digital signing. Tool knowledge = practitioner credibility.</p>
+      </div>
+      <div class="tbox" style="border-color:rgba(74,222,128,.24);">
+        <span class="tbi">🛡️</span>
+        <h4 class="ag">Speak Risk &amp; Compliance</h4>
+        <p>Reference CERT-In, PCI-DSS 4.0, FIPS 140-3. Explain CVE mapping and CVSS scoring. Know which algorithms are broken (MD5, SHA-1, DES) and what to replace them with. Compliance + risk language signals seniority.</p>
+      </div>
+    </div>
+
+    <!-- Power tips strip -->
+    <div style="width:100%;display:flex;gap:.8%;margin-bottom:.85%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);display:flex;align-items:center;gap:.8%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">💡</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#fbbf24;">Be Practical</div><div style="font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;">Always anchor answers to real tools and real scenarios — not abstract theory</div></div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);display:flex;align-items:center;gap:.8%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">📌</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#38bdf8;">Give Real Examples</div><div style="font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;">Mention Log4Shell CVE-2021-44228, OpenSSL CVE-2022-3602 — real CVEs show depth</div></div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);display:flex;align-items:center;gap:.8%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">🗺️</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#c084fc;">Show the Flow</div><div style="font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;">Describe end-to-end: CBOM → CVE → CVSS → prioritise → fix → verify — shows systems thinking</div></div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1.1%;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);display:flex;align-items:center;gap:.8%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">🔧</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#4ade80;">Structure Scenarios</div><div style="font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;">Assess → Prioritise → Remediate → Verify → Prevent — every scenario answer follows this arc</div></div>
+      </div>
+    </div>
+
+    <div class="closing">
+      <h3>🏆 Master CBOM to Stand Out in DevSecOps Interviews</h3>
+      <p>CBOM is a <strong>rare, high-demand skill</strong> in the current DevSecOps job market. Candidates who can articulate CBOM concepts, name tools, explain compliance alignment, and walk through incident scenarios with confidence <strong>immediately differentiate themselves</strong> from the majority who treat security as an afterthought. You now have everything you need — go ace that interview.</p>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Series Complete — Continue Your Journey</h3>
+        <p>You have completed the CBOM series. Apply this knowledge in real DevSecOps projects, contribute to open-source CBOM tooling, and explore post-quantum cryptography as the next frontier</p>
+      </div>
+      <div class="nbtn">🎓 Series Complete</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

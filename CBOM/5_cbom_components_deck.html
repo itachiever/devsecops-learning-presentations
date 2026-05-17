@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Components of CBOM – What Does CBOM Contain?</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #04040e;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: min(100vw, calc(100vh * 16/9));
+    height: min(100vh, calc(100vw * 9/16));
+    overflow: hidden;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3% 5%;
+    animation: fadeUp .55s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .s1 { background: linear-gradient(140deg,#07071e 0%,#0d1050 45%,#09082e 100%); }
+  .s2 { background: linear-gradient(140deg,#060d10 0%,#071c2c 50%,#060f1e 100%); }
+  .s3 { background: linear-gradient(140deg,#080618 0%,#120828 50%,#09061c 100%); }
+  .s4 { background: linear-gradient(140deg,#060a10 0%,#071825 50%,#061220 100%); }
+  .s5 { background: linear-gradient(140deg,#06080e 0%,#0a1020 50%,#07101e 100%); }
+  .s6 { background: linear-gradient(140deg,#060818 0%,#0a1232 50%,#080e28 100%); }
+
+  /* ── Orbs ── */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(72px); opacity: 0.17; pointer-events: none;
+  }
+
+  /* ── Tag ── */
+  .tag {
+    font-size: clamp(.46rem,.9vw,.65rem); font-weight: 700;
+    letter-spacing: .17em; text-transform: uppercase;
+    padding: .28em .9em; border-radius: 999px; margin-bottom: .85%;
+  }
+  .tg-indigo { color:#818cf8; background:rgba(129,140,248,.1);  border:1px solid rgba(129,140,248,.28); }
+  .tg-blue   { color:#38bdf8; background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28); }
+  .tg-violet { color:#c084fc; background:rgba(192,132,252,.1);  border:1px solid rgba(192,132,252,.28); }
+  .tg-teal   { color:#2dd4bf; background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28); }
+  .tg-cyan   { color:#67e8f9; background:rgba(103,232,249,.09); border:1px solid rgba(103,232,249,.28); }
+  .tg-green  { color:#4ade80; background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28); }
+
+  /* ── Headings ── */
+  h1 {
+    font-size: clamp(1.8rem,5vw,3.6rem); font-weight:900;
+    line-height:1.08; text-align:center;
+    background: linear-gradient(135deg,#a5b4fc,#c4b5fd,#5eead4);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:.7%;
+  }
+  h2 { font-size:clamp(1.1rem,2.4vw,1.8rem); font-weight:800; color:#e2e8f0; text-align:center; margin-bottom:1.3%; }
+
+  .divl { width:52px; height:3px; border-radius:999px; margin:.7% auto 1.2%; }
+
+  .subtitle { font-size:clamp(.78rem,1.6vw,1.15rem); color:#94a3b8; text-align:center; margin-bottom:.6%; }
+  .tagline  { font-size:clamp(.66rem,1.2vw,.88rem); font-weight:600; letter-spacing:.05em; color:#a5b4fc; }
+
+  /* ── Title icons ── */
+  .tic-row { display:flex; gap:2vw; margin:2% 0; }
+  .tic {
+    display:flex; flex-direction:column; align-items:center; gap:.4em;
+    padding:clamp(9px,1.6%,16px) clamp(12px,2.2%,22px);
+    border-radius:.9vw; font-size:clamp(1.1rem,2.1vw,1.65rem);
+    animation:floatUp 3.5s ease-in-out infinite;
+  }
+  .tic span { font-size:clamp(.44rem,.78vw,.58rem); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .tic-a { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.3); color:#a5b4fc; }
+  .tic-b { background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.3);  color:#7dd3fc; }
+  .tic-c { background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3);  color:#5eead4; }
+  .tic-d { background:rgba(192,132,252,.1); border:1px solid rgba(192,132,252,.3); color:#d8b4fe; }
+  .tic:nth-child(2){ animation-delay:.5s; }
+  .tic:nth-child(3){ animation-delay:1s; }
+  .tic:nth-child(4){ animation-delay:1.5s; }
+  @keyframes floatUp {
+    0%,100%{ transform:translateY(0); }
+    50%    { transform:translateY(-5px); }
+  }
+
+  /* ── Highlight boxes ── */
+  .hbox { border-radius:.8vw; padding:1.4% 2%; width:100%; margin-bottom:1.1%; }
+  .hbox p { font-size:clamp(.56rem,1.05vw,.78rem); line-height:1.55; }
+  .hbox strong { font-weight:700; }
+
+  .hb-indigo { background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.28); }
+  .hb-indigo p { color:#c7d2fe; } .hb-indigo strong { color:#818cf8; }
+  .hb-blue   { background:rgba(56,189,248,.08);  border:1px solid rgba(56,189,248,.26); }
+  .hb-blue p { color:#bae6fd; }   .hb-blue strong { color:#38bdf8; }
+  .hb-violet { background:rgba(192,132,252,.08); border:1px solid rgba(192,132,252,.28); }
+  .hb-violet p { color:#e9d5ff; } .hb-violet strong { color:#c084fc; }
+  .hb-teal   { background:rgba(45,212,191,.07);  border:1px solid rgba(45,212,191,.26); }
+  .hb-teal p { color:#99f6e4; }   .hb-teal strong { color:#2dd4bf; }
+  .hb-cyan   { background:rgba(103,232,249,.07); border:1px solid rgba(103,232,249,.25); }
+  .hb-cyan p { color:#a5f3fc; }   .hb-cyan strong { color:#67e8f9; }
+  .hb-grad   { background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(45,212,191,.09)); border:1px solid rgba(129,140,248,.3); }
+  .hb-grad p { color:#c7d2fe; }   .hb-grad strong { color:#a5b4fc; }
+
+  /* ── Two-col ── */
+  .two  { display:flex; gap:1.8%; width:100%; }
+  .col  { flex:1; }
+  .col-w{ flex:1.35; }
+
+  /* ── Sec label ── */
+  .sl {
+    font-size:clamp(.46rem,.86vw,.62rem); font-weight:700;
+    letter-spacing:.13em; text-transform:uppercase; margin-bottom:1%;
+  }
+  .sl-i{ color:#818cf8; } .sl-b{ color:#38bdf8; }
+  .sl-v{ color:#c084fc; } .sl-t{ color:#2dd4bf; }
+  .sl-c{ color:#67e8f9; } .sl-g{ color:#4ade80; }
+
+  /* ── Cards row ── */
+  .cards { display:flex; gap:1.3%; width:100%; }
+  .card {
+    flex:1; border-radius:.9vw; padding:1.9% 2%;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    transition:transform .25s;
+  }
+  .card:hover{ transform:translateY(-3px); }
+  .card .ci  { font-size:clamp(1.1rem,2.1vw,1.6rem); margin-bottom:3%; display:block; }
+  .card h3   { font-size:clamp(.62rem,1.18vw,.86rem); font-weight:700; color:#e2e8f0; margin-bottom:2.5%; }
+  .card p, .card li { font-size:clamp(.53rem,.97vw,.72rem); color:#94a3b8; line-height:1.55; }
+  .card ul   { list-style:none; padding:0; }
+  .card li   { padding:1.1% 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .card li:last-child{ border-bottom:none; }
+
+  /* ── Item list ── */
+  .ilist { list-style:none; padding:0; width:100%; }
+  .ilist li {
+    display:flex; align-items:flex-start; gap:1%;
+    padding:1% 0; border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.53rem,.98vw,.73rem); color:#cbd5e1; line-height:1.5;
+  }
+  .ilist li:last-child{ border-bottom:none; }
+  .ico{ font-size:1.1em; flex-shrink:0; margin-top:.1em; }
+
+  /* Accents */
+  .ai{ color:#818cf8; font-weight:700; }
+  .ab{ color:#38bdf8; font-weight:700; }
+  .av{ color:#c084fc; font-weight:700; }
+  .at{ color:#2dd4bf; font-weight:700; }
+  .ac{ color:#67e8f9; font-weight:700; }
+  .ag{ color:#4ade80; font-weight:700; }
+  .ay{ color:#fbbf24; font-weight:700; }
+  .ar{ color:#f87171; font-weight:700; }
+
+  /* ── Algorithm pills ── */
+  .algo-row { display:flex; gap:1%; flex-wrap:wrap; margin:1% 0; }
+  .apill {
+    padding:.4em 1em; border-radius:.6vw; font-weight:700;
+    font-size:clamp(.52rem,.96vw,.71rem); text-align:center;
+    flex:1; min-width:0;
+  }
+  .ap-enc  { background:rgba(129,140,248,.12); border:1px solid rgba(129,140,248,.3); color:#a5b4fc; }
+  .ap-hash { background:rgba(45,212,191,.1);   border:1px solid rgba(45,212,191,.3);  color:#5eead4; }
+  .ap-asym { background:rgba(192,132,252,.1);  border:1px solid rgba(192,132,252,.3); color:#d8b4fe; }
+  .ap-dep  { background:rgba(248,113,113,.1);  border:1px solid rgba(248,113,113,.28);color:#fca5a5; }
+
+  /* ── Key type panel ── */
+  .key-panel {
+    border-radius:.8vw; padding:1.6% 2%;
+    display:flex; align-items:flex-start; gap:2%;
+    margin-bottom:1%;
+  }
+  .kp-sym  { background:rgba(56,189,248,.07);  border:1px solid rgba(56,189,248,.24);  }
+  .kp-asym { background:rgba(192,132,252,.07); border:1px solid rgba(192,132,252,.24); }
+  .key-panel .ki { font-size:clamp(1.1rem,2vw,1.5rem); flex-shrink:0; }
+  .key-panel h4  { font-size:clamp(.6rem,1.1vw,.8rem); font-weight:700; color:#e2e8f0; margin-bottom:1.5%; }
+  .key-panel p   { font-size:clamp(.52rem,.95vw,.7rem); color:#94a3b8; line-height:1.5; }
+  .key-panel ul  { list-style:none; padding:0; margin-top:1%; }
+  .key-panel li  { font-size:clamp(.5rem,.9vw,.67rem); color:#94a3b8; padding:.5% 0; }
+  .key-panel li::before { content:"▸ "; }
+
+  /* ── Cert card ── */
+  .cert-card {
+    background:rgba(45,212,191,.06);
+    border:1px solid rgba(45,212,191,.24);
+    border-radius:.8vw; padding:1.6% 2%;
+    width:100%;
+  }
+  .cert-card h4 { font-size:clamp(.6rem,1.1vw,.8rem); font-weight:700; color:#5eead4; margin-bottom:1.2%; }
+  .cert-field {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:.85% 0; border-bottom:1px solid rgba(45,212,191,.1);
+    font-size:clamp(.5rem,.92vw,.68rem);
+  }
+  .cert-field:last-child{ border-bottom:none; }
+  .cf-key  { color:#94a3b8; font-weight:600; flex:0 0 38%; }
+  .cf-val  { color:#a7f3d0; font-weight:500; }
+  .cf-badge{ padding:.18em .6em; border-radius:999px; font-weight:700; font-size:.9em; }
+  .cfb-ok  { background:rgba(74,222,128,.14); color:#4ade80; border:1px solid rgba(74,222,128,.28); }
+  .cfb-exp { background:rgba(248,113,113,.14);color:#f87171; border:1px solid rgba(248,113,113,.28);}
+  .cfb-warn{ background:rgba(251,191,36,.12); color:#fbbf24; border:1px solid rgba(251,191,36,.26);}
+
+  /* ── Proto grid ── */
+  .proto-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.1%; width:100%; margin-bottom:1%; }
+  .proto-box {
+    border-radius:.7vw; padding:1.5% 1.6%; text-align:center;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  }
+  .proto-box .pi { font-size:clamp(.95rem,1.8vw,1.35rem); display:block; margin-bottom:3%; }
+  .proto-box h4  { font-size:clamp(.58rem,1.05vw,.76rem); font-weight:700; color:#e2e8f0; margin-bottom:2%; }
+  .proto-box p   { font-size:clamp(.48rem,.88vw,.64rem); color:#94a3b8; line-height:1.45; }
+  .p-safe  { border-color:rgba(74,222,128,.22); }
+  .p-warn  { border-color:rgba(251,191,36,.2); }
+  .p-bad   { border-color:rgba(248,113,113,.22); }
+
+  /* ── Summary wheel ── */
+  .sum-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:1%; width:100%; margin-bottom:1.1%; }
+  .sbox {
+    border-radius:.8vw; padding:1.7% 1.4%; text-align:center;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    display:flex; flex-direction:column; align-items:center; gap:3%;
+  }
+  .sbox .si { font-size:clamp(.95rem,1.85vw,1.4rem); }
+  .sbox h4  { font-size:clamp(.55rem,1vw,.74rem); font-weight:700; color:#e2e8f0; }
+  .sbox p   { font-size:clamp(.46rem,.84vw,.62rem); color:#94a3b8; line-height:1.45; }
+
+  /* ── Next box ── */
+  .next-box {
+    width:100%; border-radius:.8vw; padding:1.2% 2%;
+    background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));
+    border:1px solid rgba(129,140,248,.32);
+    display:flex; align-items:center; justify-content:space-between; gap:2%;
+  }
+  .next-box h3 { font-size:clamp(.62rem,1.15vw,.85rem); color:#e2e8f0; font-weight:700; margin-bottom:.6%; }
+  .next-box p  { font-size:clamp(.5rem,.92vw,.68rem); color:#94a3b8; }
+  .nbtn {
+    background:linear-gradient(135deg,#6366f1,#14b8a6);
+    color:#fff; font-weight:700; font-size:clamp(.52rem,.96vw,.71rem);
+    padding:.5em 1.3em; border-radius:999px; white-space:nowrap;
+    flex-shrink:0; box-shadow:0 4px 16px rgba(99,102,241,.4);
+  }
+
+  /* ── Nav ── */
+  .nav-btn {
+    position:fixed; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+    color:#e2e8f0;
+    width:clamp(28px,3vw,42px); height:clamp(28px,3vw,42px);
+    border-radius:50%; font-size:clamp(.85rem,1.4vw,1.2rem);
+    cursor:pointer; backdrop-filter:blur(6px);
+    transition:all .2s; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:hover{ background:rgba(129,140,248,.22); border-color:#818cf8; }
+  #pb{ left:.7%; } #nb{ right:.7%; }
+  .progress {
+    position:fixed; bottom:1.3%; left:50%; transform:translateX(-50%);
+    display:flex; gap:7px; z-index:100;
+  }
+  .dot {
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(255,255,255,.2); cursor:pointer; transition:all .3s;
+  }
+  .dot.active{ background:#818cf8; transform:scale(1.45); }
+  .snum {
+    position:fixed; bottom:1.3%; right:1.8%;
+    font-size:clamp(.43rem,.78vw,.58rem); color:rgba(255,255,255,.25); z-index:100;
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════════
+       SLIDE 1 · Title
+  ══════════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-indigo">🔐 CBOM Deep-Dive Series · Episode 5</div>
+    <h1>Components of CBOM</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">What Does a Cryptographic Bill of Materials Contain?</p>
+    <p class="tagline">✦ Understanding Core Elements ✦</p>
+
+    <div class="tic-row">
+      <div class="tic tic-a">⚙️ <span>Algorithms</span></div>
+      <div class="tic tic-b">🗝️ <span>Keys</span></div>
+      <div class="tic tic-c">📜 <span>Certificates</span></div>
+      <div class="tic tic-d">🔗 <span>Protocols</span></div>
+    </div>
+
+    <div class="hbox hb-grad" style="max-width:76%;text-align:center;">
+      <p>A CBOM is not just a label — it is a <strong>detailed inventory of 5 core elements</strong> that define how an application protects its data. Understanding each component is the foundation of <strong>cryptographic governance</strong> in DevSecOps.</p>
+    </div>
+    <p style="font-size:clamp(.45rem,.83vw,.6rem);color:#1e293b;margin-top:1.2%;text-align:center;">
+      Beginner-Friendly &nbsp;|&nbsp; DevOps / DevSecOps Relevant &nbsp;|&nbsp; CBOM Series
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 2 · Cryptographic Algorithms
+  ══════════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1d4ed8;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:20%;height:20%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-blue">⚙️ Component 1 of 5 · Slide 2 of 6</div>
+    <h2>Cryptographic Algorithms</h2>
+
+    <div class="hbox hb-blue" style="margin-bottom:1.1%;">
+      <p>📖 A <strong>cryptographic algorithm</strong> is a mathematical recipe — a precise set of instructions used to scramble, verify, or sign data. Algorithms are the <strong>core engine of all security</strong>. Every encryption, password check, and digital signature depends on one. CBOM tracks which algorithms are in use and whether they are still considered safe.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="sl sl-b">🗂️ Algorithm Categories Tracked in CBOM</div>
+        <ul class="ilist" style="margin-bottom:1%;">
+          <li><span class="ico">🔒</span><div><span class="ab">Symmetric Encryption</span> — same key encrypts and decrypts. Fast, used for bulk data. Example: <strong>AES-128, AES-256</strong> (used in Wi-Fi, VPNs, disk encryption, HTTPS).</div></li>
+          <li><span class="ico">🔑</span><div><span class="ab">Asymmetric Encryption</span> — key pair (public + private). Slower, used for key exchange and identity. Example: <strong>RSA-2048, RSA-4096, ECC</strong> (used in TLS handshakes, SSH).</div></li>
+          <li><span class="ico">🧮</span><div><span class="ab">Hashing</span> — one-way fingerprint of data. Cannot be reversed. Example: <strong>SHA-256, SHA-3</strong> (used in password storage, blockchain, certificate signing).</div></li>
+          <li><span class="ico">✍️</span><div><span class="ab">Digital Signatures</span> — proves authenticity and integrity. Example: <strong>ECDSA, Ed25519</strong> (used in code signing, JWT tokens, TLS certificates).</div></li>
+        </ul>
+
+        <div class="sl sl-b">🚦 CBOM Risk Flagging</div>
+        <div class="algo-row">
+          <div class="apill ap-enc">✅ AES-256<br><small style="font-weight:400;opacity:.75;">Symmetric — Strong</small></div>
+          <div class="apill ap-asym">✅ RSA-2048+<br><small style="font-weight:400;opacity:.75;">Asymmetric — Acceptable</small></div>
+          <div class="apill ap-hash">✅ SHA-256 / SHA-3<br><small style="font-weight:400;opacity:.75;">Hashing — Strong</small></div>
+          <div class="apill ap-dep">❌ MD5 / SHA-1 / DES<br><small style="font-weight:400;opacity:.75;">Broken — Remove Now</small></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-b">🌍 Real-World Examples</div>
+        <div class="cards" style="flex-direction:column; gap:1.1%;">
+          <div class="card" style="border-color:rgba(56,189,248,.22);">
+            <span class="ci">🌐</span>
+            <h3 class="ab">HTTPS / TLS</h3>
+            <p>Uses <strong>AES-256</strong> to encrypt your browsing session and <strong>RSA or ECDH</strong> during the handshake to securely exchange the AES key. CBOM tracks both.</p>
+          </div>
+          <div class="card" style="border-color:rgba(56,189,248,.22);">
+            <span class="ci">🔑</span>
+            <h3 class="ab">Password Storage</h3>
+            <p>Good apps use <strong>bcrypt or Argon2</strong> (hashing + salting). Bad apps still use <strong>MD5</strong> — flagged immediately in CBOM as a critical risk.</p>
+          </div>
+          <div class="card" style="border-color:rgba(56,189,248,.22);">
+            <span class="ci">📦</span>
+            <h3 class="ab">Code Signing</h3>
+            <p>Software packages are signed with <strong>ECDSA or RSA</strong> so your OS can verify the installer hasn't been tampered with. CBOM records the signing algorithm used.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 3 · Cryptographic Keys
+  ══════════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1d4ed8;width:20%;height:20%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-violet">🗝️ Component 2 of 5 · Slide 3 of 6</div>
+    <h2>Cryptographic Keys</h2>
+
+    <div class="hbox hb-violet" style="margin-bottom:1.1%;">
+      <p>📖 A <strong>cryptographic key</strong> is a secret value — a long string of bits — that controls the output of an encryption or hashing algorithm. Same algorithm + different key = completely different output. <strong>Key management is critical</strong>: weak, short, or leaked keys make even the strongest algorithm useless. CBOM tracks every key's type, length, storage location, and rotation history.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col">
+        <div class="sl sl-v">🔵 Type 1 — Symmetric Key</div>
+        <div class="key-panel kp-sym" style="margin-bottom:1.2%;">
+          <span class="ki">🔑</span>
+          <div>
+            <h4 class="ab">One Key Does Everything</h4>
+            <p>The same secret key is used to both encrypt and decrypt the data. Both sender and receiver must have an identical copy of this key — securely shared in advance.</p>
+            <ul>
+              <li>Key lengths: <span class="ab">128-bit, 192-bit, 256-bit</span></li>
+              <li>Algorithm: <span class="ab">AES, ChaCha20, 3DES</span></li>
+              <li>Used in: disk encryption, VPNs, HTTPS session data</li>
+              <li>Risk: if key is leaked → <span class="ar">all data exposed</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="sl sl-v">🟣 Type 2 — Asymmetric Key Pair</div>
+        <div class="key-panel kp-asym">
+          <span class="ki">🔐</span>
+          <div>
+            <h4 class="av">Public Key + Private Key</h4>
+            <p>Two mathematically linked keys. <strong>Public key</strong> is shared with anyone — used to encrypt or verify. <strong>Private key</strong> is kept secret — used to decrypt or sign.</p>
+            <ul>
+              <li>Key lengths: <span class="av">RSA-2048, RSA-4096, ECC-256</span></li>
+              <li>Used in: TLS certificates, SSH, JWT, digital signatures</li>
+              <li>Public key: safe to share — no risk in distributing</li>
+              <li>Private key: <span class="ar">must NEVER leave the server</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-v">📋 What CBOM Records About Each Key</div>
+        <ul class="ilist" style="margin-bottom:1.2%;">
+          <li><span class="ico">📏</span><div><span class="av">Key Length</span> — RSA-1024 is dangerously weak. CBOM flags keys below minimum safe lengths (RSA &lt;2048, AES &lt;128).</div></li>
+          <li><span class="ico">📍</span><div><span class="av">Storage Location</span> — Is the key in a Hardware Security Module (HSM), a secrets vault (HashiCorp Vault, AWS KMS), or hardcoded in source code? CBOM records this.</div></li>
+          <li><span class="ico">🔄</span><div><span class="av">Rotation Status</span> — Keys should be rotated regularly. CBOM tracks when a key was last rotated and alerts on stale keys.</div></li>
+          <li><span class="ico">🎯</span><div><span class="av">Purpose / Scope</span> — Is the key used for one service or shared across many? Shared keys create blast-radius risk if compromised.</div></li>
+        </ul>
+
+        <div class="hbox hb-violet" style="margin-bottom:0;">
+          <p>⚠️ <strong>Most Common Key Risks:</strong> Hardcoded keys in source code &nbsp;·&nbsp; keys never rotated &nbsp;·&nbsp; RSA-1024 still active &nbsp;·&nbsp; private keys stored in unencrypted config files. CBOM makes all of these visible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 4 · Certificates
+  ══════════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1d4ed8;width:20%;height:20%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-teal">📜 Component 3 of 5 · Slide 4 of 6</div>
+    <h2>Certificates</h2>
+
+    <div class="hbox hb-teal" style="margin-bottom:1.1%;">
+      <p>📖 A <strong>digital certificate</strong> is an electronic identity document — like a passport for a website or server. It contains a public key and is signed by a trusted <strong>Certificate Authority (CA)</strong>. Certificates enable <strong>trust and identity verification</strong>: your browser trusts a website only if its certificate is valid, unexpired, and signed by a recognised CA.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-t">🗂️ What CBOM Tracks in Every Certificate</div>
+        <ul class="ilist" style="margin-bottom:1.1%;">
+          <li><span class="ico">🏛️</span><div><span class="at">Issuer (CA)</span> — who signed and vouches for the certificate. Trusted CAs include DigiCert, Let's Encrypt, Comodo. An unknown issuer is a red flag.</div></li>
+          <li><span class="ico">📅</span><div><span class="at">Expiry Date</span> — certificates have a fixed lifespan (typically 90 days to 1 year). An expired cert breaks HTTPS and triggers browser "Not Secure" warnings instantly.</div></li>
+          <li><span class="ico">🔑</span><div><span class="at">Public Key &amp; Signature Algorithm</span> — the key strength (RSA-2048, ECC-256) and the hashing algorithm used to sign it (SHA-256). Certs signed with SHA-1 are rejected by modern browsers.</div></li>
+          <li><span class="ico">🌐</span><div><span class="at">Domain / Subject</span> — which domains the cert is valid for. A certificate issued for api.example.com used on app.example.com causes errors and blocks users.</div></li>
+          <li><span class="ico">🔗</span><div><span class="at">Certificate Chain</span> — root CA → intermediate CA → leaf cert. A broken chain causes verification failures on many client devices even if the cert itself is valid.</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-t">🔍 CBOM Certificate Inventory — Example</div>
+        <div class="cert-card">
+          <h4>📋 Live Certificate Tracking Dashboard</h4>
+          <div class="cert-field"><span class="cf-key">Service</span><span class="cf-val">api.payments.internal</span><span class="cf-badge cfb-exp">❌ Expired</span></div>
+          <div class="cert-field"><span class="cf-key">Service</span><span class="cf-val">auth.service.prod</span><span class="cf-badge cfb-warn">⚠️ 8 days left</span></div>
+          <div class="cert-field"><span class="cf-key">Service</span><span class="cf-val">web.example.com</span><span class="cf-badge cfb-ok">✅ Valid 85d</span></div>
+          <div class="cert-field"><span class="cf-key">Sig Algorithm</span><span class="cf-val">legacy.admin.portal</span><span class="cf-badge cfb-exp">❌ SHA-1 Signed</span></div>
+          <div class="cert-field"><span class="cf-key">Key Strength</span><span class="cf-val">reporting.internal</span><span class="cf-badge cfb-warn">⚠️ RSA-1024</span></div>
+          <div class="cert-field"><span class="cf-key">Service</span><span class="cf-val">cdn.assets.prod</span><span class="cf-badge cfb-ok">✅ Valid 72d</span></div>
+        </div>
+
+        <div class="hbox hb-teal" style="margin-top:.9%;margin-bottom:0;">
+          <p>🎯 <strong>Without CBOM:</strong> This table doesn't exist — cert expiries are discovered <em>after</em> an outage, not before. CBOM converts reactive fire-fighting into <strong>proactive cert lifecycle management</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 5 · Protocols & Crypto Libraries
+  ══════════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#0369a1;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:20%;height:20%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-cyan">🔗 Components 4 &amp; 5 of 5 · Slide 5 of 6</div>
+    <h2>Protocols &amp; Cryptographic Libraries</h2>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-c">🔗 Cryptographic Protocols</div>
+        <div class="hbox hb-cyan" style="margin-bottom:1%;">
+          <p>📖 A <strong>cryptographic protocol</strong> is a standardised set of rules that defines <em>how</em> two systems use cryptography to communicate securely — which algorithms, in which order, verified how. CBOM tracks which protocol versions are active and flags deprecated or insecure ones.</p>
+        </div>
+        <div class="proto-grid">
+          <div class="proto-box p-safe">
+            <span class="pi">✅</span>
+            <h4 class="ag">TLS 1.3</h4>
+            <p>Latest standard. Faster handshake, stronger cipher suites. Use for all HTTPS.</p>
+          </div>
+          <div class="proto-box p-warn">
+            <span class="pi">⚠️</span>
+            <h4 class="ay">TLS 1.2</h4>
+            <p>Acceptable with correct cipher suites. Minimum standard for PCI-DSS compliance.</p>
+          </div>
+          <div class="proto-box p-bad">
+            <span class="pi">❌</span>
+            <h4 class="ar">TLS 1.0 / 1.1</h4>
+            <p>Deprecated (RFC 8996). POODLE &amp; BEAST attacks. Must be disabled immediately.</p>
+          </div>
+          <div class="proto-box p-safe">
+            <span class="pi">✅</span>
+            <h4 class="ag">SSH v2</h4>
+            <p>Secure remote access standard. Strong key exchange and authentication.</p>
+          </div>
+          <div class="proto-box p-bad">
+            <span class="pi">❌</span>
+            <h4 class="ar">SSLv2 / SSLv3</h4>
+            <p>Completely broken. DROWN &amp; POODLE attacks. Remove from all servers urgently.</p>
+          </div>
+          <div class="proto-box p-safe">
+            <span class="pi">✅</span>
+            <h4 class="ag">DTLS 1.3</h4>
+            <p>TLS for UDP traffic. Used in VoIP, gaming, IoT. CBOM tracks DTLS versions too.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-c">📚 Cryptographic Libraries</div>
+        <div class="hbox hb-cyan" style="margin-bottom:1%;">
+          <p>📖 <strong>Crypto libraries</strong> are the software packages that <em>implement</em> algorithms and protocols. Applications don't write crypto from scratch — they import libraries. CBOM tracks which libraries are in use, their versions, and known vulnerabilities. A flaw in the library affects every application using it.</p>
+        </div>
+        <ul class="ilist">
+          <li><span class="ico">📦</span><div><span class="ac">OpenSSL</span> — the most widely used open-source crypto library. Powers HTTPS on most of the internet. <span class="ar">Heartbleed (CVE-2014-0160)</span> was an OpenSSL vulnerability affecting millions of servers.</div></li>
+          <li><span class="ico">☕</span><div><span class="ac">BouncyCastle</span> — popular Java/Kotlin crypto library. Used in Android apps, Spring Boot services, and enterprise Java applications.</div></li>
+          <li><span class="ico">🐍</span><div><span class="ac">Python Cryptography / PyCryptodome</span> — standard crypto libraries for Python apps and data pipelines. Version matters — CBOM tracks it.</div></li>
+          <li><span class="ico">🦀</span><div><span class="ac">libsodium / ring</span> — modern, memory-safe crypto libraries for Rust and C. Considered safer alternatives to legacy OpenSSL for new projects.</div></li>
+          <li><span class="ico">🪟</span><div><span class="ac">Windows CNG / BCryptPrimitives</span> — Microsoft's built-in Windows crypto API. Used by .NET apps, Active Directory, and Windows services automatically.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 6 · Summary + Key Takeaways
+  ══════════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-green">🏁 Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-grid" style="margin-bottom:1%;">
+      <div class="sbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">⚙️</span>
+        <h4 class="ab">Algorithms</h4>
+        <p>The math engine behind all security. CBOM flags weak ones (MD5, DES, SHA-1) and confirms strong ones (AES-256, SHA-256) are in use.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🗝️</span>
+        <h4 class="av">Keys</h4>
+        <p>Symmetric and asymmetric keys tracked by type, length, storage, and rotation. Hardcoded or short keys flagged as critical.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">📜</span>
+        <h4 class="at">Certificates</h4>
+        <p>SSL/TLS cert inventory — issuer, expiry, key strength, and signing algorithm. Expired or weak certs alerted before they cause outages.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(103,232,249,.22);">
+        <span class="si">🔗</span>
+        <h4 class="ac">Protocols</h4>
+        <p>TLS, SSH, DTLS versions tracked. Deprecated protocols (SSLv3, TLS 1.0) identified and flagged for immediate remediation.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(129,140,248,.22);">
+        <span class="si">📚</span>
+        <h4 class="ai">Libraries</h4>
+        <p>OpenSSL, BouncyCastle, libsodium — which version is running? Library CVEs affect every app using them. CBOM tracks all.</p>
+      </div>
+    </div>
+
+    <div class="hbox hb-grad" style="margin-bottom:1%;">
+      <p>🎯 <strong>Complete Cryptographic Visibility:</strong> A CBOM combines all 5 components into a <strong>single, unified inventory</strong>. Security teams can answer — at any moment — what algorithms run, which keys exist, which certs expire soon, which protocols are active, and which libraries carry risk. This is the foundation of <strong>cryptographic governance</strong>.</p>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>CBOM Data Fields — CERT-In Guidelines: exploring the standardised fields defined for CBOM generation in India's national cybersecurity framework</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6; let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

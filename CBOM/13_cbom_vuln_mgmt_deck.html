@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM + Vulnerability Management – CVE Mapping & Risk Visibility</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+  .s1{background:linear-gradient(145deg,#07061e 0%,#0d0a40 48%,#09082a 100%);}
+  .s2{background:linear-gradient(145deg,#060c10 0%,#081c2c 50%,#060e1e 100%);}
+  .s3{background:linear-gradient(145deg,#080618 0%,#110830 50%,#090620 100%);}
+  .s4{background:linear-gradient(145deg,#060a14 0%,#071c28 50%,#060e1a 100%);}
+  .s5{background:linear-gradient(145deg,#07060e 0%,#120820 50%,#09060e 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#080f2c 50%,#060c1e 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.17;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-red{color:#f87171;background:rgba(248,113,113,.1);  border:1px solid rgba(248,113,113,.3);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.7rem,4.7vw,3.4rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#a5b4fc,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#fca5a5;}
+  .tb-c{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-red{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-grn{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.32;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-r{color:#f87171;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ar{color:#f87171;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════════════════
+     VM LIFECYCLE (S2)
+  ═══════════════════════════════ */
+  .vm-cycle{display:flex;align-items:stretch;width:100%;gap:0;margin-bottom:.9%;}
+  .vmc{flex:1;border-radius:.8vw;padding:1.3% 1.2%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3%;transition:transform .22s;}
+  .vmc:hover{transform:translateY(-3px);}
+  .vmc .vi{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .vmc h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .vmc p {font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+  .vmc-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .vmc-2{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.26);}
+  .vmc-3{background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.24);}
+  .vmc-4{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .vmc-5{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.25);}
+  .vmc-6{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.25);}
+  .vm-arr{display:flex;align-items:center;font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;padding:0 .2%;}
+
+  /* ── CVSS Score Bar ── */
+  .cvss-bar{width:100%;margin:.5% 0;}
+  .cvss-track{height:clamp(18px,2.5%,26px);border-radius:999px;overflow:hidden;background:linear-gradient(90deg,rgba(74,222,128,.3) 0%,rgba(251,191,36,.35) 40%,rgba(251,146,60,.4) 65%,rgba(248,113,113,.55) 100%);position:relative;border:1px solid rgba(255,255,255,.08);}
+  .cvss-labels{display:flex;justify-content:space-between;margin-top:.3%;font-size:clamp(.4rem,.72vw,.53rem);color:#475569;font-weight:600;}
+
+  /* ═══════════════════════════════
+     CVE CARD (S3)
+  ═══════════════════════════════ */
+  .cve-card{
+    background:rgba(255,255,255,.04);border:1.5px solid rgba(192,132,252,.3);
+    border-radius:.85vw;overflow:hidden;width:100%;
+  }
+  .cve-header{
+    background:linear-gradient(135deg,rgba(192,132,252,.14),rgba(248,113,113,.1));
+    padding:.85% 1.5%;display:flex;align-items:center;gap:1%;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .cve-header h3{font-size:clamp(.6rem,1.12vw,.82rem);font-weight:700;color:#e2e8f0;}
+  .cve-header .ch-id{margin-left:auto;font-family:monospace;font-size:clamp(.52rem,.96vw,.7rem);color:#c084fc;font-weight:700;background:rgba(192,132,252,.14);padding:.2em .7em;border-radius:.4vw;border:1px solid rgba(192,132,252,.25);}
+  .cve-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .cf{display:flex;align-items:flex-start;gap:.8%;padding:.7% 1.5%;border-bottom:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.04);}
+  .cf:nth-child(even){border-right:none;}
+  .cf:nth-last-child(-n+2){border-bottom:none;}
+  .cf-lbl{font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;font-weight:600;flex:0 0 34%;text-transform:uppercase;letter-spacing:.05em;}
+  .cf-val{font-size:clamp(.46rem,.84vw,.62rem);color:#e2e8f0;}
+  .cf-crit{color:#f87171;font-weight:700;}
+  .cf-ok  {color:#4ade80;font-weight:700;}
+  .cf-code{font-family:monospace;color:#a5b4fc;}
+
+  /* ── CVE DB icons ── */
+  .db-row{display:flex;gap:1%;margin:.5% 0;}
+  .db-box{flex:1;border-radius:.6vw;padding:.8% 1%;text-align:center;font-size:clamp(.46rem,.84vw,.62rem);font-weight:700;}
+  .db-nvd{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);  color:#7dd3fc;}
+  .db-gh {background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.24); color:#a5b4fc;}
+  .db-oss{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.22);  color:#5eead4;}
+  .db-snk{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.22); color:#d8b4fe;}
+  .db-box .dbi{display:block;font-size:clamp(.8rem,1.5vw,1.05rem);margin-bottom:3%;}
+
+  /* ═══════════════════════════════
+     CBOM→CVE FLOW (S4)
+  ═══════════════════════════════ */
+  .flow-main{display:flex;align-items:stretch;width:100%;gap:0;margin-bottom:.85%;}
+  .fm-stage{
+    flex:1;border-radius:.8vw;padding:1.3% 1.1%;
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;gap:3%;transition:transform .22s;
+  }
+  .fm-stage:hover{transform:translateY(-3px);}
+  .fm-stage .fsi{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .fm-stage h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .fm-stage p {font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+  .fm-1{background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.28);}
+  .fm-2{background:rgba(129,140,248,.09);border:1px solid rgba(129,140,248,.28);}
+  .fm-3{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .fm-4{background:rgba(248,113,113,.09);border:1.5px solid rgba(248,113,113,.38);}
+  .fm-5{background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.28);}
+  .fm-arr{display:flex;align-items:center;font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;padding:0 .2%;}
+
+  /* ── CVE match table ── */
+  .mtbl{width:100%;border-collapse:collapse;}
+  .mtbl th,.mtbl td{padding:clamp(5px,.95%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.47rem,.87vw,.63rem);vertical-align:middle;}
+  .mtbl thead tr{background:rgba(255,255,255,.05);}
+  .mtbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.41rem,.75vw,.56rem);color:#64748b;}
+  .mtbl tbody tr:last-child td{border-bottom:none;}
+  .mtbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .sp{padding:.14em .52em;border-radius:999px;font-weight:700;font-size:.88em;}
+  .sp-c{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);}
+  .sp-h{background:rgba(251,146,60,.12); color:#fb923c;border:1px solid rgba(251,146,60,.26);}
+  .sp-m{background:rgba(251,191,36,.12); color:#fbbf24;border:1px solid rgba(251,191,36,.24);}
+  .sp-ok{background:rgba(74,222,128,.12);color:#4ade80; border:1px solid rgba(74,222,128,.26);}
+
+  /* ═══════════════════════════════
+     RISK PRIORITISATION (S5)
+  ═══════════════════════════════ */
+  .pri-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .pbox{border-radius:.8vw;padding:1.4% 1.6%;background:rgba(255,255,255,.04);}
+  .pbox-top{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .pbox-top .pbi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .pbox-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .pbox-top .psev{margin-left:auto;font-size:clamp(.36rem,.66vw,.5rem);font-weight:700;padding:.18em .55em;border-radius:999px;}
+  .psev-c{background:rgba(248,113,113,.18);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+  .psev-h{background:rgba(251,146,60,.16); color:#fb923c;border:1px solid rgba(251,146,60,.28);}
+  .psev-m{background:rgba(251,191,36,.14); color:#fbbf24;border:1px solid rgba(251,191,36,.26);}
+  .pbox-body{font-size:clamp(.5rem,.92vw,.68rem);color:#94a3b8;line-height:1.5;margin-bottom:.5%;}
+  .pbox-action{display:flex;align-items:center;gap:.7%;font-size:clamp(.46rem,.84vw,.62rem);padding:.5% .7%;border-radius:.4vw;margin-top:.4%;}
+  .pa-fix{background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.22);}
+  .pa-up {background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.22);}
+  .pa-rep{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.22);}
+  .pbox-action .pai{font-size:1.05em;}
+  .pb-1{border:1px solid rgba(248,113,113,.26);}
+  .pb-2{border:1px solid rgba(251,146,60,.24);}
+  .pb-3{border:1px solid rgba(251,191,36,.22);}
+
+  /* ── Matrix grid ── */
+  .matrix{display:grid;grid-template-columns:repeat(4,1fr);gap:.7%;width:100%;margin-bottom:.85%;}
+  .mx-box{border-radius:.65vw;padding:1% 1.1%;text-align:center;display:flex;flex-direction:column;gap:2%;align-items:center;}
+  .mx-box .mxi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .mx-box h4{font-size:clamp(.5rem,.92vw,.68rem);font-weight:700;color:#e2e8f0;}
+  .mx-box p {font-size:clamp(.43rem,.78vw,.57rem);color:#94a3b8;line-height:1.4;}
+  .mx-c1{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.28);}
+  .mx-c2{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.24);}
+  .mx-c3{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);}
+  .mx-c4{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);}
+
+  /* ═══════════════════════════════
+     SUMMARY (S6)
+  ═══════════════════════════════ */
+  .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s4b{border-radius:.75vw;padding:1.5% 1.2%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s4b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s4b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s4b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#dc2626;width:22%;height:22%;bottom:4%;right:3%;"></div>
+    <div class="orb" style="background:#0d9488;width:16%;height:16%;bottom:14%;left:25%;"></div>
+
+    <div class="tag tg-ind">🔐 CBOM Series · Episode 13</div>
+    <h1>CBOM + Vulnerability Management</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#f87171,#2dd4bf);"></div>
+    <p class="subtitle">CVE Mapping &amp; Risk Visibility — From Crypto Inventory to Risk Management</p>
+    <p class="tagline">✦ Inventory → Match → Score → Prioritise → Fix ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">📋 <span>CBOM Inventory</span></div>
+      <div class="tb tb-b">🐛 <span>CVE Mapping</span></div>
+      <div class="tb tb-c">🛡️ <span>Risk Management</span></div>
+    </div>
+
+    <!-- Master flow strip -->
+    <div style="width:90%;display:flex;gap:.8%;align-items:center;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#38bdf8;margin-top:2%;">CBOM</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Crypto inventory</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔍</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#c084fc;margin-top:2%;">CVE Match</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">NVD / OSS database</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.09);border:1.5px solid rgba(248,113,113,.3);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚡</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#f87171;margin-top:2%;">Risk Score</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">CVSS 0–10 severity</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,191,36,.07);border:1.5px solid rgba(251,191,36,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📊</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fbbf24;margin-top:2%;">Prioritise</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Critical → High → Med</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.07);border:1.5px solid rgba(74,222,128,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔧</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#4ade80;margin-top:2%;">Remediate</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Patch · replace · upgrade</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>CBOM doesn't just <em>list</em> cryptographic components — it <strong>cross-references every component against global vulnerability databases</strong> to tell you which ones carry known exploitable risks. This transforms a static inventory into a <strong>dynamic, risk-driven security management tool</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is Vulnerability Management?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🔐 Foundation · Slide 2 of 6</div>
+    <h2>What is Vulnerability Management?</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.9%;">
+      <p>📖 <strong>Vulnerability Management</strong> is the continuous process of <strong>identifying, classifying, prioritising, and remediating security weaknesses</strong> in software, systems, and infrastructure. It is not a one-time audit — it is an ongoing security discipline that ensures known weaknesses are found and fixed faster than attackers can exploit them.</p>
+    </div>
+
+    <!-- Lifecycle -->
+    <div class="sl sl-s" style="text-align:center;">🔄 Vulnerability Management Lifecycle — A Continuous Process</div>
+    <div class="vm-cycle" style="margin-bottom:.9%;">
+      <div class="vmc vmc-1">
+        <span class="vi">🔍</span>
+        <h4 class="as">1. Discover</h4>
+        <p>Inventory all software, dependencies, and components in every environment — the foundation.</p>
+      </div>
+      <div class="vm-arr">→</div>
+      <div class="vmc vmc-2">
+        <span class="vi">🐛</span>
+        <h4 class="av">2. Identify</h4>
+        <p>Match discovered components against CVE and security advisory databases to find known flaws.</p>
+      </div>
+      <div class="vm-arr">→</div>
+      <div class="vmc vmc-3">
+        <span class="vi">📊</span>
+        <h4 class="ay">3. Assess</h4>
+        <p>Score each vulnerability by severity (CVSS), exploitability, and business impact on your systems.</p>
+      </div>
+      <div class="vm-arr">→</div>
+      <div class="vmc vmc-4">
+        <span class="vi">⚡</span>
+        <h4 class="ar">4. Prioritise</h4>
+        <p>Focus on Critical and High first — especially publicly exploited vulnerabilities (CISA KEV list).</p>
+      </div>
+      <div class="vm-arr">→</div>
+      <div class="vmc vmc-5">
+        <span class="vi">🔧</span>
+        <h4 class="ag">5. Remediate</h4>
+        <p>Patch, upgrade, replace, or mitigate each vulnerability within the agreed SLA by severity level.</p>
+      </div>
+      <div class="vm-arr">→</div>
+      <div class="vmc vmc-6">
+        <span class="vi">📡</span>
+        <h4 class="at">6. Monitor</h4>
+        <p>Continuously re-scan for new vulnerabilities as new CVEs are published and code changes daily.</p>
+      </div>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.6%;">
+      <div class="col">
+        <div class="sl sl-s">🎯 Where CBOM Fits in VM</div>
+        <ul class="ilist">
+          <li><span class="ico">1️⃣</span><div><span class="as">Discover stage</span> — CBOM provides the cryptographic component inventory that VM tools use as input. Without CBOM, crypto components are invisible to traditional VM scanners.</div></li>
+          <li><span class="ico">2️⃣</span><div><span class="as">Identify stage</span> — CBOM's structured fields (name, version, PURL) enable precise CVE matching against NVD, GitHub Advisories, and OSS databases with zero ambiguity.</div></li>
+          <li><span class="ico">3️⃣</span><div><span class="as">Monitor stage</span> — CBOM regenerates on every build, so when a new CVE is published for an OpenSSL version you use, you know within hours — not weeks.</div></li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="sl sl-s">📊 CVSS Severity Scale — How Vulnerabilities Are Scored</div>
+        <div class="cvss-bar">
+          <div class="cvss-track"></div>
+          <div class="cvss-labels">
+            <span class="ag">0.0–3.9 Low</span>
+            <span class="ay">4.0–6.9 Medium</span>
+            <span class="ao">7.0–8.9 High</span>
+            <span class="ar">9.0–10.0 Critical</span>
+          </div>
+        </div>
+        <div class="hbox hb-sky" style="margin-bottom:0;margin-top:.6%;">
+          <p>💡 <strong>Why CVSS matters:</strong> A CVE scored <span class="ar">CVSS 9.8</span> (like Log4Shell) means near-certain remote exploitation. A <span class="ay">CVSS 4.2</span> may require local access. CBOM feeds these scores into your risk dashboard so teams always fix the most dangerous issues first.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · What is CVE Mapping?
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">🐛 CVE Mapping · Slide 3 of 6</div>
+    <h2>What is CVE Mapping?</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.9%;">
+      <p>📖 <strong>CVE (Common Vulnerabilities and Exposures)</strong> is the global standard for naming and identifying security vulnerabilities. Every publicly known vulnerability receives a unique <strong>CVE-ID</strong> (e.g., CVE-2021-44228). <strong>CVE Mapping</strong> is the process of matching your software components — identified by CBOM — against the CVE database to discover which known vulnerabilities affect you specifically.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-v">🔬 Anatomy of a Real CVE — Example: OpenSSL Vulnerability</div>
+        <div class="cve-card">
+          <div class="cve-header">
+            <span style="font-size:clamp(.9rem,1.7vw,1.25rem);">🐛</span>
+            <h3>OpenSSL — Memory Buffer Overflow in X.509 Certificate Parsing</h3>
+            <span class="ch-id">CVE-2022-3602</span>
+          </div>
+          <div class="cve-body">
+            <div class="cf"><span class="cf-lbl">CVSS Score</span><span class="cf-val cf-crit">9.8 / 10 — Critical</span></div>
+            <div class="cf"><span class="cf-lbl">Affected</span><span class="cf-val cf-code">OpenSSL 3.0.0 – 3.0.6</span></div>
+            <div class="cf"><span class="cf-lbl">Patched In</span><span class="cf-val cf-ok">OpenSSL 3.0.7 ✅</span></div>
+            <div class="cf"><span class="cf-lbl">Attack Type</span><span class="cf-val">Remote · No Auth Required</span></div>
+            <div class="cf"><span class="cf-lbl">Impact</span><span class="cf-val">Remote Code Execution (RCE)</span></div>
+            <div class="cf"><span class="cf-lbl">CWE</span><span class="cf-val cf-code">CWE-121: Stack Overflow</span></div>
+            <div class="cf"><span class="cf-lbl">Published</span><span class="cf-val">2022-11-01</span></div>
+            <div class="cf"><span class="cf-lbl">Source</span><span class="cf-val">NVD · NIST · OpenSSL Advisory</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-v">🗄️ Where CVE Data Comes From</div>
+        <div class="db-row" style="margin-bottom:.9%;">
+          <div class="db-box db-nvd"><span class="dbi">🇺🇸</span>NVD (NIST)<br><span style="font-weight:400;font-size:.9em;opacity:.7;">National Vulnerability Database — official US gov CVE repository</span></div>
+          <div class="db-box db-gh"><span class="dbi">🐙</span>GitHub Advisory<br><span style="font-weight:400;font-size:.9em;opacity:.7;">OSS library advisories submitted by maintainers and researchers</span></div>
+        </div>
+        <div class="db-row" style="margin-bottom:.9%;">
+          <div class="db-box db-oss"><span class="dbi">🔓</span>OSS Index<br><span style="font-weight:400;font-size:.9em;opacity:.7;">Sonatype's open-source component vulnerability database</span></div>
+          <div class="db-box db-snk"><span class="dbi">🔍</span>Snyk DB<br><span style="font-weight:400;font-size:.9em;opacity:.7;">Commercial enriched vulnerability database with remediation paths</span></div>
+        </div>
+
+        <div class="sl sl-v">⚡ How CBOM Enables Precise CVE Matching</div>
+        <ul class="ilist">
+          <li><span class="ico">🎯</span><div>CBOM stores the exact component <span class="av">PURL</span> (Package URL) — e.g., <code style="background:rgba(255,255,255,.07);padding:.1em .35em;border-radius:.3vw;font-size:.88em;">pkg:generic/openssl@3.0.5</code> — enabling zero-ambiguity database lookups.</div></li>
+          <li><span class="ico">🔗</span><div>CVE scanners match CBOM's component version against <span class="av">affected version ranges</span> in each CVE record — catching exact and partial-version matches.</div></li>
+          <li><span class="ico">📡</span><div>When a new CVE is published, the CBOM is automatically re-queried — alerting owners of affected services <span class="av">within minutes</span>, not weeks.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · How CBOM Connects to Vulnerabilities
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">🔗 Detection Flow · Slide 4 of 6</div>
+    <h2>How CBOM Connects to Vulnerability Detection</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.85%;">
+      <p>📖 CBOM is the <strong>bridge between your cryptographic inventory and the global vulnerability knowledge base</strong>. Every algorithm, library, protocol, and key tracked in CBOM becomes a queryable data point that automated tools check against millions of known CVE records — turning passive inventory into active risk detection.</p>
+    </div>
+
+    <!-- Main flow -->
+    <div class="sl sl-t" style="text-align:center;">🗺️ CBOM → CVE → Risk — The Complete Detection Pipeline</div>
+    <div class="flow-main" style="margin-bottom:.85%;">
+      <div class="fm-stage fm-1">
+        <span class="fsi">📋</span>
+        <h4 class="as">CBOM Generated</h4>
+        <p>Every component inventoried with name, version, PURL, and all crypto properties on each build.</p>
+      </div>
+      <div class="fm-arr">→</div>
+      <div class="fm-stage fm-2">
+        <span class="fsi">🔍</span>
+        <h4 class="ai">Component Identified</h4>
+        <p>Each CBOM entry matched to a precise package identifier — no version ambiguity, no false positives.</p>
+      </div>
+      <div class="fm-arr">→</div>
+      <div class="fm-stage fm-3">
+        <span class="fsi">🐛</span>
+        <h4 class="av">CVE Database Queried</h4>
+        <p>NVD, GitHub Advisory, and OSS Index checked for all CVEs matching the exact component version range.</p>
+      </div>
+      <div class="fm-arr">→</div>
+      <div class="fm-stage fm-4">
+        <span class="fsi">🚨</span>
+        <h4 class="ar">Risk Detected &amp; Scored</h4>
+        <p>Matching CVEs attached to CBOM entry. CVSS score, exploitability, and patch status recorded.</p>
+      </div>
+      <div class="fm-arr">→</div>
+      <div class="fm-stage fm-5">
+        <span class="fsi">🔧</span>
+        <h4 class="ag">Action Triggered</h4>
+        <p>Owner notified. CI/CD gate blocks deploy for Critical. Ticket auto-created with CVE details and fix version.</p>
+      </div>
+    </div>
+
+    <!-- Live match table -->
+    <div class="sl sl-t" style="text-align:center;">📊 CBOM CVE Match Results — Payment Platform Scan</div>
+    <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;">
+      <table class="mtbl">
+        <thead>
+          <tr>
+            <th style="width:20%;">CBOM Component</th>
+            <th style="width:14%;">Version in Use</th>
+            <th style="width:14%;">CVE ID</th>
+            <th style="width:8%;">CVSS</th>
+            <th style="width:9%;">Severity</th>
+            <th style="width:12%;">Attack Type</th>
+            <th>Fix / Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="ar">🐛 OpenSSL</td><td style="font-family:monospace;font-size:.88em;color:#94a3b8;">3.0.5</td><td style="font-family:monospace;font-size:.88em;" class="av">CVE-2022-3602</td><td class="ar">9.8</td><td><span class="sp sp-c">Critical</span></td><td>Remote / No Auth</td><td class="ag">Upgrade to OpenSSL 3.0.7</td></tr>
+          <tr><td class="ao">🐛 log4j-core</td><td style="font-family:monospace;font-size:.88em;color:#94a3b8;">2.14.1</td><td style="font-family:monospace;font-size:.88em;" class="av">CVE-2021-44228</td><td class="ar">10.0</td><td><span class="sp sp-c">Critical</span></td><td>Remote / JNDI</td><td class="ag">Upgrade to log4j 2.17.1</td></tr>
+          <tr><td class="ay">⚠️ BouncyCastle</td><td style="font-family:monospace;font-size:.88em;color:#94a3b8;">1.68</td><td style="font-family:monospace;font-size:.88em;" class="av">CVE-2023-33201</td><td class="ao">7.5</td><td><span class="sp sp-h">High</span></td><td>LDAP Injection</td><td class="ag">Upgrade to BC 1.74</td></tr>
+          <tr><td style="color:#fbbf24;font-weight:600;">⚠️ PyCryptodome</td><td style="font-family:monospace;font-size:.88em;color:#94a3b8;">3.14.1</td><td style="font-family:monospace;font-size:.88em;" class="av">CVE-2023-52323</td><td class="ay">5.9</td><td><span class="sp sp-m">Medium</span></td><td>Timing Attack</td><td class="ag">Upgrade to 3.19.1</td></tr>
+          <tr><td class="ag">✅ libsodium</td><td style="font-family:monospace;font-size:.88em;color:#94a3b8;">1.0.18</td><td style="color:#4ade80;">—</td><td class="ag">—</td><td><span class="sp sp-ok">✅ Clean</span></td><td>—</td><td class="ag">No action required</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Risk Management & Prioritisation
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#dc2626;width:16%;height:16%;bottom:3%;left:4%;"></div>
+
+    <div class="tag tg-red">📊 Risk Management · Slide 5 of 6</div>
+    <h2>Risk Management &amp; Prioritisation</h2>
+
+    <div class="hbox hb-red" style="margin-bottom:.85%;">
+      <p>📖 With tens or hundreds of CVEs found across a large system, <strong>you cannot fix everything at once</strong>. Risk management is the art of focusing limited security resources on the vulnerabilities that pose the greatest actual danger. CBOM's usage and dependency data adds crucial <strong>business context</strong> on top of raw CVSS scores.</p>
+    </div>
+
+    <!-- 4-tier matrix -->
+    <div class="sl sl-r" style="text-align:center;">🎯 Risk Prioritisation — Focus on What Matters Most First</div>
+    <div class="matrix" style="margin-bottom:.85%;">
+      <div class="mx-box mx-c1">
+        <span class="mxi">🔴</span>
+        <h4 class="ar">Fix Immediately</h4>
+        <p>CVSS ≥ 9.0 + publicly exploited. Active threat. Drop everything and patch within 24 hours.</p>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#f87171;font-weight:700;margin-top:2%;">e.g. Log4Shell, Heartbleed</div>
+      </div>
+      <div class="mx-box mx-c2">
+        <span class="mxi">🟠</span>
+        <h4 class="ao">Fix This Sprint</h4>
+        <p>CVSS 7.0–8.9 OR exploited in wild. Schedule for current sprint. Assign owner immediately.</p>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#fb923c;font-weight:700;margin-top:2%;">e.g. CVE-2022-3602 OpenSSL</div>
+      </div>
+      <div class="mx-box mx-c3">
+        <span class="mxi">🟡</span>
+        <h4 class="ay">Fix Next Sprint</h4>
+        <p>CVSS 4.0–6.9. Medium risk. Include in next release cycle with standard testing process.</p>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#fbbf24;font-weight:700;margin-top:2%;">e.g. timing attack vectors</div>
+      </div>
+      <div class="mx-box mx-c4">
+        <span class="mxi">🟢</span>
+        <h4 class="ag">Monitor &amp; Backlog</h4>
+        <p>CVSS 0–3.9. Low risk. Acknowledge, document, and address in routine maintenance cycle.</p>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#4ade80;font-weight:700;margin-top:2%;">e.g. informational findings</div>
+      </div>
+    </div>
+
+    <div class="pri-grid">
+      <div class="pbox pb-1">
+        <div class="pbox-top"><span class="pbi">🔴</span><h3>Patch Vulnerable Library</h3><span class="psev psev-c">Critical</span></div>
+        <div class="pbox-body">CBOM identifies <strong>log4j 2.14.1</strong> used in payment-service. CVE-2021-44228 (CVSS 10.0) matched. Owner: Java-team. SLA: fix within 24 hours.</div>
+        <div class="pbox-action pa-fix"><span class="pai">🔧</span><span class="ag">Action: Upgrade log4j to 2.17.1 · verify CBOM confirms new version · re-scan passes</span></div>
+      </div>
+      <div class="pbox pb-2">
+        <div class="pbox-top"><span class="pbi">🟠</span><h3>Upgrade Crypto Library</h3><span class="psev psev-h">High</span></div>
+        <div class="pbox-body">CBOM tracks <strong>OpenSSL 3.0.5</strong> in payment-api container. CVE-2022-3602 (CVSS 9.8) matched. Used in TLS termination — high blast radius across 8 services.</div>
+        <div class="pbox-action pa-up"><span class="pai">⬆️</span><span class="as">Action: Rebuild base image with OpenSSL 3.0.7 · re-scan all 8 dependent services</span></div>
+      </div>
+      <div class="pbox pb-3">
+        <div class="pbox-top"><span class="pbi">🟡</span><h3>Replace Weak Algorithm</h3><span class="psev psev-m">Medium</span></div>
+        <div class="pbox-body">CBOM detects <strong>MD5</strong> used in token-generation service. No specific CVE but NIST classifies MD5 as cryptographically broken — collision attacks proven. Used in low-traffic internal API only.</div>
+        <div class="pbox-action pa-rep"><span class="pai">🔄</span><span class="av">Action: Replace MD5 with SHA-256 · next sprint · regression test token validation</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-grn">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-grid" style="margin-bottom:.85%;">
+      <div class="s4b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">📋</span>
+        <h4 class="as">CBOM = Crypto Visibility</h4>
+        <p>Every algorithm, library, key, and protocol inventoried with exact version and PURL — the input layer that makes CVE matching possible and precise.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🐛</span>
+        <h4 class="av">CVE Mapping = Risk Discovery</h4>
+        <p>CBOM component versions matched against NVD, GitHub Advisory, and OSS databases — surfacing which components carry real, exploitable vulnerabilities.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(251,191,36,.24);">
+        <span class="si">📊</span>
+        <h4 class="ay">CVSS = Prioritisation Engine</h4>
+        <p>Severity scores from 0–10 let teams rank thousands of findings and focus on Critical threats first — using limited resources most effectively.</p>
+      </div>
+      <div class="s4b" style="border-color:rgba(74,222,128,.24);">
+        <span class="si">🔧</span>
+        <h4 class="ag">Risk Actions = Faster Fixes</h4>
+        <p>CBOM provides owner, location, and fix version for every finding — turning vulnerability reports into actionable tickets that teams can resolve immediately.</p>
+      </div>
+    </div>
+
+    <!-- Final flow summary -->
+    <div style="width:100%;display:flex;align-items:center;gap:.8%;margin-bottom:.85%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:.75vw;padding:1.2% 1.5%;">
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#38bdf8;margin-top:2%;">CBOM</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">Inventory</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🐛</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#c084fc;margin-top:2%;">CVE Match</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">Find issues</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚡</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#f87171;margin-top:2%;">Risk Score</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">CVSS severity</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📊</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#fbbf24;margin-top:2%;">Prioritise</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">Critical first</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔧</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#4ade80;margin-top:2%;">Remediate</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">Patch · upgrade</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">→</div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📡</div>
+        <div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#2dd4bf;margin-top:2%;">Monitor</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;">Continuous re-scan</div>
+      </div>
+      <div style="font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;">↺</div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>CERT-In CBOM Compliance Deep Dive — understanding India's national CBOM guidelines, mandatory fields, reporting requirements, and how to achieve compliance in your DevSecOps pipeline</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

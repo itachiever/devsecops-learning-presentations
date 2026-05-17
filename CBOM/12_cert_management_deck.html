@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Management using CBOM – Expiry, Tracking & Security</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+  .s1{background:linear-gradient(145deg,#07081e 0%,#0c0e48 48%,#090a30 100%);}
+  .s2{background:linear-gradient(145deg,#060a12 0%,#081c28 50%,#060e1c 100%);}
+  .s3{background:linear-gradient(145deg,#0c0608 0%,#200a12 50%,#120608 100%);}
+  .s4{background:linear-gradient(145deg,#060818 0%,#080f2c 50%,#06091e 100%);}
+  .s5{background:linear-gradient(145deg,#060c0a 0%,#071c12 50%,#060e0c 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#090f2c 50%,#060c22 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.17;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-red{color:#f87171;background:rgba(248,113,113,.1);  border:1px solid rgba(248,113,113,.3);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.7rem,4.7vw,3.4rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb-c{background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#fca5a5;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-red{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.26);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-blu{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);}
+  .hb-blu p{color:#bfdbfe;}.hb-blu strong{color:#60a5fa;}
+  .hb-grn{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-t{color:#2dd4bf;}.sl-r{color:#f87171;}
+  .sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}.sl-v{color:#c084fc;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ar{color:#f87171;font-weight:700;}.ab{color:#60a5fa;font-weight:700;}
+  .ag{color:#4ade80;font-weight:700;}.av{color:#c084fc;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════════════════
+     CERT ANATOMY (S2)
+  ═══════════════════════════════ */
+  .cert-doc{
+    background:rgba(255,255,255,.04);border:1.5px solid rgba(129,140,248,.35);
+    border-radius:.9vw;overflow:hidden;width:100%;
+  }
+  .cert-header{
+    background:linear-gradient(135deg,rgba(129,140,248,.15),rgba(45,212,191,.1));
+    padding:.9% 1.5%;display:flex;align-items:center;gap:1%;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .cert-header .chi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .cert-header h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .cert-header .ch-status{margin-left:auto;font-size:clamp(.38rem,.68vw,.52rem);font-weight:700;padding:.18em .6em;border-radius:999px;background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28);}
+  .cert-fields{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .cf-row{
+    display:flex;align-items:center;gap:1%;
+    padding:.7% 1.5%;border-bottom:1px solid rgba(255,255,255,.05);
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .cf-row:nth-child(even){border-right:none;}
+  .cf-row:nth-last-child(-n+2){border-bottom:none;}
+  .cf-ico{font-size:clamp(.75rem,1.35vw,.95rem);flex-shrink:0;}
+  .cf-label{font-size:clamp(.43rem,.78vw,.58rem);color:#64748b;font-weight:600;flex:0 0 36%;text-transform:uppercase;letter-spacing:.06em;}
+  .cf-val  {font-size:clamp(.46rem,.84vw,.62rem);color:#e2e8f0;font-family:monospace;}
+  .cf-val-ok  {color:#4ade80;}
+  .cf-val-warn{color:#fbbf24;}
+  .cf-val-bad {color:#f87171;}
+
+  /* ── Trust chain ── */
+  .trust-chain{display:flex;align-items:center;width:100%;gap:.8%;margin:.6% 0;}
+  .tc-node{
+    flex:1;border-radius:.6vw;padding:1% 1.1%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+  }
+  .tc-root{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);}
+  .tc-int {background:rgba(96,165,250,.09);border:1px solid rgba(96,165,250,.28);}
+  .tc-leaf{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.26);}
+  .tc-user{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.25);}
+  .tc-node .tci{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .tc-node h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .tc-node p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.4;}
+  .tc-arr{font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;}
+
+  /* ═══════════════════════════════
+     ISSUE CARDS (S3)
+  ═══════════════════════════════ */
+  .issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .icard{border-radius:.8vw;padding:1.4% 1.6%;background:rgba(255,255,255,.04);}
+  .icard-top{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.55%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .icard-top .ici{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .icard-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .icard-top .isev{margin-left:auto;font-size:clamp(.36rem,.66vw,.5rem);font-weight:700;padding:.18em .55em;border-radius:999px;}
+  .is-crit{background:rgba(248,113,113,.18);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+  .is-high{background:rgba(251,146,60,.16); color:#fb923c;border:1px solid rgba(251,146,60,.28);}
+  .is-med {background:rgba(251,191,36,.14); color:#fbbf24;border:1px solid rgba(251,191,36,.26);}
+  .icard-body{font-size:clamp(.5rem,.92vw,.68rem);color:#94a3b8;line-height:1.5;}
+  .icard-impact{margin-top:.55%;font-size:clamp(.46rem,.84vw,.62rem);font-weight:600;}
+  .ic-exp{border:1px solid rgba(248,113,113,.26);}
+  .ic-mis{border:1px solid rgba(251,146,60,.24);}
+  .ic-unk{border:1px solid rgba(251,191,36,.22);}
+  .ic-sha{border:1px solid rgba(192,132,252,.22);}
+  .ic-rev{border:1px solid rgba(248,113,113,.22);}
+  .ic-spr{border:1px solid rgba(96,165,250,.2);}
+
+  /* ── Outage timeline ── */
+  .timeline{width:100%;display:flex;align-items:center;position:relative;margin:.5% 0;}
+  .tl-bar{flex:1;height:clamp(22px,3%,30px);border-radius:999px;position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(74,222,128,.25) 0%,rgba(74,222,128,.2) 50%,rgba(248,113,113,.3) 75%,rgba(248,113,113,.5) 100%);}
+  .tl-marker{position:absolute;top:50%;transform:translateY(-50%);font-size:clamp(.38rem,.68vw,.5rem);font-weight:700;white-space:nowrap;}
+  .tl-90{left:2%;color:#4ade80;}
+  .tl-30{left:47%;color:#fbbf24;}
+  .tl-0 {left:72%;color:#fb923c;}
+  .tl-exp{right:1%;color:#f87171;}
+  .tl-now{position:absolute;top:-60%;left:73%;font-size:clamp(.36rem,.65vw,.48rem);color:#fb923c;font-weight:700;background:rgba(251,146,60,.12);padding:.1em .4em;border-radius:.3vw;border:1px solid rgba(251,146,60,.3);}
+
+  /* ═══════════════════════════════
+     CBOM TRACKING TABLE (S4)
+  ═══════════════════════════════ */
+  .ctbl{width:100%;border-collapse:collapse;}
+  .ctbl th,.ctbl td{padding:clamp(5px,1%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.47rem,.87vw,.63rem);vertical-align:middle;}
+  .ctbl thead tr{background:rgba(255,255,255,.05);}
+  .ctbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.41rem,.75vw,.56rem);color:#64748b;}
+  .ctbl tbody tr:last-child td{border-bottom:none;}
+  .ctbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .st-ok  {color:#4ade80;font-weight:600;}
+  .st-warn{color:#fbbf24;font-weight:600;}
+  .st-bad {color:#f87171;font-weight:600;}
+  .sp{padding:.14em .5em;border-radius:999px;font-weight:700;font-size:.88em;}
+  .sp-ok  {background:rgba(74,222,128,.12); color:#4ade80;border:1px solid rgba(74,222,128,.25);}
+  .sp-warn{background:rgba(251,191,36,.12); color:#fbbf24;border:1px solid rgba(251,191,36,.24);}
+  .sp-bad {background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);}
+  .sp-med {background:rgba(251,146,60,.12); color:#fb923c;border:1px solid rgba(251,146,60,.26);}
+
+  /* ── Visibility diff ── */
+  .vdiff{display:flex;gap:1.4%;width:100%;align-items:stretch;}
+  .vd-before{flex:1;border-radius:.75vw;padding:1.2% 1.5%;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);}
+  .vd-after {flex:1;border-radius:.75vw;padding:1.2% 1.5%;background:rgba(74,222,128,.06); border:1px solid rgba(74,222,128,.22);}
+  .vd-before h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#f87171;margin-bottom:.7%;padding-bottom:.4%;border-bottom:1px solid rgba(248,113,113,.2);}
+  .vd-after  h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#4ade80;margin-bottom:.7%;padding-bottom:.4%;border-bottom:1px solid rgba(74,222,128,.18);}
+  .vd-item{font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;padding:.4% 0;display:flex;align-items:flex-start;gap:.7%;line-height:1.45;}
+  .vd-arr{display:flex;align-items:center;justify-content:center;font-size:clamp(.9rem,1.7vw,1.25rem);color:#334155;flex-shrink:0;padding:0 .3%;}
+
+  /* ═══════════════════════════════
+     BEST PRACTICES (S5)
+  ═══════════════════════════════ */
+  .bp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .bpbox{border-radius:.8vw;padding:1.4% 1.7%;background:rgba(255,255,255,.04);}
+  .bpbox-top{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .bpbox-top .bpi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .bpbox-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .bp-steps{display:flex;flex-direction:column;gap:.5%;}
+  .bp-step{display:flex;align-items:flex-start;gap:.8%;font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;padding:.5% 0;line-height:1.45;}
+  .bp-step .bsn{flex-shrink:0;width:clamp(14px,2vw,20px);height:clamp(14px,2vw,20px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85em;font-weight:700;margin-top:.1em;}
+  .bp-1{border:1px solid rgba(56,189,248,.24);}
+  .bp-2{border:1px solid rgba(74,222,128,.24);}
+  .bp-3{border:1px solid rgba(45,212,191,.22);}
+  .bp-4{border:1px solid rgba(192,132,252,.22);}
+  .bsn-1{background:rgba(56,189,248,.2); color:#38bdf8;}
+  .bsn-2{background:rgba(74,222,128,.2); color:#4ade80;}
+  .bsn-3{background:rgba(45,212,191,.18);color:#2dd4bf;}
+  .bsn-4{background:rgba(192,132,252,.18);color:#c084fc;}
+
+  /* ── Automation flow ── */
+  .auto-flow{display:flex;align-items:center;width:100%;gap:.7%;}
+  .afnode{flex:1;border-radius:.65vw;padding:.9% 1.1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2%;}
+  .af-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .af-2{background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.24);}
+  .af-3{background:rgba(251,146,60,.07); border:1px solid rgba(251,146,60,.24);}
+  .af-4{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .af-5{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .afnode .afi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .afnode h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .afnode p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.35;}
+  .afarr{font-size:clamp(.65rem,1.2vw,.88rem);color:#334155;flex-shrink:0;}
+
+  /* ═══════════════════════════════
+     SUMMARY (S6)
+  ═══════════════════════════════ */
+  .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3b{border-radius:.75vw;padding:1.5% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s3b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#dc2626;width:14%;height:14%;bottom:12%;left:24%;"></div>
+
+    <div class="tag tg-ind">📜 CBOM Series · Episode 12</div>
+    <h1>Certificate Management using CBOM</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Expiry, Tracking &amp; Security — Avoid Downtime &amp; Security Risks</p>
+    <p class="tagline">✦ Track Every Certificate · Alert Before Expiry · Govern at Scale ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">📜 <span>Certificates</span></div>
+      <div class="tb tb-b">⏱️ <span>Expiry Tracking</span></div>
+      <div class="tb tb-c">🚨 <span>Risk Alerts</span></div>
+    </div>
+
+    <!-- Status strip -->
+    <div style="width:90%;display:flex;gap:.9%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.08);border:1.5px solid rgba(74,222,128,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">✅</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#4ade80;margin-top:2%;">Valid</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">365 days left</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,191,36,.07);border:1.5px solid rgba(251,191,36,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚠️</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fbbf24;margin-top:2%;">Expiring Soon</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">21 days left</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,146,60,.08);border:1.5px solid rgba(251,146,60,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔔</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#fb923c;margin-top:2%;">Alert Triggered</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">7 days left</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.09);border:1.5px solid rgba(248,113,113,.32);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">❌</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#f87171;margin-top:2%;">Expired</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#475569;margin-top:1%;">Site down!</div>
+      </div>
+      <div style="flex:1.4;border-radius:.65vw;padding:.9% 1%;background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.4);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#a5b4fc;margin-top:2%;">CBOM Tracks All</div>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#5eead4;margin-top:1%;">Auto-alerts every state</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>Certificates are the <strong>trust foundation of every HTTPS connection</strong> — they expire silently, break unexpectedly, and multiply across hundreds of services. Without a centralized inventory, one missed expiry can take down an entire platform. <strong>CBOM eliminates this risk completely.</strong></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What are Certificates?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">📖 Foundation · Slide 2 of 6</div>
+    <h2>What are Digital Certificates?</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.9%;">
+      <p>📖 A <strong>digital certificate</strong> is an electronic identity document — like a passport for a website or server. It contains a <strong>public key</strong>, the owner's identity, validity dates, and a <strong>digital signature from a trusted Certificate Authority (CA)</strong> that vouches for its authenticity. Without it, browsers cannot verify a site's identity.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-t">🔍 Anatomy of an SSL/TLS Certificate</div>
+        <div class="cert-doc">
+          <div class="cert-header">
+            <span class="chi">📜</span>
+            <h3>payments.example.com — TLS Certificate</h3>
+            <span class="ch-status">✅ Valid</span>
+          </div>
+          <div class="cert-fields">
+            <div class="cf-row"><span class="cf-ico">🌐</span><span class="cf-label">Subject</span><span class="cf-val">*.payments.example.com</span></div>
+            <div class="cf-row"><span class="cf-ico">🏛️</span><span class="cf-label">Issuer (CA)</span><span class="cf-val">Let's Encrypt R11</span></div>
+            <div class="cf-row"><span class="cf-ico">📅</span><span class="cf-label">Valid From</span><span class="cf-val cf-val-ok">2025-01-15</span></div>
+            <div class="cf-row"><span class="cf-ico">⏰</span><span class="cf-label">Valid Until</span><span class="cf-val cf-val-warn">2026-04-15 ⚠️ 12d</span></div>
+            <div class="cf-row"><span class="cf-ico">🔑</span><span class="cf-label">Key Algorithm</span><span class="cf-val">RSA 2048-bit</span></div>
+            <div class="cf-row"><span class="cf-ico">🔏</span><span class="cf-label">Signature</span><span class="cf-val">SHA256withRSA</span></div>
+            <div class="cf-row"><span class="cf-ico">🔢</span><span class="cf-label">Serial No.</span><span class="cf-val">03:A1:7F:4C:2B…</span></div>
+            <div class="cf-row"><span class="cf-ico">🔗</span><span class="cf-label">OCSP Status</span><span class="cf-val cf-val-ok">Good — Not Revoked</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-t">🔗 The Certificate Trust Chain</div>
+        <div class="trust-chain">
+          <div class="tc-node tc-root">
+            <span class="tci">🏛️</span>
+            <h4 class="ai">Root CA</h4>
+            <p>Internet's most trusted authority. Pre-installed in browsers &amp; OS. Signs intermediate CAs.</p>
+          </div>
+          <div class="tc-arr">↓</div>
+          <div class="tc-node tc-int">
+            <span class="tci">🔗</span>
+            <h4 class="ab">Intermediate CA</h4>
+            <p>Issued by Root CA. Signs actual server certificates. Let's Encrypt R11, DigiCert Inc.</p>
+          </div>
+          <div class="tc-arr">↓</div>
+          <div class="tc-node tc-leaf">
+            <span class="tci">📜</span>
+            <h4 class="at">Server Cert</h4>
+            <p>Issued for your domain. Installed on web server. Proves site identity to visitors.</p>
+          </div>
+          <div class="tc-arr">↓</div>
+          <div class="tc-node tc-user">
+            <span class="tci">🌐</span>
+            <h4 class="ag">Browser Trust</h4>
+            <p>Browser verifies full chain. Shows 🔒 padlock. Enables HTTPS encrypted session.</p>
+          </div>
+        </div>
+
+        <div class="sl sl-t" style="margin-top:.9%;">🌍 Where Certificates Are Used</div>
+        <ul class="ilist">
+          <li><span class="ico">🌐</span><div><span class="at">HTTPS websites</span> — every site with a padlock uses a TLS certificate to encrypt your connection and prove its identity.</div></li>
+          <li><span class="ico">📡</span><div><span class="at">API endpoints</span> — REST and GraphQL APIs use TLS certs to secure data transfer between microservices and clients.</div></li>
+          <li><span class="ico">📧</span><div><span class="at">Email servers</span> — SMTP, IMAP, and SMTP relay use TLS certs to encrypt email in transit.</div></li>
+          <li><span class="ico">🔒</span><div><span class="at">Internal services</span> — service-to-service mTLS in Kubernetes uses certificates for mutual authentication between pods.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Common Certificate Issues
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#dc2626;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-red">⚠️ Risk Landscape · Slide 3 of 6</div>
+    <h2>Common Certificate Issues &amp; Real-World Impact</h2>
+
+    <div class="hbox hb-red" style="margin-bottom:.85%;">
+      <p>📖 Certificate management failures are <strong>one of the most common causes of production outages and security incidents</strong>. Unlike application bugs that are caught in testing, certificate issues often appear silently — until the moment the cert expires, causing an immediate, total service failure visible to every user.</p>
+    </div>
+
+    <div class="issue-grid" style="margin-bottom:.75%;">
+      <div class="icard ic-exp">
+        <div class="icard-top"><span class="ici">⏰</span><h3 class="ar">Expired Certificate</h3><span class="isev is-crit">🔴 Critical</span></div>
+        <div class="icard-body">Certificate passed its <strong>Not After</strong> date. Browsers immediately show "Your connection is not private" (ERR_CERT_DATE_INVALID). All HTTPS traffic is blocked. Affects 100% of users instantly.</div>
+        <div class="icard-impact ar">💥 Impact: Complete service outage · users blocked · revenue loss · brand damage</div>
+      </div>
+      <div class="icard ic-mis">
+        <div class="icard-top"><span class="ici">⚙️</span><h3 class="ao">Misconfigured Certificate</h3><span class="isev is-high">🟠 High</span></div>
+        <div class="icard-body">Common misconfigurations: cert issued for <em>api.example.com</em> installed on <em>app.example.com</em> (domain mismatch). Broken certificate chain — intermediate CA not installed. Self-signed cert in production.</div>
+        <div class="icard-impact ao">💥 Impact: Browser warnings · mobile app failures · API clients throw SSL errors</div>
+      </div>
+      <div class="icard ic-unk">
+        <div class="icard-top"><span class="ici">🔍</span><h3 class="ay">Unknown Certificate Usage</h3><span class="isev is-med">🟡 Medium</span></div>
+        <div class="icard-body">Shadow IT and automated deployments create certificates that nobody tracks. A microservice spun up 18 months ago has a cert nobody knows about — and nobody will know when it expires. Discovered only in outage.</div>
+        <div class="icard-impact ay">💥 Impact: Unexpected outages · no owner to contact · slow incident response</div>
+      </div>
+      <div class="icard ic-sha">
+        <div class="icard-top"><span class="ici">🔐</span><h3 class="av">Weak Signature Algorithm</h3><span class="isev is-crit">🔴 Critical</span></div>
+        <div class="icard-body">Certificates signed with <strong>SHA-1</strong> are rejected by Chrome, Firefox, and Safari since 2017. Even if the cert is valid and not expired, browsers will refuse to trust it — causing the same outage as an expired cert.</div>
+        <div class="icard-impact av">💥 Impact: Distrust by modern browsers · TLS handshake failure · compliance violation</div>
+      </div>
+      <div class="icard ic-rev">
+        <div class="icard-top"><span class="ici">🚫</span><h3 class="ar">Revoked Certificate</h3><span class="isev is-crit">🔴 Critical</span></div>
+        <div class="icard-body">CA revokes a cert if the private key was compromised or the domain owner requested it. Browsers check OCSP / CRL on every connection. A revoked cert in production causes immediate distrust errors.</div>
+        <div class="icard-impact ar">💥 Impact: Immediate HTTPS failure · potential ongoing security breach if key was stolen</div>
+      </div>
+      <div class="icard ic-spr">
+        <div class="icard-top"><span class="ici">📈</span><h3 class="ab">Certificate Sprawl</h3><span class="isev is-high">🟠 High</span></div>
+        <div class="icard-body">Enterprises with 50+ microservices, multiple cloud accounts, and different teams can accumulate <strong>hundreds of certificates</strong> across environments. Manual tracking in spreadsheets always falls behind reality.</div>
+        <div class="icard-impact ao">💥 Impact: Missed renewals · no single source of truth · audit failures · expiry surprises</div>
+      </div>
+    </div>
+
+    <!-- Expiry timeline -->
+    <div class="sl sl-r" style="text-align:center;">⏰ Certificate Expiry — The Silent Countdown to Outage</div>
+    <div class="timeline">
+      <div class="tl-bar">
+        <span class="tl-marker tl-90">90d — CBOM Alert #1 sent</span>
+        <span class="tl-marker tl-30">30d — CBOM Alert #2</span>
+        <span class="tl-marker tl-0">7d — CRITICAL alert</span>
+        <span class="tl-marker tl-exp">Expired → 💥 OUTAGE</span>
+        <span class="tl-now">← Without CBOM, discovered here</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · How CBOM Helps Certificate Tracking
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-blu">📋 CBOM Tracking · Slide 4 of 6</div>
+    <h2>How CBOM Provides Centralized Certificate Visibility</h2>
+
+    <div class="hbox hb-blu" style="margin-bottom:.85%;">
+      <p>📖 CBOM acts as a <strong>single source of truth for every certificate</strong> across your entire software estate — containers, cloud services, Kubernetes workloads, and on-premises servers. It continuously discovers, inventories, and health-checks every certificate, replacing error-prone spreadsheets with an automated, always-current registry.</p>
+    </div>
+
+    <!-- Before vs After -->
+    <div class="vdiff" style="margin-bottom:.85%;">
+      <div class="vd-before">
+        <h4>❌ Without CBOM — Manual, Error-Prone</h4>
+        <div class="vd-item"><span>🤦</span><div>Certificates tracked in a spreadsheet last updated 8 months ago — already missing 15 new services</div></div>
+        <div class="vd-item"><span>😰</span><div>No one knows who owns the auth-service certificate — it expired yesterday. 3am incident call</div></div>
+        <div class="vd-item"><span>❓</span><div>Legacy payment processor uses a SHA-1 cert — discovered only during a compliance audit</div></div>
+        <div class="vd-item"><span>🔥</span><div>Checkout endpoint down. CEO calling. 45-minute outage before cert renewed manually</div></div>
+      </div>
+      <div class="vd-arr">→</div>
+      <div class="vd-after">
+        <h4>✅ With CBOM — Automated, Proactive</h4>
+        <div class="vd-item"><span>✅</span><div>All 147 certificates auto-discovered and inventoried within 60 seconds of a new deployment</div></div>
+        <div class="vd-item"><span>🔔</span><div>Email alert sent 90, 30, and 7 days before any expiry — with owner name and renewal link</div></div>
+        <div class="vd-item"><span>📋</span><div>SHA-1 certificate flagged as Critical immediately at next CBOM scan — ticket auto-created</div></div>
+        <div class="vd-item"><span>🛡️</span><div>cert-manager auto-renews 99% of certs. CBOM verifies renewal succeeded and logs new expiry</div></div>
+      </div>
+    </div>
+
+    <!-- CBOM certificate registry table -->
+    <div class="sl sl-b" style="text-align:center;">📊 CBOM Certificate Registry — Live Inventory Sample</div>
+    <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;">
+      <table class="ctbl">
+        <thead>
+          <tr>
+            <th style="width:22%;">Service / Domain</th>
+            <th style="width:14%;">Issuer</th>
+            <th style="width:12%;">Sig Algorithm</th>
+            <th style="width:13%;">Expires</th>
+            <th style="width:9%;">Days Left</th>
+            <th style="width:10%;">Status</th>
+            <th>Owner / Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="st-ok">🌐 api.payments.com</td><td>Let's Encrypt</td><td class="st-ok">SHA-256</td><td>2026-09-22</td><td class="st-ok">172d</td><td><span class="sp sp-ok">✅ Valid</span></td><td class="ag">platform-team — no action</td></tr>
+          <tr><td class="st-warn">🔒 auth.service.prod</td><td>DigiCert</td><td class="st-ok">SHA-256</td><td>2026-04-24</td><td class="st-warn">21d</td><td><span class="sp sp-warn">⚠️ Expiring</span></td><td class="ay">auth-team — renew now</td></tr>
+          <tr><td class="st-bad">💳 checkout.legacy</td><td>Comodo</td><td class="st-bad">SHA-1 ❌</td><td>2026-06-01</td><td class="st-bad">59d</td><td><span class="sp sp-bad">🔴 Critical</span></td><td class="ar">payments-team — reissue</td></tr>
+          <tr><td class="st-bad">📦 cdn.assets.io</td><td>Let's Encrypt</td><td class="st-ok">SHA-256</td><td>2026-03-31</td><td class="st-bad">−3d</td><td><span class="sp sp-bad">❌ EXPIRED</span></td><td class="ar">devops-team — URGENT</td></tr>
+          <tr><td class="st-ok">🗄️ db.internal</td><td>Internal CA</td><td class="st-ok">SHA-256</td><td>2027-01-15</td><td class="st-ok">289d</td><td><span class="sp sp-ok">✅ Valid</span></td><td class="ag">infra-team — no action</td></tr>
+          <tr><td style="color:#fb923c;font-weight:600;">🔗 webhook.integrations</td><td>ZeroSSL</td><td class="st-ok">SHA-256</td><td>2026-04-10</td><td style="color:#fb923c;font-weight:600;">7d</td><td><span class="sp sp-med">🔔 Alert</span></td><td class="ao">integrations-team — renew</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Best Practices
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-grn">🔧 Best Practices · Slide 5 of 6</div>
+    <h2>Certificate Management Best Practices with CBOM</h2>
+
+    <div class="hbox hb-grn" style="margin-bottom:.85%;">
+      <p>📖 Effective certificate management is <strong>proactive, automated, and continuous</strong>. The goal is to never discover a certificate problem reactively — through an outage or a user complaint. CBOM provides the inventory layer that makes all the following best practices <strong>enforceable and auditable</strong>.</p>
+    </div>
+
+    <div class="bp-grid" style="margin-bottom:.85%;">
+      <div class="bpbox bp-1">
+        <div class="bpbox-top"><span class="bpi">📅</span><h3>Monitor Expiry Dates Continuously</h3></div>
+        <div class="bp-steps">
+          <div class="bp-step"><span class="bsn bsn-1">1</span><div>CBOM scans all environments daily and updates expiry countdowns in real time for every certificate</div></div>
+          <div class="bp-step"><span class="bsn bsn-1">2</span><div>Alert thresholds configured: 90-day, 30-day, 14-day, and 7-day notifications to certificate owners</div></div>
+          <div class="bp-step"><span class="bsn bsn-1">3</span><div>Dashboard shows traffic-light status (green/amber/red) — zero spreadsheets, zero manual checks needed</div></div>
+        </div>
+      </div>
+
+      <div class="bpbox bp-2">
+        <div class="bpbox-top"><span class="bpi">🤖</span><h3>Automate Certificate Renewal</h3></div>
+        <div class="bp-steps">
+          <div class="bp-step"><span class="bsn bsn-2">1</span><div>Deploy <strong>cert-manager</strong> in Kubernetes — auto-renews Let's Encrypt certificates 30 days before expiry</div></div>
+          <div class="bp-step"><span class="bsn bsn-2">2</span><div>Use <strong>AWS ACM / Azure Key Vault</strong> for cloud services — fully managed renewal with zero manual steps</div></div>
+          <div class="bp-step"><span class="bsn bsn-2">3</span><div>CBOM verifies renewal succeeded after each run — alerts if a scheduled renewal failed silently</div></div>
+        </div>
+      </div>
+
+      <div class="bpbox bp-3">
+        <div class="bpbox-top"><span class="bpi">🔄</span><h3>Rotate Certificates Regularly</h3></div>
+        <div class="bp-steps">
+          <div class="bp-step"><span class="bsn bsn-3">1</span><div>Set maximum cert lifetime to 90 days (Let's Encrypt default) — reduces blast radius if a key is compromised</div></div>
+          <div class="bp-step"><span class="bsn bsn-3">2</span><div>Internal mTLS certs (Istio, Linkerd) rotate every 24 hours automatically — CBOM validates rotation health</div></div>
+          <div class="bp-step"><span class="bsn bsn-3">3</span><div>After any security incident involving a private key, CBOM flags all certs using that key for immediate revocation</div></div>
+        </div>
+      </div>
+
+      <div class="bpbox bp-4">
+        <div class="bpbox-top"><span class="bpi">📋</span><h3>Maintain Complete Inventory</h3></div>
+        <div class="bp-steps">
+          <div class="bp-step"><span class="bsn bsn-4">1</span><div>Every new service deployment automatically adds its cert to CBOM — no manual registration required</div></div>
+          <div class="bp-step"><span class="bsn bsn-4">2</span><div>CBOM tags each cert with: owner, environment (prod/staging), service name, and last-verified timestamp</div></div>
+          <div class="bp-step"><span class="bsn bsn-4">3</span><div>Decommissioned services trigger cert revocation review — CBOM prevents orphaned certs from lingering</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Automation lifecycle -->
+    <div class="sl sl-g" style="text-align:center;">⚙️ Automated Certificate Lifecycle with CBOM Integration</div>
+    <div class="auto-flow">
+      <div class="afnode af-1"><span class="afi">🔍</span><h4 class="ab">Discover</h4><p>CBOM auto-scans all environments</p></div>
+      <div class="afarr">→</div>
+      <div class="afnode af-2"><span class="afi">⏰</span><h4 class="ay">Track</h4><p>Expiry countdown updated daily</p></div>
+      <div class="afarr">→</div>
+      <div class="afnode af-3"><span class="afi">🔔</span><h4 class="ao">Alert</h4><p>Owners notified 90/30/7 days</p></div>
+      <div class="afarr">→</div>
+      <div class="afnode af-4"><span class="afi">🤖</span><h4 class="ag">Renew</h4><p>cert-manager auto-renews</p></div>
+      <div class="afarr">→</div>
+      <div class="afnode af-5"><span class="afi">✅</span><h4 class="at">Verify</h4><p>CBOM confirms new cert live</p></div>
+      <div class="afarr">↺</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum3" style="margin-bottom:.85%;">
+      <div class="s3b" style="border-color:rgba(45,212,191,.26);">
+        <span class="si">📜</span>
+        <h4 class="at">Certificates = Trust Foundation</h4>
+        <p>Every HTTPS connection, API call, and pod-to-pod service communication depends on a valid, trusted certificate. One expiry silently blocks everything.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(96,165,250,.24);">
+        <span class="si">📋</span>
+        <h4 class="ab">CBOM = Complete Visibility</h4>
+        <p>Automatically discovers and inventories every certificate — across containers, K8s, cloud services, and on-premises. No certificate is ever unknown again.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(74,222,128,.24);">
+        <span class="si">🤖</span>
+        <h4 class="ag">Automation = Zero Outages</h4>
+        <p>CBOM alerts + cert-manager auto-renewal eliminates manual tracking. Certificates are renewed before expiry — proactively, not reactively.</p>
+      </div>
+    </div>
+
+    <div class="two" style="gap:1.4%;margin-bottom:.85%;">
+      <div class="hbox hb-red" style="margin-bottom:0;flex:1;">
+        <p>🚨 <strong>What CBOM Prevents:</strong> <span class="ar">Production outages</span> from expired certificates · <span class="ar">security warnings</span> from SHA-1 signed certs · <span class="ar">compliance failures</span> from untracked certificates · <span class="ar">3am incident calls</span> for avoidable renewals.</p>
+      </div>
+      <div class="hbox hb-grn" style="margin-bottom:0;flex:1;">
+        <p>✅ <strong>What CBOM Delivers:</strong> <span class="ag">Centralized control</span> of every certificate · <span class="ag">automated lifecycle management</span> from discovery to renewal · <span class="ag">audit-ready evidence</span> for PCI-DSS 4.0, HIPAA, and CERT-In compliance requirements.</p>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>CBOM + Vulnerability Management — connecting your crypto inventory to CVE databases, risk scoring, and automated patching workflows for a complete security posture</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

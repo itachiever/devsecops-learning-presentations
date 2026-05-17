@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Structure & Format – How CBOM Looks Internally</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03030d;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#07071e 0%,#0d1050 48%,#090832 100%);}
+  .s2{background:linear-gradient(145deg,#060c10 0%,#081e2e 50%,#06101e 100%);}
+  .s3{background:linear-gradient(145deg,#080618 0%,#11082c 50%,#090620 100%);}
+  .s4{background:linear-gradient(145deg,#060a12 0%,#071c26 50%,#06101a 100%);}
+  .s5{background:linear-gradient(145deg,#06081a 0%,#0a0e2e 50%,#070c24 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#091030 50%,#070e26 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{
+    font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;
+    letter-spacing:.17em;text-transform:uppercase;
+    padding:.27em .9em;border-radius:999px;margin-bottom:.8%;
+  }
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{
+    font-size:clamp(1.8rem,5vw,3.5rem);font-weight:900;
+    line-height:1.08;text-align:center;
+    background:linear-gradient(135deg,#a5b4fc,#c4b5fd,#5eead4);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    margin-bottom:.65%;
+  }
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline {font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{
+    display:flex;flex-direction:column;align-items:center;gap:.4em;
+    padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);
+    border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);
+    animation:floatUp 3.5s ease-in-out infinite;
+  }
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.3); color:#7dd3fc;}
+  .tb-c{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb-d{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.3);color:#d8b4fe;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}.tb:nth-child(4){animation-delay:1.5s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-blu{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);}
+  .hb-blu p{color:#bfdbfe;}.hb-blu strong{color:#60a5fa;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Two-col ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.32;}
+
+  /* ── Sec label ── */
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ab{color:#60a5fa;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{
+    display:flex;align-items:flex-start;gap:1%;
+    padding:.88% 0;border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;
+  }
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ── Cards ── */
+  .cards{display:flex;gap:1.3%;width:100%;}
+  .card{
+    flex:1;border-radius:.8vw;padding:1.8% 1.9%;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+    transition:transform .22s;
+  }
+  .card:hover{transform:translateY(-3px);}
+  .card .ci{font-size:clamp(1rem,1.9vw,1.4rem);margin-bottom:3%;display:block;}
+  .card h3 {font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;margin-bottom:2%;}
+  .card p,.card li{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;}
+  .card ul{list-style:none;padding:0;}
+  .card li{padding:.9% 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .card li:last-child{border-bottom:none;}
+  .card li::before{content:"▸ ";}
+
+  /* ══════════════════════════════════════
+     SLIDE 2 — Anatomy diagram
+  ══════════════════════════════════════ */
+  .anatomy{
+    width:100%;display:flex;flex-direction:column;align-items:center;gap:.6%;
+  }
+  .anat-root{
+    background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(45,212,191,.1));
+    border:1.5px solid rgba(129,140,248,.4);
+    border-radius:.8vw;padding:1.2% 3%;text-align:center;
+    font-size:clamp(.62rem,1.15vw,.84rem);font-weight:800;color:#c7d2fe;
+    width:44%;position:relative;
+  }
+  .anat-root small{display:block;font-size:.8em;font-weight:400;color:#818cf8;margin-top:.3%;}
+  .anat-connector{width:1.5px;height:clamp(8px,1.2%,14px);background:rgba(129,140,248,.4);}
+  .anat-row{display:flex;gap:1.5%;width:100%;justify-content:center;}
+  .anat-branch{
+    display:flex;flex-direction:column;align-items:center;gap:.5%;flex:1;max-width:22%;
+  }
+  .anat-node{
+    border-radius:.7vw;padding:1.1% 1.2%;text-align:center;width:100%;
+    font-size:clamp(.54rem,1vw,.73rem);font-weight:700;
+  }
+  .anat-sub{
+    border-radius:.55vw;padding:.8% 1%;text-align:center;width:88%;
+    font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+    margin-top:.4%;
+  }
+  .an-ind{background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.3); color:#a5b4fc;}
+  .an-sky{background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);  color:#7dd3fc;}
+  .an-vio{background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28); color:#d8b4fe;}
+  .an-tel{background:rgba(45,212,191,.08);  border:1px solid rgba(45,212,191,.27);  color:#5eead4;}
+  .an-blu{background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.27);  color:#93c5fd;}
+  .v-line{width:1.5px;background:rgba(255,255,255,.12);flex-shrink:0;}
+
+  /* ══════════════════════════════════════
+     SLIDE 3 — Data group cards
+  ══════════════════════════════════════ */
+  .dg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1%;width:100%;}
+  .dg-card{
+    border-radius:.8vw;padding:1.5% 1.8%;
+    background:rgba(255,255,255,.04);
+    display:flex;flex-direction:column;gap:.5%;
+  }
+  .dg-head{
+    display:flex;align-items:center;gap:1%;
+    padding-bottom:.6%;border-bottom:1px solid rgba(255,255,255,.07);
+    margin-bottom:.4%;
+  }
+  .dg-head .dhi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .dg-head h3 {font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .dg-field{
+    display:flex;align-items:center;gap:1%;
+    padding:.55% .8%;border-radius:.4vw;
+    background:rgba(255,255,255,.03);
+    font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;
+  }
+  .dg-field .df-dot{
+    width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  }
+  .dg-field .df-name{font-weight:600;color:#e2e8f0;flex:0 0 40%;}
+  .dg-field .df-val {color:#64748b;font-size:.9em;}
+  .dg-c1{border:1px solid rgba(129,140,248,.24);}
+  .dg-c2{border:1px solid rgba(56,189,248,.22);}
+  .dg-c3{border:1px solid rgba(45,212,191,.2);}
+  .dg-c4{border:1px solid rgba(96,165,250,.2);}
+
+  /* ══════════════════════════════════════
+     SLIDE 4 — Format comparison
+  ══════════════════════════════════════ */
+  .fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5%;width:100%;margin-bottom:.9%;}
+  .fmt-box{
+    border-radius:.8vw;padding:1.5% 1.8%;
+    background:rgba(255,255,255,.04);
+  }
+  .fmt-box .fh{
+    display:flex;align-items:center;gap:1%;
+    margin-bottom:.9%;padding-bottom:.7%;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .fmt-box .fh .fi{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .fmt-box .fh h3{font-size:clamp(.6rem,1.1vw,.82rem);font-weight:700;color:#e2e8f0;}
+  .fmt-box .fh .fbadge{
+    margin-left:auto;font-size:clamp(.42rem,.76vw,.56rem);font-weight:700;
+    padding:.18em .6em;border-radius:999px;
+  }
+  .fb-primary{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28);}
+  .fb-sec   {background:rgba(251,191,36,.12); color:#fbbf24;border:1px solid rgba(251,191,36,.26);}
+  .fmt-props{display:flex;flex-direction:column;gap:.5%;}
+  .fmt-row{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:clamp(.48rem,.88vw,.64rem);
+    padding:.55% 0;border-bottom:1px solid rgba(255,255,255,.05);
+  }
+  .fmt-row:last-child{border-bottom:none;}
+  .fr-k{color:#94a3b8;font-weight:600;flex:0 0 40%;}
+  .fr-v{color:#cbd5e1;}
+  .fmt-c1{border:1px solid rgba(96,165,250,.24);}
+  .fmt-c2{border:1px solid rgba(251,191,36,.2);}
+
+  /* ── Pseudo-code block ── */
+  .pcode{
+    background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.1);
+    border-radius:.7vw;padding:1.2% 1.6%;width:100%;
+    font-family:monospace;line-height:1.65;
+    font-size:clamp(.45rem,.83vw,.62rem);
+  }
+  .pk {color:#818cf8;}.pv{color:#a5f3fc;}.pn{color:#fbbf24;}
+  .ps{color:#4ade80;}.pc{color:#475569;}.pp{color:#c084fc;}
+  .pi{color:#f87171;}.ind{padding-left:1.4em;display:block;}
+  .ind2{padding-left:2.8em;display:block;}
+  .ind3{padding-left:4.2em;display:block;}
+
+  /* ══════════════════════════════════════
+     SLIDE 5 — Hierarchy diagram
+  ══════════════════════════════════════ */
+  .tree{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:.5%;padding:.3% 0;}
+  .trow{display:flex;align-items:stretch;width:100%;gap:.8%;}
+  .tnode{
+    border-radius:.65vw;padding:.9% 1.3%;
+    display:flex;align-items:center;gap:1%;
+    font-size:clamp(.5rem,.92vw,.68rem);font-weight:600;color:#e2e8f0;
+    flex-shrink:0;
+  }
+  .tnode .tn-ico{font-size:1.1em;flex-shrink:0;}
+  .tnode .tn-lbl{font-size:clamp(.48rem,.86vw,.63rem);color:#64748b;font-weight:400;margin-left:.5%;}
+  .t-root {background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.4);width:38%;}
+  .t-comp {background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.28);  width:30%;}
+  .t-algo {background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.26); width:24%;}
+  .t-cert {background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.25);  width:24%;}
+  .t-dep  {background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);  width:24%;}
+  .t-key  {background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.22);  width:24%;}
+  .t-field{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+    border-radius:.5vw;padding:.65% 1%;
+    font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;
+    display:inline-flex;align-items:center;gap:.6%;flex-shrink:0;
+  }
+  .t-field::before{content:"·";color:#334155;margin-right:.3%;}
+  .tfields{display:flex;flex-wrap:wrap;gap:.5%;align-items:center;padding-left:1%;}
+  .th-line{
+    width:clamp(14px,2vw,24px);border-top:1px dashed rgba(255,255,255,.12);
+    flex-shrink:0;align-self:center;
+  }
+  .tv-group{display:flex;flex-direction:column;gap:.5%;flex:1;}
+
+  /* ══════════════════════════════════════
+     SLIDE 6 — Summary
+  ══════════════════════════════════════ */
+  .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3box{
+    border-radius:.75vw;padding:1.5% 1.3%;text-align:center;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  }
+  .s3box .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3box h4{font-size:clamp(.52rem,.96vw,.71rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3box p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .benrow{display:flex;gap:1%;width:100%;margin-bottom:.85%;}
+  .benbox{
+    flex:1;border-radius:.7vw;padding:1.1% 1.3%;
+    display:flex;align-items:center;gap:1%;
+  }
+  .benbox .bi{font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;}
+  .benbox h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:.4%;}
+  .benbox p {font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;line-height:1.4;}
+  .bb-sky{background:rgba(56,189,248,.07); border:1px solid rgba(56,189,248,.22);}
+  .bb-vio{background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);}
+  .bb-tel{background:rgba(45,212,191,.06); border:1px solid rgba(45,212,191,.22);}
+
+  /* ── Next box ── */
+  .next-box{
+    width:100%;border-radius:.75vw;padding:1.1% 1.9%;
+    background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));
+    border:1px solid rgba(129,140,248,.3);
+    display:flex;align-items:center;justify-content:space-between;gap:2%;
+  }
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{
+    background:linear-gradient(135deg,#6366f1,#14b8a6);
+    color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);
+    padding:.5em 1.25em;border-radius:999px;white-space:nowrap;
+    flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);
+  }
+
+  /* ── Nav ── */
+  .nav-btn{
+    position:fixed;top:50%;transform:translateY(-50%);
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+    color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);
+    border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);
+    cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-ind">📄 CBOM Series · Episode 7</div>
+    <h1>CBOM Structure &amp; Format</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">How CBOM Looks Internally — Understanding Data Representation</p>
+    <p class="tagline">✦ Structured · Organized · Machine-Readable ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">📄 <span>Structure</span></div>
+      <div class="tb tb-b">🗂️ <span>Organization</span></div>
+      <div class="tb tb-c">⚙️ <span>Format</span></div>
+      <div class="tb tb-d">🔐 <span>Security</span></div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:78%;text-align:center;margin-bottom:.7%;">
+      <p>A CBOM is not a free-form document — it follows a <strong>strict, standardised structure</strong> where every cryptographic component is represented as organised, nested data. Understanding this structure is the key to reading, generating, and automating CBOM workflows in DevSecOps.</p>
+    </div>
+
+    <div class="hbox hb-ind" style="max-width:78%;text-align:center;margin-bottom:0;">
+      <p>📌 <strong>Standard:</strong> The primary CBOM format is defined by <strong>CycloneDX 1.5+</strong> (OWASP) — an open, machine-readable specification that extends SBOM with a dedicated <span class="ai">cryptographic-asset</span> component type.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is CBOM Structure?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🗂️ Foundation · Slide 2 of 6</div>
+    <h2>What is CBOM Structure?</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:1%;">
+      <p>📖 CBOM is <strong>structured data</strong> — not plain text, not a spreadsheet, not a PDF. Every piece of information lives in a <strong>defined field, inside a defined section, with defined relationships</strong>. This makes it readable by both humans and automated security tools equally well.</p>
+    </div>
+
+    <!-- Anatomy diagram -->
+    <div class="anatomy">
+      <div class="anat-root">
+        📋 CBOM Document
+        <small>Top-level container — one document per application / service</small>
+      </div>
+      <div class="anat-connector"></div>
+      <div class="anat-row">
+        <div class="anat-branch">
+          <div class="anat-node an-ind">📋 Header &amp; Metadata</div>
+          <div class="anat-sub">Format · Version · Serial No. · Timestamp · Tool</div>
+        </div>
+        <div class="anat-branch">
+          <div class="anat-node an-sky">📦 Components [ ]</div>
+          <div class="anat-sub">Array of crypto-asset entries — one per component</div>
+        </div>
+        <div class="anat-branch">
+          <div class="anat-node an-vio">🔗 Dependencies [ ]</div>
+          <div class="anat-sub">Maps which services use which components</div>
+        </div>
+        <div class="anat-branch">
+          <div class="anat-node an-tel">🔎 Vulnerabilities [ ]</div>
+          <div class="anat-sub">CVE / risk entries linked to components</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two" style="margin-top:.7%;align-items:flex-start;gap:1.5%;">
+      <div class="col">
+        <div class="hbox hb-sky" style="margin-bottom:0;">
+          <p>🏗️ <strong>Structured means:</strong> Every CBOM tool — whether it's cdxgen, Syft, or a custom scanner — produces output in the same predictable shape. A security dashboard can ingest any valid CBOM without custom parsing.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hbox hb-ind" style="margin-bottom:0;">
+          <p>🤖 <strong>Machine-readable means:</strong> CI/CD policy engines, SIEMs, and vulnerability trackers can automatically parse every field — triggering alerts, blocking builds, and generating compliance reports with zero human intervention.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · CBOM Data Organization
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">🗃️ Organization · Slide 3 of 6</div>
+    <h2>CBOM Data Organization — Logical Field Groups</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.9%;">
+      <p>📖 Inside the <strong>Components array</strong>, each crypto-asset entry is divided into <strong>four logical field groups</strong>. Data is never mixed randomly — it is precisely grouped so any reader immediately knows where to look for what type of information.</p>
+    </div>
+
+    <div class="dg-grid">
+      <!-- Group 1 -->
+      <div class="dg-card dg-c1">
+        <div class="dg-head">
+          <span class="dhi">🏷️</span>
+          <h3 class="ai">Group 1 — Component Identification</h3>
+        </div>
+        <div class="dg-field"><span class="df-dot" style="background:#818cf8;"></span><span class="df-name">name</span><span class="df-val">e.g. "OpenSSL"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#818cf8;"></span><span class="df-name">version</span><span class="df-val">e.g. "3.0.7"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#818cf8;"></span><span class="df-name">type</span><span class="df-val">"cryptographic-asset"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#818cf8;"></span><span class="df-name">purl</span><span class="df-val">pkg:generic/openssl@3.0.7</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#818cf8;"></span><span class="df-name">supplier</span><span class="df-val">"OpenSSL Software Foundation"</span></div>
+      </div>
+
+      <!-- Group 2 -->
+      <div class="dg-card dg-c2">
+        <div class="dg-head">
+          <span class="dhi">⚙️</span>
+          <h3 class="as">Group 2 — Cryptographic Properties</h3>
+        </div>
+        <div class="dg-field"><span class="df-dot" style="background:#38bdf8;"></span><span class="df-name">assetType</span><span class="df-val">"algorithm" / "key" / "cert"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#38bdf8;"></span><span class="df-name">algorithm</span><span class="df-val">"AES" / "RSA" / "SHA-256"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#38bdf8;"></span><span class="df-name">keySize</span><span class="df-val">256 / 2048 / 4096</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#38bdf8;"></span><span class="df-name">mode</span><span class="df-val">"GCM" / "CBC" / "ECB"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#38bdf8;"></span><span class="df-name">protocolVersion</span><span class="df-val">"TLS 1.3" / "SSH-2"</span></div>
+      </div>
+
+      <!-- Group 3 -->
+      <div class="dg-card dg-c3">
+        <div class="dg-head">
+          <span class="dhi">📜</span>
+          <h3 class="at">Group 3 — Certificate &amp; Trust Metadata</h3>
+        </div>
+        <div class="dg-field"><span class="df-dot" style="background:#2dd4bf;"></span><span class="df-name">issuer</span><span class="df-val">"Let's Encrypt R3"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#2dd4bf;"></span><span class="df-name">notBefore</span><span class="df-val">"2025-01-15T00:00:00Z"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#2dd4bf;"></span><span class="df-name">notAfter</span><span class="df-val">"2026-01-15T00:00:00Z"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#2dd4bf;"></span><span class="df-name">fingerprint</span><span class="df-val">SHA-256: 4A:7B:C2:...</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#2dd4bf;"></span><span class="df-name">revocationStatus</span><span class="df-val">"OCSP: Good"</span></div>
+      </div>
+
+      <!-- Group 4 -->
+      <div class="dg-card dg-c4">
+        <div class="dg-head">
+          <span class="dhi">📍</span>
+          <h3 class="ab">Group 4 — Usage &amp; Dependency Info</h3>
+        </div>
+        <div class="dg-field"><span class="df-dot" style="background:#60a5fa;"></span><span class="df-name">usageLocation</span><span class="df-val">"payment-api / /checkout"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#60a5fa;"></span><span class="df-name">owner</span><span class="df-val">"platform-security-team"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#60a5fa;"></span><span class="df-name">dependsOn</span><span class="df-val">[ "payment-svc", "auth-svc" ]</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#60a5fa;"></span><span class="df-name">riskLevel</span><span class="df-val">"low" / "medium" / "critical"</span></div>
+        <div class="dg-field"><span class="df-dot" style="background:#60a5fa;"></span><span class="df-name">lastScanned</span><span class="df-val">"2026-03-28T14:32:00Z"</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Format Types
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">📄 Formats · Slide 4 of 6</div>
+    <h2>CBOM Format Types — How the Data is Written</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.9%;">
+      <p>📖 A CBOM document is serialised (written out) in a <strong>machine-readable format</strong> — a standardised text notation that both humans and tools can parse. The format choice affects which tools can read the CBOM, how it integrates into pipelines, and how it is stored.</p>
+    </div>
+
+    <div class="fmt-grid">
+      <div class="fmt-box fmt-c1">
+        <div class="fh">
+          <span class="fi">{ }</span>
+          <h3 class="ab">JSON — JavaScript Object Notation</h3>
+          <span class="fbadge fb-primary">✅ Primary Format</span>
+        </div>
+        <div class="fmt-props">
+          <div class="fmt-row"><span class="fr-k">Standard</span><span class="fr-v">CycloneDX 1.5+ JSON Schema</span></div>
+          <div class="fmt-row"><span class="fr-k">Readability</span><span class="fr-v">Human-readable with basic formatting</span></div>
+          <div class="fmt-row"><span class="fr-k">Tooling</span><span class="fr-v">Native support in all DevSecOps tools</span></div>
+          <div class="fmt-row"><span class="fr-k">File size</span><span class="fr-v">Compact — ideal for CI/CD artefacts</span></div>
+          <div class="fmt-row"><span class="fr-k">Use case</span><span class="fr-v">REST APIs, artefact registries, SIEM ingest</span></div>
+          <div class="fmt-row"><span class="fr-k">Extension</span><span class="fr-v">.cdx.json</span></div>
+        </div>
+      </div>
+
+      <div class="fmt-box fmt-c2">
+        <div class="fh">
+          <span class="fi">&lt;/&gt;</span>
+          <h3 class="ay">XML — Extensible Markup Language</h3>
+          <span class="fbadge fb-sec">⚠️ Legacy / Enterprise</span>
+        </div>
+        <div class="fmt-props">
+          <div class="fmt-row"><span class="fr-k">Standard</span><span class="fr-v">CycloneDX XML Schema (same spec)</span></div>
+          <div class="fmt-row"><span class="fr-k">Readability</span><span class="fr-v">Verbose — more tags than data</span></div>
+          <div class="fmt-row"><span class="fr-k">Tooling</span><span class="fr-v">Preferred by legacy ITSM / enterprise systems</span></div>
+          <div class="fmt-row"><span class="fr-k">File size</span><span class="fr-v">Larger — due to tag overhead</span></div>
+          <div class="fmt-row"><span class="fr-k">Use case</span><span class="fr-v">SAP integrations, legacy audit systems</span></div>
+          <div class="fmt-row"><span class="fr-k">Extension</span><span class="fr-v">.cdx.xml</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two" style="gap:1.4%;align-items:stretch;">
+      <div class="hbox hb-tel" style="margin-bottom:0;flex:1;">
+        <p>🌐 <strong>SPDX Format</strong> — an alternative open standard from the Linux Foundation. Primarily designed for SBOM but supports cryptographic fields. Used widely in open-source and government contexts. File extension: <span class="at">.spdx.json</span></p>
+      </div>
+      <div class="hbox hb-blu" style="margin-bottom:0;flex:1;">
+        <p>🔏 <strong>Digital Signature:</strong> A valid CBOM is cryptographically signed using <span class="ab">JSON Web Signatures (JWS)</span> — this proves the CBOM was generated by a specific trusted tool and has not been tampered with since generation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Example CBOM Structure
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#1e3a8a;width:28%;height:28%;top:-3%;right:5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-blu">🗺️ Example · Slide 5 of 6</div>
+    <h2>Simplified CBOM Structure — Visual Hierarchy</h2>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <!-- Left: visual tree -->
+      <div class="col-w">
+        <div class="sl sl-b">📐 CBOM Document Hierarchy — How Fields Nest Inside Each Other</div>
+        <div class="tree">
+          <!-- Root -->
+          <div class="trow">
+            <div class="tnode t-root"><span class="tn-ico">📋</span> CBOM Document <span class="tn-lbl">— top-level container</span></div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">bomFormat: "CycloneDX"</span>
+              <span class="t-field">specVersion: "1.5"</span>
+              <span class="t-field">serialNumber</span>
+              <span class="t-field">timestamp</span>
+            </div>
+          </div>
+          <!-- Component -->
+          <div class="trow" style="padding-left:3%;">
+            <div class="th-line" style="width:2%;border-top:none;border-left:1px dashed rgba(255,255,255,.12);height:auto;align-self:stretch;"></div>
+            <div class="tnode t-comp"><span class="tn-ico">📦</span> Component Entry <span class="tn-lbl">— one per crypto asset</span></div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">name: "OpenSSL"</span>
+              <span class="t-field">version: "3.0.7"</span>
+              <span class="t-field">type: "cryptographic-asset"</span>
+              <span class="t-field">purl</span>
+            </div>
+          </div>
+          <!-- Algorithm -->
+          <div class="trow" style="padding-left:6%;">
+            <div class="th-line" style="width:2%;border-top:none;border-left:1px dashed rgba(255,255,255,.1);height:auto;align-self:stretch;"></div>
+            <div class="tnode t-algo"><span class="tn-ico">⚙️</span> algorithmProperties</div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">algorithm: "AES"</span>
+              <span class="t-field">mode: "GCM"</span>
+              <span class="t-field">keySize: 256</span>
+              <span class="t-field" style="color:#4ade80;">✅ strength: strong</span>
+            </div>
+          </div>
+          <!-- Key -->
+          <div class="trow" style="padding-left:6%;">
+            <div class="th-line" style="width:2%;border-top:none;border-left:1px dashed rgba(255,255,255,.1);height:auto;align-self:stretch;"></div>
+            <div class="tnode t-key"><span class="tn-ico">🗝️</span> keyProperties</div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">keyType: "symmetric"</span>
+              <span class="t-field">keySize: 256</span>
+              <span class="t-field">storage: "AWS KMS"</span>
+              <span class="t-field">rotationDays: 90</span>
+            </div>
+          </div>
+          <!-- Certificate -->
+          <div class="trow" style="padding-left:6%;">
+            <div class="th-line" style="width:2%;border-top:none;border-left:1px dashed rgba(255,255,255,.1);height:auto;align-self:stretch;"></div>
+            <div class="tnode t-cert"><span class="tn-ico">📜</span> certificateProperties</div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">issuer: "Let's Encrypt"</span>
+              <span class="t-field" style="color:#fbbf24;">⚠️ expiry: 14 days</span>
+              <span class="t-field">sigAlg: "SHA256withRSA"</span>
+            </div>
+          </div>
+          <!-- Dependencies -->
+          <div class="trow" style="padding-left:3%;">
+            <div class="th-line" style="width:2%;border-top:none;border-left:1px dashed rgba(255,255,255,.1);height:auto;align-self:stretch;"></div>
+            <div class="tnode t-dep"><span class="tn-ico">🔗</span> dependencies</div>
+            <div class="th-line"></div>
+            <div class="tfields">
+              <span class="t-field">ref: "payment-svc"</span>
+              <span class="t-field">ref: "auth-svc"</span>
+              <span class="t-field">owner: "platform-team"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: key relationships + risk indicators -->
+      <div class="col">
+        <div class="sl sl-b">🔗 Key Structural Concepts</div>
+        <ul class="ilist" style="margin-bottom:.9%;">
+          <li><span class="ico">🪆</span><div><span class="ab">Nesting</span> — crypto properties are nested <em>inside</em> the component entry, not listed separately. Each component owns its own algorithm, key, and certificate data.</div></li>
+          <li><span class="ico">🔗</span><div><span class="ab">Relationships</span> — the dependencies section separately maps which application services reference which CBOM component by its unique ID — creating a traceable graph.</div></li>
+          <li><span class="ico">🎯</span><div><span class="ab">Risk at Component Level</span> — each component carries its own risk score, computed from algorithm strength + cert health + key rotation status. One field, instant overview.</div></li>
+        </ul>
+
+        <div class="sl sl-b">🚦 Risk Indicators in Structure</div>
+        <div class="cards" style="flex-direction:column;gap:.8%;">
+          <div class="card" style="border-color:rgba(74,222,128,.22);padding:1.2% 1.6%;">
+            <p>✅ <span class="ag">riskLevel: "low"</span> — AES-256 + TLS 1.3 + cert valid 365d + key in HSM. All fields compliant with FIPS and CERT-In guidelines.</p>
+          </div>
+          <div class="card" style="border-color:rgba(251,191,36,.2);padding:1.2% 1.6%;">
+            <p>⚠️ <span class="ay">riskLevel: "medium"</span> — TLS 1.2 (acceptable) + cert expires in 14 days. Action required: schedule cert renewal this sprint.</p>
+          </div>
+          <div class="card" style="border-color:rgba(248,113,113,.22);padding:1.2% 1.6%;">
+            <p>❌ <span class="ar">riskLevel: "critical"</span> — algorithm: MD5 detected. Flagged for immediate removal. Build gate blocks deployment until resolved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-grn">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum3" style="margin-bottom:.85%;">
+      <div class="s3box" style="border-color:rgba(129,140,248,.24);">
+        <span class="si">🏗️</span>
+        <h4 class="ai">Structured</h4>
+        <p>CBOM is not free-form text. Every field lives in a defined position — header, components array, dependencies, and vulnerabilities — in a strict, predictable hierarchy.</p>
+      </div>
+      <div class="s3box" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🗂️</span>
+        <h4 class="as">Organized</h4>
+        <p>Data is grouped into 4 logical sections per component: identification, crypto properties, certificate metadata, and usage/dependency info. Nothing is mixed together.</p>
+      </div>
+      <div class="s3box" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">🤖</span>
+        <h4 class="at">Machine-Readable</h4>
+        <p>Serialised in JSON (primary) or XML — formats that CI/CD pipelines, SIEMs, and policy engines can parse, query, and act on automatically without any human intervention.</p>
+      </div>
+    </div>
+
+    <div class="sl sl-g" style="text-align:center;">🎯 How Structure Enables Security Outcomes</div>
+    <div class="benrow" style="margin-bottom:.85%;">
+      <div class="benbox bb-sky">
+        <span class="bi">⚙️</span>
+        <div>
+          <h4 class="as">Automation</h4>
+          <p>Predictable structure means tools can generate, parse, and compare CBOMs automatically — no manual data entry, no human error in the critical security data layer.</p>
+        </div>
+      </div>
+      <div class="benbox bb-vio">
+        <span class="bi">🔌</span>
+        <div>
+          <h4 class="av">Integration</h4>
+          <p>Standard formats (CycloneDX JSON) plug directly into Dependency-Track, GitHub Advanced Security, Snyk, OWASP tools, and custom dashboards without conversion.</p>
+        </div>
+      </div>
+      <div class="benbox bb-tel">
+        <span class="bi">🛡️</span>
+        <div>
+          <h4 class="at">Security Management</h4>
+          <p>Nested risk fields and dependency maps let security teams instantly see blast radius, prioritise by risk level, and prove compliance to auditors with one structured document.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>How CBOM is generated - Code & Dependency analysis, Buils & Pipeline integration, Runtime & Environment Discovery, CBOM Generation & Output </p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

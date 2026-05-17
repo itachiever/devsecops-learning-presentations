@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Report Explained – Keycloak Step-by-Step Breakdown</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#060818 0%,#0c0e46 48%,#080a2c 100%);}
+  .s2{background:linear-gradient(145deg,#060a14 0%,#071e2c 50%,#060e1e 100%);}
+  .s3{background:linear-gradient(145deg,#080618 0%,#0f0828 50%,#09061c 100%);}
+  .s4{background:linear-gradient(145deg,#060c0a 0%,#071c12 50%,#060e0c 100%);}
+  .s5{background:linear-gradient(145deg,#060810 0%,#0a0e2c 50%,#07091e 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#090f2c 50%,#060c20 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.17;pointer-events:none;}
+
+  /* Tags */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);border:1px solid rgba(45,212,191,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.28);}
+
+  /* Headings */
+  h1{font-size:clamp(1.8rem,4.9vw,3.5rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1%;}
+  .divl{width:52px;height:3px;border-radius:999px;margin:.65% auto 1%;}
+  .subtitle{font-size:clamp(.76rem,1.55vw,1.12rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.64rem,1.18vw,.86rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* Bubbles */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);color:#5eead4;}
+  .tb-c{background:rgba(251,146,60,.09);border:1px solid rgba(251,146,60,.3);color:#fed7aa;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* Hboxes */
+  .hbox{border-radius:.75vw;padding:1.1% 1.7%;width:100%;margin-bottom:.8%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-red{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);}
+  .hb-red p{color:#fecaca;}.hb-red strong{color:#f87171;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* Layout */
+  .two{display:flex;gap:1.5%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.8%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-g{color:#4ade80;}.sl-r{color:#f87171;}
+
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ag{color:#4ade80;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ao{color:#fb923c;font-weight:700;}
+
+  /* Item list */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.82% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ── S1 – Title strips ── */
+  .meta-strip{display:flex;gap:.9%;width:88%;margin-bottom:.9%;}
+  .ms-box{flex:1;border-radius:.65vw;padding:.9% 1%;text-align:center;}
+  .ms-box .msv{font-size:clamp(.9rem,1.7vw,1.25rem);font-weight:800;}
+  .ms-box .msl{font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-top:2%;}
+  .msb-1{background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);}
+  .msb-2{background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);}
+  .msb-3{background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.28);}
+  .msb-4{background:rgba(74,222,128,.07);border:1.5px solid rgba(74,222,128,.26);}
+  .msb-5{background:rgba(45,212,191,.07);border:1.5px solid rgba(45,212,191,.26);}
+
+  /* ── S2 – Structure card ── */
+  .struct-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1%;width:100%;margin-bottom:.9%;}
+  .sg-box{border-radius:.8vw;padding:1.2% 1.3%;text-align:center;background:rgba(255,255,255,.04);transition:transform .22s;}
+  .sg-box:hover{transform:translateY(-3px);}
+  .sg-box .sgi{font-size:clamp(1rem,1.9vw,1.4rem);display:block;margin-bottom:3%;}
+  .sg-box h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .sg-box p{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+
+  /* ── S3 – Component rows ── */
+  .comp-tbl{width:100%;border-collapse:collapse;}
+  .comp-tbl th,.comp-tbl td{padding:clamp(5px,.95%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.47rem,.87vw,.63rem);vertical-align:middle;}
+  .comp-tbl thead tr{background:rgba(255,255,255,.05);}
+  .comp-tbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.41rem,.75vw,.56rem);color:#64748b;}
+  .comp-tbl tbody tr:last-child td{border-bottom:none;}
+  .comp-tbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .badge{padding:.14em .52em;border-radius:999px;font-weight:700;font-size:.88em;}
+  .b-nqs{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);}
+  .b-na {background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.26);}
+  .b-unk{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.24);}
+  .b-alg{background:rgba(56,189,248,.12);color:#38bdf8;border:1px solid rgba(56,189,248,.24);}
+  .b-key{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid rgba(192,132,252,.24);}
+  .b-pro{background:rgba(45,212,191,.1);color:#2dd4bf;border:1px solid rgba(45,212,191,.22);}
+
+  /* ── S4 – Algorithm cards ── */
+  .algo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9%;width:100%;margin-bottom:.85%;}
+  .algo-box{border-radius:.75vw;padding:1.2% 1.4%;background:rgba(255,255,255,.04);}
+  .algo-box-top{display:flex;align-items:center;gap:.8%;margin-bottom:.6%;padding-bottom:.45%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .algo-box-top .ai2{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .algo-box-top h3{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .algo-rows{display:flex;flex-direction:column;gap:.35%;}
+  .ar-row{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;padding:.4% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .ar-row:last-child{border-bottom:none;}
+  .ab-1{border:1px solid rgba(56,189,248,.22);}
+  .ab-2{border:1px solid rgba(192,132,252,.2);}
+  .ab-3{border:1px solid rgba(45,212,191,.2);}
+  .ab-4{border:1px solid rgba(248,113,113,.2);}
+  .ab-5{border:1px solid rgba(74,222,128,.2);}
+  .ab-6{border:1px solid rgba(251,191,36,.18);}
+
+  /* ── S5 – Dependency flow ── */
+  .dep-flow{display:flex;align-items:center;width:100%;gap:.8%;margin-bottom:.85%;}
+  .df-node{flex:1;border-radius:.7vw;padding:1% 1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2%;}
+  .df-node .dfi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .df-node h4{font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#e2e8f0;}
+  .df-node p{font-size:clamp(.43rem,.78vw,.57rem);color:#94a3b8;line-height:1.35;}
+  .dfn-1{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.26);}
+  .dfn-2{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .dfn-3{background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(129,140,248,.1));border:1.5px solid rgba(45,212,191,.38);}
+  .dfn-4{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.26);}
+  .df-arr{font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;}
+
+  /* ── S6 – Summary cards ── */
+  .sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3b{border-radius:.75vw;padding:1.4% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s3b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3b p{font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{width:100%;border-radius:.8vw;padding:1.3% 2%;background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.35);text-align:center;margin-bottom:.85%;}
+  .closing h3{font-size:clamp(.66rem,1.25vw,.92rem);font-weight:800;color:#e2e8f0;margin-bottom:.5%;}
+  .closing p{font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.5;}
+
+  /* Nav */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:25%;height:25%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:14%;height:14%;bottom:13%;left:25%;"></div>
+
+    <div class="tag tg-ind">📋 Real CBOM Report Analysis</div>
+    <h1>CBOM Report Explained</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Step-by-Step Breakdown — Keycloak Open Source Project</p>
+    <p class="tagline">✦ Understanding CBOM Output Clearly ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🔐 <span>Keycloak</span></div>
+      <div class="tb tb-b">🛠️ <span>CBOMkit</span></div>
+      <div class="tb tb-c">📋 <span>CycloneDX 1.6</span></div>
+    </div>
+
+    <!-- Key stats strip -->
+    <div class="meta-strip">
+      <div class="ms-box msb-1"><span class="msv" style="color:#38bdf8;">55</span><div class="msl">Total Components</div></div>
+      <div class="ms-box msb-2"><span class="msv" style="color:#c084fc;">20+</span><div class="msl">Crypto Algorithms</div></div>
+      <div class="ms-box msb-3"><span class="msv" style="color:#f87171;">8</span><div class="msl">Not Quantum Safe</div></div>
+      <div class="ms-box msb-4"><span class="msv" style="color:#4ade80;">1</span><div class="msl">Protocol (TLS)</div></div>
+      <div class="ms-box" style="background:rgba(251,146,60,.07);border:1.5px solid rgba(251,146,60,.26);"><span class="msv" style="color:#fb923c;">38</span><div class="msl">Dependencies</div></div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:82%;text-align:center;margin-bottom:0;">
+      <p>This CBOM was generated by <strong>CBOMkit (PQCA)</strong> from the <strong>Keycloak open-source identity and access management project</strong> (GitHub: keycloak/keycloak, commit 3f0bd12, 25 March 2026). It is a real-world CycloneDX 1.6 CBOM that reveals every cryptographic component used inside one of the most widely deployed security platforms in the world.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SLIDE 2 · Overview
+  ═══════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🗂️ Overview · Slide 2 of 6</div>
+    <h2>Overview of the CBOM Report</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.85%;">
+      <p>📖 A CBOM (Cryptographic Bill of Materials) is a <strong>structured inventory of every cryptographic component</strong> inside a software project. This report was auto-generated by scanning the Keycloak source code — it contains every algorithm, key type, and protocol Keycloak uses, along with where each one appears in the code.</p>
+    </div>
+
+    <!-- Structure cards -->
+    <div class="sl sl-s" style="text-align:center;">🏗️ Four Main Sections of This CBOM Report</div>
+    <div class="struct-grid" style="margin-bottom:.9%;">
+      <div class="sg-box" style="border:1px solid rgba(56,189,248,.24);">
+        <span class="sgi">🔢</span><h4 class="as">metadata</h4>
+        <p>Who generated it, when, from which repo, and what tool. The "header" of the document — proves authenticity and currency.</p>
+      </div>
+      <div class="sg-box" style="border:1px solid rgba(192,132,252,.22);">
+        <span class="sgi">📦</span><h4 class="av">components</h4>
+        <p>The main payload — 55 entries. Each entry is one cryptographic asset: an algorithm, a key, or a protocol, with full details.</p>
+      </div>
+      <div class="sg-box" style="border:1px solid rgba(45,212,191,.22);">
+        <span class="sgi">🔗</span><h4 class="at">dependencies</h4>
+        <p>38 relationships showing which key depends on which algorithm — maps how crypto components connect to each other.</p>
+      </div>
+      <div class="sg-box" style="border:1px solid rgba(74,222,128,.22);">
+        <span class="sgi">📋</span><h4 class="ag">specVersion</h4>
+        <p>This CBOM uses <strong>CycloneDX 1.6</strong> — the latest standard — ensuring all fields are recognized by modern security tools.</p>
+      </div>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.5%;">
+      <div class="col">
+        <div class="sl sl-s">📊 Component Breakdown by Asset Type</div>
+        <ul class="ilist">
+          <li><span class="ico">⚙️</span><div><span class="as">algorithm</span> — 22 entries covering encryption, hashing, signing, MAC, KDF, and block cipher algorithms used across the codebase</div></li>
+          <li><span class="ico">🗝️</span><div><span class="as">related-crypto-material</span> — 32 entries for actual keys (public-key, private-key, secret-key) generated or used by those algorithms</div></li>
+          <li><span class="ico">🔗</span><div><span class="as">protocol</span> — 1 entry: TLS, detected in 15 different source locations across Keycloak's HTTP client, test, and operator code</div></li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="sl sl-s">🔍 Compliance Summary at a Glance</div>
+        <ul class="ilist">
+          <li><span class="ico">🔴</span><div><span class="ar">Not Quantum Safe (8)</span> — RSA-2048, DSA, ECDH, EC, SHA256withRSA, SHA512withRSA, SHA384withRSA, RSASSA-PSS, EdDSA, SHA1withRSA, SHA1withDSA — asymmetric algorithms breakable by quantum computers</div></li>
+          <li><span class="ico">🟢</span><div><span class="ag">Not Applicable (7)</span> — symmetric algorithms like SHA256, AES, HMAC — quantum safe by nature (not affected by Shor's algorithm)</div></li>
+          <li><span class="ico">🟡</span><div><span class="ay">Unknown (33+)</span> — key entries without full algorithmProperties — need additional scanning configuration to classify</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SLIDE 3 · Component & Basic Info
+  ═══════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">📦 Components · Slide 3 of 6</div>
+    <h2>Component &amp; Basic Information Fields</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 Every entry in the <strong>components array</strong> describes one cryptographic asset. Each has standard identification fields that tell you <em>what</em> it is, <em>where</em> it came from, and <em>whether</em> it is safe. Here are representative examples drawn directly from the Keycloak CBOM.</p>
+    </div>
+
+    <!-- Component table -->
+    <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;margin-bottom:.85%;">
+      <table class="comp-tbl">
+        <thead><tr><th>Field</th><th>Example Value</th><th>What It Means</th><th>Type</th><th>Compliance</th></tr></thead>
+        <tbody>
+          <tr><td><span class="av">bom-ref</span></td><td style="font-family:monospace;font-size:.85em;color:#94a3b8;">3725c85a-...</td><td>Unique ID — used by dependency section to link this component to others</td><td><span class="badge b-alg">algorithm</span></td><td><span class="badge b-nqs">Not Quantum Safe</span></td></tr>
+          <tr><td><span class="av">name</span></td><td style="color:#e2e8f0;">RSA-2048</td><td>Human-readable algorithm name — RSA with 2048-bit key. Widely used but vulnerable to quantum computers</td><td><span class="badge b-alg">algorithm</span></td><td><span class="badge b-nqs">Not Quantum Safe</span></td></tr>
+          <tr><td><span class="av">name</span></td><td style="color:#e2e8f0;">SHA256</td><td>SHA-256 hashing. Symmetric — used for digests, PKCE, token hashing. Found in 16 source locations</td><td><span class="badge b-alg">algorithm</span></td><td><span class="badge b-na">Not Applicable</span></td></tr>
+          <tr><td><span class="av">name</span></td><td style="color:#e2e8f0;">MD5</td><td>MD5 hash — <strong>cryptographically broken</strong>. Found in ComputedKey.java cache key. Should be replaced with SHA-256</td><td><span class="badge b-alg">algorithm</span></td><td><span class="badge b-na">Not Applicable</span></td></tr>
+          <tr><td><span class="av">name</span></td><td style="color:#e2e8f0;">TLS</td><td>TLS protocol — found in 15 files including HTTP clients, operator controller, and test utilities</td><td><span class="badge b-pro">protocol</span></td><td><span class="badge b-unk">Unknown (ver)</span></td></tr>
+          <tr><td><span class="av">name</span></td><td style="color:#94a3b8;">public-key@491e...</td><td>Public key generated by RSA-2048 in JWKParser.java line 141 — used for JSON Web Key parsing</td><td><span class="badge b-key">key material</span></td><td><span class="badge b-unk">Unknown</span></td></tr>
+          <tr><td><span class="av">complianceLevel</span></td><td style="color:#f87171;">Not Quantum Safe</td><td>This asset uses asymmetric crypto that quantum computers (Shor's algorithm) will be able to break</td><td>—</td><td><span class="badge b-nqs">Action needed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="two" style="gap:1.5%;">
+      <div class="hbox hb-vio" style="margin-bottom:0;flex:1;">
+        <p>🔑 <strong>type field</strong> is always <span class="av">cryptographic-asset</span> — tells security tools this component belongs in a CBOM, not a standard SBOM. This is the key differentiator introduced in CycloneDX 1.5+.</p>
+      </div>
+      <div class="hbox hb-red" style="margin-bottom:0;flex:1;">
+        <p>⚠️ <strong>MD5 found in Keycloak!</strong> — <code style="font-size:.88em;background:rgba(255,255,255,.08);padding:.1em .3em;border-radius:.3vw;">services/src/main/java/org/keycloak/cache/ComputedKey.java</code> line 34. MD5 is broken and should be replaced immediately with SHA-256.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SLIDE 4 · Cryptographic Details
+  ═══════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">🔐 Crypto Details · Slide 4 of 6</div>
+    <h2>Cryptographic Details — Algorithms, Keys &amp; Protocol</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.85%;">
+      <p>📖 The <strong>cryptoProperties</strong> section is the most important part of each component entry. It contains the <em>technical specification</em> of the algorithm — its type, function, key size, mode, and OID. This is what security tools use to evaluate whether each component meets your approved-algorithm policy.</p>
+    </div>
+
+    <div class="algo-grid" style="margin-bottom:.8%;">
+      <!-- SHA256 -->
+      <div class="algo-box ab-1">
+        <div class="algo-box-top"><span class="ai2">🔷</span><h3 class="as">SHA256 — Hashing</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="as">primitive:</span> hash · <span class="as">function:</span> digest</div></div>
+          <div class="ar-row"><span>▸</span><div><span class="as">keySize:</span> 256-bit output · <span class="as">OID:</span> 2.16.840.1.101.3.4.2.1</div></div>
+          <div class="ar-row"><span>▸</span><div>Found in 16 locations including PKCE, token hashing, mutual TLS</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ag">Not Applicable (symmetric → quantum safe)</span></div></div>
+        </div>
+      </div>
+      <!-- RSA-2048 -->
+      <div class="algo-box ab-4">
+        <div class="algo-box-top"><span class="ai2">🔑</span><h3 class="ar">RSA-2048 — Asymmetric PKE</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="ar">primitive:</span> pke · <span class="ar">function:</span> keygen</div></div>
+          <div class="ar-row"><span>▸</span><div><span class="ar">keySize:</span> 2048-bit · <span class="ar">OID:</span> 1.2.840.113549.1.1.1</div></div>
+          <div class="ar-row"><span>▸</span><div>Used in JWKParser, SAML RSAKeyValueType, KeyUtils</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ar">Not Quantum Safe — plan PQC migration</span></div></div>
+        </div>
+      </div>
+      <!-- HMAC-SHA256 -->
+      <div class="algo-box ab-2">
+        <div class="algo-box-top"><span class="ai2">🏷️</span><h3 class="av">HMAC-SHA256 — MAC</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="av">primitive:</span> mac · <span class="av">function:</span> tag</div></div>
+          <div class="ar-row"><span>▸</span><div><span class="av">OID:</span> 1.2.840.113549.2.9 (HMAC-SHA-256)</div></div>
+          <div class="ar-row"><span>▸</span><div>Used in JWS HMACProvider and KeycloakModelUtils</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ag">Not Applicable (symmetric)</span></div></div>
+        </div>
+      </div>
+      <!-- AES128-GCM -->
+      <div class="algo-box ab-3">
+        <div class="algo-box-top"><span class="ai2">🛡️</span><h3 class="at">AES128-GCM — Authenticated Encryption</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="at">primitive:</span> ae · <span class="at">mode:</span> gcm · keySize: 128-bit</div></div>
+          <div class="ar-row"><span>▸</span><div><span class="at">OID:</span> 2.16.840.1.101.3.4.1 (AES)</div></div>
+          <div class="ar-row"><span>▸</span><div>Used in WildFlyElytronProvider (javax.crypto.Cipher)</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ag">Not Applicable (symmetric)</span></div></div>
+        </div>
+      </div>
+      <!-- SHA1withRSA -->
+      <div class="algo-box ab-4" style="border-color:rgba(248,113,113,.3);">
+        <div class="algo-box-top"><span class="ai2">⚠️</span><h3 class="ar">SHA1withRSA — Deprecated Sig</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="ar">primitive:</span> signature · keySize: 2048-bit</div></div>
+          <div class="ar-row"><span>▸</span><div><span class="ar">OID:</span> 1.2.840.113549.1.1.5 (SHA1withRSA)</div></div>
+          <div class="ar-row"><span>▸</span><div>Found in SAML SignatureUtil.java line 214</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ar">Not Quantum Safe — SHA-1 deprecated!</span></div></div>
+        </div>
+      </div>
+      <!-- TLS protocol -->
+      <div class="algo-box ab-3" style="border-color:rgba(45,212,191,.3);">
+        <div class="algo-box-top"><span class="ai2">🔗</span><h3 class="at">TLS — Protocol</h3></div>
+        <div class="algo-rows">
+          <div class="ar-row"><span>▸</span><div><span class="at">assetType:</span> protocol · <span class="at">type:</span> tls</div></div>
+          <div class="ar-row"><span>▸</span><div>Version not specified — needs runtime scanning for TLS 1.2/1.3 verification</div></div>
+          <div class="ar-row"><span>▸</span><div>Found in 15 files: HttpClientBuilder, Operator, TestSuites</div></div>
+          <div class="ar-row"><span>▸</span><div>Compliance: <span class="ay">Unknown — version must be verified</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-tel" style="margin-bottom:0;">
+      <p>📌 <strong>Key insight:</strong> The OID (Object Identifier) is a globally unique dotted number that precisely identifies each algorithm. Security tools like Dependency-Track use OIDs to match CBOM entries against CVE databases — no ambiguity, no false positives. <span class="at">The OID field is what makes CBOM machine-readable and automatable.</span></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SLIDE 5 · Dependencies & Metadata
+  ═══════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-ind">🔗 Dependencies & Metadata · Slide 5 of 6</div>
+    <h2>Dependencies, Evidence &amp; Metadata Fields</h2>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-i">🔗 How Dependencies Work in This CBOM</div>
+        <div class="hbox hb-ind" style="margin-bottom:.85%;">
+          <p>📖 The <strong>dependencies section</strong> maps which key material was generated <em>by</em> which algorithm. It uses <strong>bom-ref IDs</strong> to link entries. This tells you the complete crypto chain — algorithm → key → usage location.</p>
+        </div>
+        <!-- Dep flow example -->
+        <div class="sl sl-i">📍 Example: RSA-2048 → Public Key → JWKParser</div>
+        <div class="dep-flow" style="margin-bottom:.85%;">
+          <div class="df-node dfn-1"><span class="dfi">⚙️</span><h4 class="as">RSA-2048</h4><p>Algorithm<br>bom-ref: 3725c85a</p></div>
+          <div class="df-arr">→</div>
+          <div class="df-node dfn-2"><span class="dfi">🗝️</span><h4 class="av">public-key</h4><p>Key material<br>bom-ref: 491e5948</p></div>
+          <div class="df-arr">→</div>
+          <div class="df-node dfn-3"><span class="dfi">📁</span><h4 class="at">JWKParser.java</h4><p>Usage location<br>line 141, offset 28</p></div>
+          <div class="df-arr">→</div>
+          <div class="df-node" style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.26);border-radius:.7vw;padding:1% 1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2%;"><span class="dfi">🔐</span><h4 class="ag">JWK Endpoint</h4><p>JSON Web Key<br>public key serving</p></div>
+        </div>
+
+        <div class="sl sl-i">📌 Evidence Fields — Where in the Code?</div>
+        <ul class="ilist">
+          <li><span class="ico">📍</span><div><span class="ai">location</span> — exact source file path (e.g., <code style="font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">core/src/main/java/.../JWKParser.java</code>)</div></li>
+          <li><span class="ico">🔢</span><div><span class="ai">line / offset</span> — precise line number and character offset where the crypto API is called — pinpoints exactly where to look or fix</div></li>
+          <li><span class="ico">💬</span><div><span class="ai">additionalContext</span> — the exact Java method signature that triggered detection (e.g., <code style="font-size:.88em;background:rgba(255,255,255,.07);padding:.1em .3em;border-radius:.3vw;">java.security.KeyFactory#getInstance(...)</code>)</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-i">📋 Metadata Section — The Report's Header</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(129,140,248,.24);border-radius:.8vw;overflow:hidden;margin-bottom:.85%;">
+          <div style="background:rgba(129,140,248,.1);padding:.8% 1.2%;font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#a5b4fc;border-bottom:1px solid rgba(255,255,255,.08);">📋 metadata Fields — CBOM Identity &amp; Provenance</div>
+          <div style="padding:.7% 1.2%;">
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">timestamp</span><span style="color:#c7d2fe;font-family:monospace;font-size:.9em;">2026-03-25T06:49:21Z</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">tool.name</span><span style="color:#c7d2fe;">CBOMkit (by PQCA)</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">gitUrl</span><span style="color:#c7d2fe;">github.com/keycloak/keycloak</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">revision</span><span style="color:#c7d2fe;">main branch</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">commit</span><span style="color:#c7d2fe;font-family:monospace;">3f0bd12</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.47rem,.87vw,.63rem);"><span style="color:#64748b;font-weight:600;">specVersion</span><span style="color:#c7d2fe;">CycloneDX 1.6</span></div>
+            <div style="display:flex;justify-content:space-between;padding:.5% 0;font-size:clamp(.47rem,.87vw,.63em);"><span style="color:#64748b;font-weight:600;">serialNumber</span><span style="color:#c7d2fe;font-family:monospace;font-size:.9em;">urn:uuid:b1a366a5...</span></div>
+          </div>
+        </div>
+
+        <div class="hbox hb-ind" style="margin-bottom:0;">
+          <p>💡 <strong>Why metadata matters:</strong> The <span class="ai">serialNumber</span> proves this specific CBOM is unique and tamper-detectable. The <span class="ai">commit hash</span> ties the CBOM to exactly one point in code history — auditors can verify the report against the source. The <span class="ai">timestamp</span> proves currency for compliance submissions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════
+       SLIDE 6 · Summary & Insights
+  ═══════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-grn">🏁 Summary & Key Insights · Slide 6 of 6</div>
+    <h2>What We Learned from This CBOM Report</h2>
+
+    <div class="sum-grid" style="margin-bottom:.85%;">
+      <div class="s3b" style="border-color:rgba(248,113,113,.26);">
+        <span class="si">⚠️</span>
+        <h4 class="ar">MD5 Still in Use</h4>
+        <p>Found in <code style="font-size:.85em;background:rgba(255,255,255,.08);padding:.1em .3em;border-radius:.3vw;">ComputedKey.java</code> line 34. MD5 is cryptographically broken since 2004. Should be replaced with SHA-256 immediately.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(251,146,60,.22);">
+        <span class="si">🔑</span>
+        <h4 class="ar">SHA1withRSA &amp; SHA1withDSA</h4>
+        <p>Deprecated SHA-1 based signatures found in SAML SignatureUtil. SHA-1 collisions proven since 2017 — must migrate to SHA256withRSA minimum.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(251,191,36,.22);">
+        <span class="si">🔌</span>
+        <h4 class="ay">TLS Version Unknown</h4>
+        <p>TLS detected in 15 files but the version (1.2 or 1.3) is not captured by static scanning alone. Runtime scanning needed to verify TLS 1.2+ is enforced.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">✅</span>
+        <h4 class="as">Strong Algorithms Present</h4>
+        <p>SHA-256, AES128-GCM, HMAC-SHA256, ConcatenationKDF — all good modern symmetric choices. SHA256withRSA, SHA384withRSA, SHA512withRSA also present for RSA signing.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">⚛️</span>
+        <h4 class="av">Quantum Risk Flagged</h4>
+        <p>8+ algorithms flagged "Not Quantum Safe": RSA-2048, EC, ECDH, DSA, EdDSA, RSASSA-PSS, SHA256withRSA family. Post-quantum migration planning should begin now.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(74,222,128,.24);">
+        <span class="si">🗺️</span>
+        <h4 class="ag">Full Code Traceability</h4>
+        <p>Every algorithm traced to exact file, line, and method. DevSecOps teams can immediately find, assign, and fix any finding — no investigation lag.</p>
+      </div>
+    </div>
+
+    <div class="closing">
+      <h3>🔐 Why This CBOM Report Matters for DevSecOps</h3>
+      <p>In 10 minutes of scanning, CBOMkit produced a <strong>complete, machine-readable cryptographic inventory of Keycloak</strong> — revealing deprecated algorithms, quantum risk, and exact code locations for every finding. Without CBOM, a team of engineers doing manual audit would take weeks to find the same information and still miss transitive dependencies. <strong>This is the power of automated CBOM in a real DevSecOps pipeline.</strong></p>
+    </div>
+
+    <div style="width:100%;display:flex;gap:.8%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#7dd3fc;font-weight:600;">55 Components<br><span style="font-weight:400;color:#475569;font-size:.9em;">Fully inventoried</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#fca5a5;font-weight:600;">MD5 + SHA-1 Detected<br><span style="font-weight:400;color:#475569;font-size:.9em;">Needs immediate fix</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#d8b4fe;font-weight:600;">8+ Quantum Risks<br><span style="font-weight:400;color:#475569;font-size:.9em;">Plan PQC migration</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#5eead4;font-weight:600;">38 Dependencies<br><span style="font-weight:400;color:#475569;font-size:.9em;">Full crypto chain mapped</span></div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.22);text-align:center;font-size:clamp(.5rem,.93vw,.69rem);color:#bbf7d0;font-weight:600;">CycloneDX 1.6<br><span style="font-weight:400;color:#475569;font-size:.9em;">Latest standard format</span></div>
+    </div>
+  </div>
+
+</div>
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

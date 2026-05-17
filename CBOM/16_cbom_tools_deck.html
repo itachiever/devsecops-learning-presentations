@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Tools in Industry – Features, Capabilities & Evaluation</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#060818 0%,#0b0d40 48%,#080928 100%);}
+  .s2{background:linear-gradient(145deg,#08060c 0%,#160820 50%,#0c060e 100%);}
+  .s3{background:linear-gradient(145deg,#060a14 0%,#07182c 50%,#060e1e 100%);}
+  .s4{background:linear-gradient(145deg,#060c0a 0%,#071c14 50%,#060e0c 100%);}
+  .s5{background:linear-gradient(145deg,#08060c 0%,#11082c 50%,#09061c 100%);}
+  .s6{background:linear-gradient(145deg,#060810 0%,#090e2c 50%,#060c1e 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);border:1px solid rgba(45,212,191,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.28);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);border:1px solid rgba(96,165,250,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.7rem,4.7vw,3.4rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.3);color:#5eead4;}
+  .tb-c{background:rgba(251,146,60,.09);border:1px solid rgba(251,146,60,.3);color:#fed7aa;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-sky{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-tel{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-grn{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-v{color:#c084fc;}.sl-s{color:#38bdf8;}
+  .sl-t{color:#2dd4bf;}.sl-g{color:#4ade80;}.sl-b{color:#60a5fa;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.av{color:#c084fc;font-weight:700;}
+  .as{color:#38bdf8;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ag{color:#4ade80;font-weight:700;}.ab{color:#60a5fa;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════
+     S2 – PROBLEM SCALE
+  ═══════════════════ */
+  .env-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .ebox{border-radius:.8vw;padding:1.3% 1.5%;background:rgba(255,255,255,.04);transition:transform .22s;}
+  .ebox:hover{transform:translateY(-3px);}
+  .ebox-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .ebox-top .eico{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .ebox-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .ebox-items{display:flex;flex-direction:column;gap:.5%;}
+  .ei{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;padding:.45% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.45;}
+  .ei:last-child{border-bottom:none;}
+  .eb-1{border:1px solid rgba(248,113,113,.24);}
+  .eb-2{border:1px solid rgba(251,146,60,.22);}
+  .eb-3{border:1px solid rgba(251,191,36,.2);}
+
+  /* ── Scale stat boxes ── */
+  .stat-row{display:flex;gap:1%;width:100%;}
+  .stat{flex:1;border-radius:.7vw;padding:.9% 1.1%;text-align:center;}
+  .stat .sv{font-size:clamp(.9rem,1.7vw,1.25rem);font-weight:800;}
+  .stat .sl2{font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-top:2%;}
+  .stat-r{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.24);}
+  .stat-o{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.22);}
+  .stat-y{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);}
+  .stat-b{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);}
+
+  /* ═══════════════════
+     S3 – FEATURE CARDS
+  ═══════════════════ */
+  .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .fcard{border-radius:.8vw;padding:1.3% 1.6%;background:rgba(255,255,255,.04);}
+  .fcard-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .fcard-top .fi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .fcard-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .fcard-body{font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;line-height:1.5;margin-bottom:.55%;}
+  .fcard-tags{display:flex;flex-wrap:wrap;gap:.4%;}
+  .ftag{font-size:clamp(.38rem,.68vw,.5rem);font-weight:700;padding:.15em .55em;border-radius:999px;}
+  .fc-1{border:1px solid rgba(56,189,248,.24);}
+  .fc-2{border:1px solid rgba(192,132,252,.22);}
+  .fc-3{border:1px solid rgba(248,113,113,.22);}
+  .fc-4{border:1px solid rgba(45,212,191,.22);}
+  .fc-5{border:1px solid rgba(74,222,128,.22);}
+  .fc-6{border:1px solid rgba(251,146,60,.22);}
+
+  /* ── Tool capability matrix ── */
+  .cap-tbl{width:100%;border-collapse:collapse;}
+  .cap-tbl th,.cap-tbl td{padding:clamp(5px,.95%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.46rem,.85vw,.62rem);vertical-align:middle;}
+  .cap-tbl thead tr{background:rgba(255,255,255,.05);}
+  .cap-tbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.41rem,.75vw,.56rem);color:#64748b;}
+  .cap-tbl tbody tr:last-child td{border-bottom:none;}
+  .cap-tbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .ck{color:#4ade80;font-weight:700;text-align:center;}
+  .cx{color:#f87171;text-align:center;}
+  .cp{color:#fbbf24;text-align:center;}
+
+  /* ═══════════════════
+     S4 – INTEGRATION
+  ═══════════════════ */
+  .int-center{
+    background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(129,140,248,.1));
+    border:1.5px solid rgba(45,212,191,.38);
+    border-radius:.85vw;
+    padding:1.2% 2%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+    width:28%;flex-shrink:0;
+  }
+  .int-center .ici{font-size:clamp(1.2rem,2.3vw,1.8rem);}
+  .int-center h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .int-center p{font-size:clamp(.46rem,.84vw,.62rem);color:#5eead4;}
+
+  .int-spokes{display:flex;align-items:center;width:100%;gap:1%;margin-bottom:.85%;}
+  .int-left,.int-right{display:flex;flex-direction:column;gap:.8%;flex:1;}
+  .int-spoke{
+    border-radius:.7vw;padding:.9% 1.1%;
+    display:flex;align-items:center;gap:.8%;
+    font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;
+  }
+  .int-spoke .spi{font-size:1.05em;flex-shrink:0;}
+  .int-spoke h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;margin-bottom:.3%;}
+  .int-spoke p{font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;line-height:1.35;}
+  .int-arr-l{font-size:clamp(.8rem,1.5vw,1.1rem);color:#334155;flex-shrink:0;display:flex;align-items:center;}
+  .is-ci{border:1px solid rgba(56,189,248,.24);background:rgba(56,189,248,.07);}
+  .is-sast{border:1px solid rgba(192,132,252,.22);background:rgba(192,132,252,.07);}
+  .is-sca{border:1px solid rgba(251,146,60,.2);background:rgba(251,146,60,.06);}
+  .is-dast{border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.06);}
+  .is-siem{border:1px solid rgba(251,191,36,.18);background:rgba(251,191,36,.05);}
+  .is-kms{border:1px solid rgba(45,212,191,.22);background:rgba(45,212,191,.06);}
+  .is-dep{border:1px solid rgba(74,222,128,.2);background:rgba(74,222,128,.06);}
+  .is-dash{border:1px solid rgba(129,140,248,.22);background:rgba(129,140,248,.07);}
+
+  /* ═══════════════════
+     S5 – EVALUATION
+  ═══════════════════ */
+  .eval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .evbox{border-radius:.8vw;padding:1.3% 1.6%;background:rgba(255,255,255,.04);}
+  .evbox-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .evbox-top .evi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .evbox-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .evbox-top .evnum{margin-left:auto;font-size:clamp(.42rem,.76vw,.56rem);font-weight:800;padding:.2em .65em;border-radius:999px;}
+  .evbox-body{font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;line-height:1.5;margin-bottom:.5%;}
+  .ev-qs{display:flex;flex-direction:column;gap:.35%;}
+  .ev-q{display:flex;align-items:flex-start;gap:.6%;font-size:clamp(.44rem,.8vw,.59rem);color:#64748b;}
+  .ev-q::before{content:"›";color:#475569;flex-shrink:0;}
+  .evc-1{border:1px solid rgba(56,189,248,.24);}
+  .evc-2{border:1px solid rgba(192,132,252,.22);}
+  .evc-3{border:1px solid rgba(45,212,191,.2);}
+  .evc-4{border:1px solid rgba(74,222,128,.22);}
+  .evn-1{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.28);}
+  .evn-2{background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);}
+  .evn-3{background:rgba(45,212,191,.13);color:#2dd4bf;border:1px solid rgba(45,212,191,.26);}
+  .evn-4{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.24);}
+
+  /* ── Decision matrix ── */
+  .dm-row{display:flex;align-items:center;width:100%;gap:.8%;margin:.4% 0;}
+  .dm-label{font-size:clamp(.44rem,.8vw,.59rem);font-weight:600;color:#94a3b8;flex:0 0 22%;}
+  .dm-bar-wrap{flex:1;height:clamp(14px,2%,20px);background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.08);}
+  .dm-bar{height:100%;border-radius:999px;transition:width .5s;}
+  .dm-score{font-size:clamp(.44rem,.8vw,.59rem);font-weight:700;flex:0 0 5%;text-align:right;}
+
+  /* ═══════════════════
+     S6 – SUMMARY
+  ═══════════════════ */
+  .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3b{border-radius:.75vw;padding:1.5% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s3b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{width:100%;border-radius:.8vw;padding:1.3% 2%;background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.35);text-align:center;margin-bottom:.85%;}
+  .closing h3{font-size:clamp(.66rem,1.25vw,.92rem);font-weight:800;color:#e2e8f0;margin-bottom:.5%;}
+  .closing p{font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.5;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:35%;height:35%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:24%;height:24%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:14%;height:14%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-ind">🛠️ CBOM Tool Landscape · Episode 16</div>
+    <h1>CBOM Tools in Industry</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Features, Capabilities &amp; Evaluation — Choosing the Right Security Solution</p>
+    <p class="tagline">✦ Generate · Scan · Detect · Integrate · Govern ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🛠️ <span>Tools</span></div>
+      <div class="tb tb-b">📊 <span>Capabilities</span></div>
+      <div class="tb tb-c">🔍 <span>Evaluation</span></div>
+    </div>
+
+    <!-- Tool capability preview strip -->
+    <div style="width:92%;display:flex;gap:.8%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚙️</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#38bdf8;margin-top:2%;">Auto Generation</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">CBOM on every build</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔍</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#c084fc;margin-top:2%;">Crypto Discovery</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Static, runtime, cloud</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(248,113,113,.08);border:1.5px solid rgba(248,113,113,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🚨</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#f87171;margin-top:2%;">Weak Crypto Alert</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">MD5, SHA-1, TLS 1.0</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(45,212,191,.07);border:1.5px solid rgba(45,212,191,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📜</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#2dd4bf;margin-top:2%;">Cert Tracking</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Expiry monitoring</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.07);border:1.5px solid rgba(74,222,128,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔌</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#4ade80;margin-top:2%;">CI/CD Integration</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Pipeline automation</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>The market for CBOM tooling has grown rapidly as organizations recognize the need for <strong>automated cryptographic visibility</strong>. Understanding what to look for — and how to evaluate tools objectively — is the critical first step before selecting any solution for your DevSecOps programme.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · Why CBOM Tools Are Needed
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#7c3aed;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#dc2626;width:16%;height:16%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-vio">⚠️ The Problem · Slide 2 of 6</div>
+    <h2>Why CBOM Tools Are Needed</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 Manual cryptographic tracking was feasible when applications ran on a few monolithic servers. In modern cloud-native architectures, a single organization might have <strong>hundreds of microservices, thousands of containers, and dozens of cloud services</strong> — each carrying crypto components that change with every deployment. Manual approaches collapse at this scale.</p>
+    </div>
+
+    <div class="env-grid" style="margin-bottom:.85%;">
+      <div class="ebox eb-1">
+        <div class="ebox-top"><span class="eico">📱</span><h3 class="ar">Application Layer</h3></div>
+        <div class="ebox-items">
+          <div class="ei"><span>🔴</span><div>A single Node.js app can have <strong>500+ transitive dependencies</strong> — each potentially importing its own crypto library version silently.</div></div>
+          <div class="ei"><span>🔴</span><div>Developers change dependencies daily. A library upgrade in a pull request can introduce or remove crypto components without any team member noticing.</div></div>
+          <div class="ei"><span>🔴</span><div>Multiple language stacks (Java, Python, Go, Rust) use different crypto libraries — no single human can track all of them across all repos.</div></div>
+        </div>
+      </div>
+      <div class="ebox eb-2">
+        <div class="ebox-top"><span class="eico">🐳</span><h3 class="ao">Container Layer</h3></div>
+        <div class="ebox-items">
+          <div class="ei"><span>🟠</span><div>Docker images add crypto libraries at every layer — the base OS (OpenSSL), the runtime (Node, JVM), the framework, and the app itself — potentially 4 different OpenSSL versions in one image.</div></div>
+          <div class="ei"><span>🟠</span><div>Base image updates from Docker Hub change crypto components without any developer action. An automated rebuild can silently introduce an EOL library.</div></div>
+          <div class="ei"><span>🟠</span><div>Organizations run <strong>thousands of containers</strong> across Kubernetes clusters — manually checking each image for crypto content is operationally impossible.</div></div>
+        </div>
+      </div>
+      <div class="ebox eb-3">
+        <div class="ebox-top"><span class="eico">☁️</span><h3 class="ay">Cloud &amp; Runtime Layer</h3></div>
+        <div class="ebox-items">
+          <div class="ei"><span>🟡</span><div>Cloud services (AWS RDS, S3, ALB) use crypto configurations managed by the cloud provider — invisible to traditional code scanners unless queried via cloud APIs.</div></div>
+          <div class="ei"><span>🟡</span><div>Runtime crypto (dynamically loaded libraries, JIT-compiled crypto, service mesh mTLS) doesn't appear in static code analysis — requires live environment scanning.</div></div>
+          <div class="ei"><span>🟡</span><div>Certificate sprawl across cloud accounts, Kubernetes secrets, and legacy on-premises systems creates hundreds of expiry timelines no spreadsheet can reliably track.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scale statistics -->
+    <div class="sl sl-v" style="text-align:center;">📊 The Scale of the Problem — Why Manual Doesn't Work</div>
+    <div class="stat-row">
+      <div class="stat stat-r"><span class="sv" style="color:#f87171;">500+</span><span class="sl2">avg transitive deps<br>per Node.js app</span></div>
+      <div class="stat stat-o"><span class="sv" style="color:#fb923c;">74%</span><span class="sl2">of apps contain<br>unknown crypto libs</span></div>
+      <div class="stat stat-y"><span class="sv" style="color:#fbbf24;">47 min</span><span class="sl2">avg time to detect<br>cert expiry manually</span></div>
+      <div class="stat stat-b"><span class="sv" style="color:#38bdf8;">&lt;60s</span><span class="sl2">CBOM tool scan time<br>for same application</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Key Features of CBOM Tools
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">⚙️ Core Features · Slide 3 of 6</div>
+    <h2>Key Features of CBOM Tools</h2>
+
+    <div class="feat-grid" style="margin-bottom:.85%;">
+      <div class="fcard fc-1">
+        <div class="fcard-top"><span class="fi">⚙️</span><h3 class="as">Automatic CBOM Generation</h3></div>
+        <div class="fcard-body">Produces a structured, machine-readable CycloneDX or SPDX CBOM document from source code, package manifests, container images, or running environments — without manual input. Triggered on every commit, build, or schedule.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid rgba(56,189,248,.28);">CycloneDX 1.5+</span>
+          <span class="ftag" style="background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid rgba(56,189,248,.28);">SPDX</span>
+          <span class="ftag" style="background:rgba(56,189,248,.14);color:#38bdf8;border:1px solid rgba(56,189,248,.28);">Digital Signing</span>
+        </div>
+      </div>
+      <div class="fcard fc-2">
+        <div class="fcard-top"><span class="fi">🔍</span><h3 class="av">Cryptographic Discovery</h3></div>
+        <div class="fcard-body">Identifies crypto components across all scan targets — static source code, package lock files, container image layers, and live runtime environments. Finds both direct dependencies and transitive (indirect) crypto imports that developers never explicitly chose.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);">Static Analysis</span>
+          <span class="ftag" style="background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);">Container Scan</span>
+          <span class="ftag" style="background:rgba(192,132,252,.14);color:#c084fc;border:1px solid rgba(192,132,252,.26);">Runtime Probe</span>
+        </div>
+      </div>
+      <div class="fcard fc-3">
+        <div class="fcard-top"><span class="fi">🚨</span><h3 class="ar">Weak Crypto Detection</h3></div>
+        <div class="fcard-body">Compares every discovered algorithm, protocol, and key configuration against a configurable approved-algorithm policy. Flags deprecated algorithms (MD5, SHA-1, DES), old protocols (TLS 1.0/1.1, SSLv3), short keys (RSA-1024), and weak cipher modes (AES/ECB) automatically.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);">Policy-as-Code</span>
+          <span class="ftag" style="background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);">CVSS Scoring</span>
+          <span class="ftag" style="background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28);">Build Gate</span>
+        </div>
+      </div>
+      <div class="fcard fc-4">
+        <div class="fcard-top"><span class="fi">📜</span><h3 class="at">Certificate Lifecycle Tracking</h3></div>
+        <div class="fcard-body">Discovers, inventories, and monitors all TLS/SSL certificates across code repositories, containers, Kubernetes secrets, cloud services, and on-premises systems. Tracks expiry, issuer trust, signature algorithm, and revocation status with configurable alert thresholds.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(45,212,191,.13);color:#2dd4bf;border:1px solid rgba(45,212,191,.26);">Expiry Alerts</span>
+          <span class="ftag" style="background:rgba(45,212,191,.13);color:#2dd4bf;border:1px solid rgba(45,212,191,.26);">OCSP Check</span>
+          <span class="ftag" style="background:rgba(45,212,191,.13);color:#2dd4bf;border:1px solid rgba(45,212,191,.26);">Chain Validation</span>
+        </div>
+      </div>
+      <div class="fcard fc-5">
+        <div class="fcard-top"><span class="fi">🐛</span><h3 class="ag">CVE Vulnerability Mapping</h3></div>
+        <div class="fcard-body">Automatically cross-references every CBOM component version against NVD, GitHub Advisory, and OSS vulnerability databases. Attaches CVE IDs, CVSS scores, and fix versions to affected CBOM entries. Re-queries automatically when new CVEs are published.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(74,222,128,.13);color:#4ade80;border:1px solid rgba(74,222,128,.25);">NVD / NIST</span>
+          <span class="ftag" style="background:rgba(74,222,128,.13);color:#4ade80;border:1px solid rgba(74,222,128,.25);">GitHub Advisory</span>
+          <span class="ftag" style="background:rgba(74,222,128,.13);color:#4ade80;border:1px solid rgba(74,222,128,.25);">Real-Time Match</span>
+        </div>
+      </div>
+      <div class="fcard fc-6">
+        <div class="fcard-top"><span class="fi">📊</span><h3 class="ao">Governance Reporting</h3></div>
+        <div class="fcard-body">Produces compliance-ready reports for CERT-In, PCI-DSS 4.0, FIPS 140-3, HIPAA, and ISO 27001 audits. Executive dashboards show overall crypto posture, trend over time, open findings, and SLA compliance — all derived from the CBOM data automatically.</div>
+        <div class="fcard-tags">
+          <span class="ftag" style="background:rgba(251,146,60,.14);color:#fb923c;border:1px solid rgba(251,146,60,.26);">CERT-In Ready</span>
+          <span class="ftag" style="background:rgba(251,146,60,.14);color:#fb923c;border:1px solid rgba(251,146,60,.26);">PCI-DSS 4.0</span>
+          <span class="ftag" style="background:rgba(251,146,60,.14);color:#fb923c;border:1px solid rgba(251,146,60,.26);">API Export</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-sky" style="margin-bottom:0;">
+      <p>💡 <strong>Core Principle:</strong> The best CBOM tools combine all six capabilities in a unified workflow — from first-scan discovery through continuous runtime monitoring — so security teams never have to manually correlate data from multiple disconnected point solutions.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Integration & Ecosystem
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">🔌 Ecosystem · Slide 4 of 6</div>
+    <h2>Integration &amp; DevSecOps Ecosystem</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.85%;">
+      <p>📖 A CBOM tool that operates in isolation provides limited value. The real power comes from <strong>deep integration with the DevSecOps toolchain</strong> — feeding CBOM data into CI/CD pipelines, security platforms, key management systems, and governance dashboards to create a unified, automated security fabric.</p>
+    </div>
+
+    <!-- Hub-and-spoke integration visual -->
+    <div class="int-spokes" style="align-items:center;">
+      <div class="int-left">
+        <div class="int-spoke is-ci">
+          <div><h4 class="as">⚙️ CI/CD Pipeline</h4><p>GitHub Actions, GitLab CI, Jenkins — CBOM generated on every push and stored as a signed build artefact alongside the container image.</p></div>
+        </div>
+        <div class="int-spoke is-sast">
+          <div><h4 class="av">🔎 SAST Tools</h4><p>SonarQube, Semgrep, Checkmarx — CBOM enriches static scan results with crypto-specific findings invisible to traditional SAST engines.</p></div>
+        </div>
+        <div class="int-spoke is-sca">
+          <div><h4 class="ao">📦 SCA / Dep-Track</h4><p>Snyk, OWASP Dependency-Track, Trivy — CBOM feeds component versions into SCA for CVE matching and vulnerability prioritisation.</p></div>
+        </div>
+        <div class="int-spoke is-dast">
+          <div><h4 class="ar">🌐 DAST / Runtime</h4><p>OWASP ZAP, Burp Suite — DAST runtime findings are reconciled against CBOM-declared protocols to detect live configuration drift.</p></div>
+        </div>
+      </div>
+
+      <div class="int-arr-l">←</div>
+      <div class="int-center">
+        <span class="ici">📋</span>
+        <h3>CBOM Tool</h3>
+        <p>Centralized Crypto Inventory &amp; Governance Engine</p>
+        <div style="font-size:clamp(.42rem,.76vw,.56rem);color:#334155;margin-top:2%;">All integrations flow through the CBOM as the single source of cryptographic truth</div>
+      </div>
+      <div class="int-arr-l">→</div>
+
+      <div class="int-right">
+        <div class="int-spoke is-siem">
+          <div><h4 class="ay">📡 SIEM &amp; Alerting</h4><p>Splunk, Datadog, PagerDuty — CBOM crypto risk events pushed as structured alerts for SOC triage and incident response workflows.</p></div>
+        </div>
+        <div class="int-spoke is-kms">
+          <div><h4 class="at">🗝️ KMS &amp; Secrets</h4><p>AWS KMS, HashiCorp Vault, Azure Key Vault — CBOM queries key inventory and rotation status directly via cloud provider APIs.</p></div>
+        </div>
+        <div class="int-spoke is-dep">
+          <div><h4 class="ag">🚀 Deployment &amp; Registry</h4><p>OCI registry, Kubernetes admission controller — CBOM attached to every image pushed; admission webhooks block non-compliant crypto policies at deploy time.</p></div>
+        </div>
+        <div class="int-spoke is-dash">
+          <div><h4 class="ai">📊 Governance Dashboard</h4><p>Grafana, Power BI, Dependency-Track — CBOM data powers executive dashboards showing crypto posture, trend, and compliance status in real time.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grn" style="margin-top:.7%;margin-bottom:0;">
+      <p>🔌 <strong>Integration Standard:</strong> Look for tools that expose a well-documented <span class="ag">REST API</span> and support <span class="ag">webhook-based notifications</span> — these two capabilities unlock integration with virtually any DevSecOps platform without requiring vendor-specific plugins or lock-in.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Evaluation Criteria
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-vio">🔍 Evaluation · Slide 5 of 6</div>
+    <h2>Evaluation Criteria — How to Choose the Right CBOM Tool</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 Not all CBOM tools are equal. Evaluating tools objectively requires a structured framework that assesses <strong>technical coverage, detection accuracy, compliance alignment, and operational fit</strong> — independent of vendor marketing. Use these criteria to build your RFP, proof-of-concept, and final decision scorecard.</p>
+    </div>
+
+    <div class="eval-grid" style="margin-bottom:.85%;">
+      <div class="evbox evc-1">
+        <div class="evbox-top"><span class="evi">🔭</span><h3>Coverage Breadth</h3><span class="evnum evn-1">#1</span></div>
+        <div class="evbox-body">Can the tool scan across all your environments? Coverage gaps create blind spots that undermine the value of the entire CBOM programme.</div>
+        <div class="ev-qs">
+          <div class="ev-q">Does it scan source code in all languages your org uses (Java, Python, Go, Node)?</div>
+          <div class="ev-q">Does it scan container image layers including the base OS?</div>
+          <div class="ev-q">Does it query cloud provider APIs (AWS, GCP, Azure) for managed service crypto?</div>
+          <div class="ev-q">Does it perform runtime scanning of live Kubernetes workloads?</div>
+        </div>
+      </div>
+      <div class="evbox evc-2">
+        <div class="evbox-top"><span class="evi">🎯</span><h3>Detection Accuracy</h3><span class="evnum evn-2">#2</span></div>
+        <div class="evbox-body">High false-positive rates erode team confidence and create alert fatigue. Detection quality matters as much as detection breadth.</div>
+        <div class="ev-qs">
+          <div class="ev-q">What is the false-positive rate on your tech stack? (Run a PoC on real code to measure)</div>
+          <div class="ev-q">Does it detect transitive (indirect) crypto dependencies — not just direct imports?</div>
+          <div class="ev-q">How quickly does its CVE database update after NVD publishes a new advisory?</div>
+          <div class="ev-q">Can it distinguish between algorithm name and algorithm mode (AES vs AES/ECB)?</div>
+        </div>
+      </div>
+      <div class="evbox evc-3">
+        <div class="evbox-top"><span class="evi">📋</span><h3>Compliance Support</h3><span class="evnum evn-3">#3</span></div>
+        <div class="evbox-body">Compliance requirements are non-negotiable for regulated sectors. The tool must produce audit-ready evidence in accepted standard formats.</div>
+        <div class="ev-qs">
+          <div class="ev-q">Does it output CycloneDX 1.5+ JSON and/or SPDX — not proprietary formats?</div>
+          <div class="ev-q">Does it support CERT-In mandatory data fields as described in their guidelines?</div>
+          <div class="ev-q">Can it generate compliance reports for PCI-DSS 4.0, FIPS 140-3, and ISO 27001?</div>
+          <div class="ev-q">Does the CBOM carry a digital signature to prove authenticity for audit submissions?</div>
+        </div>
+      </div>
+      <div class="evbox evc-4">
+        <div class="evbox-top"><span class="evi">🔌</span><h3>Integration &amp; Usability</h3><span class="evnum evn-4">#4</span></div>
+        <div class="evbox-body">A tool with superior detection but poor pipeline integration creates operational friction and reduces adoption across engineering teams.</div>
+        <div class="ev-qs">
+          <div class="ev-q">Is there a well-documented API and webhook system for DevSecOps integration?</div>
+          <div class="ev-q">How long does a scan take? (Under 2 minutes for CI/CD pipeline inclusion)</div>
+          <div class="ev-q">Does it offer policy-as-code gate capability to block non-compliant builds?</div>
+          <div class="ev-q">What is the maintenance burden — is it SaaS, self-hosted, or hybrid?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weighted decision bars -->
+    <div class="sl sl-v" style="text-align:center;">📊 Suggested Evaluation Weighting — Adjust Based on Your Priorities</div>
+    <div style="width:100%;padding:.4% 0;">
+      <div class="dm-row"><span class="dm-label">Coverage Breadth</span><div class="dm-bar-wrap"><div class="dm-bar" style="width:90%;background:linear-gradient(90deg,#38bdf8,#60a5fa);"></div></div><span class="dm-score" style="color:#38bdf8;">90%</span></div>
+      <div class="dm-row"><span class="dm-label">Detection Accuracy</span><div class="dm-bar-wrap"><div class="dm-bar" style="width:85%;background:linear-gradient(90deg,#c084fc,#a78bfa);"></div></div><span class="dm-score" style="color:#c084fc;">85%</span></div>
+      <div class="dm-row"><span class="dm-label">Compliance Support</span><div class="dm-bar-wrap"><div class="dm-bar" style="width:80%;background:linear-gradient(90deg,#2dd4bf,#5eead4);"></div></div><span class="dm-score" style="color:#2dd4bf;">80%</span></div>
+      <div class="dm-row"><span class="dm-label">CI/CD Integration</span><div class="dm-bar-wrap"><div class="dm-bar" style="width:75%;background:linear-gradient(90deg,#4ade80,#86efac);"></div></div><span class="dm-score" style="color:#4ade80;">75%</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum3" style="margin-bottom:.85%;">
+      <div class="s3b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🛠️</span>
+        <h4 class="av">Tools Enable Scale</h4>
+        <p>Manual crypto tracking fails at enterprise scale. CBOM tools automate discovery, scanning, and alerting across thousands of services — making the invisible visible without human effort.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">⚙️</span>
+        <h4 class="as">Core Capabilities Matter</h4>
+        <p>Six capabilities define a complete CBOM tool: auto-generation, crypto discovery, weak crypto detection, certificate tracking, CVE mapping, and governance reporting. Gaps in any area create security blind spots.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(74,222,128,.24);">
+        <span class="si">🔍</span>
+        <h4 class="ag">Evaluate Objectively</h4>
+        <p>Use coverage, accuracy, compliance support, and integration as your structured evaluation framework. Run a proof-of-concept on real workloads before committing — marketing claims rarely match real-world performance.</p>
+      </div>
+    </div>
+
+    <!-- Evaluation checklist strip -->
+    <div style="width:100%;display:flex;gap:.8%;margin-bottom:.85%;">
+      <div style="flex:1;border-radius:.7vw;padding:1% 1.1%;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);display:flex;align-items:center;gap:.9%;">
+        <span style="font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;">✅</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#38bdf8;">Automation</div><div style="font-size:clamp(.42rem,.77vw,.57rem);color:#94a3b8;">Auto-generates on every build · no manual steps</div></div>
+      </div>
+      <div style="flex:1;border-radius:.7vw;padding:1% 1.1%;background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);display:flex;align-items:center;gap:.9%;">
+        <span style="font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;">✅</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#c084fc;">Visibility</div><div style="font-size:clamp(.42rem,.77vw,.57rem);color:#94a3b8;">Complete coverage across code, container, cloud</div></div>
+      </div>
+      <div style="flex:1;border-radius:.7vw;padding:1% 1.1%;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.22);display:flex;align-items:center;gap:.9%;">
+        <span style="font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;">✅</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#f87171;">Risk Detection</div><div style="font-size:clamp(.42rem,.77vw,.57rem);color:#94a3b8;">CVE mapping · weak algo alerts · cert expiry</div></div>
+      </div>
+      <div style="flex:1;border-radius:.7vw;padding:1% 1.1%;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.22);display:flex;align-items:center;gap:.9%;">
+        <span style="font-size:clamp(.85rem,1.6vw,1.15rem);flex-shrink:0;">✅</span>
+        <div><div style="font-size:clamp(.5rem,.93vw,.69rem);font-weight:700;color:#4ade80;">Compliance</div><div style="font-size:clamp(.42rem,.77vw,.57rem);color:#94a3b8;">CycloneDX · CERT-In · PCI-DSS · FIPS ready</div></div>
+      </div>
+    </div>
+
+    <div class="closing">
+      <h3>🎯 The Right Tool Changes Everything</h3>
+      <p>A well-chosen CBOM tool transforms cryptographic security from a reactive, fire-fighting exercise into a <strong>proactive, governed, audit-ready programme</strong>. The investment in selecting, integrating, and maintaining the right tool pays dividends across security posture, compliance confidence, and operational resilience — especially as quantum computing threats make crypto migration an imminent enterprise priority.</p>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>Apply CBOM governance principles to your organization — start with discovery, establish your approved-algorithm policy, and integrate CBOM into your CI/CD pipeline today
+        </p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

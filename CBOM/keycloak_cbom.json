@@ -1,0 +1,2030 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "518ddabf-4226-4d41-9c30-46f32fa59277",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "key-agree"
+        },
+        "assetType": "algorithm",
+        "oid": "1.3.132.1.12"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.KeyAgreement#getInstance(Ljava/lang/String;)Ljavax/crypto/KeyAgreement;",
+            "line": 183,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "javax.crypto.KeyAgreement#getInstance(Ljava/lang/String;)Ljavax/crypto/KeyAgreement;",
+            "line": 208,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "ECDH",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "528d3fd9-e33f-44a8-980a-f91ef57099ea",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "digest"
+          ],
+          "parameterSetIdentifier": "160",
+          "primitive": "hash"
+        },
+        "assetType": "algorithm",
+        "oid": "1.3.14.3.2.26"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 334,
+            "location": "federation/sssd/src/main/java/org/freedesktop/dbus/connections/SASL.java",
+            "offset": 21
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 378,
+            "location": "federation/sssd/src/main/java/org/freedesktop/dbus/connections/SASL.java",
+            "offset": 17
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 48,
+            "location": "server-spi-private/src/main/java/org/keycloak/protocol/saml/util/ArtifactBindingUtils.java",
+            "offset": 41
+          },
+          {
+            "additionalContext": "java.security.Signature#getInstance(Ljava/lang/String;)Ljava/security/Signature;",
+            "line": 212,
+            "location": "saml-core/src/main/java/org/keycloak/saml/processing/core/saml/v2/util/SignatureUtil.java",
+            "offset": 18
+          },
+          {
+            "additionalContext": "java.security.Signature#getInstance(Ljava/lang/String;)Ljava/security/Signature;",
+            "line": 214,
+            "location": "saml-core/src/main/java/org/keycloak/saml/processing/core/saml/v2/util/SignatureUtil.java",
+            "offset": 18
+          }
+        ]
+      },
+      "name": "SHA1",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "9059dafb-56d8-4d4f-9fde-b05654706e19",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 132,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          }
+        ]
+      },
+      "name": "key@9059dafb-56d8-4d4f-9fde-b05654706e19",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "b5dc5385-7bd9-4bb1-b464-46ef169a4f55",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "primitive": "signature"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 135,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEddsaKeyProviderFactory.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 51,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEddsaKeyProvider.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "EdDSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "755dd8ce-bbbb-4aef-b02c-f0d9b3adcdcb",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The asset primitive is unclear and does not allow further categorization",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "primitive": "other"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 159,
+            "location": "server-spi/src/main/java/org/keycloak/models/utils/HmacOTP.java",
+            "offset": 35
+          }
+        ]
+      },
+      "name": "RAW",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "fd13368a-188f-4af1-b61b-eace188b1fef",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "tag"
+          ],
+          "primitive": "mac"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.2.9"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 40,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 223,
+            "location": "server-spi-private/src/main/java/org/keycloak/models/utils/KeycloakModelUtils.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "HMAC-SHA256",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "ff459d4c-c583-479d-8147-2799847808bb",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 159,
+            "location": "server-spi/src/main/java/org/keycloak/models/utils/HmacOTP.java",
+            "offset": 35
+          }
+        ]
+      },
+      "name": "secret-key@ff459d4c-c583-479d-8147-2799847808bb",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "3725c85a-7306-472e-8209-269187d47d92",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "parameterSetIdentifier": "2048",
+          "primitive": "pke"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 141,
+            "location": "core/src/main/java/org/keycloak/jose/jwk/JWKParser.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 70,
+            "location": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 103,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/RSAKeyValueType.java",
+            "offset": 39
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 122,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/RSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "RSA-2048",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "e76b66ce-faaa-4ab0-a128-fb317b4403a7",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 81,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCECDSACryptoProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "public-key@e76b66ce-faaa-4ab0-a128-fb317b4403a7",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "9a1c756f-5962-45e5-b7e7-410f48111e38",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.10040.4.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 211,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/DSAKeyValueType.java",
+            "offset": 39
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 234,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/DSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "DSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "c713160c-0edb-42b4-91cd-278786c59043",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 103,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/RSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "public-key@c713160c-0edb-42b4-91cd-278786c59043",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "788d4aa1-6a18-4734-9984-64fd55f6769a",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 205,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "public-key@788d4aa1-6a18-4734-9984-64fd55f6769a",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "4084f42a-868e-4599-8521-fabed2f364a7",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "private-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 58,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEcdhKeyProvider.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "private-key@4084f42a-868e-4599-8521-fabed2f364a7",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "9d7a5bf3-66a5-48bf-8764-f5c441abf54b",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "private-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 51,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEddsaKeyProvider.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "private-key@9d7a5bf3-66a5-48bf-8764-f5c441abf54b",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "b2314d71-776f-494d-a47e-02a95db7cbd1",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 113,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 42
+          }
+        ]
+      },
+      "name": "secret-key@b2314d71-776f-494d-a47e-02a95db7cbd1",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "d3ab5600-c2b2-4c6e-b841-010c91492a59",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "primitive": "pke"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 225,
+            "location": "core/src/main/java/org/keycloak/util/DIDUtils.java",
+            "offset": 32
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 58,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEcdhKeyProvider.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 58,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEcdsaKeyProvider.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 117,
+            "location": "services/src/main/java/org/keycloak/keys/AbstractGeneratedEcKeyProviderFactory.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 88,
+            "location": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+            "offset": 38
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 86,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSECDSACryptoProvider.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 142,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 205,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 125,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 137,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 15
+          },
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 132,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 199,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 81,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCECDSACryptoProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "EC",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "41044e4b-ea95-4943-82fd-080fafae344d",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 211,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/DSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "public-key@41044e4b-ea95-4943-82fd-080fafae344d",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "f14b84a0-fae8-420a-b9b4-febc93e5d92f",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 137,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 15
+          }
+        ]
+      },
+      "name": "key@f14b84a0-fae8-420a-b9b4-febc93e5d92f",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "b266afe3-32ac-4e57-9442-a2346b109b02",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 169,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesCbcHmacShaEncryptionProvider.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "secret-key@b266afe3-32ac-4e57-9442-a2346b109b02",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "0c9ba7e2-78e8-4b06-8aa6-0b70ec26fc24",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 88,
+            "location": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+            "offset": 38
+          }
+        ]
+      },
+      "name": "key@0c9ba7e2-78e8-4b06-8aa6-0b70ec26fc24",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "3605d5d8-a5ea-4310-933f-d7b627619c6e",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 125,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          }
+        ]
+      },
+      "name": "key@3605d5d8-a5ea-4310-933f-d7b627619c6e",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "0f747a21-de20-4a2d-a4fe-67acd90a65ca",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The asset primitive is unclear and does not allow further categorization",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "decapsulate"
+          ],
+          "parameterSetIdentifier": "128",
+          "primitive": "other"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "org.bouncycastle.crypto.engines.AESWrapEngine#\u003cinit\u003e()V",
+            "line": 86,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 32
+          },
+          {
+            "additionalContext": "org.bouncycastle.crypto.engines.AESWrapEngine#\u003cinit\u003e()V",
+            "line": 119,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 32
+          },
+          {
+            "additionalContext": "org.bouncycastle.crypto.engines.AESWrapEngine#\u003cinit\u003e()V",
+            "line": 39,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/AesKeyWrapAlgorithmProvider.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "org.bouncycastle.crypto.engines.AESWrapEngine#\u003cinit\u003e()V",
+            "line": 46,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/AesKeyWrapAlgorithmProvider.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "AES",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "071dc9e2-cc03-445c-91e5-fb53d5a1ed96",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 151,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesGcmEncryptionProvider.java",
+            "offset": 31
+          }
+        ]
+      },
+      "name": "secret-key@071dc9e2-cc03-445c-91e5-fb53d5a1ed96",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cf0870f4-032a-4bfc-bed9-1d1fcc932d84",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.11"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 39,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "SHA256withRSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "94660757-3dd5-434b-a7ce-91d97ce88e5f",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "digest"
+          ],
+          "parameterSetIdentifier": "512",
+          "primitive": "hash"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.2.3"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 43,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          },
+          {
+            "line": 44,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "SHA512",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "1dc453fb-e6a6-4689-867d-b06e6e6646c6",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 223,
+            "location": "server-spi-private/src/main/java/org/keycloak/models/utils/KeycloakModelUtils.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "secret-key@1dc453fb-e6a6-4689-867d-b06e6e6646c6",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "89718d61-a95f-4982-8c6b-75849caabf7f",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.13"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 43,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "SHA512withRSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "455815d6-8c7f-4a22-ac24-bf4e51e65b83",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 225,
+            "location": "core/src/main/java/org/keycloak/util/DIDUtils.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "public-key@455815d6-8c7f-4a22-ac24-bf4e51e65b83",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "628558d6-c053-4b4b-b70e-9892e2863841",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 86,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSECDSACryptoProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "public-key@628558d6-c053-4b4b-b70e-9892e2863841",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "7108aba4-5504-4680-ab25-cbf2b0d003c9",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 168,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesCbcHmacShaEncryptionProvider.java",
+            "offset": 31
+          }
+        ]
+      },
+      "name": "secret-key@7108aba4-5504-4680-ab25-cbf2b0d003c9",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "bb033ccd-5ae8-43a9-bbe3-4a9a13a7dfa1",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.12"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 41,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "SHA384withRSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "619c6023-b3fe-4064-a4e4-dc55871dbbd8",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 80,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 44
+          }
+        ]
+      },
+      "name": "secret-key@619c6023-b3fe-4064-a4e4-dc55871dbbd8",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "3bb49ab8-1bc1-49e3-afc0-aa3b06053166",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.10040.4.3"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.Signature#getInstance(Ljava/lang/String;)Ljava/security/Signature;",
+            "line": 212,
+            "location": "saml-core/src/main/java/org/keycloak/saml/processing/core/saml/v2/util/SignatureUtil.java",
+            "offset": 18
+          }
+        ]
+      },
+      "name": "SHA1withDSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "71d018f6-348c-4982-8340-cf1a3cc9f10b",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "private-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 58,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEcdsaKeyProvider.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "private-key@71d018f6-348c-4982-8340-cf1a3cc9f10b",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "0f23898a-b764-4eae-8b54-53f08b951b1f",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "digest"
+          ],
+          "parameterSetIdentifier": "384",
+          "primitive": "hash"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.2.2"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 41,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          },
+          {
+            "line": 42,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "SHA384",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "f62ba629-83f2-4115-a726-1c0404326da7",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "tag"
+          ],
+          "primitive": "mac"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.2.11"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 44,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "HMAC-SHA512",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "54e8f414-93b5-45e3-a5dd-caf44e70b3d2",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "parameterSetIdentifier": "2048",
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.5"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.Signature#getInstance(Ljava/lang/String;)Ljava/security/Signature;",
+            "line": 214,
+            "location": "saml-core/src/main/java/org/keycloak/saml/processing/core/saml/v2/util/SignatureUtil.java",
+            "offset": 18
+          }
+        ]
+      },
+      "name": "SHA1withRSA",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "80b15032-1e1c-427b-8059-3f1b731ad9e1",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 473,
+            "location": "quarkus/tests/junit5/src/main/java/org/keycloak/it/utils/RawKeycloakDistribution.java",
+            "offset": 25
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 263,
+            "location": "adapters/saml/core/src/main/java/org/keycloak/adapters/cloned/HttpClientBuilder.java",
+            "offset": 29
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 369,
+            "location": "operator/src/main/java/org/keycloak/operator/controllers/KeycloakClientBaseController.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 253,
+            "location": "services/src/main/java/org/keycloak/connections/httpclient/HttpClientBuilder.java",
+            "offset": 29
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 264,
+            "location": "services/src/main/java/org/keycloak/connections/httpclient/HttpClientBuilder.java",
+            "offset": 46
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 59,
+            "location": "services/src/main/java/org/keycloak/truststore/JSSETruststoreConfigurator.java",
+            "offset": 44
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 211,
+            "location": "model/infinispan/src/main/java/org/keycloak/spi/infinispan/impl/embedded/JGroupsConfigurator.java",
+            "offset": 29
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 237,
+            "location": "model/infinispan/src/main/java/org/keycloak/spi/infinispan/impl/remote/DefaultCacheRemoteConfigProviderFactory.java",
+            "offset": 29
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 533,
+            "location": "testsuite/utils/src/main/java/org/keycloak/testsuite/KeycloakServer.java",
+            "offset": 32
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 101,
+            "location": "testsuite/integration-arquillian/tests/base/src/main/java/org/keycloak/testsuite/util/MutualTLSUtils.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 175,
+            "location": "testsuite/integration-arquillian/tests/base/src/main/java/org/keycloak/testsuite/arquillian/containers/InfinispanServerDeployableContainer.java",
+            "offset": 28
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 414,
+            "location": "testsuite/integration-arquillian/tests/base/src/main/java/org/keycloak/testsuite/arquillian/containers/AbstractQuarkusDeployableContainer.java",
+            "offset": 25
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 66,
+            "location": "testsuite/integration-arquillian/util/src/main/java/org/keycloak/testsuite/utils/tls/TLSUtils.java",
+            "offset": 22
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 89,
+            "location": "test-framework/core/src/main/java/org/keycloak/testframework/server/ReadinessProbe.java",
+            "offset": 29
+          },
+          {
+            "additionalContext": "javax.net.ssl.SSLContext#getInstance(Ljava/lang/String;)Ljavax/net/ssl/SSLContext;",
+            "line": 264,
+            "location": "test-framework/core/src/main/java/org/keycloak/testframework/server/DistributionKeycloakServer.java",
+            "offset": 40
+          }
+        ]
+      },
+      "name": "TLS",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "559b6cb6-17f7-4b80-afd6-38b6f41e8d71",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyPairGenerator#getInstance(Ljava/lang/String;Ljava/lang/String;)Ljava/security/KeyPairGenerator;",
+            "line": 142,
+            "location": "crypto/fips1402/src/main/java/org/keycloak/crypto/fips/BCFIPSEcdhEsAlgorithmProvider.java",
+            "offset": 38
+          }
+        ]
+      },
+      "name": "key@559b6cb6-17f7-4b80-afd6-38b6f41e8d71",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "c80d57cd-48a5-4b81-8fa6-2ef8fb8f92dd",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The asset primitive is unclear and does not allow further categorization",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "primitive": "other"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 169,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesCbcHmacShaEncryptionProvider.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "HMACSHA2",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "0fea7f5b-b1b5-4204-bf17-acbe003302c5",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 117,
+            "location": "services/src/main/java/org/keycloak/keys/AbstractGeneratedEcKeyProviderFactory.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "public-key@0fea7f5b-b1b5-4204-bf17-acbe003302c5",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "09e344b6-b755-4388-859b-d8bc4fb6d199",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 199,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "public-key@09e344b6-b755-4388-859b-d8bc4fb6d199",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "491e5948-5cb8-4d71-9799-06e4fd19301b",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 141,
+            "location": "core/src/main/java/org/keycloak/jose/jwk/JWKParser.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "public-key@491e5948-5cb8-4d71-9799-06e4fd19301b",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "cddabb7e-bec9-4602-979e-e7b518e898bc",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The asset primitive is unclear and does not allow further categorization",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "other"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.8"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.spec.PSSParameterSpec#\u003cinit\u003e(Ljava/lang/String;Ljava/lang/String;Ljava/security/spec/AlgorithmParameterSpec;II)V",
+            "line": 187,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 48
+          }
+        ]
+      },
+      "name": "MGF1",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "49c4d596-2106-420c-bfec-092b9af2d6f8",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "mode": "cbc",
+          "padding": "pkcs5",
+          "parameterSetIdentifier": "128",
+          "primitive": "block-cipher"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.Cipher#getInstance(Ljava/lang/String;)Ljavax/crypto/Cipher;",
+            "line": 142,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 15
+          }
+        ]
+      },
+      "name": "AES128-CBC-PKCS5",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "ecdc7925-72b8-48bf-a6a0-e910b42b275f",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "secret-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 115,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 31
+          }
+        ]
+      },
+      "name": "secret-key@ecdc7925-72b8-48bf-a6a0-e910b42b275f",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "51d0dd16-8f60-43c2-8e91-dff57c227e90",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 70,
+            "location": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+            "offset": 36
+          }
+        ]
+      },
+      "name": "public-key@51d0dd16-8f60-43c2-8e91-dff57c227e90",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "87d2512b-5934-4cf0-bb76-150b86d82803",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "mode": "gcm",
+          "parameterSetIdentifier": "128",
+          "primitive": "ae"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.Cipher#getInstance(Ljava/lang/String;)Ljavax/crypto/Cipher;",
+            "line": 147,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 15
+          }
+        ]
+      },
+      "name": "AES128-GCM",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "9998b86b-c63a-4499-a894-aa6a712981fa",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "private-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 234,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/DSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "private-key@9998b86b-c63a-4499-a894-aa6a712981fa",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "66eecbe1-130b-4899-b905-ece7ec14ea68",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "tag"
+          ],
+          "primitive": "mac"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.2.10"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 42,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          }
+        ]
+      },
+      "name": "HMAC-SHA384",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "b8f730e8-ab9b-4032-b23e-908f40278731",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "kdf"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "org.bouncycastle.crypto.agreement.kdf.ConcatenationKDFGenerator#\u003cinit\u003e(Lorg/bouncycastle/crypto/Digest;)V",
+            "line": 157,
+            "location": "crypto/default/src/main/java/org/keycloak/crypto/def/BCEcdhEsAlgorithmProvider.java",
+            "offset": 46
+          }
+        ]
+      },
+      "name": "ConcatenationKDF",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "328ea519-f986-4b6c-b4c7-8b3eeadc5cf8",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "digest"
+          ],
+          "parameterSetIdentifier": "256",
+          "primitive": "hash"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.2.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "line": 80,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HashUtils.java",
+            "offset": 35
+          },
+          {
+            "line": 39,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/RSAProvider.java",
+            "offset": 23
+          },
+          {
+            "line": 40,
+            "location": "core/src/main/java/org/keycloak/jose/jws/crypto/HMACProvider.java",
+            "offset": 23
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 134,
+            "location": "server-spi-private/src/main/java/org/keycloak/broker/provider/AbstractIdentityProvider.java",
+            "offset": 17
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 223,
+            "location": "server-spi-private/src/main/java/org/keycloak/models/utils/KeycloakModelUtils.java",
+            "offset": 32
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 120,
+            "location": "operator/src/main/java/org/keycloak/operator/Utils.java",
+            "offset": 19
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 44,
+            "location": "services/src/main/java/org/keycloak/utils/BrokerUtil.java",
+            "offset": 31
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 270,
+            "location": "services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java",
+            "offset": 25
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 115,
+            "location": "services/src/main/java/org/keycloak/services/util/MtlsHoKTokenUtil.java",
+            "offset": 27
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 230,
+            "location": "services/src/main/java/org/keycloak/services/clientpolicy/executor/PKCEEnforcerExecutor.java",
+            "offset": 27
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 37,
+            "location": "services/src/main/java/org/keycloak/protocol/docker/DockerKeyIdentifier.java",
+            "offset": 41
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 90,
+            "location": "services/src/main/java/org/keycloak/protocol/oidc/mappers/SHA256PairwiseSubMapper.java",
+            "offset": 21
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 85,
+            "location": "services/src/main/java/org/keycloak/protocol/oidc/par/endpoints/AbstractParEndpoint.java",
+            "offset": 19
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 121,
+            "location": "services/src/main/java/org/keycloak/protocol/oid4vc/issuance/signing/vcdm/Ed255192018Suite.java",
+            "offset": 31
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 100,
+            "location": "common/src/main/java/org/keycloak/common/util/KeyUtils.java",
+            "offset": 36
+          },
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 141,
+            "location": "testsuite/integration-arquillian/tests/base/src/main/java/org/keycloak/testsuite/util/MutualTLSUtils.java",
+            "offset": 31
+          }
+        ]
+      },
+      "name": "SHA256",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "1f9ec092-ad43-4963-966d-0b62a267b7fa",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "keygen"
+          ],
+          "parameterSetIdentifier": "128",
+          "primitive": "block-cipher"
+        },
+        "assetType": "algorithm",
+        "oid": "2.16.840.1.101.3.4.1"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 151,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesGcmEncryptionProvider.java",
+            "offset": 31
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 168,
+            "location": "core/src/main/java/org/keycloak/jose/jwe/enc/AesCbcHmacShaEncryptionProvider.java",
+            "offset": 31
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 80,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 44
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 113,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 42
+          },
+          {
+            "additionalContext": "javax.crypto.spec.SecretKeySpec#\u003cinit\u003e([BLjava/lang/String;)V",
+            "line": 115,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/ElytronEcdhEsAlgorithmProvider.java",
+            "offset": 31
+          },
+          {
+            "additionalContext": "javax.crypto.Cipher#getInstance(Ljava/lang/String;)Ljavax/crypto/Cipher;",
+            "line": 36,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/AesKeyWrapAlgorithmProvider.java",
+            "offset": 24
+          },
+          {
+            "additionalContext": "javax.crypto.Cipher#getInstance(Ljava/lang/String;)Ljavax/crypto/Cipher;",
+            "line": 43,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/AesKeyWrapAlgorithmProvider.java",
+            "offset": 24
+          }
+        ]
+      },
+      "name": "AES128",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "51e9ec13-4d4c-42c0-8820-aaeb81691f69",
+      "complianceLevel": "Not Quantum Safe",
+      "complianceMessage": "The asset has an asymmetric primitive and does not match with the Quantum Safe whitelists of OIDs and names",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "primitive": "signature"
+        },
+        "assetType": "algorithm",
+        "oid": "1.2.840.113549.1.1.10"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.Signature#getInstance(Ljava/lang/String;)Ljava/security/Signature;",
+            "line": 183,
+            "location": "crypto/elytron/src/main/java/org/keycloak/crypto/elytron/WildFlyElytronProvider.java",
+            "offset": 32
+          }
+        ]
+      },
+      "name": "RSASSA-PSS",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "866f70c1-3902-4bcc-bba6-fa303736d610",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "private-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 122,
+            "location": "saml-core-api/src/main/java/org/keycloak/dom/xmlsec/w3/xmldsig/RSAKeyValueType.java",
+            "offset": 39
+          }
+        ]
+      },
+      "name": "private-key@866f70c1-3902-4bcc-bba6-fa303736d610",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "b1fb8479-4793-4b3a-9a0e-7325f6c1237a",
+      "complianceLevel": "Unknown",
+      "complianceMessage": "The field 'algorithmProperties' was not set, which does not allow further categorization",
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key"
+        }
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.KeyFactory#getInstance(Ljava/lang/String;)Ljava/security/KeyFactory;",
+            "line": 135,
+            "location": "services/src/main/java/org/keycloak/keys/GeneratedEddsaKeyProviderFactory.java",
+            "offset": 28
+          }
+        ]
+      },
+      "name": "public-key@b1fb8479-4793-4b3a-9a0e-7325f6c1237a",
+      "type": "cryptographic-asset"
+    },
+    {
+      "bom-ref": "9f997e09-f681-409c-a153-892367b0f63f",
+      "complianceLevel": "Not Applicable",
+      "complianceMessage": "The asset has a symmetric primitive, so the Quantum Safe categorization is not applicable",
+      "cryptoProperties": {
+        "algorithmProperties": {
+          "cryptoFunctions": [
+            "digest"
+          ],
+          "parameterSetIdentifier": "128",
+          "primitive": "hash"
+        },
+        "assetType": "algorithm"
+      },
+      "evidence": {
+        "occurrences": [
+          {
+            "additionalContext": "java.security.MessageDigest#getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;",
+            "line": 34,
+            "location": "services/src/main/java/org/keycloak/cache/ComputedKey.java",
+            "offset": 19
+          }
+        ]
+      },
+      "name": "MD5",
+      "type": "cryptographic-asset"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "755dd8ce-bbbb-4aef-b02c-f0d9b3adcdcb"
+      ],
+      "ref": "ff459d4c-c583-479d-8147-2799847808bb"
+    },
+    {
+      "dependsOn": [
+        "0f23898a-b764-4eae-8b54-53f08b951b1f"
+      ],
+      "ref": "bb033ccd-5ae8-43a9-bbe3-4a9a13a7dfa1"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "628558d6-c053-4b4b-b70e-9892e2863841"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "f14b84a0-fae8-420a-b9b4-febc93e5d92f"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "455815d6-8c7f-4a22-ac24-bf4e51e65b83"
+    },
+    {
+      "dependsOn": [
+        "1f9ec092-ad43-4963-966d-0b62a267b7fa"
+      ],
+      "ref": "619c6023-b3fe-4064-a4e4-dc55871dbbd8"
+    },
+    {
+      "dependsOn": [
+        "9a1c756f-5962-45e5-b7e7-410f48111e38"
+      ],
+      "ref": "41044e4b-ea95-4943-82fd-080fafae344d"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "0c9ba7e2-78e8-4b06-8aa6-0b70ec26fc24"
+    },
+    {
+      "dependsOn": [
+        "94660757-3dd5-434b-a7ce-91d97ce88e5f"
+      ],
+      "ref": "f62ba629-83f2-4115-a726-1c0404326da7"
+    },
+    {
+      "dependsOn": [
+        "1f9ec092-ad43-4963-966d-0b62a267b7fa"
+      ],
+      "ref": "7108aba4-5504-4680-ab25-cbf2b0d003c9"
+    },
+    {
+      "dependsOn": [
+        "528d3fd9-e33f-44a8-980a-f91ef57099ea"
+      ],
+      "ref": "3bb49ab8-1bc1-49e3-afc0-aa3b06053166"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "3605d5d8-a5ea-4310-933f-d7b627619c6e"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "4084f42a-868e-4599-8521-fabed2f364a7"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "e76b66ce-faaa-4ab0-a128-fb317b4403a7"
+    },
+    {
+      "dependsOn": [
+        "328ea519-f986-4b6c-b4c7-8b3eeadc5cf8"
+      ],
+      "ref": "cf0870f4-032a-4bfc-bed9-1d1fcc932d84"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "788d4aa1-6a18-4734-9984-64fd55f6769a"
+    },
+    {
+      "dependsOn": [
+        "9a1c756f-5962-45e5-b7e7-410f48111e38"
+      ],
+      "ref": "9998b86b-c63a-4499-a894-aa6a712981fa"
+    },
+    {
+      "dependsOn": [
+        "3725c85a-7306-472e-8209-269187d47d92"
+      ],
+      "ref": "491e5948-5cb8-4d71-9799-06e4fd19301b"
+    },
+    {
+      "dependsOn": [
+        "1f9ec092-ad43-4963-966d-0b62a267b7fa"
+      ],
+      "ref": "ecdc7925-72b8-48bf-a6a0-e910b42b275f"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "9059dafb-56d8-4d4f-9fde-b05654706e19"
+    },
+    {
+      "dependsOn": [
+        "1f9ec092-ad43-4963-966d-0b62a267b7fa"
+      ],
+      "ref": "b2314d71-776f-494d-a47e-02a95db7cbd1"
+    },
+    {
+      "dependsOn": [
+        "3725c85a-7306-472e-8209-269187d47d92"
+      ],
+      "ref": "866f70c1-3902-4bcc-bba6-fa303736d610"
+    },
+    {
+      "dependsOn": [
+        "94660757-3dd5-434b-a7ce-91d97ce88e5f"
+      ],
+      "ref": "89718d61-a95f-4982-8c6b-75849caabf7f"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "0fea7f5b-b1b5-4204-bf17-acbe003302c5"
+    },
+    {
+      "dependsOn": [
+        "1f9ec092-ad43-4963-966d-0b62a267b7fa"
+      ],
+      "ref": "071dc9e2-cc03-445c-91e5-fb53d5a1ed96"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "09e344b6-b755-4388-859b-d8bc4fb6d199"
+    },
+    {
+      "dependsOn": [
+        "fd13368a-188f-4af1-b61b-eace188b1fef"
+      ],
+      "ref": "1dc453fb-e6a6-4689-867d-b06e6e6646c6"
+    },
+    {
+      "dependsOn": [
+        "3725c85a-7306-472e-8209-269187d47d92"
+      ],
+      "ref": "51d0dd16-8f60-43c2-8e91-dff57c227e90"
+    },
+    {
+      "dependsOn": [
+        "0f23898a-b764-4eae-8b54-53f08b951b1f"
+      ],
+      "ref": "66eecbe1-130b-4899-b905-ece7ec14ea68"
+    },
+    {
+      "dependsOn": [
+        "c80d57cd-48a5-4b81-8fa6-2ef8fb8f92dd"
+      ],
+      "ref": "b266afe3-32ac-4e57-9442-a2346b109b02"
+    },
+    {
+      "dependsOn": [
+        "b5dc5385-7bd9-4bb1-b464-46ef169a4f55"
+      ],
+      "ref": "b1fb8479-4793-4b3a-9a0e-7325f6c1237a"
+    },
+    {
+      "dependsOn": [
+        "328ea519-f986-4b6c-b4c7-8b3eeadc5cf8"
+      ],
+      "ref": "fd13368a-188f-4af1-b61b-eace188b1fef"
+    },
+    {
+      "dependsOn": [
+        "528d3fd9-e33f-44a8-980a-f91ef57099ea"
+      ],
+      "ref": "54e8f414-93b5-45e3-a5dd-caf44e70b3d2"
+    },
+    {
+      "dependsOn": [
+        "cddabb7e-bec9-4602-979e-e7b518e898bc"
+      ],
+      "ref": "51e9ec13-4d4c-42c0-8820-aaeb81691f69"
+    },
+    {
+      "dependsOn": [
+        "3725c85a-7306-472e-8209-269187d47d92"
+      ],
+      "ref": "c713160c-0edb-42b4-91cd-278786c59043"
+    },
+    {
+      "dependsOn": [
+        "b5dc5385-7bd9-4bb1-b464-46ef169a4f55"
+      ],
+      "ref": "9d7a5bf3-66a5-48bf-8764-f5c441abf54b"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "559b6cb6-17f7-4b80-afd6-38b6f41e8d71"
+    },
+    {
+      "dependsOn": [
+        "d3ab5600-c2b2-4c6e-b841-010c91492a59"
+      ],
+      "ref": "71d018f6-348c-4982-8340-cf1a3cc9f10b"
+    }
+  ],
+  "metadata": {
+    "properties": [
+      {
+        "name": "gitUrl",
+        "value": "https://github.com/keycloak/keycloak"
+      },
+      {
+        "name": "revision",
+        "value": "main"
+      },
+      {
+        "name": "commit",
+        "value": "3f0bd12"
+      }
+    ],
+    "timestamp": "2026-03-25T06:49:21Z",
+    "tools": {
+      "components": [],
+      "services": [
+        {
+          "name": "CBOMkit",
+          "provider": {
+            "name": "PQCA"
+          }
+        }
+      ]
+    }
+  },
+  "serialNumber": "urn:uuid:b1a366a5-f81c-4760-a0da-9f47d94181c9",
+  "specVersion": "1.6",
+  "version": 1
+}

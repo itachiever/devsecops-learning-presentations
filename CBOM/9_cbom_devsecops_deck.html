@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM in DevSecOps Pipeline – CI/CD Integration Explained</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#03030d;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(14px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+
+  .s1{background:linear-gradient(145deg,#07071e 0%,#0c1048 48%,#090830 100%);}
+  .s2{background:linear-gradient(145deg,#060c10 0%,#071e2c 50%,#060f1c 100%);}
+  .s3{background:linear-gradient(145deg,#060818 0%,#100828 50%,#08061c 100%);}
+  .s4{background:linear-gradient(145deg,#060a12 0%,#071a24 50%,#060e18 100%);}
+  .s5{background:linear-gradient(145deg,#060818 0%,#090e2a 50%,#06081e 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#08102c 50%,#070c22 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.8rem,4.9vw,3.5rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#a5b4fc,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.3); color:#7dd3fc;}
+  .tb-c{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-blu{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);}
+  .hb-blu p{color:#bfdbfe;}.hb-blu strong{color:#60a5fa;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Two-col ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.3;}
+
+  /* ── Sec label ── */
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ab{color:#60a5fa;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.88% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ── Cards ── */
+  .cards{display:flex;gap:1.3%;width:100%;}
+  .card{flex:1;border-radius:.8vw;padding:1.8% 1.9%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);transition:transform .22s;}
+  .card:hover{transform:translateY(-3px);}
+  .card .ci{font-size:clamp(1rem,1.9vw,1.4rem);margin-bottom:3%;display:block;}
+  .card h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;margin-bottom:2%;}
+  .card p,.card li{font-size:clamp(.5rem,.93vw,.69rem);color:#94a3b8;line-height:1.5;}
+  .card ul{list-style:none;padding:0;}
+  .card li{padding:.9% 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .card li:last-child{border-bottom:none;}
+  .card li::before{content:"▸ ";}
+
+  /* ══════════════════════════════════
+     PIPELINE STAGE COMPONENT
+  ══════════════════════════════════ */
+  .pipeline{display:flex;align-items:stretch;width:100%;gap:0;}
+  .pstage{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:1.3% 1%;text-align:center;border-radius:.8vw;
+    position:relative;transition:transform .22s;
+  }
+  .pstage:hover{transform:translateY(-2px);}
+  .ps-num{
+    width:clamp(16px,2.2vw,26px);height:clamp(16px,2.2vw,26px);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(.44rem,.8vw,.6rem);font-weight:800;margin-bottom:4%;flex-shrink:0;
+  }
+  .ps-ico{font-size:clamp(.95rem,1.8vw,1.3rem);margin-bottom:3%;}
+  .pstage h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:2%;}
+  .pstage p {font-size:clamp(.43rem,.78vw,.58rem);color:#94a3b8;line-height:1.4;}
+
+  .ps-code {background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .ps-bld  {background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .ps-scan {background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .ps-cbom {background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(96,165,250,.1));border:1.5px solid rgba(45,212,191,.38);}
+  .ps-gate {background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.26);}
+  .ps-dep  {background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.26);}
+  .ps-mon  {background:rgba(249,115,22,.08); border:1px solid rgba(249,115,22,.24);}
+
+  .pn-1{background:rgba(56,189,248,.2); color:#38bdf8;}
+  .pn-2{background:rgba(129,140,248,.2);color:#818cf8;}
+  .pn-3{background:rgba(192,132,252,.2);color:#c084fc;}
+  .pn-4{background:rgba(45,212,191,.18);color:#2dd4bf;}
+  .pn-5{background:rgba(251,191,36,.18); color:#fbbf24;}
+  .pn-6{background:rgba(74,222,128,.18); color:#4ade80;}
+  .pn-7{background:rgba(249,115,22,.18); color:#fb923c;}
+
+  .parrow{display:flex;align-items:center;font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;padding:0 .2%;}
+
+  /* ── CBOM highlight badge in pipeline ── */
+  .cbom-badge{
+    position:absolute;top:-10%;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,#2dd4bf,#60a5fa);
+    color:#000;font-size:clamp(.38rem,.7vw,.52rem);font-weight:800;
+    padding:.15em .6em;border-radius:999px;white-space:nowrap;
+    box-shadow:0 2px 10px rgba(45,212,191,.4);
+  }
+
+  /* ══════════════════════════════════
+     SECURITY TOOLS INTEGRATION (S4)
+  ══════════════════════════════════ */
+  .tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1%;width:100%;margin-bottom:.9%;}
+  .tbox{border-radius:.8vw;padding:1.5% 1.6%;background:rgba(255,255,255,.04);}
+  .tbox-head{display:flex;align-items:center;gap:1%;margin-bottom:.7%;padding-bottom:.6%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .tbox-head .ti{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .tbox-head h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .tbox-row{display:flex;align-items:flex-start;gap:.8%;padding:.5% 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.45;}
+  .tbox-row:last-child{border-bottom:none;}
+  .tbox-row .dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:.4em;}
+  .tb-sast{border:1px solid rgba(56,189,248,.22);}
+  .tb-sca {border:1px solid rgba(192,132,252,.22);}
+  .tb-dast{border:1px solid rgba(45,212,191,.20);}
+
+  /* ══════════════════════════════════
+     BENEFITS GRID (S5)
+  ══════════════════════════════════ */
+  .ben-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.9%;}
+  .bbox{border-radius:.8vw;padding:1.4% 1.5%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);text-align:center;}
+  .bbox .bi{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .bbox h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .bbox p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  /* ── Shift-left visual ── */
+  .shift-bar{
+    width:100%;height:clamp(26px,3.5%,36px);
+    border-radius:999px;position:relative;overflow:hidden;
+    background:linear-gradient(90deg,rgba(74,222,128,.25) 0%,rgba(251,191,36,.2) 40%,rgba(248,113,113,.25) 100%);
+    border:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;
+    margin:.6% 0;
+  }
+  .sb-label{
+    position:absolute;font-size:clamp(.42rem,.78vw,.58rem);
+    font-weight:700;letter-spacing:.08em;
+  }
+  .sb-l{left:3%;color:#4ade80;}
+  .sb-m{left:38%;color:#fbbf24;}
+  .sb-r{right:3%;color:#f87171;}
+  .sb-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);
+    font-size:clamp(.65rem,1.2vw,.88rem);
+    animation:arrowSlide 2.5s ease-in-out infinite;
+  }
+  @keyframes arrowSlide{0%,100%{left:4%;}50%{left:8%;}}
+  .sb-tag{
+    position:absolute;right:0;top:50%;transform:translateY(-50%);
+    background:linear-gradient(135deg,#4ade80,#2dd4bf);
+    color:#000;font-size:clamp(.38rem,.7vw,.52rem);font-weight:800;
+    padding:.15em .7em;border-radius:999px 0 0 999px;
+  }
+
+  /* ══════════════════════════════════
+     SUMMARY (S6)
+  ══════════════════════════════════ */
+  .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .sbox{border-radius:.75vw;padding:1.5% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .sbox .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .sbox h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .sbox p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  /* ── Next box ── */
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-ind">🔁 CBOM Series · Episode 9</div>
+    <h1>CBOM in DevSecOps Pipeline</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">CI/CD Integration Explained — From Code to Secure Deployment</p>
+    <p class="tagline">✦ Automate · Integrate · Secure at Every Stage ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🔁 <span>Pipeline</span></div>
+      <div class="tb tb-b">⚙️ <span>Automation</span></div>
+      <div class="tb tb-c">🛡️ <span>Security</span></div>
+    </div>
+
+    <!-- Mini pipeline preview on title -->
+    <div class="pipeline" style="margin-bottom:.9%;max-width:92%;">
+      <div class="pstage ps-code" style="padding:1% .9%;">
+        <span class="ps-ico">💾</span><h4>Code</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-bld" style="padding:1% .9%;">
+        <span class="ps-ico">🔨</span><h4>Build</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-scan" style="padding:1% .9%;">
+        <span class="ps-ico">🔍</span><h4>Scan</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-cbom" style="padding:1% .9%;position:relative;">
+        <div class="cbom-badge">CBOM</div>
+        <span class="ps-ico">📋</span><h4>Generate</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-gate" style="padding:1% .9%;">
+        <span class="ps-ico">🚦</span><h4>Gate</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-dep" style="padding:1% .9%;">
+        <span class="ps-ico">🚀</span><h4>Deploy</h4>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-mon" style="padding:1% .9%;">
+        <span class="ps-ico">📡</span><h4>Monitor</h4>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>In a DevSecOps pipeline, <strong>CBOM is not an afterthought</strong> — it is generated automatically at every build, enforced at every deployment gate, and monitored in every production environment. This episode shows exactly where and how it fits.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is DevSecOps Pipeline?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🏗️ Foundation · Slide 2 of 6</div>
+    <h2>What is a DevSecOps Pipeline?</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.9%;">
+      <p>📖 A <strong>DevSecOps pipeline</strong> is an automated software delivery workflow where <strong>security is built into every stage</strong> — not bolted on at the end. Traditional DevOps had a security review before release; DevSecOps runs security checks at every step, from the first commit to production monitoring.</p>
+    </div>
+
+    <!-- Pipeline stages detailed -->
+    <div class="sl sl-s" style="text-align:center;">⚙️ Core Pipeline Stages — Security Integrated at Every Step</div>
+    <div class="pipeline" style="margin-bottom:.9%;">
+      <div class="pstage ps-code">
+        <div class="ps-num pn-1">1</div>
+        <span class="ps-ico">💾</span>
+        <h4 class="as">Code</h4>
+        <p>Developer commits code to Git. Pre-commit hooks run linting and secret scanning immediately.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-bld">
+        <div class="ps-num pn-2">2</div>
+        <span class="ps-ico">🔨</span>
+        <h4 class="ai">Build</h4>
+        <p>CI system compiles the application. Dependency resolution happens here — all libraries fetched.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-scan">
+        <div class="ps-num pn-3">3</div>
+        <span class="ps-ico">🔍</span>
+        <h4 class="av">Test &amp; Scan</h4>
+        <p>Unit tests, SAST, SCA, and container scanning run in parallel. Vulnerabilities reported here.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-gate">
+        <div class="ps-num pn-5">4</div>
+        <span class="ps-ico">🚦</span>
+        <h4 class="ay">Policy Gate</h4>
+        <p>Automated quality and security gates. Build fails if critical issues found. No exceptions.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-dep">
+        <div class="ps-num pn-6">5</div>
+        <span class="ps-ico">🚀</span>
+        <h4 class="ag">Deploy</h4>
+        <p>Passed builds deploy to staging then production. Artefacts signed and stored with provenance.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-mon">
+        <div class="ps-num pn-7">6</div>
+        <span class="ps-ico">📡</span>
+        <h4 style="color:#fb923c;">Monitor</h4>
+        <p>Production runtime monitored continuously. Alerts on anomalies, new CVEs, or cert expiry.</p>
+      </div>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.5%;">
+      <div class="col">
+        <div class="hbox hb-sky" style="margin-bottom:0;">
+          <p>🔀 <strong>CI = Continuous Integration:</strong> every code change automatically triggers the full build and test sequence — no manual steps, no waiting for release day to discover problems.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hbox hb-ind" style="margin-bottom:0;">
+          <p>🚀 <strong>CD = Continuous Delivery/Deployment:</strong> approved builds are automatically packaged and deployed to environments — reducing human error and shortening release cycles from weeks to hours.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="hbox hb-vio" style="margin-bottom:0;">
+          <p>🛡️ <strong>Sec = Security Everywhere:</strong> every stage has security tooling — not just a pre-release pentest. Issues are caught in minutes, not months, dramatically reducing remediation cost.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Where CBOM Fits
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">📋 CBOM Placement · Slide 3 of 6</div>
+    <h2>Where CBOM Fits in the Pipeline</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.9%;">
+      <p>📖 CBOM is not a single-point tool — it <strong>touches multiple pipeline stages</strong>. It is generated during the build and scan phase, enforced at the policy gate, stored alongside deployment artefacts, and continuously refreshed during runtime monitoring. It provides <strong>continuous security visibility</strong> across the entire lifecycle.</p>
+    </div>
+
+    <div class="sl sl-v" style="text-align:center;">🗺️ CBOM Integration Points — Highlighted Across the Full Pipeline</div>
+
+    <!-- Full annotated pipeline -->
+    <div class="pipeline" style="margin-bottom:.9%;">
+      <div class="pstage ps-code">
+        <div class="ps-num pn-1">1</div>
+        <span class="ps-ico">💾</span>
+        <h4 class="as">Code Commit</h4>
+        <p>Pre-commit hooks detect obvious crypto API misuse</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-bld" style="position:relative;">
+        <div class="cbom-badge">CBOM starts here</div>
+        <div class="ps-num pn-2">2</div>
+        <span class="ps-ico">🔨</span>
+        <h4 class="ai">Build</h4>
+        <p>cdxgen / Syft scan source &amp; manifests. Static CBOM generated.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-scan" style="position:relative;">
+        <div class="cbom-badge">CBOM enriched</div>
+        <div class="ps-num pn-3">3</div>
+        <span class="ps-ico">🔍</span>
+        <h4 class="av">Scan Stage</h4>
+        <p>SCA &amp; SAST run. CBOM fields enriched with CVEs and risk scores.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-cbom" style="position:relative;">
+        <div class="cbom-badge" style="background:linear-gradient(135deg,#a5b4fc,#5eead4);">CBOM published</div>
+        <div class="ps-num pn-4">4</div>
+        <span class="ps-ico">📋</span>
+        <h4 class="at">CBOM Output</h4>
+        <p>Final CycloneDX JSON signed and stored in artefact registry.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-gate" style="position:relative;">
+        <div class="cbom-badge" style="background:linear-gradient(135deg,#fbbf24,#fb923c);">CBOM enforced</div>
+        <div class="ps-num pn-5">5</div>
+        <span class="ps-ico">🚦</span>
+        <h4 class="ay">Policy Gate</h4>
+        <p>CBOM compared against policy. Weak crypto = build blocked.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-dep">
+        <div class="ps-num pn-6">6</div>
+        <span class="ps-ico">🚀</span>
+        <h4 class="ag">Deploy</h4>
+        <p>CBOM deployed alongside container image as signed artefact.</p>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-mon" style="position:relative;">
+        <div class="cbom-badge" style="background:linear-gradient(135deg,#fb923c,#f87171);">CBOM updated</div>
+        <div class="ps-num pn-7">7</div>
+        <span class="ps-ico">📡</span>
+        <h4 style="color:#fb923c;">Monitor</h4>
+        <p>Runtime scanner refreshes CBOM. Cert expiry alerts triggered.</p>
+      </div>
+    </div>
+
+    <div class="two" style="align-items:stretch;gap:1.4%;">
+      <div class="hbox hb-tel" style="margin-bottom:0;flex:1;">
+        <p>🔄 <strong>Continuous Visibility:</strong> Because CBOM is generated at <em>every</em> build, the inventory is never stale. Any new crypto component added by a developer immediately appears in the next build's CBOM — detected before it reaches production.</p>
+      </div>
+      <div class="hbox hb-vio" style="margin-bottom:0;flex:1;">
+        <p>🚦 <strong>Policy as Code:</strong> The CBOM policy gate is defined as a code file (e.g., <span class="av">.cbom-policy.json</span>) that lists approved algorithms, minimum key sizes, and max cert age. Any deviation fails the build automatically — zero manual review needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Integration with Security Tools
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">🔌 Tool Integration · Slide 4 of 6</div>
+    <h2>CBOM Integration with Security Tools</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.9%;">
+      <p>📖 CBOM does not work in isolation — it operates as part of a <strong>unified security toolchain</strong>. It complements SAST, SCA, and DAST by adding a <strong>dedicated cryptographic visibility layer</strong> that these tools don't natively provide. Together, they cover the full security spectrum.</p>
+    </div>
+
+    <div class="tool-grid">
+      <!-- SAST -->
+      <div class="tbox tb-sast">
+        <div class="tbox-head">
+          <span class="ti">🔎</span>
+          <h3 class="as">SAST — Static Analysis</h3>
+        </div>
+        <div class="tbox-row"><span class="dot" style="background:#38bdf8;"></span><div><strong style="color:#bae6fd;">What it does:</strong> scans source code for bugs, injection flaws, and insecure coding patterns</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#38bdf8;"></span><div><strong style="color:#bae6fd;">CBOM adds:</strong> detects which crypto APIs are called and flags misuse (e.g., ECB mode, MD5 hashing)</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#38bdf8;"></span><div><strong style="color:#bae6fd;">Tools:</strong> SonarQube, Semgrep, Checkmarx, Veracode</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#38bdf8;"></span><div><strong style="color:#bae6fd;">Stage:</strong> Build / Pre-merge scan</div></div>
+      </div>
+
+      <!-- SCA -->
+      <div class="tbox tb-sca">
+        <div class="tbox-head">
+          <span class="ti">📦</span>
+          <h3 class="av">SCA — Composition Analysis</h3>
+        </div>
+        <div class="tbox-row"><span class="dot" style="background:#c084fc;"></span><div><strong style="color:#e9d5ff;">What it does:</strong> identifies known CVEs in third-party libraries and open-source dependencies</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#c084fc;"></span><div><strong style="color:#e9d5ff;">CBOM adds:</strong> maps which vulnerable libraries contain crypto — shows cryptographic blast radius of each CVE</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#c084fc;"></span><div><strong style="color:#e9d5ff;">Tools:</strong> Snyk, Trivy, OWASP Dep-Check, Dependabot</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#c084fc;"></span><div><strong style="color:#e9d5ff;">Stage:</strong> Build / Dependency resolution</div></div>
+      </div>
+
+      <!-- DAST -->
+      <div class="tbox tb-dast">
+        <div class="tbox-head">
+          <span class="ti">🌐</span>
+          <h3 class="at">DAST — Dynamic Analysis</h3>
+        </div>
+        <div class="tbox-row"><span class="dot" style="background:#2dd4bf;"></span><div><strong style="color:#99f6e4;">What it does:</strong> tests the running application for vulnerabilities by sending real HTTP requests and observing responses</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#2dd4bf;"></span><div><strong style="color:#99f6e4;">CBOM adds:</strong> validates runtime TLS version and cipher suite matches what CBOM declared at build time</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#2dd4bf;"></span><div><strong style="color:#99f6e4;">Tools:</strong> OWASP ZAP, Burp Suite, Nikto, Nuclei</div></div>
+        <div class="tbox-row"><span class="dot" style="background:#2dd4bf;"></span><div><strong style="color:#99f6e4;">Stage:</strong> Staging environment / pre-release</div></div>
+      </div>
+    </div>
+
+    <!-- Central integration diagram -->
+    <div style="width:100%;display:flex;align-items:center;justify-content:center;gap:1.2%;margin-bottom:.7%;">
+      <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.22);border-radius:.6vw;padding:.8% 1.2%;font-size:clamp(.48rem,.88vw,.64rem);color:#7dd3fc;font-weight:600;text-align:center;">🔎 SAST<br><span style="color:#475569;font-weight:400;">code patterns</span></div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">+</div>
+      <div style="background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.22);border-radius:.6vw;padding:.8% 1.2%;font-size:clamp(.48rem,.88vw,.64rem);color:#d8b4fe;font-weight:600;text-align:center;">📦 SCA<br><span style="color:#475569;font-weight:400;">dep CVEs</span></div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">+</div>
+      <div style="background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.22);border-radius:.6vw;padding:.8% 1.2%;font-size:clamp(.48rem,.88vw,.64rem);color:#5eead4;font-weight:600;text-align:center;">🌐 DAST<br><span style="color:#475569;font-weight:400;">runtime behaviour</span></div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">+</div>
+      <div style="background:linear-gradient(135deg,rgba(45,212,191,.14),rgba(96,165,250,.12));border:1.5px solid rgba(45,212,191,.38);border-radius:.6vw;padding:.8% 1.4%;font-size:clamp(.48rem,.88vw,.64rem);color:#a7f3d0;font-weight:700;text-align:center;">📋 CBOM<br><span style="color:#5eead4;font-weight:400;">crypto inventory</span></div>
+      <div style="font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;">=</div>
+      <div style="background:linear-gradient(135deg,rgba(129,140,248,.14),rgba(45,212,191,.1));border:1.5px solid rgba(129,140,248,.4);border-radius:.6vw;padding:.8% 1.4%;font-size:clamp(.48rem,.88vw,.64rem);color:#c7d2fe;font-weight:700;text-align:center;">🛡️ Unified Security<br><span style="color:#a5b4fc;font-weight:400;">complete coverage</span></div>
+    </div>
+
+    <div class="hbox hb-tel" style="margin-bottom:0;">
+      <p>🎯 <strong>Unified Approach:</strong> SAST finds insecure code patterns. SCA finds vulnerable libraries. DAST finds runtime flaws. <strong>CBOM ties it together</strong> by providing the cryptographic context — which algorithms, keys, and certs underpin all of those findings — turning individual tool reports into a coherent security picture.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Automation & Benefits
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#1e3a8a;width:28%;height:28%;top:-3%;right:5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-blu">⚡ Benefits · Slide 5 of 6</div>
+    <h2>Automation &amp; Benefits of CBOM in DevSecOps</h2>
+
+    <div class="hbox hb-blu" style="margin-bottom:.85%;">
+      <p>📖 When CBOM is embedded in a DevSecOps pipeline, the result is <strong>continuous, automated cryptographic governance</strong> — with no manual effort. The security team gets real-time visibility; the development team gets fast, actionable feedback; and the compliance team gets audit-ready evidence automatically.</p>
+    </div>
+
+    <!-- Shift-left bar -->
+    <div class="sl sl-b" style="text-align:center;">⬅️ Shift-Left Security — Catch Issues Earlier, Fix Them Cheaper</div>
+    <div class="shift-bar">
+      <span class="sb-label sb-l">✅ Code / Build — Cheapest fix</span>
+      <span class="sb-label sb-m">⚠️ Staging — Moderate cost</span>
+      <span class="sb-label sb-r">❌ Production — Most expensive</span>
+      <span class="sb-arrow">🎯</span>
+      <span class="sb-tag">CBOM catches here ←</span>
+    </div>
+
+    <div class="ben-grid" style="margin-top:.7%;">
+      <div class="bbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="bi">🤖</span>
+        <h4 class="as">Automated Generation</h4>
+        <p>CBOM auto-generated on every build — zero manual effort. cdxgen runs in under 60 seconds for most applications.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="bi">📡</span>
+        <h4 class="av">Continuous Monitoring</h4>
+        <p>Runtime scanners refresh CBOM continuously. Certificate expiry, new CVEs, and config drift are detected the moment they appear.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="bi">🎯</span>
+        <h4 class="at">Early Detection</h4>
+        <p>Weak algorithms, deprecated protocols, and short keys are caught at the build stage — before any code reaches staging or production.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(74,222,128,.24);">
+        <span class="bi">⚡</span>
+        <h4 class="ag">Faster Remediation</h4>
+        <p>CBOM pinpoints the exact component, file, and owner — teams fix the right thing immediately rather than spending hours investigating.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(96,165,250,.24);">
+        <span class="bi">📋</span>
+        <h4 class="ab">Better Compliance</h4>
+        <p>Auto-generated CBOM provides signed, timestamped evidence for FIPS 140-3, PCI-DSS 4.0, HIPAA, and CERT-In audits on demand.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(129,140,248,.24);">
+        <span class="bi">⚛️</span>
+        <h4 class="ai">Quantum Readiness</h4>
+        <p>Continuous CBOM gives teams a living map of all current algorithms — essential for planning post-quantum cryptography (PQC) migrations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-grn">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-grid" style="margin-bottom:.85%;">
+      <div class="sbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🔁</span>
+        <h4 class="as">Integrated Pipeline</h4>
+        <p>CBOM plugs into every CI/CD stage — from pre-commit hooks and build scanning to policy gates, deployment artefacts, and runtime monitoring.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">👁️</span>
+        <h4 class="at">Continuous Visibility</h4>
+        <p>Every build auto-generates a fresh CBOM. The cryptographic inventory is never stale — it reflects the real, current state of your application at all times.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">⚙️</span>
+        <h4 class="av">Automated Checks</h4>
+        <p>Policy-as-code gates block deployments with weak crypto automatically — no manual review, no security team bottleneck, no delays.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(129,140,248,.24);">
+        <span class="si">🔌</span>
+        <h4 class="ai">Unified Toolchain</h4>
+        <p>CBOM works alongside SAST, SCA, and DAST — adding the cryptographic layer that these tools miss, giving teams a complete security posture in one view.</p>
+      </div>
+    </div>
+
+    <!-- Mini pipeline recap -->
+    <div class="pipeline" style="margin-bottom:.85%;max-width:95%;">
+      <div class="pstage ps-code" style="padding:1% .8%;"><span class="ps-ico">💾</span><h4 class="as" style="font-size:clamp(.44rem,.8vw,.6rem);">Code</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-bld" style="padding:1% .8%;position:relative;"><div class="cbom-badge" style="font-size:clamp(.3rem,.56vw,.42rem);">CBOM gen</div><span class="ps-ico">🔨</span><h4 class="ai" style="font-size:clamp(.44rem,.8vw,.6rem);">Build</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-scan" style="padding:1% .8%;position:relative;"><div class="cbom-badge" style="font-size:clamp(.3rem,.56vw,.42rem);">enriched</div><span class="ps-ico">🔍</span><h4 class="av" style="font-size:clamp(.44rem,.8vw,.6rem);">Scan</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-cbom" style="padding:1% .8%;"><span class="ps-ico">📋</span><h4 class="at" style="font-size:clamp(.44rem,.8vw,.6rem);">CBOM Out</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-gate" style="padding:1% .8%;position:relative;"><div class="cbom-badge" style="font-size:clamp(.3rem,.56vw,.42rem);background:linear-gradient(135deg,#fbbf24,#fb923c);">enforced</div><span class="ps-ico">🚦</span><h4 class="ay" style="font-size:clamp(.44rem,.8vw,.6rem);">Gate</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-dep" style="padding:1% .8%;"><span class="ps-ico">🚀</span><h4 class="ag" style="font-size:clamp(.44rem,.8vw,.6rem);">Deploy</h4></div>
+      <div class="parrow">→</div>
+      <div class="pstage ps-mon" style="padding:1% .8%;position:relative;"><div class="cbom-badge" style="font-size:clamp(.3rem,.56vw,.42rem);background:linear-gradient(135deg,#fb923c,#f87171);">updated</div><span class="ps-ico">📡</span><h4 style="color:#fb923c;font-size:clamp(.44rem,.8vw,.6rem);">Monitor</h4></div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>CBOM for Containers &amp; Cloud — scanning Docker images, Kubernetes workloads, and cloud-native services for cryptographic risks in modern infrastructure</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

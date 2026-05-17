@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBOM vs CBOM vs SCA – Complete Comparison</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #04040e;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: min(100vw, calc(100vh * 16/9));
+    height: min(100vh, calc(100vw * 9/16));
+    overflow: hidden;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3% 5%;
+    animation: fadeUp .55s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .s1 { background: linear-gradient(140deg,#07071e 0%,#0d1248 45%,#0a0b30 100%); }
+  .s2 { background: linear-gradient(140deg,#060c10 0%,#071e30 50%,#061520 100%); }
+  .s3 { background: linear-gradient(140deg,#080614 0%,#130830 50%,#0a0620 100%); }
+  .s4 { background: linear-gradient(140deg,#060c12 0%,#061e28 50%,#071824 100%); }
+  .s5 { background: linear-gradient(140deg,#060618 0%,#0b0d30 45%,#080c28 100%); }
+  .s6 { background: linear-gradient(140deg,#060810 0%,#0a1230 50%,#080e28 100%); }
+
+  /* ── Orbs ── */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(72px); opacity: 0.16; pointer-events: none;
+  }
+
+  /* ── Slide tag ── */
+  .tag {
+    font-size: clamp(.46rem,.9vw,.65rem); font-weight:700;
+    letter-spacing:.17em; text-transform:uppercase;
+    padding:.28em .9em; border-radius:999px; margin-bottom:.85%;
+  }
+  .tg-blue   { color:#60a5fa; background:rgba(96,165,250,.1);  border:1px solid rgba(96,165,250,.28); }
+  .tg-teal   { color:#2dd4bf; background:rgba(45,212,191,.09); border:1px solid rgba(45,212,191,.28); }
+  .tg-purple { color:#c084fc; background:rgba(192,132,252,.1); border:1px solid rgba(192,132,252,.28); }
+  .tg-orange { color:#fb923c; background:rgba(251,146,60,.09); border:1px solid rgba(251,146,60,.28); }
+  .tg-green  { color:#4ade80; background:rgba(74,222,128,.09); border:1px solid rgba(74,222,128,.28); }
+
+  /* ── Headings ── */
+  h1 {
+    font-size: clamp(1.8rem,5vw,3.6rem); font-weight:900;
+    line-height:1.08; text-align:center;
+    background: linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:.7%;
+  }
+  h2 { font-size:clamp(1.1rem,2.4vw,1.8rem); font-weight:800; color:#e2e8f0; text-align:center; margin-bottom:1.3%; }
+
+  .divl { width:52px; height:3px; border-radius:999px; margin:.7% auto 1.2%; }
+
+  .subtitle { font-size:clamp(.78rem,1.6vw,1.15rem); color:#94a3b8; text-align:center; margin-bottom:.6%; }
+  .tagline  { font-size:clamp(.66rem,1.2vw,.88rem); font-weight:600; letter-spacing:.05em; }
+
+  /* ── Title icons ── */
+  .title-icons { display:flex; gap:2vw; margin:2% 0; }
+  .tic {
+    display:flex; flex-direction:column; align-items:center; gap:.4em;
+    padding:clamp(10px,1.8%,18px) clamp(14px,2.4%,24px);
+    border-radius:.9vw; font-size:clamp(1.1rem,2.1vw,1.6rem);
+    animation:gentlePulse 3.5s ease-in-out infinite;
+  }
+  .tic span { font-size:clamp(.48rem,.85vw,.62rem); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .tic-blue   { background:rgba(96,165,250,.1);  border:1px solid rgba(96,165,250,.3);  color:#93c5fd; }
+  .tic-purple { background:rgba(192,132,252,.1); border:1px solid rgba(192,132,252,.3); color:#d8b4fe; }
+  .tic-teal   { background:rgba(45,212,191,.09); border:1px solid rgba(45,212,191,.3);  color:#5eead4; }
+  .tic:nth-child(2){ animation-delay:.6s; }
+  .tic:nth-child(3){ animation-delay:1.2s; }
+  @keyframes gentlePulse {
+    0%,100%{ transform:translateY(0); }
+    50%    { transform:translateY(-4px); }
+  }
+
+  /* ── Highlight box ── */
+  .hbox {
+    border-radius:.8vw; padding:1.4% 2%; width:100%; margin-bottom:1.1%;
+  }
+  .hbox p { font-size:clamp(.56rem,1.05vw,.78rem); line-height:1.55; }
+  .hbox strong { font-weight:700; }
+  .hb-blue   { background:rgba(96,165,250,.08);  border:1px solid rgba(96,165,250,.28);  }
+  .hb-blue p { color:#bfdbfe; } .hb-blue strong { color:#60a5fa; }
+  .hb-teal   { background:rgba(45,212,191,.07);  border:1px solid rgba(45,212,191,.26);  }
+  .hb-teal p { color:#99f6e4; } .hb-teal strong { color:#2dd4bf; }
+  .hb-purple { background:rgba(192,132,252,.08); border:1px solid rgba(192,132,252,.28); }
+  .hb-purple p{ color:#e9d5ff; } .hb-purple strong{ color:#c084fc; }
+  .hb-green  { background:rgba(74,222,128,.07);  border:1px solid rgba(74,222,128,.25);  }
+  .hb-green p{ color:#bbf7d0; } .hb-green strong{ color:#4ade80; }
+  .hb-grad   { background:linear-gradient(135deg,rgba(96,165,250,.09),rgba(192,132,252,.09)); border:1px solid rgba(192,132,252,.3); }
+  .hb-grad p { color:#c4b5fd; } .hb-grad strong { color:#a78bfa; }
+
+  /* ── Two-col ── */
+  .two { display:flex; gap:1.8%; width:100%; }
+  .col  { flex:1; }
+  .col-w{ flex:1.35; }
+
+  /* ── Sec label ── */
+  .sl {
+    font-size:clamp(.46rem,.86vw,.62rem); font-weight:700;
+    letter-spacing:.13em; text-transform:uppercase; margin-bottom:1%;
+  }
+  .sl-b{ color:#60a5fa; } .sl-t{ color:#2dd4bf; }
+  .sl-p{ color:#c084fc; } .sl-g{ color:#4ade80; }
+  .sl-o{ color:#fb923c; }
+
+  /* ── Cards ── */
+  .cards { display:flex; gap:1.3%; width:100%; }
+  .card {
+    flex:1; border-radius:.9vw; padding:2% 2%;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    transition:transform .25s;
+  }
+  .card:hover{ transform:translateY(-3px); }
+  .card .ci { font-size:clamp(1.1rem,2.1vw,1.6rem); margin-bottom:3%; display:block; }
+  .card h3  { font-size:clamp(.62rem,1.18vw,.86rem); font-weight:700; color:#e2e8f0; margin-bottom:2.5%; }
+  .card p, .card li { font-size:clamp(.54rem,.98vw,.73rem); color:#94a3b8; line-height:1.55; }
+  .card ul  { list-style:none; padding:0; }
+  .card li  { padding:1.1% 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .card li:last-child{ border-bottom:none; }
+  .card li::before{ content:"▸ "; }
+
+  /* ── Item list ── */
+  .ilist { list-style:none; padding:0; width:100%; }
+  .ilist li {
+    display:flex; align-items:flex-start; gap:1%;
+    padding:1% 0; border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.54rem,1vw,.75rem); color:#cbd5e1; line-height:1.5;
+  }
+  .ilist li:last-child{ border-bottom:none; }
+  .ico { font-size:1.1em; flex-shrink:0; margin-top:.1em; }
+
+  /* Accents */
+  .ab{ color:#60a5fa; font-weight:700; }
+  .at{ color:#2dd4bf; font-weight:700; }
+  .ap{ color:#c084fc; font-weight:700; }
+  .ag{ color:#4ade80; font-weight:700; }
+  .ao{ color:#fb923c; font-weight:700; }
+  .ay{ color:#fbbf24; font-weight:700; }
+  .ar{ color:#f87171; font-weight:700; }
+
+  /* ── Question badge ── */
+  .qbadge {
+    display:inline-flex; align-items:center; gap:.5em;
+    padding:.35em 1em; border-radius:999px; font-weight:700;
+    font-size:clamp(.56rem,1.02vw,.75rem); margin-bottom:1.2%;
+  }
+  .qb-blue   { background:rgba(96,165,250,.15);  border:1px solid rgba(96,165,250,.4);  color:#93c5fd; }
+  .qb-purple { background:rgba(192,132,252,.15); border:1px solid rgba(192,132,252,.4); color:#d8b4fe; }
+  .qb-teal   { background:rgba(45,212,191,.12);  border:1px solid rgba(45,212,191,.38); color:#5eead4; }
+
+  /* ── Example panel ── */
+  .eg {
+    border-radius:.7vw; padding:1.3% 1.8%;
+    display:flex; align-items:flex-start; gap:1.5%;
+  }
+  .eg .ei { font-size:clamp(1rem,1.9vw,1.4rem); flex-shrink:0; }
+  .eg h4  { font-size:clamp(.58rem,1.05vw,.77rem); font-weight:700; margin-bottom:.6%; }
+  .eg p   { font-size:clamp(.52rem,.95vw,.7rem); color:#94a3b8; line-height:1.5; }
+  .eg-blue   { background:rgba(96,165,250,.07);  border:1px solid rgba(96,165,250,.22);  }
+  .eg-purple { background:rgba(192,132,252,.07); border:1px solid rgba(192,132,252,.22); }
+  .eg-teal   { background:rgba(45,212,191,.06);  border:1px solid rgba(45,212,191,.22);  }
+
+  /* ── Comparison table ── */
+  .ctable { width:100%; border-collapse:collapse; }
+  .ctable th, .ctable td {
+    padding:clamp(6px,1.1%,11px) clamp(8px,1.3%,14px);
+    text-align:left; vertical-align:top;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    font-size:clamp(.52rem,.96vw,.71rem); line-height:1.45;
+  }
+  .ctable thead tr { background:rgba(255,255,255,.06); }
+  .ctable th {
+    font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    font-size:clamp(.46rem,.84vw,.62rem); color:#94a3b8;
+  }
+  .ctable tbody tr { transition:background .2s; }
+  .ctable tbody tr:hover { background:rgba(255,255,255,.03); }
+  .ctable tbody tr:last-child td { border-bottom:none; }
+
+  .row-sbom td:first-child { border-left:3px solid #60a5fa; }
+  .row-sca  td:first-child { border-left:3px solid #c084fc; }
+  .row-cbom td:first-child { border-left:3px solid #2dd4bf; }
+
+  .badge {
+    display:inline-block; padding:.18em .65em; border-radius:999px;
+    font-weight:700; font-size:.9em;
+  }
+  .bd-blue   { background:rgba(96,165,250,.14);  color:#60a5fa;  border:1px solid rgba(96,165,250,.3); }
+  .bd-purple { background:rgba(192,132,252,.14); color:#c084fc;  border:1px solid rgba(192,132,252,.3); }
+  .bd-teal   { background:rgba(45,212,191,.12);  color:#2dd4bf;  border:1px solid rgba(45,212,191,.3); }
+
+  /* ── Together flow (slide 6) ── */
+  .flow { display:flex; align-items:center; width:100%; gap:.8%; margin:1% 0; }
+  .fnode {
+    flex:1; border-radius:.8vw; padding:1.8% 1.5%; text-align:center;
+  }
+  .fn-blue   { background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.3); }
+  .fn-purple { background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.3); }
+  .fn-teal   { background:rgba(45,212,191,.08);  border:1px solid rgba(45,212,191,.3); }
+  .fn-green  { background:rgba(74,222,128,.08);  border:1px solid rgba(74,222,128,.3); }
+  .fnode .fi { font-size:clamp(1rem,1.9vw,1.4rem); display:block; margin-bottom:4%; }
+  .fnode h4  { font-size:clamp(.58rem,1.05vw,.77rem); font-weight:700; color:#e2e8f0; margin-bottom:2%; }
+  .fnode p   { font-size:clamp(.5rem,.9vw,.67rem); color:#94a3b8; line-height:1.45; }
+  .farrow    { font-size:clamp(.9rem,1.7vw,1.3rem); color:#475569; flex-shrink:0; }
+
+  /* ── Recap 3-col ── */
+  .rgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2%; width:100%; }
+  .rbox  {
+    border-radius:.8vw; padding:1.8% 1.8%;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    text-align:center;
+  }
+  .rbox .ri { font-size:clamp(1.1rem,2.1vw,1.5rem); display:block; margin-bottom:4%; }
+  .rbox h4  { font-size:clamp(.6rem,1.1vw,.8rem); font-weight:700; color:#e2e8f0; margin-bottom:2%; }
+  .rbox p   { font-size:clamp(.5rem,.9vw,.67rem); color:#94a3b8; line-height:1.5; }
+
+  .next-box {
+    width:100%; border-radius:.8vw; padding:1.2% 2%;
+    background:linear-gradient(135deg,rgba(96,165,250,.12),rgba(192,132,252,.12));
+    border:1px solid rgba(192,132,252,.32);
+    display:flex; align-items:center; justify-content:space-between; gap:2%;
+  }
+  .next-box h3 { font-size:clamp(.62rem,1.15vw,.85rem); color:#e2e8f0; font-weight:700; margin-bottom:.6%; }
+  .next-box p  { font-size:clamp(.5rem,.92vw,.68rem); color:#94a3b8; }
+  .nbtn {
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+    color:#fff; font-weight:700; font-size:clamp(.52rem,.96vw,.71rem);
+    padding:.5em 1.3em; border-radius:999px; white-space:nowrap;
+    flex-shrink:0; box-shadow:0 4px 16px rgba(139,92,246,.4);
+  }
+
+  /* ── Nav ── */
+  .nav-btn {
+    position:fixed; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+    color:#e2e8f0;
+    width:clamp(28px,3vw,42px); height:clamp(28px,3vw,42px);
+    border-radius:50%; font-size:clamp(.85rem,1.4vw,1.2rem);
+    cursor:pointer; backdrop-filter:blur(6px);
+    transition:all .2s; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:hover{ background:rgba(96,165,250,.22); border-color:#60a5fa; }
+  #pb{ left:.7%; } #nb{ right:.7%; }
+  .progress {
+    position:fixed; bottom:1.3%; left:50%; transform:translateX(-50%);
+    display:flex; gap:7px; z-index:100;
+  }
+  .dot {
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(255,255,255,.2); cursor:pointer; transition:all .3s;
+  }
+  .dot.active{ background:#60a5fa; transform:scale(1.45); }
+  .snum {
+    position:fixed; bottom:1.3%; right:1.8%;
+    font-size:clamp(.43rem,.78vw,.58rem); color:rgba(255,255,255,.25); z-index:100;
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════════
+       SLIDE 1 · Title
+  ══════════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#3b82f6;width:35%;height:35%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#8b5cf6;width:28%;height:28%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#14b8a6;width:18%;height:18%;bottom:15%;left:28%;"></div>
+
+    <div class="tag tg-blue">🔍 DevSecOps Series · Episode 4</div>
+    <h1>SBOM vs CBOM vs SCA</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#60a5fa,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Understanding the Key Differences</p>
+    <p class="tagline" style="color:#93c5fd;">✦ Clear Comparison for Beginners &amp; Professionals ✦</p>
+
+    <div class="title-icons">
+      <div class="tic tic-blue">📦 <span>SBOM</span></div>
+      <div class="tic tic-purple">🔍 <span>SCA</span></div>
+      <div class="tic tic-teal">🔐 <span>CBOM</span></div>
+    </div>
+
+    <div class="hbox hb-grad" style="max-width:74%;text-align:center;">
+      <p>Three essential tools in modern software security — each answers a <strong>different question</strong>: <strong>What</strong> is in your software? <strong>Is it vulnerable?</strong> And <strong>how is your data secured?</strong> Together, they form complete application security.</p>
+    </div>
+    <p style="font-size:clamp(.46rem,.84vw,.6rem);color:#1e293b;margin-top:1.2%;text-align:center;">
+      Beginner-Friendly &nbsp;|&nbsp; DevOps / DevSecOps Relevant &nbsp;|&nbsp; Security Foundations Series
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 2 · What is SBOM?
+  ══════════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1d4ed8;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:20%;height:20%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-blue">📦 Concept 1 of 3 · Slide 2 of 6</div>
+    <h2>What is SBOM?</h2>
+
+    <div class="qbadge qb-blue">❓ Key Question: "What software components are being used?"</div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="sl sl-b">📖 Definition</div>
+        <div class="hbox hb-blue" style="margin-bottom:1.2%;">
+          <p>A <strong>Software Bill of Materials (SBOM)</strong> is a complete, machine-readable <strong>inventory of all software components</strong> inside an application — like a detailed ingredient list for your code. It tells you exactly what is inside, without examining each component individually.</p>
+        </div>
+
+        <div class="sl sl-b">📦 What Does an SBOM Track?</div>
+        <ul class="ilist">
+          <li><span class="ico">📚</span><div><span class="ab">Libraries &amp; Packages</span> — every open-source and commercial library used (e.g., React, Spring Boot, OpenSSL, log4j).</div></li>
+          <li><span class="ico">🔗</span><div><span class="ab">Direct &amp; Transitive Dependencies</span> — not just what you imported, but every package those packages depend on — potentially hundreds deep.</div></li>
+          <li><span class="ico">🏷️</span><div><span class="ab">Versions &amp; Licenses</span> — exact version numbers and open-source licenses (MIT, GPL, Apache) to track legal obligations.</div></li>
+          <li><span class="ico">🏛️</span><div><span class="ab">Supplier &amp; Origin</span> — who created and maintains each component, and where it was sourced from.</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-b">🌍 Real-World Example</div>
+        <div class="eg eg-blue" style="margin-bottom:1.2%;">
+          <span class="ei">🛒</span>
+          <div>
+            <h4 class="ab">E-Commerce Application SBOM</h4>
+            <p>Your app uses React, Axios, Express, and lodash directly. But lodash pulls in 4 more packages, Express pulls in 12, and Axios pulls in 3. Your SBOM captures <em>all 20+</em> components — giving you a complete picture.</p>
+          </div>
+        </div>
+
+        <div class="sl sl-b">✅ Why It Matters</div>
+        <div class="cards" style="flex-direction:column;gap:1%;">
+          <div class="card" style="border-color:rgba(96,165,250,.22);padding:1.5% 1.8%;">
+            <p>🛡️ <span class="ab">Supply chain security</span> — Executive Order 14028 (US) mandates SBOMs for federal software. Knowing your components is now a compliance requirement.</p>
+          </div>
+          <div class="card" style="border-color:rgba(96,165,250,.22);padding:1.5% 1.8%;">
+            <p>⚡ <span class="ab">Rapid incident response</span> — When Log4Shell dropped in 2021, organizations with SBOMs found affected systems in hours. Others took weeks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-blue" style="margin-top:.8%;margin-bottom:0;">
+      <p>📋 <strong>SBOM Formats:</strong> <strong>CycloneDX</strong> (OWASP) and <strong>SPDX</strong> (Linux Foundation) are the two dominant open standards. Tools like Syft, cdxgen, and Trivy can auto-generate SBOMs from any codebase.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 3 · What is SCA?
+  ══════════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#7c3aed;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#be185d;width:20%;height:20%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-purple">🔍 Concept 2 of 3 · Slide 3 of 6</div>
+    <h2>What is SCA?</h2>
+
+    <div class="qbadge qb-purple">❓ Key Question: "Are the components I use vulnerable?"</div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="sl sl-p">📖 Definition</div>
+        <div class="hbox hb-purple" style="margin-bottom:1.2%;">
+          <p><strong>Software Composition Analysis (SCA)</strong> is the process of <strong>automatically scanning your dependencies for known security vulnerabilities</strong>. SCA takes the inventory from an SBOM and cross-references every component against vulnerability databases like the <strong>National Vulnerability Database (NVD)</strong> and <strong>CVE</strong> records.</p>
+        </div>
+
+        <div class="sl sl-p">⚙️ How SCA Works (Step by Step)</div>
+        <ul class="ilist">
+          <li><span class="ico">1️⃣</span><div><span class="ap">Scan</span> — SCA tool scans your codebase, package files (package.json, pom.xml, requirements.txt), and containers.</div></li>
+          <li><span class="ico">2️⃣</span><div><span class="ap">Identify</span> — Builds a component list (often using SBOM internally) with exact versions of every library.</div></li>
+          <li><span class="ico">3️⃣</span><div><span class="ap">Match</span> — Cross-references component versions against CVE databases, GitHub Advisory, Snyk DB, and OSS Index.</div></li>
+          <li><span class="ico">4️⃣</span><div><span class="ap">Report</span> — Outputs a prioritised list of vulnerabilities with severity scores (CVSS) and recommended fix versions.</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-p">🌍 Real-World Example</div>
+        <div class="eg eg-purple" style="margin-bottom:1.2%;">
+          <span class="ei">🚨</span>
+          <div>
+            <h4 class="ap">Detecting a Vulnerable Package</h4>
+            <p>Your app uses <strong>log4j 2.14.1</strong>. SCA instantly flags <strong>CVE-2021-44228</strong> (Log4Shell — CVSS 10.0 Critical) and tells you the fix is <strong>log4j 2.17.1</strong>. Without SCA, you'd never know until an attack happened.</p>
+          </div>
+        </div>
+
+        <div class="sl sl-p">🛠️ Popular SCA Tools</div>
+        <div class="cards" style="flex-direction:column;gap:1%;">
+          <div class="card" style="border-color:rgba(192,132,252,.22);padding:1.4% 1.8%;">
+            <ul>
+              <li style="color:#d8b4fe;">🔍 <span class="ap">Snyk</span> — developer-first, IDE integration, real-time alerts</li>
+              <li style="color:#d8b4fe;">🔍 <span class="ap">OWASP Dependency-Check</span> — open-source, CI/CD pipeline ready</li>
+              <li style="color:#d8b4fe;">🔍 <span class="ap">Trivy</span> — fast scanner for containers, filesystems, and git repos</li>
+              <li style="color:#d8b4fe;">🔍 <span class="ap">Dependabot</span> — built into GitHub, automatic PR updates</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-purple" style="margin-top:.8%;margin-bottom:0;">
+      <p>⚡ <strong>SCA vs SBOM:</strong> SBOM answers <strong>"what is here?"</strong> — SCA answers <strong>"is it safe?"</strong>. SCA <em>uses</em> SBOM data as its starting point. They are complementary, not competing tools.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 4 · What is CBOM?
+  ══════════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1d4ed8;width:20%;height:20%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-teal">🔐 Concept 3 of 3 · Slide 4 of 6</div>
+    <h2>What is CBOM?</h2>
+
+    <div class="qbadge qb-teal">❓ Key Question: "How is my data cryptographically secured?"</div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="sl sl-t">📖 Definition</div>
+        <div class="hbox hb-teal" style="margin-bottom:1.2%;">
+          <p>A <strong>Cryptographic Bill of Materials (CBOM)</strong> is a structured inventory of all <strong>cryptographic components</strong> in a software system — including which algorithms protect your data, what keys are in use, which certificates are active, and which protocols carry your traffic.</p>
+        </div>
+
+        <div class="sl sl-t">🗂️ What Does a CBOM Track?</div>
+        <ul class="ilist">
+          <li><span class="ico">⚙️</span><div><span class="at">Algorithms</span> — AES-256 (symmetric), RSA-2048 (asymmetric), SHA-256 (hashing). Flags deprecated ones like MD5 and DES.</div></li>
+          <li><span class="ico">🗝️</span><div><span class="at">Cryptographic Keys</span> — type, length, storage location, and rotation status. Weak or short keys are highlighted.</div></li>
+          <li><span class="ico">📜</span><div><span class="at">Certificates</span> — TLS/SSL certificates, issuer, expiry date, key strength. Alerts on expiring or mis-configured certs.</div></li>
+          <li><span class="ico">🔗</span><div><span class="at">Protocols</span> — TLS 1.2/1.3, SSH, DTLS. Deprecated protocols like TLS 1.0/SSLv3 are flagged as critical risk.</div></li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-t">🌍 Real-World Example</div>
+        <div class="eg eg-teal" style="margin-bottom:1.2%;">
+          <span class="ei">🏦</span>
+          <div>
+            <h4 class="at">Banking Application CBOM</h4>
+            <p>A CBOM scan reveals: payment service uses <strong>AES-256 ✅</strong>, auth service uses <strong>MD5 for token signing ❌</strong>, API gateway runs <strong>TLS 1.0 ❌</strong>. Without CBOM, these risks were completely invisible to the team.</p>
+          </div>
+        </div>
+
+        <div class="sl sl-t">🆚 Why CBOM is Different from SBOM + SCA</div>
+        <div class="cards" style="flex-direction:column;gap:1%;">
+          <div class="card" style="border-color:rgba(45,212,191,.22);padding:1.4% 1.8%;">
+            <p>📦 <span class="ab">SBOM</span> tells you <em>log4j 2.14.1</em> is present. <span class="ap">SCA</span> tells you it has a CVE. But <span class="at">CBOM</span> tells you <em>how data is encrypted inside</em> — a completely different security dimension SBOMs and SCA tools do not cover.</p>
+          </div>
+          <div class="card" style="border-color:rgba(45,212,191,.22);padding:1.4% 1.8%;">
+            <p>⚛️ Only <span class="at">CBOM</span> enables <strong>post-quantum cryptography (PQC) readiness</strong> — identifying which algorithms will break under quantum computing and mapping migration paths.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-teal" style="margin-top:.8%;margin-bottom:0;">
+      <p>🛠️ <strong>CBOM Tools:</strong> cdxgen (CycloneDX CBOM extension) · IBM SBOM Utility · Cryptosense Analyzer · custom CI/CD crypto scanners in DevSecOps pipelines</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 5 · Comparison Table
+  ══════════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-3%;right:6%;"></div>
+    <div class="orb" style="background:#0d9488;width:20%;height:20%;bottom:3%;left:4%;"></div>
+    <div class="orb" style="background:#1d4ed8;width:18%;height:18%;bottom:5%;right:30%;"></div>
+
+    <div class="tag tg-blue">📊 Full Comparison · Slide 5 of 6</div>
+    <h2>SBOM vs SCA vs CBOM — Side-by-Side Comparison</h2>
+
+    <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:.9vw;overflow:hidden;margin-bottom:1.2%;">
+      <table class="ctable">
+        <thead>
+          <tr>
+            <th style="width:13%;">Tool</th>
+            <th style="width:18%;">Purpose</th>
+            <th style="width:22%;">What It Tracks</th>
+            <th style="width:22%;">Output / Result</th>
+            <th style="width:25%;">Primary Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-sbom">
+            <td><span class="badge bd-blue">📦 SBOM</span></td>
+            <td><span class="ab">Software inventory</span> — catalogues every component inside an application</td>
+            <td>Libraries, packages, dependencies, versions, licenses, suppliers</td>
+            <td>Structured component list (CycloneDX / SPDX format) — machine &amp; human readable</td>
+            <td>Supply chain transparency · compliance (EO 14028) · dependency management · incident response</td>
+          </tr>
+          <tr class="row-sca">
+            <td><span class="badge bd-purple">🔍 SCA</span></td>
+            <td><span class="ap">Vulnerability detection</span> — finds known security flaws in your dependencies</td>
+            <td>CVEs, license violations, outdated versions, malicious packages</td>
+            <td>Prioritised vulnerability report with CVSS severity scores and remediation versions</td>
+            <td>Shift-left security · CI/CD pipeline scanning · patch management · risk prioritisation</td>
+          </tr>
+          <tr class="row-cbom">
+            <td><span class="badge bd-teal">🔐 CBOM</span></td>
+            <td><span class="at">Cryptographic visibility</span> — inventories all crypto components and their health</td>
+            <td>Algorithms, keys, TLS certificates, protocols, cipher suites, key lengths</td>
+            <td>Crypto inventory with risk flags — weak algorithms, expired certs, insecure protocols</td>
+            <td>Crypto governance · PQC readiness · cert lifecycle · compliance (FIPS, PCI-DSS, HIPAA)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards">
+      <div class="card" style="border-color:rgba(96,165,250,.22);text-align:center;">
+        <span class="ci">📦</span>
+        <h3 class="ab">"What is here?"</h3>
+        <p>SBOM maps the complete ingredient list of your software — every component, every version.</p>
+      </div>
+      <div class="card" style="border-color:rgba(192,132,252,.22);text-align:center;">
+        <span class="ci">🔍</span>
+        <h3 class="ap">"Is it vulnerable?"</h3>
+        <p>SCA checks each component against known CVE databases and flags exploitable weaknesses.</p>
+      </div>
+      <div class="card" style="border-color:rgba(45,212,191,.22);text-align:center;">
+        <span class="ci">🔐</span>
+        <h3 class="at">"How is data secured?"</h3>
+        <p>CBOM audits the cryptographic layer — ensuring algorithms, keys, and certs are strong and current.</p>
+      </div>
+    </div>
+
+    <div class="hbox hb-grad" style="margin-top:.9%;margin-bottom:0;">
+      <p>💡 <strong>Key Insight:</strong> SBOM, SCA, and CBOM are <strong>not competing</strong> — they are complementary layers. SBOM provides the foundation. SCA analyses it for vulnerabilities. CBOM goes deeper into the cryptographic security posture.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLIDE 6 · Summary + Key Takeaways
+  ══════════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#6d28d9;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:4%;left:5%;"></div>
+
+    <div class="tag tg-green">🏁 Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="rgrid" style="margin-bottom:1.1%;">
+      <div class="rbox" style="border-color:rgba(96,165,250,.22);">
+        <span class="ri">📦</span>
+        <h4><span class="ab">SBOM</span></h4>
+        <p><strong>Software inventory.</strong> Answers "what's inside?" Complete list of libraries, packages, and dependencies — with versions and licenses.</p>
+      </div>
+      <div class="rbox" style="border-color:rgba(192,132,252,.22);">
+        <span class="ri">🔍</span>
+        <h4><span class="ap">SCA</span></h4>
+        <p><strong>Vulnerability detection.</strong> Answers "is it safe?" Scans component versions against CVE databases and delivers severity-ranked risk reports.</p>
+      </div>
+      <div class="rbox" style="border-color:rgba(45,212,191,.22);">
+        <span class="ri">🔐</span>
+        <h4><span class="at">CBOM</span></h4>
+        <p><strong>Cryptographic visibility.</strong> Answers "how is data secured?" Tracks algorithms, keys, certs, and protocols — flags weak or outdated crypto.</p>
+      </div>
+    </div>
+
+    <div class="sl sl-g" style="text-align:center;">🤝 How They Work Together for Complete Application Security</div>
+
+    <div class="flow">
+      <div class="fnode fn-blue">
+        <span class="fi">📦</span>
+        <h4 class="ab">SBOM</h4>
+        <p>Generate full component inventory</p>
+      </div>
+      <span class="farrow">→</span>
+      <div class="fnode fn-purple">
+        <span class="fi">🔍</span>
+        <h4 class="ap">SCA</h4>
+        <p>Scan SBOM for CVEs &amp; vulnerabilities</p>
+      </div>
+      <span class="farrow">→</span>
+      <div class="fnode fn-teal">
+        <span class="fi">🔐</span>
+        <h4 class="at">CBOM</h4>
+        <p>Audit cryptographic layer for weak crypto</p>
+      </div>
+      <span class="farrow">→</span>
+      <div class="fnode fn-green">
+        <span class="fi">🛡️</span>
+        <h4 class="ag">Secure App</h4>
+        <p>Full software + cryptographic security posture</p>
+      </div>
+    </div>
+
+    <div class="next-box" style="margin-top:1%;">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>Components of CBOM — deep dive into algorithms, keys, certificates, and protocols with hands-on DevSecOps examples</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6; let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

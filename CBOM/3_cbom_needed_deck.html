@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why CBOM is Needed? – Hidden Security Risks Explained</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #04040e;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: min(100vw, calc(100vh * 16/9));
+    height: min(100vh, calc(100vw * 9/16));
+    overflow: hidden;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3% 5%;
+    animation: fadeUp .55s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .s1 { background: linear-gradient(140deg,#08061c 0%,#160830 50%,#0a0f2e 100%); }
+  .s2 { background: linear-gradient(140deg,#06060f 0%,#0b0a28 45%,#060c22 100%); }
+  .s3 { background: linear-gradient(140deg,#08040e 0%,#180620 50%,#0e0520 100%); }
+  .s4 { background: linear-gradient(140deg,#060810 0%,#090f28 50%,#060d22 100%); }
+  .s5 { background: linear-gradient(140deg,#040e0c 0%,#051c18 50%,#060e20 100%); }
+  .s6 { background: linear-gradient(140deg,#060810 0%,#0a1228 50%,#060f20 100%); }
+
+  /* ── Orbs ── */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(72px); opacity: 0.17; pointer-events: none;
+  }
+
+  /* ── Tag ── */
+  .tag {
+    font-size: clamp(.48rem,.95vw,.68rem);
+    font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .28em .95em; border-radius: 999px; margin-bottom: .9%;
+  }
+  .tag-warn   { color:#fb923c; background:rgba(251,146,60,.1);  border:1px solid rgba(251,146,60,.3); }
+  .tag-prob   { color:#f472b6; background:rgba(244,114,182,.1); border:1px solid rgba(244,114,182,.3); }
+  .tag-sol    { color:#34d399; background:rgba(52,211,153,.1);  border:1px solid rgba(52,211,153,.3); }
+  .tag-recap  { color:#60a5fa; background:rgba(96,165,250,.1);  border:1px solid rgba(96,165,250,.3); }
+
+  /* ── Headings ── */
+  h1 {
+    font-size: clamp(1.9rem,5.2vw,3.8rem); font-weight: 900;
+    line-height: 1.08; text-align: center;
+    background: linear-gradient(135deg,#fca5a5,#f472b6,#c4b5fd);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom: .7%;
+  }
+  h2 {
+    font-size: clamp(1.15rem,2.5vw,1.85rem); font-weight: 800;
+    color: #e2e8f0; text-align: center; margin-bottom: 1.4%;
+  }
+
+  .div {
+    width: 54px; height: 3px;
+    background: linear-gradient(90deg,#f472b6,#8b5cf6);
+    border-radius: 999px; margin: .7% auto 1.2%;
+  }
+  .div-teal { background: linear-gradient(90deg,#34d399,#06b6d4); }
+  .div-blue { background: linear-gradient(90deg,#60a5fa,#8b5cf6); }
+
+  .subtitle { font-size:clamp(.8rem,1.65vw,1.2rem); color:#94a3b8; text-align:center; margin-bottom:.6%; }
+  .tagline  { font-size:clamp(.68rem,1.25vw,.92rem); color:#f472b6; font-weight:600; letter-spacing:.05em; }
+
+  /* ── Icon bubbles ── */
+  .icon-row { display:flex; gap:2.6vw; margin:2% 0; }
+  .ibub {
+    width:clamp(54px,8vw,78px); height:clamp(54px,8vw,78px);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:clamp(1.2rem,2.4vw,1.9rem);
+    animation:glowPulse 3s ease-in-out infinite;
+  }
+  .ibub-red    { background:rgba(239,68,68,.1);  border:1px solid rgba(239,68,68,.3); }
+  .ibub-orange { background:rgba(251,146,60,.1); border:1px solid rgba(251,146,60,.3); }
+  .ibub-purple { background:rgba(139,92,246,.1); border:1px solid rgba(139,92,246,.3); }
+  .ibub:nth-child(2){ animation-delay:.5s; }
+  .ibub:nth-child(3){ animation-delay:1s; }
+  @keyframes glowPulse {
+    0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,.3); }
+    50%    { box-shadow:0 0 0 9px rgba(239,68,68,0); }
+  }
+
+  /* ── Cards ── */
+  .cards { display:flex; gap:1.4%; width:100%; }
+  .card {
+    flex:1; border-radius:.9vw; padding:2% 2.1%;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.09);
+    transition:transform .25s;
+  }
+  .card:hover{ transform:translateY(-3px); }
+  .card .ci { font-size:clamp(1.2rem,2.3vw,1.8rem); margin-bottom:3%; display:block; }
+  .card h3  { font-size:clamp(.65rem,1.25vw,.92rem); font-weight:700; color:#e2e8f0; margin-bottom:2.5%; }
+  .card p, .card li { font-size:clamp(.56rem,1.02vw,.76rem); color:#94a3b8; line-height:1.55; }
+  .card ul  { list-style:none; padding:0; }
+  .card li  { padding:1.2% 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .card li:last-child { border-bottom:none; }
+  .card li::before { content:"▸ "; color:#f472b6; }
+
+  /* ── Highlight boxes ── */
+  .hbox {
+    border-radius:.8vw; padding:1.5% 2.1%; width:100%; margin-bottom:1.2%;
+  }
+  .hbox p { font-size:clamp(.58rem,1.08vw,.8rem); line-height:1.55; }
+  .hbox strong { font-weight:700; }
+
+  .hbox-red    { background:rgba(239,68,68,.08);   border:1px solid rgba(239,68,68,.28);   }
+  .hbox-red p  { color:#fca5a5; } .hbox-red strong { color:#f87171; }
+
+  .hbox-orange { background:rgba(251,146,60,.08);  border:1px solid rgba(251,146,60,.28);  }
+  .hbox-orange p{ color:#fed7aa; } .hbox-orange strong{ color:#fb923c; }
+
+  .hbox-purple { background:rgba(139,92,246,.1);   border:1px solid rgba(139,92,246,.35);  }
+  .hbox-purple p{ color:#c4b5fd; } .hbox-purple strong{ color:#a78bfa; }
+
+  .hbox-teal   { background:rgba(52,211,153,.08);  border:1px solid rgba(52,211,153,.28);  }
+  .hbox-teal p { color:#a7f3d0; } .hbox-teal strong { color:#34d399; }
+
+  .hbox-blue   { background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);  }
+  .hbox-blue p { color:#bfdbfe; } .hbox-blue strong { color:#60a5fa; }
+
+  /* ── Two-col ── */
+  .two { display:flex; gap:1.8%; width:100%; }
+  .col { flex:1; }
+  .col-w { flex:1.35; }
+
+  /* ── Sec label ── */
+  .slabel {
+    font-size:clamp(.48rem,.88vw,.64rem); font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase;
+    margin-bottom:1%;
+  }
+  .slabel-r { color:#f87171; } .slabel-o { color:#fb923c; }
+  .slabel-t { color:#34d399; } .slabel-b { color:#60a5fa; }
+  .slabel-p { color:#c4b5fd; }
+
+  /* ── Item list ── */
+  .ilist { list-style:none; padding:0; width:100%; }
+  .ilist li {
+    display:flex; align-items:flex-start; gap:1%;
+    padding:1% 0; border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.56rem,1.05vw,.78rem); color:#cbd5e1; line-height:1.5;
+  }
+  .ilist li:last-child{ border-bottom:none; }
+  .ico { font-size:1.1em; flex-shrink:0; margin-top:.1em; }
+
+  /* Accents */
+  .ar { color:#f87171; font-weight:700; }
+  .ao { color:#fb923c; font-weight:700; }
+  .ap { color:#c4b5fd; font-weight:700; }
+  .ab { color:#60a5fa; font-weight:700; }
+  .at { color:#34d399; font-weight:700; }
+  .ay { color:#fbbf24; font-weight:700; }
+
+  /* ── Problem banner ── */
+  .prob-banner {
+    width:100%; border-radius:.7vw; padding:1.1% 2%;
+    background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(251,146,60,.12));
+    border:1px solid rgba(239,68,68,.35);
+    display:flex; align-items:center; gap:1.5%;
+    margin-bottom:1.2%;
+  }
+  .prob-banner .pb-icon { font-size:clamp(1rem,1.9vw,1.4rem); flex-shrink:0; }
+  .prob-banner p { font-size:clamp(.58rem,1.05vw,.78rem); color:#fca5a5; line-height:1.5; }
+  .prob-banner strong { color:#f87171; }
+
+  /* ── Impact box ── */
+  .impact-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2%; width:100%; margin:1% 0; }
+  .ibox {
+    border-radius:.7vw; padding:1.5% 1.8%; text-align:center;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+  }
+  .ibox .ii { font-size:clamp(1rem,2vw,1.5rem); margin-bottom:5%; display:block; }
+  .ibox h4  { font-size:clamp(.58rem,1.05vw,.78rem); font-weight:700; color:#e2e8f0; margin-bottom:3%; }
+  .ibox p   { font-size:clamp(.5rem,.9vw,.68rem); color:#94a3b8; line-height:1.5; }
+
+  /* ── Cert visual ── */
+  .cert-box {
+    border-radius:.8vw; padding:1.8% 2.2%;
+    background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.3);
+  }
+  .cert-box h4 { font-size:clamp(.62rem,1.15vw,.84rem); font-weight:700; color:#f87171; margin-bottom:1.8%; }
+  .cert-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:.9% 0; border-bottom:1px solid rgba(239,68,68,.12);
+    font-size:clamp(.54rem,.98vw,.72rem); color:#fca5a5;
+  }
+  .cert-row:last-child { border-bottom:none; }
+  .cert-status { padding:.2em .7em; border-radius:999px; font-weight:700; font-size:.9em; }
+  .st-exp  { background:rgba(239,68,68,.18); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+  .st-mis  { background:rgba(251,146,60,.18);color:#fb923c; border:1px solid rgba(251,146,60,.3);}
+  .st-ok   { background:rgba(52,211,153,.12);color:#34d399; border:1px solid rgba(52,211,153,.3);}
+  .st-warn { background:rgba(251,191,36,.14);color:#fbbf24; border:1px solid rgba(251,191,36,.3);}
+
+  /* ── Solution checklist ── */
+  .sol-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2%; width:100%; margin-bottom:1.2%; }
+  .sbox {
+    border-radius:.8vw; padding:2% 1.8%;
+    background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.22);
+  }
+  .sbox .si { font-size:clamp(1.1rem,2.1vw,1.6rem); margin-bottom:4%; display:block; }
+  .sbox h4  { font-size:clamp(.6rem,1.1vw,.82rem); font-weight:700; color:#a7f3d0; margin-bottom:2.5%; }
+  .sbox p   { font-size:clamp(.52rem,.96vw,.71rem); color:#6ee7b7; line-height:1.5; }
+
+  /* ── Summary (slide 6) ── */
+  .sum-row { display:flex; gap:1.5%; width:100%; margin-bottom:1.2%; }
+  .sum-prob {
+    flex:1; border-radius:.8vw; padding:1.8% 2%;
+    background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.25);
+  }
+  .sum-sol {
+    flex:1; border-radius:.8vw; padding:1.8% 2%;
+    background:rgba(52,211,153,.07); border:1px solid rgba(52,211,153,.25);
+  }
+  .sum-prob h4 { font-size:clamp(.62rem,1.12vw,.83rem); color:#f87171; font-weight:700; margin-bottom:1.5%; }
+  .sum-sol  h4 { font-size:clamp(.62rem,1.12vw,.83rem); color:#34d399; font-weight:700; margin-bottom:1.5%; }
+  .sum-list { list-style:none; padding:0; }
+  .sum-list li { font-size:clamp(.54rem,.98vw,.72rem); color:#cbd5e1; padding:.8% 0; border-bottom:1px solid rgba(255,255,255,.05); line-height:1.45; }
+  .sum-list li:last-child{ border-bottom:none; }
+
+  .next-box {
+    width:100%; border-radius:.8vw; padding:1.3% 2.1%;
+    background:linear-gradient(135deg,rgba(96,165,250,.12),rgba(139,92,246,.12));
+    border:1px solid rgba(139,92,246,.35);
+    display:flex; align-items:center; justify-content:space-between; gap:2%;
+  }
+  .next-box h3 { font-size:clamp(.65rem,1.2vw,.88rem); color:#e2e8f0; font-weight:700; margin-bottom:.7%; }
+  .next-box p  { font-size:clamp(.52rem,.95vw,.7rem); color:#94a3b8; }
+  .nbtn {
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+    color:#fff; font-weight:700;
+    font-size:clamp(.55rem,1vw,.74rem);
+    padding:.55em 1.3em; border-radius:999px;
+    white-space:nowrap; flex-shrink:0;
+    box-shadow:0 4px 18px rgba(139,92,246,.4);
+  }
+
+  /* ── Nav ── */
+  .nav-btn {
+    position:fixed; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+    color:#e2e8f0;
+    width:clamp(28px,3vw,42px); height:clamp(28px,3vw,42px);
+    border-radius:50%; font-size:clamp(.85rem,1.4vw,1.2rem);
+    cursor:pointer; backdrop-filter:blur(6px);
+    transition:all .2s; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:hover{ background:rgba(244,114,182,.2); border-color:#f472b6; }
+  #pb{ left:.7%; } #nb{ right:.7%; }
+
+  .progress {
+    position:fixed; bottom:1.4%; left:50%; transform:translateX(-50%);
+    display:flex; gap:7px; z-index:100;
+  }
+  .dot {
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(255,255,255,.2); cursor:pointer; transition:all .3s;
+  }
+  .dot.active{ background:#f472b6; transform:scale(1.4); }
+  .snum {
+    position:fixed; bottom:1.4%; right:1.8%;
+    font-size:clamp(.44rem,.8vw,.6rem); color:rgba(255,255,255,.25); z-index:100;
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 1 · Title
+  ══════════════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#dc2626;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#9333ea;width:28%;height:28%;bottom:0;right:0;"></div>
+    <div class="orb" style="background:#f472b6;width:18%;height:18%;bottom:15%;left:25%;"></div>
+
+    <div class="tag tag-warn">⚠️ Security Risk Series · Episode 3</div>
+    <h1>Why CBOM is Needed?</h1>
+    <div class="div"></div>
+    <p class="subtitle">Understanding Hidden Cryptographic Security Risks</p>
+    <p class="tagline">✦ From Problem to Solution ✦</p>
+
+    <div class="icon-row">
+      <div class="ibub ibub-red">🚨</div>
+      <div class="ibub ibub-orange">🛡️</div>
+      <div class="ibub ibub-purple">🐛</div>
+    </div>
+
+    <div class="hbox hbox-red" style="max-width:72%;text-align:center;">
+      <p>Most organizations have <strong>no idea</strong> what cryptographic components are running inside their software. This invisibility creates <strong>real, exploitable security risks</strong> — risks that CBOM was built to eliminate.</p>
+    </div>
+
+    <p style="font-size:clamp(.48rem,.88vw,.62rem);color:#1e293b;margin-top:1.2%;text-align:center;">
+      Beginner-Friendly &nbsp;|&nbsp; DevOps &amp; DevSecOps Relevant &nbsp;|&nbsp; Security Foundations Series
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 2 · Problem – Lack of Visibility
+  ══════════════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#7c3aed;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#dc2626;width:22%;height:22%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tag-prob">❌ Problem 1 of 3 · Slide 2 of 6</div>
+    <h2>Problem: Lack of Cryptographic Visibility</h2>
+
+    <div class="prob-banner">
+      <span class="pb-icon">🔍</span>
+      <p><strong>"No Visibility = High Risk"</strong> — You cannot protect what you cannot see. Most teams have zero awareness of which cryptographic libraries are running inside their applications.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="slabel slabel-r">🚫 What Organizations Don't Know</div>
+        <ul class="ilist">
+          <li><span class="ico">🔐</span><div><span class="ar">What encryption is being used</span> — third-party libraries, open-source packages, and legacy code often use unknown algorithms without documentation.</div></li>
+          <li><span class="ico">📍</span><div><span class="ao">Where encryption is used</span> — encryption may exist in payment modules, auth systems, or APIs, but there is no central map of where or how.</div></li>
+          <li><span class="ico">📦</span><div><span class="ap">Which crypto libraries are included</span> — a single npm or Maven package can pull in 5–10 indirect cryptographic dependencies silently.</div></li>
+          <li><span class="ico">🔄</span><div><span class="ay">Who updates them</span> — if you don't know a library exists, it never gets patched when a vulnerability is discovered.</div></li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="slabel slabel-r">📌 Real-World Example</div>
+        <div class="card" style="margin-bottom:1.3%;border-color:rgba(239,68,68,.2);">
+          <span class="ci">🏗️</span>
+          <h3>The Hidden Dependency Problem</h3>
+          <p>A DevOps team deploys a Node.js app. Buried inside a transitive dependency, an old version of <span class="ar">OpenSSL with a known flaw</span> is running. The team never audited it — because they didn't know it existed.</p>
+        </div>
+        <div class="card" style="border-color:rgba(251,146,60,.2);">
+          <span class="ci">📊</span>
+          <h3>The Scale of the Problem</h3>
+          <ul>
+            <li>A typical enterprise app has <span class="ao">50–200+</span> indirect dependencies</li>
+            <li>Only <span class="ar">~30%</span> of crypto components are intentionally chosen</li>
+            <li>The rest arrive silently through package managers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hbox-purple" style="margin-top:.8%;margin-bottom:0;">
+      <p>💡 <strong>Key Insight:</strong> You can't fix, audit, or govern cryptographic components that you don't know exist. The first step to security is always <strong>complete visibility</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 3 · Problem – Weak & Outdated Crypto
+  ══════════════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#be123c;width:32%;height:32%;top:-6%;left:-4%;"></div>
+    <div class="orb" style="background:#7c3aed;width:22%;height:22%;bottom:4%;right:6%;"></div>
+
+    <div class="tag tag-prob">❌ Problem 2 of 3 · Slide 3 of 6</div>
+    <h2>Problem: Weak &amp; Outdated Cryptography</h2>
+
+    <div class="prob-banner">
+      <span class="pb-icon">⚠️</span>
+      <p>Not all encryption is equal. Many applications still rely on <strong>algorithms that were broken years ago</strong>. Hackers actively exploit these weaknesses — and most teams don't even know these algorithms are in use.</p>
+    </div>
+
+    <div class="cards" style="margin-bottom:1.2%;">
+      <div class="card" style="border-color:rgba(239,68,68,.25);">
+        <span class="ci">💀</span>
+        <h3 class="ar">MD5 — Completely Broken</h3>
+        <p>Designed in 1991. Researchers proved in 2004 it can be <strong>reversed and forged</strong>. Still found in legacy codebases for password hashing, checksums, and tokens.</p>
+        <p style="margin-top:4%;color:#f87171;">❌ Do not use for any security purpose</p>
+      </div>
+      <div class="card" style="border-color:rgba(251,146,60,.25);">
+        <span class="ci">⚡</span>
+        <h3 class="ao">SHA-1 — Practically Broken</h3>
+        <p>Google's <strong>SHAttered attack (2017)</strong> created two different files with the same SHA-1 hash in under 100,000 CPU hours. Still used in legacy TLS certificates and git repositories.</p>
+        <p style="margin-top:4%;color:#fb923c;">⚠️ Deprecated — migrate to SHA-256/SHA-3</p>
+      </div>
+      <div class="card" style="border-color:rgba(251,191,36,.2);">
+        <span class="ci">🔌</span>
+        <h3 class="ay">Old TLS Versions (1.0 / 1.1)</h3>
+        <p>TLS 1.0 (1999) and TLS 1.1 (2006) have known vulnerabilities like <strong>POODLE and BEAST attacks</strong>. Both are officially deprecated by IETF since 2021 but still active on legacy servers.</p>
+        <p style="margin-top:4%;color:#fbbf24;">⚠️ Upgrade to TLS 1.2 minimum, TLS 1.3 preferred</p>
+      </div>
+    </div>
+
+    <div class="impact-grid">
+      <div class="ibox" style="border-color:rgba(239,68,68,.2);">
+        <span class="ii">💥</span>
+        <h4 class="ar">Data Breaches</h4>
+        <p>Attackers crack weak hashes from stolen databases and gain access to user accounts en masse.</p>
+      </div>
+      <div class="ibox" style="border-color:rgba(251,146,60,.2);">
+        <span class="ii">🎭</span>
+        <h4 class="ao">Man-in-the-Middle Attacks</h4>
+        <p>Old TLS lets attackers silently intercept and read traffic between users and servers.</p>
+      </div>
+      <div class="ibox" style="border-color:rgba(251,191,36,.18);">
+        <span class="ii">⚛️</span>
+        <h4 class="ay">Quantum Threat Ahead</h4>
+        <p>Quantum computers will break RSA-2048 and ECC. Algorithms need mapping now to plan migration.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 4 · Problem – Certificate Issues
+  ══════════════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#1d4ed8;width:28%;height:28%;top:-3%;right:5%;"></div>
+    <div class="orb" style="background:#be123c;width:20%;height:20%;bottom:4%;left:5%;"></div>
+
+    <div class="tag tag-prob">❌ Problem 3 of 3 · Slide 4 of 6</div>
+    <h2>Problem: Certificate &amp; TLS Configuration Issues</h2>
+
+    <div class="two" style="align-items:flex-start;gap:2%;">
+      <div class="col-w">
+        <div class="slabel slabel-r">📜 What Can Go Wrong with Certificates?</div>
+        <ul class="ilist" style="margin-bottom:1.2%;">
+          <li><span class="ico">📅</span><div><span class="ar">Expired certificates</span> — SSL/TLS certificates have expiry dates. When they expire, browsers show a <strong>"Not Secure" or "Your connection is not private"</strong> warning, breaking user trust instantly.</div></li>
+          <li><span class="ico">⚙️</span><div><span class="ao">Misconfigured TLS</span> — wrong cipher suites, weak key lengths (RSA-1024), or missing HSTS headers leave connections vulnerable even when a cert is valid.</div></li>
+          <li><span class="ico">🏷️</span><div><span class="ap">Wrong domain or scope</span> — a certificate issued for <em>api.example.com</em> used on <em>app.example.com</em> throws browser errors and blocks legitimate users.</div></li>
+          <li><span class="ico">🔗</span><div><span class="ay">Broken certificate chain</span> — intermediate CA certificates not properly installed cause verification failures on some devices and clients.</div></li>
+          <li><span class="ico">🏛️</span><div><span class="ab">Untrusted Certificate Authority</span> — self-signed or expired root CAs trigger hard browser blocks, causing operational outages in production.</div></li>
+        </ul>
+        <div class="hbox hbox-orange" style="margin-bottom:0;">
+          <p>⚠️ <strong>Operational Risk:</strong> A single expired certificate can take down an entire production service — payment APIs, login endpoints, or public websites — affecting thousands of users within seconds.</p>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="slabel slabel-r">🔍 Certificate Status Dashboard Example</div>
+        <div class="cert-box">
+          <h4>🏢 Enterprise Certificate Inventory (Unmanaged)</h4>
+          <div class="cert-row"><span>api.payments.internal</span><span class="cert-status st-exp">❌ Expired 14d ago</span></div>
+          <div class="cert-row"><span>auth.service.prod</span><span class="cert-status st-mis">⚙️ Misconfigured TLS 1.0</span></div>
+          <div class="cert-row"><span>cdn.assets.example.com</span><span class="cert-status st-ok">✅ Valid (expires 90d)</span></div>
+          <div class="cert-row"><span>legacy.admin.portal</span><span class="cert-status st-exp">❌ Expired 3d ago</span></div>
+          <div class="cert-row"><span>webhook.integrations.io</span><span class="cert-status st-warn">⚠️ Expires in 7 days</span></div>
+          <div class="cert-row"><span>reporting.internal.svc</span><span class="cert-status st-mis">⚙️ SHA-1 Signed Cert</span></div>
+        </div>
+
+        <div class="hbox hbox-red" style="margin-top:1%;margin-bottom:0;">
+          <p>🚨 <strong>Without CBOM:</strong> Nobody knows this table exists. Certificate expiry events are discovered reactively — after an outage, not before it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 5 · How CBOM Solves These Problems
+  ══════════════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#059669;width:30%;height:30%;top:-5%;right:5%;"></div>
+    <div class="orb" style="background:#0891b2;width:22%;height:22%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tag-sol">✅ Solution · Slide 5 of 6</div>
+    <h2>How CBOM Solves These Problems</h2>
+
+    <div class="hbox hbox-teal" style="margin-bottom:1.2%;">
+      <p>🛡️ A <strong>CBOM (Cryptographic Bill of Materials)</strong> is a <strong>centralized, structured inventory</strong> of every cryptographic component in your software — algorithms, keys, certificates, protocols — giving you complete <strong>control &amp; governance</strong> over your security posture.</p>
+    </div>
+
+    <div class="sol-grid" style="margin-bottom:1.1%;">
+      <div class="sbox">
+        <span class="si">👁️</span>
+        <h4>Full Crypto Visibility</h4>
+        <p>Automatically discovers every crypto component — even in third-party and transitive dependencies. Nothing is hidden.</p>
+      </div>
+      <div class="sbox">
+        <span class="si">🔍</span>
+        <h4>Weak Crypto Detection</h4>
+        <p>Flags deprecated algorithms (MD5, SHA-1, DES) and old protocols (TLS 1.0/1.1) before attackers can exploit them.</p>
+      </div>
+      <div class="sbox">
+        <span class="si">📜</span>
+        <h4>Certificate Tracking</h4>
+        <p>Monitors all certificates — expiry dates, issuer, strength — and alerts teams weeks before expiration causes outages.</p>
+      </div>
+      <div class="sbox">
+        <span class="si">📋</span>
+        <h4>Compliance Ready</h4>
+        <p>Proves to auditors (FIPS, PCI-DSS, HIPAA, NIS2) exactly which approved algorithms and protocols are in use.</p>
+      </div>
+      <div class="sbox">
+        <span class="si">⚛️</span>
+        <h4>Quantum Readiness</h4>
+        <p>Maps current algorithms so teams can plan ahead for post-quantum cryptography (PQC) migration before it's urgent.</p>
+      </div>
+      <div class="sbox">
+        <span class="si">🔄</span>
+        <h4>Continuous Monitoring</h4>
+        <p>Integrates into CI/CD pipelines — scans every code change and deployment so crypto risks are caught in real time.</p>
+      </div>
+    </div>
+
+    <div class="two" style="gap:1.5%;">
+      <div class="hbox hbox-teal" style="margin-bottom:0;">
+        <p>🛠️ <strong>Tools that generate CBOMs:</strong> Syft · cdxgen · Dependabot (crypto plugin) · OWASP CycloneDX · IBM SBOM Utility</p>
+      </div>
+      <div class="hbox hbox-blue" style="margin-bottom:0;">
+        <p>🎯 <strong>End result:</strong> Turn invisible cryptographic risk into a <strong>managed, trackable, governable inventory</strong> — one that your security, DevOps, and compliance teams all share.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 6 · Summary + Key Takeaways
+  ══════════════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#7c3aed;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:20%;height:20%;bottom:4%;left:5%;"></div>
+
+    <div class="tag tag-recap">🏁 Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-row">
+      <div class="sum-prob">
+        <h4>❌ The 3 Core Problems</h4>
+        <ul class="sum-list">
+          <li>🔍 <span class="ar">No Visibility</span> — Organizations don't know which crypto components exist in their software or where they're used.</li>
+          <li>💀 <span class="ao">Weak &amp; Outdated Crypto</span> — Broken algorithms (MD5, SHA-1) and old protocols (TLS 1.0/1.1) remain in production, silently exposing data.</li>
+          <li>📜 <span class="ap">Certificate Risks</span> — Expired, misconfigured, or untracked certificates cause security gaps and unexpected production outages.</li>
+        </ul>
+      </div>
+      <div class="sum-sol">
+        <h4>✅ How CBOM Helps</h4>
+        <ul class="sum-list">
+          <li>👁️ <span class="at">Full Visibility</span> — A complete, auto-generated inventory of every cryptographic component across your entire software estate.</li>
+          <li>🛡️ <span class="at">Risk Reduction</span> — Proactively detects and alerts on weak, deprecated, or vulnerable crypto before it becomes an incident.</li>
+          <li>✅ <span class="at">Compliance &amp; Governance</span> — Satisfies regulatory requirements (FIPS, PCI-DSS, HIPAA, NIS2) with documented, auditable crypto usage.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="impact-grid" style="margin:0 0 1.1%;">
+      <div class="ibox" style="border-color:rgba(96,165,250,.2);">
+        <span class="ii">🔒</span>
+        <h4 class="ab">Security</h4>
+        <p>Eliminate known-vulnerable crypto before attackers find and exploit it in your systems.</p>
+      </div>
+      <div class="ibox" style="border-color:rgba(52,211,153,.2);">
+        <span class="ii">📋</span>
+        <h4 class="at">Compliance</h4>
+        <p>Meet regulatory demands with proof of approved algorithms, valid certs, and secure protocols.</p>
+      </div>
+      <div class="ibox" style="border-color:rgba(139,92,246,.2);">
+        <span class="ii">📉</span>
+        <h4 class="ap">Risk Reduction</h4>
+        <p>Transform unknown cryptographic risks into manageable, trackable, governable inventory items.</p>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>SBOM vs CBOM vs SCA — what's the difference, when to use each, and how they work together in a real DevSecOps pipeline</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N = 6; let cur = 1;
+  const prog = document.getElementById('prog');
+  const snum = document.getElementById('snum');
+  for (let i = 1; i <= N; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===1?' active':'');
+    d.onclick = () => go(i);
+    prog.appendChild(d);
+  }
+  function go(n) {
+    if (n<1||n>N) return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur = n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent = cur+' / '+N;
+  }
+  function nav(d){ go(cur+d); }
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown') nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   nav(-1);
+  });
+  snum.textContent = '1 / '+N;
+</script>
+</body>
+</html>

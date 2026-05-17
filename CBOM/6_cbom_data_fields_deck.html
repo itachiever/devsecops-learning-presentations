@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBOM Data Fields – CERT-In Guidelines Simplified</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #03030d;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    width: min(100vw, calc(100vh * 16/9));
+    height: min(100vh, calc(100vw * 9/16));
+    overflow: hidden;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2.8% 4.8%;
+    animation: fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(15px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .s1 { background: linear-gradient(145deg,#06061c 0%,#0c0e40 48%,#080828 100%); }
+  .s2 { background: linear-gradient(145deg,#050b10 0%,#071a28 50%,#060e1c 100%); }
+  .s3 { background: linear-gradient(145deg,#080614 0%,#110828 50%,#090618 100%); }
+  .s4 { background: linear-gradient(145deg,#060a10 0%,#071820 50%,#06101a 100%); }
+  .s5 { background: linear-gradient(145deg,#060818 0%,#0a0e2c 50%,#070c22 100%); }
+  .s6 { background: linear-gradient(145deg,#060812 0%,#091030 50%,#070e24 100%); }
+
+  /* ── Orbs ── */
+  .orb { position:absolute; border-radius:50%; filter:blur(70px); opacity:.16; pointer-events:none; }
+
+  /* ── Tag ── */
+  .tag {
+    font-size:clamp(.44rem,.86vw,.62rem); font-weight:700;
+    letter-spacing:.17em; text-transform:uppercase;
+    padding:.27em .9em; border-radius:999px; margin-bottom:.8%;
+  }
+  .tg-indigo { color:#818cf8; background:rgba(129,140,248,.1);  border:1px solid rgba(129,140,248,.28); }
+  .tg-sky    { color:#38bdf8; background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28); }
+  .tg-violet { color:#c084fc; background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28); }
+  .tg-teal   { color:#2dd4bf; background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28); }
+  .tg-blue   { color:#60a5fa; background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28); }
+  .tg-green  { color:#4ade80; background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28); }
+
+  /* ── Headings ── */
+  h1 {
+    font-size:clamp(1.8rem,5vw,3.6rem); font-weight:900;
+    line-height:1.08; text-align:center;
+    background:linear-gradient(135deg,#a5b4fc,#c4b5fd,#5eead4);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:.65%;
+  }
+  h2 { font-size:clamp(1.05rem,2.3vw,1.75rem); font-weight:800; color:#e2e8f0; text-align:center; margin-bottom:1.2%; }
+
+  .divl { width:50px; height:3px; border-radius:999px; margin:.65% auto 1.1%; }
+  .subtitle { font-size:clamp(.76rem,1.55vw,1.12rem); color:#94a3b8; text-align:center; margin-bottom:.55%; }
+  .tagline  { font-size:clamp(.64rem,1.18vw,.86rem); font-weight:600; letter-spacing:.05em; color:#a5b4fc; }
+
+  /* ── Title icons ── */
+  .tic-row { display:flex; gap:2.2vw; margin:1.8% 0; }
+  .tic {
+    display:flex; flex-direction:column; align-items:center; gap:.4em;
+    padding:clamp(8px,1.5%,15px) clamp(11px,2%,21px);
+    border-radius:.9vw; font-size:clamp(1.1rem,2.1vw,1.6rem);
+    animation:floatUp 3.5s ease-in-out infinite;
+  }
+  .tic span { font-size:clamp(.42rem,.75vw,.56rem); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .tic-a { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.3); color:#a5b4fc; }
+  .tic-b { background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.3);  color:#7dd3fc; }
+  .tic-c { background:rgba(45,212,191,.08);  border:1px solid rgba(45,212,191,.3);  color:#5eead4; }
+  .tic:nth-child(2){ animation-delay:.55s; } .tic:nth-child(3){ animation-delay:1.1s; }
+  @keyframes floatUp { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
+
+  /* ── Highlight boxes ── */
+  .hbox { border-radius:.75vw; padding:1.3% 1.9%; width:100%; margin-bottom:1%; }
+  .hbox p { font-size:clamp(.54rem,1.02vw,.76rem); line-height:1.55; }
+  .hbox strong { font-weight:700; }
+  .hb-indigo { background:rgba(129,140,248,.08); border:1px solid rgba(129,140,248,.27); }
+  .hb-indigo p { color:#c7d2fe; } .hb-indigo strong { color:#818cf8; }
+  .hb-sky    { background:rgba(56,189,248,.08);  border:1px solid rgba(56,189,248,.25); }
+  .hb-sky p  { color:#bae6fd; }  .hb-sky strong  { color:#38bdf8; }
+  .hb-violet { background:rgba(192,132,252,.08); border:1px solid rgba(192,132,252,.27); }
+  .hb-violet p { color:#e9d5ff; } .hb-violet strong { color:#c084fc; }
+  .hb-teal   { background:rgba(45,212,191,.07);  border:1px solid rgba(45,212,191,.25); }
+  .hb-teal p { color:#99f6e4; }  .hb-teal strong  { color:#2dd4bf; }
+  .hb-blue   { background:rgba(96,165,250,.08);  border:1px solid rgba(96,165,250,.25); }
+  .hb-blue p { color:#bfdbfe; }  .hb-blue strong  { color:#60a5fa; }
+  .hb-grad   { background:linear-gradient(135deg,rgba(129,140,248,.09),rgba(45,212,191,.08)); border:1px solid rgba(129,140,248,.3); }
+  .hb-grad p { color:#c7d2fe; }  .hb-grad strong  { color:#a5b4fc; }
+
+  /* ── Two-col ── */
+  .two  { display:flex; gap:1.6%; width:100%; }
+  .col  { flex:1; }
+  .col-w{ flex:1.3; }
+
+  /* ── Sec label ── */
+  .sl {
+    font-size:clamp(.44rem,.82vw,.6rem); font-weight:700;
+    letter-spacing:.13em; text-transform:uppercase; margin-bottom:.9%;
+  }
+  .sl-i{ color:#818cf8; } .sl-s{ color:#38bdf8; }
+  .sl-v{ color:#c084fc; } .sl-t{ color:#2dd4bf; }
+  .sl-b{ color:#60a5fa; } .sl-g{ color:#4ade80; }
+
+  /* ── Field card (data field display) ── */
+  .field-card {
+    width:100%; border-radius:.75vw; padding:1.3% 1.8%;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    margin-bottom:.85%; transition:transform .2s;
+  }
+  .field-card:hover{ transform:translateX(3px); }
+  .field-card:last-child{ margin-bottom:0; }
+  .fc-header {
+    display:flex; align-items:center; gap:1.2%; margin-bottom:.7%;
+  }
+  .fc-icon { font-size:clamp(.9rem,1.7vw,1.25rem); flex-shrink:0; }
+  .fc-name {
+    font-size:clamp(.6rem,1.12vw,.82rem); font-weight:700; color:#e2e8f0;
+    flex:1;
+  }
+  .fc-badge {
+    font-size:clamp(.42rem,.76vw,.56rem); font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:.2em .65em; border-radius:999px;
+  }
+  .fcb-req  { background:rgba(248,113,113,.12); color:#f87171; border:1px solid rgba(248,113,113,.28); }
+  .fcb-imp  { background:rgba(251,191,36,.11);  color:#fbbf24; border:1px solid rgba(251,191,36,.26); }
+  .fcb-opt  { background:rgba(74,222,128,.1);   color:#4ade80; border:1px solid rgba(74,222,128,.25); }
+  .fc-body  { font-size:clamp(.5rem,.93vw,.69rem); color:#94a3b8; line-height:1.5; }
+  .fc-example {
+    margin-top:.55%; font-size:clamp(.48rem,.88vw,.65rem);
+    color:#64748b; font-style:italic;
+  }
+  .fc-example span { font-family:monospace; background:rgba(255,255,255,.06); padding:.1em .4em; border-radius:.3vw; color:#94a3b8; font-style:normal; }
+
+  /* ── Data field group header ── */
+  .group-header {
+    display:flex; align-items:center; gap:1%;
+    margin-bottom:.9%; padding:.6% 1.2%;
+    border-radius:.5vw;
+  }
+  .gh-icon { font-size:clamp(.85rem,1.6vw,1.15rem); flex-shrink:0; }
+  .gh-text { font-size:clamp(.56rem,1.05vw,.76rem); font-weight:700; color:#e2e8f0; }
+  .gh-sub  { font-size:clamp(.46rem,.84vw,.62rem); color:#64748b; margin-left:.5%; }
+  .gh-ind  { background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.2); }
+  .gh-sky  { background:rgba(56,189,248,.08);  border:1px solid rgba(56,189,248,.2); }
+  .gh-vio  { background:rgba(192,132,252,.08); border:1px solid rgba(192,132,252,.2); }
+  .gh-tel  { background:rgba(45,212,191,.07);  border:1px solid rgba(45,212,191,.2); }
+  .gh-blu  { background:rgba(96,165,250,.08);  border:1px solid rgba(96,165,250,.2); }
+
+  /* ── Cert fields table ── */
+  .ctable { width:100%; border-collapse:collapse; }
+  .ctable th, .ctable td {
+    padding:clamp(5px,1%,10px) clamp(7px,1.2%,13px);
+    text-align:left; vertical-align:top;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-size:clamp(.5rem,.92vw,.68rem); line-height:1.45;
+  }
+  .ctable thead tr { background:rgba(255,255,255,.05); }
+  .ctable th { font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:clamp(.42rem,.78vw,.58rem); color:#64748b; }
+  .ctable tbody tr:hover { background:rgba(255,255,255,.02); }
+  .ctable tbody tr:last-child td { border-bottom:none; }
+
+  /* ── Dep map ── */
+  .dep-flow { display:flex; align-items:center; width:100%; gap:.8%; margin:1% 0; }
+  .dnode {
+    flex:1; border-radius:.7vw; padding:1.4% 1.5%; text-align:center;
+  }
+  .dn-app  { background:rgba(129,140,248,.09); border:1px solid rgba(129,140,248,.28); }
+  .dn-svc  { background:rgba(56,189,248,.08);  border:1px solid rgba(56,189,248,.26); }
+  .dn-lib  { background:rgba(45,212,191,.07);  border:1px solid rgba(45,212,191,.25); }
+  .dn-algo { background:rgba(192,132,252,.08); border:1px solid rgba(192,132,252,.26); }
+  .dnode .di { font-size:clamp(.85rem,1.65vw,1.2rem); display:block; margin-bottom:3%; }
+  .dnode h4  { font-size:clamp(.5rem,.93vw,.68rem); font-weight:700; color:#e2e8f0; margin-bottom:1.5%; }
+  .dnode p   { font-size:clamp(.44rem,.8vw,.59rem); color:#94a3b8; line-height:1.4; }
+  .darrow    { font-size:clamp(.8rem,1.5vw,1.1rem); color:#334155; flex-shrink:0; }
+
+  /* ── Summary grid ── */
+  .sum-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1%; width:100%; margin-bottom:1%; }
+  .sbox {
+    border-radius:.75vw; padding:1.6% 1.4%; text-align:center;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+  }
+  .sbox .si { font-size:clamp(.9rem,1.75vw,1.3rem); display:block; margin-bottom:3%; }
+  .sbox h4  { font-size:clamp(.54rem,.98vw,.72rem); font-weight:700; color:#e2e8f0; margin-bottom:1.5%; }
+  .sbox p   { font-size:clamp(.44rem,.8vw,.6rem); color:#94a3b8; line-height:1.45; }
+
+  /* Accents */
+  .ai{ color:#818cf8; font-weight:700; } .as{ color:#38bdf8; font-weight:700; }
+  .av{ color:#c084fc; font-weight:700; } .at{ color:#2dd4bf; font-weight:700; }
+  .ab{ color:#60a5fa; font-weight:700; } .ag{ color:#4ade80; font-weight:700; }
+  .ay{ color:#fbbf24; font-weight:700; } .ar{ color:#f87171; font-weight:700; }
+
+  /* ── Progress / Nav ── */
+  .nav-btn {
+    position:fixed; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.13);
+    color:#e2e8f0; width:clamp(27px,2.9vw,41px); height:clamp(27px,2.9vw,41px);
+    border-radius:50%; font-size:clamp(.82rem,1.35vw,1.15rem);
+    cursor:pointer; backdrop-filter:blur(6px); transition:all .2s; z-index:100;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:hover{ background:rgba(129,140,248,.22); border-color:#818cf8; }
+  #pb{ left:.65%; } #nb{ right:.65%; }
+  .progress { position:fixed; bottom:1.3%; left:50%; transform:translateX(-50%); display:flex; gap:7px; z-index:100; }
+  .dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.2); cursor:pointer; transition:all .3s; }
+  .dot.active{ background:#818cf8; transform:scale(1.45); }
+  .snum { position:fixed; bottom:1.3%; right:1.8%; font-size:clamp(.42rem,.76vw,.57rem); color:rgba(255,255,255,.24); z-index:100; }
+
+  /* ── Next box ── */
+  .next-box {
+    width:100%; border-radius:.75vw; padding:1.1% 1.9%;
+    background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));
+    border:1px solid rgba(129,140,248,.3);
+    display:flex; align-items:center; justify-content:space-between; gap:2%;
+  }
+  .next-box h3 { font-size:clamp(.6rem,1.1vw,.82rem); color:#e2e8f0; font-weight:700; margin-bottom:.55%; }
+  .next-box p  { font-size:clamp(.48rem,.88vw,.65rem); color:#94a3b8; }
+  .nbtn {
+    background:linear-gradient(135deg,#6366f1,#14b8a6);
+    color:#fff; font-weight:700; font-size:clamp(.5rem,.93vw,.68rem);
+    padding:.5em 1.25em; border-radius:999px; white-space:nowrap;
+    flex-shrink:0; box-shadow:0 4px 15px rgba(99,102,241,.38);
+  }
+
+  /* ── Items list ── */
+  .ilist { list-style:none; padding:0; width:100%; }
+  .ilist li {
+    display:flex; align-items:flex-start; gap:1%;
+    padding:.9% 0; border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:clamp(.52rem,.96vw,.71rem); color:#cbd5e1; line-height:1.5;
+  }
+  .ilist li:last-child{ border-bottom:none; }
+  .ico{ font-size:1.05em; flex-shrink:0; margin-top:.1em; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════
+       SLIDE 1 · Title
+  ══════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:26%;height:26%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#7c3aed;width:18%;height:18%;bottom:13%;left:26%;"></div>
+
+    <div class="tag tg-indigo">📋 CBOM Series · Episode 6</div>
+    <h1>CBOM Data Fields</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">CERT-In Guidelines Simplified — Field by Field</p>
+    <p class="tagline">✦ Understanding What Data a CBOM Record Contains ✦</p>
+
+    <div class="tic-row">
+      <div class="tic tic-a">📦 <span>Component Info</span></div>
+      <div class="tic tic-b">🔐 <span>Crypto Details</span></div>
+      <div class="tic tic-c">📜 <span>Cert &amp; Metadata</span></div>
+    </div>
+
+    <div class="hbox hb-grad" style="max-width:78%;text-align:center;margin-bottom:.7%;">
+      <p>A CBOM is only as useful as the <strong>data fields it contains</strong>. CERT-In (India's national cybersecurity agency) defines a structured set of fields every CBOM record must include. This episode walks through each field — what it means, why it matters, and what it looks like in a real system.</p>
+    </div>
+
+    <div class="hbox hb-indigo" style="max-width:78%;text-align:center;margin-bottom:0;">
+      <p>📌 <strong>CERT-In</strong> = Computer Emergency Response Team – India. Part of the Ministry of Electronics &amp; IT (MeitY). Defines cybersecurity standards and incident response guidelines for Indian organisations and beyond.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SLIDE 2 · Basic Component Info
+  ══════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🏷️ Field Group 1 of 4 · Slide 2 of 6</div>
+    <h2>Basic Component Information</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:1%;">
+      <p>📖 These fields form the <strong>core identification layer</strong> of a CBOM record. They answer the fundamental question: <strong>"What cryptographic component is this?"</strong> — giving every entry a unique, traceable identity across your entire software estate.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;">
+      <div class="col-w">
+        <div class="group-header gh-sky">
+          <span class="gh-icon">🏷️</span>
+          <span class="gh-text">Identification Fields</span>
+          <span class="gh-sub">— required for every CBOM entry</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">📛</span>
+            <span class="fc-name"><span class="as">Component Name</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The official, unambiguous name of the cryptographic component, library, or tool. Must match the vendor's published name exactly to enable cross-referencing with CVE databases and vulnerability feeds.</div>
+          <div class="fc-example">Example: <span>OpenSSL</span> &nbsp;·&nbsp; <span>BouncyCastle</span> &nbsp;·&nbsp; <span>libsodium</span> &nbsp;·&nbsp; <span>Windows CNG</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">🔢</span>
+            <span class="fc-name"><span class="as">Version</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The specific release version in use. This is critical — the same library at two different versions can have completely different security postures. Vulnerability databases are version-specific. "Latest" is not acceptable — an exact version string is required.</div>
+          <div class="fc-example">Example: <span>OpenSSL 3.0.2</span> &nbsp;·&nbsp; <span>BouncyCastle 1.70</span> &nbsp;·&nbsp; <span>libsodium 1.0.18</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">📝</span>
+            <span class="fc-name"><span class="as">Description</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">A brief human-readable summary of what this component does and its purpose within the application. Helps auditors and new team members understand the component's role without reading source code.</div>
+          <div class="fc-example">Example: <span>"TLS library used for HTTPS on payment API gateway"</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="group-header gh-sky">
+          <span class="gh-icon">🔍</span>
+          <span class="gh-text">Traceability Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.18);">
+          <div class="fc-header">
+            <span class="fc-icon">🏷️</span>
+            <span class="fc-name"><span class="as">Unique Identifier (PURL / CPE)</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">A standardised machine-readable identifier that uniquely identifies the component globally. Enables automated tooling to match this entry against vulnerability databases without ambiguity.</div>
+          <div class="fc-example">Example: <span>pkg:generic/openssl@3.0.2</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.18);">
+          <div class="fc-header">
+            <span class="fc-icon">🏛️</span>
+            <span class="fc-name"><span class="as">Supplier / Vendor</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">The organisation or individual that develops and maintains this component. Used for vendor risk assessment and to know who to contact if a critical vulnerability is discovered.</div>
+          <div class="fc-example">Example: <span>OpenSSL Software Foundation</span> &nbsp;·&nbsp; <span>Legion of the Bouncy Castle</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(56,189,248,.18);">
+          <div class="fc-header">
+            <span class="fc-icon">📄</span>
+            <span class="fc-name"><span class="as">License Type</span></span>
+            <span class="fc-badge fcb-opt">Optional</span>
+          </div>
+          <div class="fc-body">The open-source or commercial license governing use of this component. Relevant for compliance, legal review, and understanding redistribution rights in enterprise deployments.</div>
+          <div class="fc-example">Example: <span>Apache-2.0</span> &nbsp;·&nbsp; <span>MIT</span> &nbsp;·&nbsp; <span>OpenSSL License</span></div>
+        </div>
+
+        <div class="hbox hb-sky" style="margin-bottom:0;margin-top:.5%;">
+          <p>💡 <strong>Why Version Matters:</strong> OpenSSL 3.0.1 was vulnerable to <span class="ar">CVE-2022-3602 (Critical)</span>. OpenSSL 3.0.7 patched it. Same name — completely different risk profile.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SLIDE 3 · Cryptographic Details
+  ══════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:30%;height:30%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-violet">🔐 Field Group 2 of 4 · Slide 3 of 6</div>
+    <h2>Cryptographic Details</h2>
+
+    <div class="hbox hb-violet" style="margin-bottom:1%;">
+      <p>📖 These fields define the <strong>security definition layer</strong> — the technical specifics of <em>how</em> data is protected. They answer: <strong>"Which algorithm protects this data, with what key, over which protocol?"</strong> These are the fields auditors scrutinise most closely for compliance (FIPS, PCI-DSS, HIPAA).</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col">
+        <div class="group-header gh-vio">
+          <span class="gh-icon">⚙️</span>
+          <span class="gh-text">Algorithm Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.24);">
+          <div class="fc-header">
+            <span class="fc-icon">⚙️</span>
+            <span class="fc-name"><span class="av">Algorithm Type</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The category and name of the cryptographic algorithm in use — symmetric, asymmetric, hashing, or signature. CBOM tools flag algorithms against an approved-list (e.g., FIPS 140-3 approved algorithms).</div>
+          <div class="fc-example">Example: <span>AES-256-GCM</span> &nbsp;·&nbsp; <span>RSA-2048</span> &nbsp;·&nbsp; <span>SHA-256</span> &nbsp;·&nbsp; <span class="ar">MD5 ❌ Flagged</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.24);">
+          <div class="fc-header">
+            <span class="fc-icon">🎛️</span>
+            <span class="fc-name"><span class="av">Algorithm Mode / Padding</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">Even a strong algorithm can be weakened by a bad mode. AES in ECB mode is insecure; AES in GCM mode is strong. CBOM captures the full algorithm configuration, not just the name.</div>
+          <div class="fc-example">Example: <span>AES/GCM/NoPadding</span> &nbsp;·&nbsp; <span class="ar">AES/ECB ❌</span> &nbsp;·&nbsp; <span>RSA/OAEP</span></div>
+        </div>
+
+        <div class="group-header gh-vio" style="margin-top:.6%;">
+          <span class="gh-icon">🔗</span>
+          <span class="gh-text">Protocol Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.24);">
+          <div class="fc-header">
+            <span class="fc-icon">🔗</span>
+            <span class="fc-name"><span class="av">Protocol &amp; Version</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The security protocol enabling the communication channel and its exact version. Protocol version is as important as algorithm choice — TLS 1.0 is broken; TLS 1.3 is the gold standard.</div>
+          <div class="fc-example">Example: <span>TLS 1.3</span> &nbsp;·&nbsp; <span>TLS 1.2</span> &nbsp;·&nbsp; <span class="ar">TLS 1.0 ❌</span> &nbsp;·&nbsp; <span>SSH-2</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="group-header gh-vio">
+          <span class="gh-icon">🗝️</span>
+          <span class="gh-text">Key Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.2);">
+          <div class="fc-header">
+            <span class="fc-icon">📏</span>
+            <span class="fc-name"><span class="av">Key Type &amp; Size</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The nature of the key (symmetric/asymmetric/session) and its length in bits. Minimum safe sizes: AES ≥ 128-bit, RSA ≥ 2048-bit, ECC ≥ 256-bit. Keys below minimum are flagged Critical.</div>
+          <div class="fc-example">Example: <span>AES / 256-bit</span> &nbsp;·&nbsp; <span>RSA / 2048-bit</span> &nbsp;·&nbsp; <span class="ar">RSA / 1024-bit ❌</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.2);">
+          <div class="fc-header">
+            <span class="fc-icon">📦</span>
+            <span class="fc-name"><span class="av">Key Storage Location</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">Where the key is stored determines its security level. Hardware Security Modules (HSMs) are the gold standard. Keys in config files or environment variables are flagged as high risk in CBOM.</div>
+          <div class="fc-example">Example: <span>AWS KMS</span> &nbsp;·&nbsp; <span>HashiCorp Vault</span> &nbsp;·&nbsp; <span class="ar">Hardcoded in code ❌</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(192,132,252,.2);">
+          <div class="fc-header">
+            <span class="fc-icon">🔄</span>
+            <span class="fc-name"><span class="av">Key Rotation Policy</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">How frequently the key is rotated and when it was last changed. Stale keys that have never been rotated are a significant risk — CBOM tracks last-rotation date and flags overdue rotations.</div>
+          <div class="fc-example">Example: <span>Rotated every 90 days — Last: 2025-12-01</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SLIDE 4 · Certificate & Metadata
+  ══════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:30%;height:30%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-teal">📜 Field Group 3 of 4 · Slide 4 of 6</div>
+    <h2>Certificate &amp; Metadata Fields</h2>
+
+    <div class="hbox hb-teal" style="margin-bottom:1%;">
+      <p>📖 These fields capture <strong>trust and verification data</strong> — the proof that a component is genuine, issued by a trusted authority, and still within its valid lifetime. Without this data, an organisation cannot manage certificate expiry proactively or demonstrate trust chain integrity to auditors.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col-w">
+        <div class="group-header gh-tel">
+          <span class="gh-icon">📜</span>
+          <span class="gh-text">Certificate Fields</span>
+          <span class="gh-sub">— for TLS/SSL certificate entries</span>
+        </div>
+
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(45,212,191,.18);border-radius:.7vw;overflow:hidden;margin-bottom:.9%;">
+          <table class="ctable">
+            <thead>
+              <tr>
+                <th style="width:22%;">Field Name</th>
+                <th style="width:14%;">Status</th>
+                <th style="width:30%;">What It Captures</th>
+                <th>Real-World Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="at">Issuer (CA)</span></td><td><span class="fc-badge fcb-req" style="font-size:.75em;">Required</span></td><td>Who signed and vouches for the certificate</td><td><span style="font-family:monospace;font-size:.9em;color:#6ee7b7;">Let's Encrypt R3 / DigiCert Inc</span></td></tr>
+              <tr><td><span class="at">Subject / Domain</span></td><td><span class="fc-badge fcb-req" style="font-size:.75em;">Required</span></td><td>Which hostname(s) this cert covers</td><td><span style="font-family:monospace;font-size:.9em;color:#6ee7b7;">*.payments.example.com</span></td></tr>
+              <tr><td><span class="at">Valid From</span></td><td><span class="fc-badge fcb-req" style="font-size:.75em;">Required</span></td><td>Activation date — cert invalid before this</td><td><span style="font-family:monospace;font-size:.9em;color:#6ee7b7;">2025-01-15 00:00:00 UTC</span></td></tr>
+              <tr><td><span class="at">Expiry Date</span></td><td><span class="fc-badge fcb-req" style="font-size:.75em;">Required</span></td><td>When the cert stops being valid — alert threshold</td><td><span style="font-family:monospace;font-size:.9em;color:#f87171;">2025-04-15 ⚠️ 14 days left</span></td></tr>
+              <tr><td><span class="at">Serial Number</span></td><td><span class="fc-badge fcb-imp" style="font-size:.75em;">Important</span></td><td>Unique ID issued by CA — used for revocation checks</td><td><span style="font-family:monospace;font-size:.9em;color:#6ee7b7;">03:A1:B2:4F:9C…</span></td></tr>
+              <tr><td><span class="at">Signature Algorithm</span></td><td><span class="fc-badge fcb-req" style="font-size:.75em;">Required</span></td><td>Algorithm CA used to sign this cert</td><td><span style="font-family:monospace;font-size:.9em;color:#6ee7b7;">SHA256withRSA</span> &nbsp;<span style="font-family:monospace;font-size:.9em;color:#f87171;">SHA1withRSA ❌</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="group-header gh-tel">
+          <span class="gh-icon">🔏</span>
+          <span class="gh-text">Hash &amp; Integrity Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(45,212,191,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">🔏</span>
+            <span class="fc-name"><span class="at">Component Hash (Digest)</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">A cryptographic hash of the component file itself — proves the file hasn't been tampered with since it was published. CBOM stores the hash so it can be re-verified at any time.</div>
+          <div class="fc-example">Example: <span>SHA-256: a3f9b2c1...</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(45,212,191,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">🔗</span>
+            <span class="fc-name"><span class="at">Certificate Fingerprint</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">A short hash of the full certificate used to uniquely identify it in logs, monitoring tools, and alerting systems. Easier to work with than full cert data in automation pipelines.</div>
+          <div class="fc-example">Example: <span>SHA-256 fingerprint: 4A:7B:C2:...</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(45,212,191,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">🗃️</span>
+            <span class="fc-name"><span class="at">Revocation Status (CRL/OCSP)</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">Whether the certificate has been revoked by its issuing CA before expiry. A revoked cert is immediately untrustworthy. CBOM tracks CRL (Certificate Revocation List) and OCSP status.</div>
+          <div class="fc-example">Example: <span>OCSP: Good</span> &nbsp;·&nbsp; <span class="ar">CRL: Revoked ❌</span></div>
+        </div>
+
+        <div class="hbox hb-teal" style="margin-top:.5%;margin-bottom:0;">
+          <p>🎯 <strong>Compliance Note:</strong> PCI-DSS 4.0 requires organisations to maintain a documented inventory of all certificates in use — this is exactly what CBOM certificate fields deliver.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SLIDE 5 · Usage & Dependency Info
+  ══════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#1e3a8a;width:28%;height:28%;top:-3%;right:5%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-blue">🗺️ Field Group 4 of 4 · Slide 5 of 6</div>
+    <h2>Usage &amp; Dependency Information</h2>
+
+    <div class="hbox hb-blue" style="margin-bottom:1%;">
+      <p>📖 These fields provide <strong>operational visibility</strong> — they answer: <strong>"Where is this component used, who owns it, and what depends on it?"</strong> Without usage data, a CBOM is just a list. With it, teams can instantly understand the blast radius of any cryptographic risk.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start; gap:1.8%;">
+      <div class="col-w">
+        <div class="group-header gh-blu">
+          <span class="gh-icon">📍</span>
+          <span class="gh-text">Location &amp; Ownership Fields</span>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(96,165,250,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">📍</span>
+            <span class="fc-name"><span class="ab">Usage Location</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">Exactly where in the application this component is used — which service, module, function, or layer. This field defines the <strong>scope of impact</strong> if the component is found to be vulnerable.</div>
+          <div class="fc-example">Example: <span>Payment Gateway API · /auth/login endpoint · Database encryption module</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(96,165,250,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">👤</span>
+            <span class="fc-name"><span class="ab">Ownership (Responsible Team)</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">The team or individual accountable for this component — who must act when a vulnerability is discovered or a cert expires. Enables immediate escalation without any investigation delay.</div>
+          <div class="fc-example">Example: <span>Platform Security Team</span> &nbsp;·&nbsp; <span>payments-team@company.com</span></div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(96,165,250,.22);">
+          <div class="fc-header">
+            <span class="fc-icon">⚙️</span>
+            <span class="fc-name"><span class="ab">Configuration Details</span></span>
+            <span class="fc-badge fcb-imp">Important</span>
+          </div>
+          <div class="fc-body">Key configuration parameters — cipher suites enabled, TLS versions allowed, key derivation settings. Misconfiguration is as dangerous as a vulnerability. CBOM captures config state at scan time.</div>
+          <div class="fc-example">Example: <span>TLSv1.3, TLSv1.2 | Ciphers: AES-256-GCM | Key exchange: ECDH</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="group-header gh-blu">
+          <span class="gh-icon">🔗</span>
+          <span class="gh-text">Dependency Mapping</span>
+        </div>
+        <div class="hbox hb-blue" style="margin-bottom:.9%;">
+          <p>📖 <strong>Dependency mapping</strong> shows which application components rely on this crypto component. When a crypto component has a vulnerability, the dependency map tells you <em>exactly</em> which services are affected.</p>
+        </div>
+
+        <div class="dep-flow">
+          <div class="dnode dn-app">
+            <span class="di">🏢</span>
+            <h4 class="ab">Application</h4>
+            <p>PaymentService v2.3</p>
+          </div>
+          <span class="darrow">→</span>
+          <div class="dnode dn-svc">
+            <span class="di">🔌</span>
+            <h4 class="as">Module</h4>
+            <p>TLS Handler</p>
+          </div>
+          <span class="darrow">→</span>
+          <div class="dnode dn-lib">
+            <span class="di">📚</span>
+            <h4 class="at">Library</h4>
+            <p>OpenSSL 3.0.2</p>
+          </div>
+          <span class="darrow">→</span>
+          <div class="dnode dn-algo">
+            <span class="di">⚙️</span>
+            <h4 class="av">Algorithm</h4>
+            <p>AES-256-GCM</p>
+          </div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(96,165,250,.2);margin-top:.5%;">
+          <div class="fc-header">
+            <span class="fc-icon">🔗</span>
+            <span class="fc-name"><span class="ab">Dependency Relationships</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">A structured map of which software components use this crypto component — direct dependents and transitive consumers. Enables instant blast-radius analysis when a vulnerability is discovered in the crypto component.</div>
+        </div>
+
+        <div class="field-card" style="border-color:rgba(96,165,250,.2);">
+          <div class="fc-header">
+            <span class="fc-icon">📅</span>
+            <span class="fc-name"><span class="ab">Last Scan Timestamp</span></span>
+            <span class="fc-badge fcb-req">Required</span>
+          </div>
+          <div class="fc-body">When this CBOM entry was last generated or verified. Stale CBOM data is dangerous — a component may have been updated without a rescan. CERT-In recommends scanning at every build or deployment.</div>
+          <div class="fc-example">Example: <span>2026-03-28T14:32:00Z</span> &nbsp;|&nbsp; Source: <span>CI/CD Pipeline · Build #4821</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SLIDE 6 · Summary
+  ══════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#0d9488;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-green">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum-grid" style="margin-bottom:.9%;">
+      <div class="sbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🏷️</span>
+        <h4 class="as">Component Info</h4>
+        <p><strong>Who</strong> — Name, version, supplier, identifier. Core identification for every CBOM entry. Powers CVE matching and supply chain tracking.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🔐</span>
+        <h4 class="av">Crypto Details</h4>
+        <p><strong>How</strong> — Algorithm type, mode, key size, storage, rotation policy, protocol version. Defines the security strength of each component.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">📜</span>
+        <h4 class="at">Cert &amp; Metadata</h4>
+        <p><strong>Trust</strong> — Issuer, expiry, fingerprint, revocation status, hash digest. Proves integrity and manages certificate lifecycle proactively.</p>
+      </div>
+      <div class="sbox" style="border-color:rgba(96,165,250,.24);">
+        <span class="si">🗺️</span>
+        <h4 class="ab">Usage &amp; Dependencies</h4>
+        <p><strong>Where &amp; Who</strong> — Location, owner, config, dependency map, scan timestamp. Delivers operational visibility and blast-radius analysis.</p>
+      </div>
+    </div>
+
+    <div class="hbox hb-grad" style="margin-bottom:.9%;">
+      <p>🎯 <strong>Unified CBOM Data = Visibility + Compliance + Risk Management:</strong> When all four field groups are populated, a CBOM enables security teams to <strong>detect weak crypto</strong>, <strong>track certificate lifecycles</strong>, <strong>prove regulatory compliance</strong> (FIPS, PCI-DSS, HIPAA, CERT-In), and <strong>respond to incidents in minutes</strong> — not days.</p>
+    </div>
+
+    <div class="two" style="gap:1.4%;margin-bottom:.9%;">
+      <div class="hbox hb-sky" style="margin-bottom:0;">
+        <p>⚙️ <strong>CERT-In Standard:</strong> Field groups align with India's national CBOM framework — ensuring organisations generating CBOMs meet government cybersecurity requirements for critical infrastructure and regulated industries.</p>
+      </div>
+      <div class="hbox hb-violet" style="margin-bottom:0;">
+        <p>🔄 <strong>Living Document:</strong> A CBOM is not a one-time report. CERT-In recommends <strong>regenerating CBOM at every build, deployment, and dependency update</strong> to keep data current and accurate.</p>
+      </div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>CBOM Structure - tools, scanning techniques, CI/CD pipeline integration, and automated CBOM generation in real DevSecOps workflows</p>
+      </div>
+      <div class="nbtn">▶ Next Episode</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6; let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CERT-In CBOM Guidelines – Deep Dive for Compliance & Implementation</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.7% 4.6%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+  .s1{background:linear-gradient(145deg,#060818 0%,#0b0e42 48%,#08092c 100%);}
+  .s2{background:linear-gradient(145deg,#060c12 0%,#081c2e 50%,#060e1e 100%);}
+  .s3{background:linear-gradient(145deg,#060818 0%,#100830 50%,#090620 100%);}
+  .s4{background:linear-gradient(145deg,#060a14 0%,#071a26 50%,#060e1a 100%);}
+  .s5{background:linear-gradient(145deg,#060c0a 0%,#071a10 50%,#060d0c 100%);}
+  .s6{background:linear-gradient(145deg,#060812 0%,#09102e 50%,#060c22 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-ora{color:#fb923c;background:rgba(251,146,60,.09);  border:1px solid rgba(251,146,60,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.7rem,4.7vw,3.4rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.6%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.6% auto 1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.5%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.7% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.4%,14px) clamp(10px,1.8%,19px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb-c{background:rgba(251,146,60,.09); border:1px solid rgba(251,146,60,.3); color:#fed7aa;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.1% 1.7%;width:100%;margin-bottom:.8%;}
+  .hbox p{font-size:clamp(.51rem,.97vw,.72rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-ora{background:rgba(251,146,60,.08); border:1px solid rgba(251,146,60,.24);}
+  .hb-ora p{color:#fed7aa;}.hb-ora strong{color:#fb923c;}
+  .hb-grn{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.5%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.32;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.8%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-o{color:#fb923c;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ao{color:#fb923c;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.82% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.5rem,.92vw,.68rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ── Compliance pill ── */
+  .cpill{display:inline-block;font-size:clamp(.38rem,.68vw,.52rem);font-weight:700;padding:.18em .6em;border-radius:999px;margin-left:.4%;}
+  .cp-mand{background:rgba(248,113,113,.16);color:#f87171;border:1px solid rgba(248,113,113,.3);}
+  .cp-req {background:rgba(251,146,60,.14); color:#fb923c;border:1px solid rgba(251,146,60,.28);}
+  .cp-rec {background:rgba(74,222,128,.12); color:#4ade80;border:1px solid rgba(74,222,128,.26);}
+
+  /* ═══════════════════════════
+     CERT-IN AUTHORITY (S2)
+  ═══════════════════════════ */
+  .authority-box{
+    background:rgba(255,255,255,.04);border:1.5px solid rgba(56,189,248,.3);
+    border-radius:.9vw;overflow:hidden;width:100%;
+  }
+  .ab-header{
+    background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(129,140,248,.1));
+    padding:.85% 1.5%;display:flex;align-items:center;gap:1%;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .ab-header .ahi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .ab-header h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .ab-header .ah-sub{margin-left:auto;font-size:clamp(.38rem,.68vw,.52rem);color:#38bdf8;font-weight:700;background:rgba(56,189,248,.12);padding:.18em .6em;border-radius:.4vw;border:1px solid rgba(56,189,248,.24);}
+  .ab-fields{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .abf{display:flex;align-items:flex-start;gap:.8%;padding:.7% 1.5%;border-bottom:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.04);}
+  .abf:nth-child(even){border-right:none;}
+  .abf:nth-last-child(-n+2){border-bottom:none;}
+  .abf-lbl{font-size:clamp(.42rem,.76vw,.56rem);color:#64748b;font-weight:600;flex:0 0 34%;text-transform:uppercase;letter-spacing:.05em;}
+  .abf-val{font-size:clamp(.46rem,.84vw,.62rem);color:#bae6fd;}
+
+  /* ── Compliance scope band ── */
+  .scope-band{
+    display:flex;gap:1%;width:100%;margin:.6% 0;
+  }
+  .sb-item{
+    flex:1;border-radius:.65vw;padding:.9% 1.1%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+  }
+  .sb-item .sbi{font-size:clamp(.8rem,1.5vw,1.1rem);}
+  .sb-item h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .sb-item p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.4;}
+  .sbi-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .sbi-2{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.24);}
+  .sbi-3{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.22);}
+  .sbi-4{background:rgba(251,146,60,.08); border:1px solid rgba(251,146,60,.22);}
+  .sbi-5{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.22);}
+
+  /* ═══════════════════════════
+     KEY REQUIREMENTS (S3)
+  ═══════════════════════════ */
+  .req-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .rbox{border-radius:.8vw;padding:1.3% 1.6%;background:rgba(255,255,255,.04);}
+  .rbox-top{display:flex;align-items:center;gap:1%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .rbox-top .rbi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .rbox-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .rbox-top .rbadge{margin-left:auto;}
+  .rbox-items{display:flex;flex-direction:column;gap:.4%;}
+  .ri-item{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;padding:.45% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.45;}
+  .ri-item:last-child{border-bottom:none;}
+  .ri-item .rii{font-size:1em;flex-shrink:0;}
+  .rb-1{border:1px solid rgba(56,189,248,.24);}
+  .rb-2{border:1px solid rgba(192,132,252,.22);}
+  .rb-3{border:1px solid rgba(45,212,191,.22);}
+  .rb-4{border:1px solid rgba(251,146,60,.22);}
+
+  /* ── Requirement checklist ── */
+  .chk{display:flex;align-items:flex-start;gap:.8%;padding:.6% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.48rem,.88vw,.64rem);color:#cbd5e1;line-height:1.45;}
+  .chk:last-child{border-bottom:none;}
+  .chk-icon{font-size:1em;flex-shrink:0;}
+
+  /* ═══════════════════════════
+     DATA FIELDS TABLE (S4)
+  ═══════════════════════════ */
+  .ftbl{width:100%;border-collapse:collapse;}
+  .ftbl th,.ftbl td{padding:clamp(5px,.95%,10px) clamp(6px,1.1%,12px);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-size:clamp(.46rem,.85vw,.62rem);vertical-align:middle;line-height:1.4;}
+  .ftbl thead tr{background:rgba(255,255,255,.05);}
+  .ftbl th{font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:clamp(.4rem,.73vw,.55rem);color:#64748b;}
+  .ftbl tbody tr:last-child td{border-bottom:none;}
+  .ftbl tbody tr:hover{background:rgba(255,255,255,.02);}
+  .ftbl .fc-grp{font-weight:700;font-size:clamp(.46rem,.85vw,.62rem);}
+  .gc-1{color:#38bdf8;}.gc-2{color:#c084fc;}.gc-3{color:#2dd4bf;}.gc-4{color:#60a5fa;}
+
+  /* ── Field detail panels ── */
+  .fdpanel{border-radius:.7vw;padding:1.1% 1.4%;display:flex;flex-direction:column;gap:.5%;}
+  .fdf{display:flex;align-items:center;gap:.7%;font-size:clamp(.45rem,.82vw,.6rem);color:#94a3b8;padding:.4% 0;border-bottom:1px solid rgba(255,255,255,.04);}
+  .fdf:last-child{border-bottom:none;}
+  .fdf .fd-name{font-weight:600;color:#e2e8f0;flex:0 0 38%;}
+  .fdf .fd-val {font-family:monospace;color:#94a3b8;font-size:.9em;}
+  .fdp-1{background:rgba(56,189,248,.06); border:1px solid rgba(56,189,248,.2);}
+  .fdp-2{background:rgba(192,132,252,.06);border:1px solid rgba(192,132,252,.2);}
+  .fdp-3{background:rgba(45,212,191,.05); border:1px solid rgba(45,212,191,.18);}
+  .fdp-4{background:rgba(96,165,250,.06); border:1px solid rgba(96,165,250,.2);}
+
+  /* ═══════════════════════════
+     IMPLEMENTATION (S5)
+  ═══════════════════════════ */
+  .impl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .ibox{border-radius:.8vw;padding:1.3% 1.5%;background:rgba(255,255,255,.04);}
+  .ibox-top{display:flex;align-items:center;gap:.9%;margin-bottom:.65%;padding-bottom:.5%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .ibox-top .ibi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .ibox-top h3{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .ibox-steps{display:flex;flex-direction:column;gap:.5%;}
+  .is{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;padding:.45% 0;line-height:1.45;}
+  .is-n{flex-shrink:0;width:clamp(13px,1.8vw,18px);height:clamp(13px,1.8vw,18px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82em;font-weight:700;margin-top:.1em;}
+  .isn-1{background:rgba(56,189,248,.2); color:#38bdf8;}
+  .isn-2{background:rgba(74,222,128,.2); color:#4ade80;}
+  .isn-3{background:rgba(45,212,191,.18);color:#2dd4bf;}
+  .ib-1{border:1px solid rgba(56,189,248,.22);}
+  .ib-2{border:1px solid rgba(74,222,128,.22);}
+  .ib-3{border:1px solid rgba(45,212,191,.2);}
+  .ib-4{border:1px solid rgba(192,132,252,.2);}
+  .ib-5{border:1px solid rgba(251,146,60,.2);}
+  .ib-6{border:1px solid rgba(96,165,250,.2);}
+
+  /* ── Governance maturity ── */
+  .gmat{width:100%;display:flex;gap:.8%;align-items:stretch;}
+  .gm-box{flex:1;border-radius:.65vw;padding:1% 1.1%;text-align:center;display:flex;flex-direction:column;gap:2%;align-items:center;}
+  .gm-box .gmi{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .gm-box h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .gm-box p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.4;}
+  .gm-1{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.24);}
+  .gm-2{background:rgba(251,146,60,.07); border:1px solid rgba(251,146,60,.22);}
+  .gm-3{background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.22);}
+  .gm-4{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.22);}
+  .gm-5{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.22);}
+  .gm-arr{font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;display:flex;align-items:center;}
+
+  /* ═══════════════════════════
+     SUMMARY (S6)
+  ═══════════════════════════ */
+  .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3b{border-radius:.75vw;padding:1.4% 1.2%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s3b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{
+    width:100%;border-radius:.8vw;padding:1.4% 2%;
+    background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));
+    border:1.5px solid rgba(129,140,248,.35);
+    text-align:center;margin-bottom:.85%;
+  }
+  .closing h3{font-size:clamp(.7rem,1.3vw,.95rem);font-weight:800;color:#e2e8f0;margin-bottom:.6%;}
+  .closing p{font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.55;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1% 1.8%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.58rem,1.05vw,.78rem);color:#e2e8f0;font-weight:700;margin-bottom:.4%;}
+  .next-box p {font-size:clamp(.46rem,.85vw,.63rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.48rem,.9vw,.66rem);padding:.48em 1.2em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 14px rgba(99,102,241,.36);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(26px,2.8vw,40px);height:clamp(26px,2.8vw,40px);border-radius:50%;font-size:clamp(.8rem,1.32vw,1.1rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:24%;height:24%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#ea580c;width:14%;height:14%;bottom:14%;left:26%;"></div>
+
+    <div class="tag tg-ind">🇮🇳 CBOM Compliance Series · Episode 14</div>
+    <h1>CERT-In CBOM Guidelines</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Deep Dive for Compliance &amp; Implementation</p>
+    <p class="tagline">✦ From Concepts to Real-World Compliance Readiness ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">📄 <span>Guidelines</span></div>
+      <div class="tb tb-b">🛡️ <span>Compliance</span></div>
+      <div class="tb tb-c">🔍 <span>Audit Ready</span></div>
+    </div>
+
+    <!-- Compliance pillars strip -->
+    <div style="width:92%;display:flex;gap:.8%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🏛️</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#38bdf8;margin-top:2%;">CERT-In Authority</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">National cybersecurity body</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(129,140,248,.08);border:1.5px solid rgba(129,140,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#a5b4fc;margin-top:2%;">Mandatory CBOM</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">For critical infrastructure</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔑</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#c084fc;margin-top:2%;">Required Data Fields</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Structured &amp; complete</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(45,212,191,.07);border:1.5px solid rgba(45,212,191,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔄</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#2dd4bf;margin-top:2%;">Continuous Updates</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Lifecycle management</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(251,146,60,.07);border:1.5px solid rgba(251,146,60,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📊</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#fb923c;margin-top:2%;">Risk Governance</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Audit-ready posture</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>CERT-In's CBOM guidelines establish <strong>India's national standard</strong> for cryptographic component visibility in software systems. For organizations operating in regulated sectors — banking, healthcare, government, and critical infrastructure — compliance is not optional. This episode breaks down exactly what is required.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is CERT-In & Why Guidelines Matter
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🏛️ Authority & Context · Slide 2 of 6</div>
+    <h2>What is CERT-In &amp; Why These Guidelines Matter</h2>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-s">🏛️ CERT-In at a Glance</div>
+        <div class="authority-box" style="margin-bottom:.85%;">
+          <div class="ab-header">
+            <span class="ahi">🇮🇳</span>
+            <h3>CERT-In — Computer Emergency Response Team India</h3>
+            <span class="ah-sub">Government of India</span>
+          </div>
+          <div class="ab-fields">
+            <div class="abf"><span class="abf-lbl">Full Name</span><span class="abf-val">Indian Computer Emergency Response Team</span></div>
+            <div class="abf"><span class="abf-lbl">Parent Ministry</span><span class="abf-val">MeitY — Ministry of Electronics &amp; IT</span></div>
+            <div class="abf"><span class="abf-lbl">Established</span><span class="abf-val">2004 — under the IT Act, 2000</span></div>
+            <div class="abf"><span class="abf-lbl">Legal Authority</span><span class="abf-val">Section 70B, IT (Amendment) Act 2008</span></div>
+            <div class="abf"><span class="abf-lbl">Primary Role</span><span class="abf-val">National cybersecurity incident coordination</span></div>
+            <div class="abf"><span class="abf-lbl">CBOM Mandate</span><span class="abf-val">Issued guidelines for crypto asset visibility</span></div>
+          </div>
+        </div>
+
+        <div class="sl sl-s">🏢 Who Must Comply</div>
+        <div class="scope-band">
+          <div class="sb-item sbi-1"><span class="sbi">🏦</span><h4 class="as">Banking &amp; Finance</h4><p>Banks, NBFCs, payment gateways, fintech platforms</p></div>
+          <div class="sb-item sbi-2"><span class="sbi">🏥</span><h4 class="av">Healthcare</h4><p>Hospitals, health IT systems, medical record platforms</p></div>
+          <div class="sb-item sbi-3"><span class="sbi">🏛️</span><h4 class="at">Government</h4><p>Central &amp; state IT systems, e-governance platforms</p></div>
+          <div class="sb-item sbi-4"><span class="sbi">⚡</span><h4 class="ao">Critical Infra</h4><p>Power, telecom, transport, defence-adjacent systems</p></div>
+          <div class="sb-item sbi-5"><span class="sbi">☁️</span><h4 class="ag">IT &amp; Cloud</h4><p>Cloud providers, MSPs, SaaS platforms serving regulated sectors</p></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-s">⚖️ Why the Guidelines Were Issued</div>
+        <ul class="ilist" style="margin-bottom:.85%;">
+          <li><span class="ico">🔍</span><div><span class="as">No crypto visibility</span> — most Indian organizations had zero visibility into which cryptographic components their software used, making risk assessment impossible.</div></li>
+          <li><span class="ico">🌐</span><div><span class="as">Global supply chain risk</span> — Log4Shell and similar incidents showed that unknown transitive dependencies create massive, undetected attack surfaces.</div></li>
+          <li><span class="ico">⚛️</span><div><span class="as">Quantum computing preparedness</span> — India's national security posture requires mapping all current crypto to plan migration to post-quantum algorithms (PQC) before quantum-capable adversaries emerge.</div></li>
+          <li><span class="ico">📋</span><div><span class="as">Audit and accountability gap</span> — regulators needed a standardized format to verify cryptographic compliance during audits — without a standard, every organization reported differently.</div></li>
+        </ul>
+
+        <div class="hbox hb-sky" style="margin-bottom:0;">
+          <p>⚖️ <strong>Legal Weight:</strong> Non-compliance with CERT-In directives can result in regulatory action under the IT Act 2000. For critical infrastructure operators, failure to maintain a CBOM is increasingly treated as a <span class="as">material security control gap</span> during government and RBI audits.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · Key CBOM Requirements (CERT-In)
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">📋 Core Requirements · Slide 3 of 6</div>
+    <h2>Key CBOM Requirements under CERT-In</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 CERT-In's CBOM mandate establishes four core requirement pillars. Each pillar defines a specific obligation — what must be tracked, how it must be structured, and what governance processes must be in place. Together they create a <strong>complete cryptographic governance framework</strong> for any organization handling sensitive data.</p>
+    </div>
+
+    <div class="req-grid">
+      <!-- Req 1 -->
+      <div class="rbox rb-1">
+        <div class="rbox-top">
+          <span class="rbi">📦</span>
+          <h3 class="as">Maintain Complete Crypto Inventory</h3>
+          <span class="cpill cp-mand">Mandatory</span>
+        </div>
+        <div class="rbox-items">
+          <div class="ri-item"><span class="rii">✅</span><div>All cryptographic algorithms actively used in production systems must be documented — including indirect dependencies introduced by third-party libraries.</div></div>
+          <div class="ri-item"><span class="rii">✅</span><div>Inventory must cover all environments: development, staging, production, and disaster recovery — not just production alone.</div></div>
+          <div class="ri-item"><span class="rii">✅</span><div>Both intentional and transitive (indirect) crypto components must be included — no component may be excluded due to being automatically introduced.</div></div>
+        </div>
+      </div>
+      <!-- Req 2 -->
+      <div class="rbox rb-2">
+        <div class="rbox-top">
+          <span class="rbi">🔐</span>
+          <h3 class="av">Cover All Crypto Component Types</h3>
+          <span class="cpill cp-mand">Mandatory</span>
+        </div>
+        <div class="rbox-items">
+          <div class="ri-item"><span class="rii">⚙️</span><div><span class="av">Algorithms</span> — type, name, mode, and strength classification (strong / deprecated / broken). Deprecated algorithms must be flagged and remediation planned.</div></div>
+          <div class="ri-item"><span class="rii">🗝️</span><div><span class="av">Keys</span> — type (symmetric/asymmetric), bit length, storage mechanism, rotation policy, and last-rotation date must all be recorded.</div></div>
+          <div class="ri-item"><span class="rii">📜</span><div><span class="av">Certificates</span> — issuer, subject, expiry, signature algorithm, and revocation status tracked for every TLS/SSL certificate in use.</div></div>
+          <div class="ri-item"><span class="rii">🔗</span><div><span class="av">Protocols</span> — TLS version, SSH version, and cipher suite configuration must be documented and compared against approved minimum standards.</div></div>
+        </div>
+      </div>
+      <!-- Req 3 -->
+      <div class="rbox rb-3">
+        <div class="rbox-top">
+          <span class="rbi">✔️</span>
+          <h3 class="at">Ensure Accuracy &amp; Completeness</h3>
+          <span class="cpill cp-req">Required</span>
+        </div>
+        <div class="rbox-items">
+          <div class="ri-item"><span class="rii">🎯</span><div>CBOM data must reflect the actual deployed state — not last month's snapshot. Stale CBOMs that don't reflect current deployments are non-compliant.</div></div>
+          <div class="ri-item"><span class="rii">🔏</span><div>CBOM documents must be digitally signed by the generating tool or authorized security officer to prove provenance and prevent tampering.</div></div>
+          <div class="ri-item"><span class="rii">📅</span><div>Each CBOM entry must carry a verified generation timestamp. For compliance audits, regulators may ask for CBOMs at specific points in time.</div></div>
+        </div>
+      </div>
+      <!-- Req 4 -->
+      <div class="rbox rb-4">
+        <div class="rbox-top">
+          <span class="rbi">👁️</span>
+          <h3 class="ao">Maintain Visibility &amp; Reporting</h3>
+          <span class="cpill cp-req">Required</span>
+        </div>
+        <div class="rbox-items">
+          <div class="ri-item"><span class="rii">📊</span><div>CBOM must be accessible to security and compliance teams through a centralized platform — not distributed across individual developer machines.</div></div>
+          <div class="ri-item"><span class="rii">🚨</span><div>Organizations must have alerting in place for: deprecated algorithm usage, certificate expiry within 30 days, and new CVEs affecting CBOM components.</div></div>
+          <div class="ri-item"><span class="rii">📤</span><div>On request from CERT-In or designated regulatory bodies, the CBOM must be shareable in standard machine-readable format (CycloneDX JSON or SPDX) within a defined SLA.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hbox hb-vio" style="margin-bottom:0;">
+      <p>📌 <strong>CERT-In Alignment Note:</strong> These requirements align with the broader <span class="av">CERT-In Information Security Practices</span> directive and the <span class="av">NCIIPC (National Critical Information Infrastructure Protection Centre)</span> guidelines for protecting India's critical digital infrastructure through comprehensive asset visibility.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Required Data Fields
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">📊 Data Fields · Slide 4 of 6</div>
+    <h2>Required Data Fields — CERT-In Compliance View</h2>
+
+    <div class="hbox hb-tel" style="margin-bottom:.85%;">
+      <p>📖 CERT-In prescribes a structured set of data fields that every CBOM record must populate. These fields are organized into four groups — each serving a distinct compliance function. Incomplete records (missing mandatory fields) are treated as non-compliant during regulatory audits.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <!-- Table -->
+      <div class="col-w">
+        <div class="sl sl-t">📋 Field-by-Field Compliance Checklist</div>
+        <div style="width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:.75vw;overflow:hidden;">
+          <table class="ftbl">
+            <thead>
+              <tr>
+                <th style="width:22%;">Field Group</th>
+                <th style="width:28%;">Required Field</th>
+                <th style="width:12%;">Status</th>
+                <th>Compliance Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="4" class="fc-grp gc-1">🏷️ Component Info</td><td>Name &amp; Version</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Enables CVE matching &amp; supply chain traceability</td></tr>
+              <tr><td>Unique Identifier (PURL/CPE)</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Machine-readable ID for automated tool integration</td></tr>
+              <tr><td>Supplier / Vendor</td><td><span class="cpill cp-req">Required</span></td><td>Vendor risk assessment &amp; incident contact path</td></tr>
+              <tr><td>License Type</td><td><span class="cpill cp-rec">Recommended</span></td><td>Legal compliance and redistribution audit</td></tr>
+              <tr><td rowspan="3" class="fc-grp gc-2">⚙️ Crypto Details</td><td>Algorithm Type &amp; Mode</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Verify approved algorithms per FIPS/CERT-In policy</td></tr>
+              <tr><td>Key Size &amp; Storage Location</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Minimum key strength validation &amp; key governance</td></tr>
+              <tr><td>Protocol &amp; Version</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Protocol compliance check (TLS 1.2+ minimum)</td></tr>
+              <tr><td rowspan="3" class="fc-grp gc-3">📜 Cert Metadata</td><td>Issuer &amp; Subject / Domain</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Trust chain verification &amp; domain scope validation</td></tr>
+              <tr><td>Valid From / Expiry Date</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Proactive expiry management &amp; outage prevention</td></tr>
+              <tr><td>Revocation Status (OCSP/CRL)</td><td><span class="cpill cp-req">Required</span></td><td>Ensures compromised certs are detected promptly</td></tr>
+              <tr><td rowspan="3" class="fc-grp gc-4">📍 Usage &amp; Deps</td><td>Usage Location &amp; Owner</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Blast-radius analysis &amp; incident response routing</td></tr>
+              <tr><td>Dependency Relationships</td><td><span class="cpill cp-req">Required</span></td><td>Service impact mapping when vulnerabilities found</td></tr>
+              <tr><td>Last Scan Timestamp</td><td><span class="cpill cp-mand">Mandatory</span></td><td>Proves CBOM currency for audit evidence</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <div class="col">
+        <div class="sl sl-t">📄 Example Field Values</div>
+        <div class="fdpanel fdp-1" style="margin-bottom:.7%;">
+          <div class="fdf"><span class="fd-name">name</span><span class="fd-val">"OpenSSL"</span></div>
+          <div class="fdf"><span class="fd-name">version</span><span class="fd-val">"3.0.7"</span></div>
+          <div class="fdf"><span class="fd-name">purl</span><span class="fd-val">pkg:generic/openssl@3.0.7</span></div>
+        </div>
+        <div class="fdpanel fdp-2" style="margin-bottom:.7%;">
+          <div class="fdf"><span class="fd-name">algorithm</span><span class="fd-val">"AES-256-GCM"</span></div>
+          <div class="fdf"><span class="fd-name">keySize</span><span class="fd-val">256</span></div>
+          <div class="fdf"><span class="fd-name">protocol</span><span class="fd-val">"TLS 1.3"</span></div>
+        </div>
+        <div class="fdpanel fdp-3" style="margin-bottom:.7%;">
+          <div class="fdf"><span class="fd-name">issuer</span><span class="fd-val">"Let's Encrypt R11"</span></div>
+          <div class="fdf"><span class="fd-name">notAfter</span><span class="fd-val">"2026-09-15T00:00:00Z"</span></div>
+          <div class="fdf"><span class="fd-name">ocspStatus</span><span class="fd-val">"Good"</span></div>
+        </div>
+        <div class="fdpanel fdp-4">
+          <div class="fdf"><span class="fd-name">usageLocation</span><span class="fd-val">"payment-api/checkout"</span></div>
+          <div class="fdf"><span class="fd-name">owner</span><span class="fd-val">"platform-security-team"</span></div>
+          <div class="fdf"><span class="fd-name">lastScanned</span><span class="fd-val">"2026-04-03T09:14:00Z"</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Implementation & Operational Expectations
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#059669;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-grn">⚙️ Implementation · Slide 5 of 6</div>
+    <h2>Implementation &amp; Operational Expectations</h2>
+
+    <div class="hbox hb-grn" style="margin-bottom:.85%;">
+      <p>📖 CERT-In does not consider CBOM a one-time deliverable — it is an <strong>ongoing operational discipline</strong>. The guidelines specify expectations around frequency of updates, tool integration, continuous monitoring, and governance processes that organizations must embed into their standard security operations.</p>
+    </div>
+
+    <div class="impl-grid" style="margin-bottom:.85%;">
+      <div class="ibox ib-1">
+        <div class="ibox-top"><span class="ibi">🔄</span><h3>Regular CBOM Updates</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-1">1</span><div>Regenerate CBOM on <span class="as">every code commit, build, and deployment</span> — not on a monthly or quarterly schedule</div></div>
+          <div class="is"><span class="is-n isn-1">2</span><div>Trigger re-scan when any dependency changes — even indirect package-lock updates must invalidate and regenerate the CBOM</div></div>
+          <div class="is"><span class="is-n isn-1">3</span><div>Maintain a <span class="as">versioned CBOM archive</span> — auditors may request the CBOM as it existed on a specific past date</div></div>
+        </div>
+      </div>
+      <div class="ibox ib-2">
+        <div class="ibox-top"><span class="ibi">🔌</span><h3>Security Tool Integration</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-2">1</span><div>CBOM must feed into <span class="ag">SIEM, vulnerability management, and CSPM</span> platforms for automated risk correlation</div></div>
+          <div class="is"><span class="is-n isn-2">2</span><div>Integrate with CVE databases (NVD, OSS Index) for automatic vulnerability matching against every CBOM component version</div></div>
+          <div class="is"><span class="is-n isn-2">3</span><div>Embed in CI/CD pipeline with <span class="ag">policy-as-code gates</span> — weak crypto in CBOM must fail the build before deployment</div></div>
+        </div>
+      </div>
+      <div class="ibox ib-3">
+        <div class="ibox-top"><span class="ibi">📡</span><h3>Continuous Monitoring</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-3">1</span><div>Runtime environment scanning must supplement static CBOM — <span class="at">Kubernetes pods, cloud services, and containers</span> scanned continuously</div></div>
+          <div class="is"><span class="is-n isn-3">2</span><div>Certificate expiry monitoring with automated alerts at 90, 30, and 7-day thresholds — escalating to security leadership at 7 days</div></div>
+          <div class="is"><span class="is-n isn-3">3</span><div>New CVE publications must trigger <span class="at">automatic re-evaluation</span> of all CBOM entries — within 24 hours for Critical severity</div></div>
+        </div>
+      </div>
+      <div class="ibox ib-4">
+        <div class="ibox-top"><span class="ibi">⚠️</span><h3>Risk Management</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-1">1</span><div>Deprecated algorithms flagged in CBOM must have a <span class="ai">documented remediation timeline</span> — not just flagged and ignored</div></div>
+          <div class="is"><span class="is-n isn-1">2</span><div>Risk acceptance decisions (where immediate upgrade is not feasible) must be documented, approved by CISO, and tracked in the CBOM system</div></div>
+          <div class="is"><span class="is-n isn-1">3</span><div>CBOM risk posture must be reported to senior management quarterly as part of the <span class="ai">security governance review</span> cadence</div></div>
+        </div>
+      </div>
+      <div class="ibox ib-5">
+        <div class="ibox-top"><span class="ibi">📊</span><h3>Governance &amp; Reporting</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-2">1</span><div>Assign a <span class="ao">CBOM Owner</span> — a named security role responsible for CBOM accuracy, completeness, and regulatory reporting</div></div>
+          <div class="is"><span class="is-n isn-2">2</span><div>Maintain an <span class="ao">approved-algorithm policy document</span> aligned with CERT-In, NIST, and FIPS 140-3 — reviewed and updated annually</div></div>
+          <div class="is"><span class="is-n isn-2">3</span><div>Be prepared to submit the current CBOM to CERT-In within the defined incident-response window if a cryptographic breach is suspected</div></div>
+        </div>
+      </div>
+      <div class="ibox ib-6">
+        <div class="ibox-top"><span class="ibi">🗂️</span><h3>Format &amp; Standards</h3></div>
+        <div class="ibox-steps">
+          <div class="is"><span class="is-n isn-3">1</span><div>CBOM must be produced in <span class="ab">CycloneDX JSON 1.5+</span> or SPDX format — proprietary or unstructured formats are not compliant</div></div>
+          <div class="is"><span class="is-n isn-3">2</span><div>Documents must carry a <span class="ab">digital signature</span> (JWS) from the generating tool or authorized security officer to prove authenticity</div></div>
+          <div class="is"><span class="is-n isn-3">3</span><div>Store CBOMs in a <span class="ab">tamper-evident repository</span> (immutable object storage, signed artefact registry) with access-controlled retrieval</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maturity progression -->
+    <div class="sl sl-g" style="text-align:center;">📈 CBOM Compliance Maturity Progression — Where Does Your Organization Stand?</div>
+    <div class="gmat">
+      <div class="gm-box gm-1"><span class="gmi">🔴</span><h4 class="ar">Level 0</h4><p>No CBOM. No crypto visibility. Compliance gap.</p></div>
+      <div class="gm-arr">→</div>
+      <div class="gm-box gm-2"><span class="gmi">🟠</span><h4 class="ao">Level 1</h4><p>Manual CBOM. Spreadsheets. Incomplete. Stale.</p></div>
+      <div class="gm-arr">→</div>
+      <div class="gm-box gm-3"><span class="gmi">🟡</span><h4 class="ay">Level 2</h4><p>Automated generation. All fields captured. No integration.</p></div>
+      <div class="gm-arr">→</div>
+      <div class="gm-box gm-4"><span class="gmi">🔵</span><h4 class="as">Level 3</h4><p>CI/CD integrated. CVE mapped. Alerts active.</p></div>
+      <div class="gm-arr">→</div>
+      <div class="gm-box" style="background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(45,212,191,.08));border:1.5px solid rgba(74,222,128,.3);border-radius:.65vw;padding:1% 1.1%;text-align:center;display:flex;flex-direction:column;gap:2%;align-items:center;"><span class="gmi">🟢</span><h4 class="ag">Level 4</h4><p>Full lifecycle governance. Audit-ready. CERT-In compliant.</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum3" style="margin-bottom:.85%;">
+      <div class="s3b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🏛️</span>
+        <h4 class="as">CERT-In = Legal Foundation</h4>
+        <p>India's national cybersecurity authority mandates CBOM for critical infrastructure operators. Non-compliance is a regulatory risk, not just a best-practice gap.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">📋</span>
+        <h4 class="av">Mandatory Data Fields</h4>
+        <p>Component identification, cryptographic details, certificate metadata, and usage/dependency information are all required — incomplete records are non-compliant.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">🔄</span>
+        <h4 class="at">Continuous — Not One-Time</h4>
+        <p>CBOM must be regenerated on every build, integrated into CI/CD, linked to CVE databases, and monitored continuously — it is an operational discipline, not an annual audit deliverable.</p>
+      </div>
+    </div>
+
+    <!-- Closing statement -->
+    <div class="closing">
+      <h3>🎯 The Core Message</h3>
+      <p>CBOM is not just a compliance checkbox — it is the <strong>foundation of modern cryptographic governance</strong>. Organisations that implement CERT-In-compliant CBOMs gain complete visibility into their cryptographic posture, dramatically reduce their attack surface, and position themselves for <strong>quantum-era security migration</strong>. In today's DevSecOps landscape, <strong>you cannot govern what you cannot see — and CBOM makes everything visible.</strong></p>
+    </div>
+
+    <!-- Compliance summary strip -->
+    <div style="width:100%;display:flex;gap:.7%;margin-bottom:.85%;">
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.22);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#7dd3fc;font-weight:600;">📋<br>Complete<br>Crypto Visibility</div>
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(192,132,252,.07);border:1px solid rgba(192,132,252,.22);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#d8b4fe;font-weight:600;">📊<br>Structured<br>Data Fields</div>
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#5eead4;font-weight:600;">🔄<br>Continuous<br>Updates</div>
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.22);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#fca5a5;font-weight:600;">🐛<br>CVE<br>Mapping</div>
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.22);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#fed7aa;font-weight:600;">📊<br>Risk<br>Governance</div>
+      <div style="flex:1;border-radius:.6vw;padding:.9% 1%;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.22);text-align:center;font-size:clamp(.44rem,.8vw,.59rem);color:#bbf7d0;font-weight:600;">✅<br>Audit<br>Readiness</div>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Up Next in This Series</h3>
+        <p>This episode concludes the CBOM foundation series. Apply these principles to build a CERT-In compliant CBOM program and elevate your organisation's cryptographic security governance to Level 4 maturity.</p>
+      </div>
+      <div class="nbtn">🏁 Series Complete</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>

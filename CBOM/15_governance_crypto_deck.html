@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governance & Crypto Asset Management using CBOM</title>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#02030e;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, calc(100vh * 16/9));
+    height:min(100vh, calc(100vw * 9/16));
+    overflow:hidden;
+  }
+  .slide {
+    position:absolute; inset:0;
+    display:none; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:2.8% 4.8%;
+    animation:fadeUp .5s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  .slide.active { display:flex; }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(13px);}
+    to  {opacity:1;transform:translateY(0);}
+  }
+  .s1{background:linear-gradient(145deg,#06061c 0%,#0a0e44 48%,#07082c 100%);}
+  .s2{background:linear-gradient(145deg,#060a14 0%,#071e2e 50%,#060f1e 100%);}
+  .s3{background:linear-gradient(145deg,#080618 0%,#100a2e 50%,#090620 100%);}
+  .s4{background:linear-gradient(145deg,#060c10 0%,#071e28 50%,#060e1a 100%);}
+  .s5{background:linear-gradient(145deg,#06080e 0%,#0a0d28 50%,#07091e 100%);}
+  .s6{background:linear-gradient(145deg,#060810 0%,#090e28 50%,#060c1e 100%);}
+
+  .orb{position:absolute;border-radius:50%;filter:blur(72px);opacity:.16;pointer-events:none;}
+
+  /* ── Tags ── */
+  .tag{font-size:clamp(.44rem,.86vw,.62rem);font-weight:700;letter-spacing:.17em;text-transform:uppercase;padding:.27em .9em;border-radius:999px;margin-bottom:.8%;}
+  .tg-ind{color:#818cf8;background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.28);}
+  .tg-sky{color:#38bdf8;background:rgba(56,189,248,.09);  border:1px solid rgba(56,189,248,.28);}
+  .tg-vio{color:#c084fc;background:rgba(192,132,252,.09); border:1px solid rgba(192,132,252,.28);}
+  .tg-tel{color:#2dd4bf;background:rgba(45,212,191,.09);  border:1px solid rgba(45,212,191,.28);}
+  .tg-blu{color:#60a5fa;background:rgba(96,165,250,.09);  border:1px solid rgba(96,165,250,.28);}
+  .tg-grn{color:#4ade80;background:rgba(74,222,128,.09);  border:1px solid rgba(74,222,128,.28);}
+
+  /* ── Headings ── */
+  h1{font-size:clamp(1.7rem,4.7vw,3.4rem);font-weight:900;line-height:1.08;text-align:center;background:linear-gradient(135deg,#93c5fd,#c4b5fd,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.65%;}
+  h2{font-size:clamp(1.05rem,2.3vw,1.72rem);font-weight:800;color:#e2e8f0;text-align:center;margin-bottom:1.1%;}
+  .divl{width:50px;height:3px;border-radius:999px;margin:.65% auto 1.1%;}
+  .subtitle{font-size:clamp(.75rem,1.52vw,1.1rem);color:#94a3b8;text-align:center;margin-bottom:.55%;}
+  .tagline{font-size:clamp(.63rem,1.15vw,.84rem);font-weight:600;letter-spacing:.05em;color:#a5b4fc;}
+
+  /* ── Title bubbles ── */
+  .tbrow{display:flex;gap:2vw;margin:1.8% 0;}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:.4em;padding:clamp(8px,1.5%,15px) clamp(10px,1.9%,20px);border-radius:.9vw;font-size:clamp(1.05rem,2vw,1.55rem);animation:floatUp 3.5s ease-in-out infinite;}
+  .tb span{font-size:clamp(.41rem,.74vw,.55rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+  .tb-a{background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);color:#a5b4fc;}
+  .tb-b{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.3); color:#5eead4;}
+  .tb-c{background:rgba(96,165,250,.09); border:1px solid rgba(96,165,250,.3); color:#93c5fd;}
+  .tb:nth-child(2){animation-delay:.5s;}.tb:nth-child(3){animation-delay:1s;}
+  @keyframes floatUp{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+
+  /* ── Hboxes ── */
+  .hbox{border-radius:.75vw;padding:1.2% 1.8%;width:100%;margin-bottom:.85%;}
+  .hbox p{font-size:clamp(.52rem,1vw,.74rem);line-height:1.55;}
+  .hbox strong{font-weight:700;}
+  .hb-ind{background:rgba(129,140,248,.08);border:1px solid rgba(129,140,248,.26);}
+  .hb-ind p{color:#c7d2fe;}.hb-ind strong{color:#818cf8;}
+  .hb-sky{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.24);}
+  .hb-sky p{color:#bae6fd;}.hb-sky strong{color:#38bdf8;}
+  .hb-vio{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.25);}
+  .hb-vio p{color:#e9d5ff;}.hb-vio strong{color:#c084fc;}
+  .hb-tel{background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.24);}
+  .hb-tel p{color:#99f6e4;}.hb-tel strong{color:#2dd4bf;}
+  .hb-blu{background:rgba(96,165,250,.08); border:1px solid rgba(96,165,250,.24);}
+  .hb-blu p{color:#bfdbfe;}.hb-blu strong{color:#60a5fa;}
+  .hb-grn{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.24);}
+  .hb-grn p{color:#bbf7d0;}.hb-grn strong{color:#4ade80;}
+  .hb-grd{background:linear-gradient(135deg,rgba(129,140,248,.1),rgba(45,212,191,.08));border:1px solid rgba(129,140,248,.3);}
+  .hb-grd p{color:#c7d2fe;}.hb-grd strong{color:#a5b4fc;}
+
+  /* ── Layout ── */
+  .two{display:flex;gap:1.6%;width:100%;}
+  .col{flex:1;}.col-w{flex:1.32;}
+  .sl{font-size:clamp(.43rem,.8vw,.59rem);font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.85%;}
+  .sl-i{color:#818cf8;}.sl-s{color:#38bdf8;}.sl-v{color:#c084fc;}
+  .sl-t{color:#2dd4bf;}.sl-b{color:#60a5fa;}.sl-g{color:#4ade80;}
+
+  /* Accents */
+  .ai{color:#818cf8;font-weight:700;}.as{color:#38bdf8;font-weight:700;}
+  .av{color:#c084fc;font-weight:700;}.at{color:#2dd4bf;font-weight:700;}
+  .ab{color:#60a5fa;font-weight:700;}.ag{color:#4ade80;font-weight:700;}
+  .ay{color:#fbbf24;font-weight:700;}.ar{color:#f87171;font-weight:700;}
+
+  /* ── Item list ── */
+  .ilist{list-style:none;padding:0;width:100%;}
+  .ilist li{display:flex;align-items:flex-start;gap:1%;padding:.85% 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:clamp(.51rem,.94vw,.7rem);color:#cbd5e1;line-height:1.5;}
+  .ilist li:last-child{border-bottom:none;}
+  .ico{font-size:1.05em;flex-shrink:0;margin-top:.1em;}
+
+  /* ═══════════════════════════
+     ASSET TILES (S2)
+  ═══════════════════════════ */
+  .asset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .atile{border-radius:.8vw;padding:1.4% 1.6%;background:rgba(255,255,255,.04);transition:transform .22s;}
+  .atile:hover{transform:translateY(-3px);}
+  .atile-top{display:flex;align-items:center;gap:.9%;margin-bottom:.7%;padding-bottom:.55%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .atile-top .ati{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .atile-top h3{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;}
+  .atile-rows{display:flex;flex-direction:column;gap:.4%;}
+  .at-row{display:flex;align-items:flex-start;gap:.7%;font-size:clamp(.47rem,.86vw,.63rem);color:#94a3b8;padding:.45% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.45;}
+  .at-row:last-child{border-bottom:none;}
+  .at-row .atr{font-size:.95em;flex-shrink:0;}
+  .at-1{border:1px solid rgba(56,189,248,.24);}
+  .at-2{border:1px solid rgba(192,132,252,.22);}
+  .at-3{border:1px solid rgba(45,212,191,.22);}
+
+  /* ── CAM framework ── */
+  .cam-frame{
+    width:100%;border:1.5px solid rgba(96,165,250,.3);
+    border-radius:.85vw;overflow:hidden;
+  }
+  .cam-header{
+    background:linear-gradient(135deg,rgba(96,165,250,.14),rgba(129,140,248,.1));
+    padding:.85% 1.5%;display:flex;align-items:center;gap:1%;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .cam-header .chi{font-size:clamp(.9rem,1.7vw,1.25rem);}
+  .cam-header h3{font-size:clamp(.58rem,1.08vw,.8rem);font-weight:700;color:#e2e8f0;}
+  .cam-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+  .cam-col{padding:.8% 1.2%;border-right:1px solid rgba(255,255,255,.06);}
+  .cam-col:last-child{border-right:none;}
+  .cam-col h4{font-size:clamp(.46rem,.84vw,.62rem);font-weight:700;color:#60a5fa;margin-bottom:.6%;text-transform:uppercase;letter-spacing:.07em;}
+  .cam-col .ci{font-size:clamp(.44rem,.8vw,.59rem);color:#94a3b8;padding:.35% 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.4;}
+  .cam-col .ci:last-child{border-bottom:none;}
+
+  /* ═══════════════════════════
+     GOVERNANCE FRAMEWORK (S3)
+  ═══════════════════════════ */
+  .gov-pyramid{
+    display:flex;flex-direction:column;align-items:center;gap:.6%;
+    width:100%;margin-bottom:.85%;
+  }
+  .gp-layer{
+    border-radius:.7vw;padding:.9% 1.5%;display:flex;align-items:center;gap:1.5%;
+  }
+  .gp-layer .gl-ico{font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;}
+  .gp-layer h4{font-size:clamp(.56rem,1.05vw,.76rem);font-weight:700;color:#e2e8f0;flex:0 0 22%;}
+  .gp-layer p {font-size:clamp(.48rem,.88vw,.64rem);color:#94a3b8;line-height:1.45;}
+  .gp-1{background:rgba(129,140,248,.1);border:1.5px solid rgba(129,140,248,.35);width:96%;}
+  .gp-2{background:rgba(96,165,250,.09); border:1px solid rgba(96,165,250,.3);  width:88%;}
+  .gp-3{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.28); width:80%;}
+  .gp-4{background:rgba(74,222,128,.07); border:1px solid rgba(74,222,128,.26); width:72%;}
+  .gp-5{background:rgba(251,146,60,.07); border:1px solid rgba(251,146,60,.24); width:64%;}
+
+  /* ── Policy cards ── */
+  .pol-grid{display:flex;gap:1%;width:100%;}
+  .pcard{flex:1;border-radius:.7vw;padding:1.1% 1.3%;background:rgba(255,255,255,.04);}
+  .pcard-top{display:flex;align-items:center;gap:.8%;margin-bottom:.6%;padding-bottom:.45%;border-bottom:1px solid rgba(255,255,255,.07);}
+  .pcard-top .pi{font-size:clamp(.8rem,1.5vw,1.05rem);}
+  .pcard-top h4{font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#e2e8f0;}
+  .pcard-body{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.45;}
+  .pcard-ex{margin-top:.5%;font-size:clamp(.44rem,.8vw,.59rem);font-style:italic;color:#64748b;}
+  .pcard-ex span{font-style:normal;background:rgba(255,255,255,.06);padding:.1em .35em;border-radius:.3vw;color:#94a3b8;}
+  .pc-1{border:1px solid rgba(129,140,248,.22);}
+  .pc-2{border:1px solid rgba(56,189,248,.2);}
+  .pc-3{border:1px solid rgba(45,212,191,.2);}
+  .pc-4{border:1px solid rgba(74,222,128,.2);}
+
+  /* ═══════════════════════════
+     CBOM GOVERNANCE ROLE (S4)
+  ═══════════════════════════ */
+  .gov-flow{display:flex;align-items:stretch;width:100%;gap:0;margin-bottom:.9%;}
+  .gf-stage{flex:1;border-radius:.8vw;padding:1.3% 1.1%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3%;transition:transform .22s;}
+  .gf-stage:hover{transform:translateY(-3px);}
+  .gf-stage .gfi{font-size:clamp(1rem,1.9vw,1.4rem);}
+  .gf-stage h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;}
+  .gf-stage p {font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.4;}
+  .gfs-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .gfs-2{background:rgba(129,140,248,.09);border:1px solid rgba(129,140,248,.28);}
+  .gfs-3{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .gfs-4{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.28);}
+  .gfs-5{background:rgba(74,222,128,.08); border:1px solid rgba(74,222,128,.28);}
+  .gf-arr{display:flex;align-items:center;font-size:clamp(.7rem,1.3vw,.95rem);color:#334155;flex-shrink:0;padding:0 .2%;}
+
+  /* ── Quote box ── */
+  .quote-box{
+    width:100%;border-radius:.8vw;padding:1.4% 2%;
+    background:linear-gradient(135deg,rgba(45,212,191,.1),rgba(96,165,250,.1));
+    border:1.5px solid rgba(45,212,191,.35);
+    text-align:center;margin-bottom:.85%;
+  }
+  .quote-box .qt{font-size:clamp(.68rem,1.28vw,.94rem);font-weight:800;color:#e2e8f0;margin-bottom:.5%;}
+  .quote-box .qs{font-size:clamp(.5rem,.93vw,.68rem);color:#5eead4;}
+
+  /* ── Dashboard mockup ── */
+  .dash-mock{
+    width:100%;background:rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.1);border-radius:.8vw;
+    overflow:hidden;
+  }
+  .dash-titlebar{
+    background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.08);
+    padding:.55% 1.2%;display:flex;align-items:center;gap:.8%;
+    font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;font-weight:600;
+  }
+  .dt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .dt-r{background:#f87171;}.dt-y{background:#fbbf24;}.dt-g{background:#4ade80;}
+  .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+  .dash-kpi{
+    padding:.8% 1.1%;border-right:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:1%;
+  }
+  .dash-kpi:nth-child(4n){border-right:none;}
+  .dash-kpi:nth-last-child(-n+4){border-bottom:none;}
+  .kpi-val{font-size:clamp(.9rem,1.7vw,1.25rem);font-weight:800;}
+  .kpi-lbl{font-size:clamp(.4rem,.73vw,.54rem);color:#64748b;text-transform:uppercase;letter-spacing:.08em;}
+  .kpi-sub{font-size:clamp(.38rem,.68vw,.5rem);}
+  .kpi-ok {color:#4ade80;}.kpi-warn{color:#fbbf24;}.kpi-bad{color:#f87171;}.kpi-inf{color:#60a5fa;}
+
+  /* ═══════════════════════════
+     BENEFITS (S5)
+  ═══════════════════════════ */
+  .ben-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .bbox{border-radius:.8vw;padding:1.4% 1.6%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);text-align:center;transition:transform .22s;}
+  .bbox:hover{transform:translateY(-3px);}
+  .bbox .bi{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .bbox h4{font-size:clamp(.54rem,1vw,.73rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .bbox p{font-size:clamp(.46rem,.84vw,.62rem);color:#94a3b8;line-height:1.45;}
+
+  /* ── Value chain ── */
+  .vchain{display:flex;align-items:center;width:100%;gap:.8%;margin-bottom:.85%;}
+  .vcnode{
+    flex:1;border-radius:.7vw;padding:1% 1%;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:2%;
+  }
+  .vcn-1{background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.26);}
+  .vcn-2{background:rgba(129,140,248,.09);border:1px solid rgba(129,140,248,.28);}
+  .vcn-3{background:rgba(192,132,252,.09);border:1px solid rgba(192,132,252,.28);}
+  .vcn-4{background:rgba(45,212,191,.08); border:1px solid rgba(45,212,191,.28);}
+  .vcn-5{background:linear-gradient(135deg,rgba(74,222,128,.1),rgba(45,212,191,.08));border:1.5px solid rgba(74,222,128,.3);}
+  .vcnode .vci{font-size:clamp(.85rem,1.6vw,1.15rem);}
+  .vcnode h4{font-size:clamp(.48rem,.88vw,.64rem);font-weight:700;color:#e2e8f0;}
+  .vcnode p {font-size:clamp(.42rem,.76vw,.56rem);color:#94a3b8;line-height:1.35;}
+  .vcarr{font-size:clamp(.65rem,1.2vw,.88rem);color:#334155;flex-shrink:0;}
+
+  /* ═══════════════════════════
+     SUMMARY (S6)
+  ═══════════════════════════ */
+  .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:1%;width:100%;margin-bottom:.85%;}
+  .s3b{border-radius:.75vw;padding:1.5% 1.3%;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);}
+  .s3b .si{font-size:clamp(.9rem,1.75vw,1.3rem);display:block;margin-bottom:3%;}
+  .s3b h4{font-size:clamp(.52rem,.96vw,.7rem);font-weight:700;color:#e2e8f0;margin-bottom:1.5%;}
+  .s3b p {font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;line-height:1.45;}
+
+  .closing{
+    width:100%;border-radius:.8vw;padding:1.3% 2%;
+    background:linear-gradient(135deg,rgba(129,140,248,.12),rgba(45,212,191,.1));
+    border:1.5px solid rgba(129,140,248,.35);
+    text-align:center;margin-bottom:.85%;
+  }
+  .closing h3{font-size:clamp(.66rem,1.25vw,.92rem);font-weight:800;color:#e2e8f0;margin-bottom:.5%;}
+  .closing p {font-size:clamp(.52rem,.97vw,.72rem);color:#a5b4fc;line-height:1.5;}
+
+  .next-box{width:100%;border-radius:.75vw;padding:1.1% 1.9%;background:linear-gradient(135deg,rgba(129,140,248,.11),rgba(45,212,191,.09));border:1px solid rgba(129,140,248,.3);display:flex;align-items:center;justify-content:space-between;gap:2%;}
+  .next-box h3{font-size:clamp(.6rem,1.1vw,.82rem);color:#e2e8f0;font-weight:700;margin-bottom:.5%;}
+  .next-box p {font-size:clamp(.48rem,.88vw,.65rem);color:#94a3b8;}
+  .nbtn{background:linear-gradient(135deg,#6366f1,#14b8a6);color:#fff;font-weight:700;font-size:clamp(.5rem,.93vw,.68rem);padding:.5em 1.25em;border-radius:999px;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 15px rgba(99,102,241,.38);}
+
+  /* ── Nav ── */
+  .nav-btn{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#e2e8f0;width:clamp(27px,2.9vw,41px);height:clamp(27px,2.9vw,41px);border-radius:50%;font-size:clamp(.82rem,1.35vw,1.15rem);cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;z-index:100;display:flex;align-items:center;justify-content:center;}
+  .nav-btn:hover{background:rgba(129,140,248,.22);border-color:#818cf8;}
+  #pb{left:.65%;}#nb{right:.65%;}
+  .progress{position:fixed;bottom:1.3%;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:100;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+  .dot.active{background:#818cf8;transform:scale(1.45);}
+  .snum{position:fixed;bottom:1.3%;right:1.8%;font-size:clamp(.42rem,.76vw,.57rem);color:rgba(255,255,255,.24);z-index:100;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════
+       SLIDE 1 · Title
+  ═══════════════════════════════════ -->
+  <div class="slide s1 active" id="slide-1">
+    <div class="orb" style="background:#4f46e5;width:36%;height:36%;top:-8%;left:-5%;"></div>
+    <div class="orb" style="background:#0d9488;width:24%;height:24%;bottom:2%;right:2%;"></div>
+    <div class="orb" style="background:#1d4ed8;width:15%;height:15%;bottom:13%;left:26%;"></div>
+
+    <div class="tag tg-ind">🏛️ CBOM Enterprise Series · Episode 15</div>
+    <h1>Governance &amp; Crypto Asset Management</h1>
+    <div class="divl" style="background:linear-gradient(90deg,#818cf8,#c084fc,#2dd4bf);"></div>
+    <p class="subtitle">Using CBOM for Control &amp; Visibility — Managing Cryptography at Scale</p>
+    <p class="tagline">✦ Inventory · Policy · Control · Visibility · Compliance ✦</p>
+
+    <div class="tbrow">
+      <div class="tb tb-a">🏛️ <span>Governance</span></div>
+      <div class="tb tb-b">🗝️ <span>Asset Mgmt</span></div>
+      <div class="tb tb-c">📊 <span>Dashboard</span></div>
+    </div>
+
+    <!-- Enterprise pillars -->
+    <div style="width:92%;display:flex;gap:.8%;margin-bottom:.9%;">
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(56,189,248,.08);border:1.5px solid rgba(56,189,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📦</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#38bdf8;margin-top:2%;">Asset Inventory</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Know every crypto component</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(129,140,248,.08);border:1.5px solid rgba(129,140,248,.28);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">📋</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#a5b4fc;margin-top:2%;">Policy Enforcement</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Approved algorithms only</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(192,132,252,.08);border:1.5px solid rgba(192,132,252,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">🔍</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#c084fc;margin-top:2%;">Risk Visibility</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Continuous threat monitoring</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(45,212,191,.07);border:1.5px solid rgba(45,212,191,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">⚙️</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#2dd4bf;margin-top:2%;">Lifecycle Control</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">From deployment to retirement</div>
+      </div>
+      <div style="flex:1;border-radius:.65vw;padding:.9% 1%;background:rgba(74,222,128,.07);border:1.5px solid rgba(74,222,128,.26);text-align:center;">
+        <div style="font-size:clamp(.85rem,1.6vw,1.15rem);">✅</div>
+        <div style="font-size:clamp(.47rem,.86vw,.63rem);font-weight:700;color:#4ade80;margin-top:2%;">Compliance Assurance</div>
+        <div style="font-size:clamp(.4rem,.73vw,.54rem);color:#475569;margin-top:1%;">Audit-ready at all times</div>
+      </div>
+    </div>
+
+    <div class="hbox hb-grd" style="max-width:80%;text-align:center;margin-bottom:0;">
+      <p>As organizations scale, cryptographic assets — algorithms, keys, certificates — multiply across hundreds of services and teams. Without a <strong>structured governance framework and centralized asset management</strong>, these assets become untracked liabilities. CBOM provides the foundation to manage cryptography <strong>as a first-class enterprise asset</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 2 · What is Crypto Asset Management?
+  ═══════════════════════════════════ -->
+  <div class="slide s2" id="slide-2">
+    <div class="orb" style="background:#1e40af;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#0891b2;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-sky">🗝️ Foundation · Slide 2 of 6</div>
+    <h2>What is Cryptographic Asset Management?</h2>
+
+    <div class="hbox hb-sky" style="margin-bottom:.9%;">
+      <p>📖 <strong>Cryptographic Asset Management (CAM)</strong> is the discipline of systematically <strong>discovering, cataloguing, monitoring, and controlling</strong> all cryptographic components used across an organization's software portfolio. Just as IT asset management tracks servers and software licenses, CAM tracks algorithms, keys, and certificates as formal, governed assets with defined owners, lifecycles, and risk profiles.</p>
+    </div>
+
+    <div class="asset-grid" style="margin-bottom:.85%;">
+      <div class="atile at-1">
+        <div class="atile-top"><span class="ati">⚙️</span><h3 class="as">Algorithm Assets</h3></div>
+        <div class="atile-rows">
+          <div class="at-row"><span class="atr">📌</span><div><span class="as">What it is:</span> The mathematical operations that encrypt, hash, or sign data — AES, RSA, SHA-256, ECDSA.</div></div>
+          <div class="at-row"><span class="atr">🎯</span><div><span class="as">Why managed:</span> Algorithms have defined lifespans — MD5 and SHA-1 are retired. New algorithms will be needed for post-quantum security.</div></div>
+          <div class="at-row"><span class="atr">📊</span><div><span class="as">Asset attributes:</span> Name · version · strength classification · deprecation status · approved-list membership</div></div>
+        </div>
+      </div>
+      <div class="atile at-2">
+        <div class="atile-top"><span class="ati">🗝️</span><h3 class="av">Key Assets</h3></div>
+        <div class="atile-rows">
+          <div class="at-row"><span class="atr">📌</span><div><span class="av">What it is:</span> Secret values that control encryption and decryption — symmetric keys, RSA public/private pairs, ECDH ephemeral keys.</div></div>
+          <div class="at-row"><span class="atr">🎯</span><div><span class="av">Why managed:</span> Keys have defined rotation schedules, storage requirements, and access controls. A leaked key compromises all data it protected.</div></div>
+          <div class="at-row"><span class="atr">📊</span><div><span class="av">Asset attributes:</span> Type · bit-length · storage location · owner · last-rotation date · rotation policy</div></div>
+        </div>
+      </div>
+      <div class="atile at-3">
+        <div class="atile-top"><span class="ati">📜</span><h3 class="at">Certificate Assets</h3></div>
+        <div class="atile-rows">
+          <div class="at-row"><span class="atr">📌</span><div><span class="at">What it is:</span> Digital identity documents binding a public key to a domain or service — TLS/SSL certificates, code-signing certs, CA certificates.</div></div>
+          <div class="at-row"><span class="atr">🎯</span><div><span class="at">Why managed:</span> Certificates expire on a fixed date — an unmanaged expiry causes immediate production outage and user-facing security warnings.</div></div>
+          <div class="at-row"><span class="atr">📊</span><div><span class="at">Asset attributes:</span> Issuer · subject · expiry date · signature algorithm · revocation status · renewal owner</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAM framework table -->
+    <div class="sl sl-s" style="text-align:center;">🏗️ Crypto Asset Management Framework — The Four Management Disciplines</div>
+    <div class="cam-frame">
+      <div class="cam-header">
+        <span class="chi">🗂️</span>
+        <h3>Cryptographic Asset Management Framework — Core Activities</h3>
+      </div>
+      <div class="cam-cols">
+        <div class="cam-col">
+          <h4>📦 Discovery</h4>
+          <div class="ci">Automated scanning of all environments</div>
+          <div class="ci">Static code &amp; container analysis</div>
+          <div class="ci">Runtime environment probing</div>
+          <div class="ci">Cloud API inventory queries</div>
+        </div>
+        <div class="cam-col">
+          <h4>🔖 Classification</h4>
+          <div class="ci">Strength rating per NIST guidelines</div>
+          <div class="ci">Approved vs deprecated status</div>
+          <div class="ci">Business criticality tier</div>
+          <div class="ci">Ownership assignment</div>
+        </div>
+        <div class="cam-col">
+          <h4>📊 Monitoring</h4>
+          <div class="ci">Certificate expiry countdown alerts</div>
+          <div class="ci">New CVE matching against inventory</div>
+          <div class="ci">Key rotation compliance tracking</div>
+          <div class="ci">Algorithm deprecation notifications</div>
+        </div>
+        <div class="cam-col">
+          <h4>🔧 Lifecycle Control</h4>
+          <div class="ci">Scheduled key rotation enforcement</div>
+          <div class="ci">Automated certificate renewal</div>
+          <div class="ci">Approved algorithm migration planning</div>
+          <div class="ci">Retirement and decommission tracking</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 3 · What is Governance in Security?
+  ═══════════════════════════════════ -->
+  <div class="slide s3" id="slide-3">
+    <div class="orb" style="background:#6d28d9;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#1e40af;width:18%;height:18%;bottom:4%;left:4%;"></div>
+
+    <div class="tag tg-vio">📋 Governance · Slide 3 of 6</div>
+    <h2>What is Governance in Cryptographic Security?</h2>
+
+    <div class="hbox hb-vio" style="margin-bottom:.85%;">
+      <p>📖 <strong>Cryptographic governance</strong> is the structured framework of <strong>policies, standards, controls, and accountability mechanisms</strong> that determine how cryptography is selected, deployed, monitored, and retired across an organization. Without governance, even a well-inventoried CBOM becomes a list — not a control mechanism.</p>
+    </div>
+
+    <div class="two" style="align-items:flex-start;gap:1.8%;">
+      <div class="col-w">
+        <div class="sl sl-v">🏛️ Governance Hierarchy — Policy to Operations</div>
+        <div class="gov-pyramid">
+          <div class="gp-layer gp-1">
+            <span class="gl-ico">🏛️</span>
+            <h4 class="ai">Crypto Policy</h4>
+            <p>Board / CISO level. Defines organizational commitment: "We will use only NIST-approved algorithms. All cryptographic assets must be inventoried in CBOM." Sets the intent.</p>
+          </div>
+          <div class="gp-layer gp-2">
+            <span class="gl-ico">📋</span>
+            <h4 class="ab">Crypto Standards</h4>
+            <p>Security architecture level. Approved algorithm list: AES-256-GCM, RSA-2048+, SHA-256+, TLS 1.2 minimum. Minimum key lengths and required storage mechanisms defined.</p>
+          </div>
+          <div class="gp-layer gp-3">
+            <span class="gl-ico">⚙️</span>
+            <h4 class="at">Crypto Controls</h4>
+            <p>Engineering level. CI/CD policy gates, CBOM mandatory fields, automated CVE alerts, certificate renewal SLAs, key rotation enforcement — operationalizing the standards.</p>
+          </div>
+          <div class="gp-layer gp-4">
+            <span class="gl-ico">🔍</span>
+            <h4 class="ag">Monitoring &amp; Audit</h4>
+            <p>Security operations level. Continuous CBOM scanning, dashboard reporting, exception tracking, quarterly risk reviews submitted to CISO and compliance teams.</p>
+          </div>
+          <div class="gp-layer gp-5">
+            <span class="gl-ico">📊</span>
+            <h4 class="ao">Reporting &amp; Accountability</h4>
+            <p>Governance reporting level. Named CBOM owners, SLA breach escalations, regulatory submissions (CERT-In, RBI, SEBI), executive risk dashboards.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="sl sl-v">📜 Governance Policy Examples</div>
+        <div class="pol-grid" style="flex-direction:column;gap:.8%;">
+          <div class="pcard pc-1">
+            <div class="pcard-top"><span class="pi">📋</span><h4 class="ai">Approved Algorithm Policy</h4></div>
+            <div class="pcard-body">Defines which algorithms are permitted for each use case. Symmetric encryption: AES-256-GCM only. Hashing: SHA-256 or SHA-3. No MD5, SHA-1, or DES for any security function.</div>
+            <div class="pcard-ex">Enforced by: <span>CBOM CI/CD gate blocking non-compliant builds automatically</span></div>
+          </div>
+          <div class="pcard pc-2">
+            <div class="pcard-top"><span class="pi">🗝️</span><h4 class="as">Key Management Policy</h4></div>
+            <div class="pcard-body">Minimum RSA-2048 or ECC-256. All production keys stored in HSM or approved KMS (AWS KMS, HashiCorp Vault). Rotation every 90 days. No hardcoded keys in source code.</div>
+            <div class="pcard-ex">Enforced by: <span>CBOM key-storage field checked against approved-storage list on each scan</span></div>
+          </div>
+          <div class="pcard pc-3">
+            <div class="pcard-top"><span class="pi">📜</span><h4 class="at">Certificate Lifecycle Policy</h4></div>
+            <div class="pcard-body">All certs must use SHA-256 signature algorithm. Maximum 1-year validity. Renewal initiated 60 days before expiry. OCSP stapling required for all public-facing TLS.</div>
+            <div class="pcard-ex">Enforced by: <span>CBOM certificate expiry alerts at 90d/30d/7d with escalating severity</span></div>
+          </div>
+          <div class="pcard pc-4">
+            <div class="pcard-top"><span class="pi">🔗</span><h4 class="ag">Protocol Version Policy</h4></div>
+            <div class="pcard-body">TLS 1.3 required for all new services. TLS 1.2 acceptable with approved cipher suites. TLS 1.0/1.1 and SSLv3 strictly prohibited. SSH-2 only for all remote access.</div>
+            <div class="pcard-ex">Enforced by: <span>CBOM runtime protocol scan flags violations in real time</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 4 · Role of CBOM in Governance
+  ═══════════════════════════════════ -->
+  <div class="slide s4" id="slide-4">
+    <div class="orb" style="background:#0d9488;width:28%;height:28%;top:-4%;right:4%;"></div>
+    <div class="orb" style="background:#4f46e5;width:18%;height:18%;bottom:3%;left:3%;"></div>
+
+    <div class="tag tg-tel">📋 CBOM's Role · Slide 4 of 6</div>
+    <h2>The Role of CBOM in Cryptographic Governance</h2>
+
+    <div class="quote-box" style="margin-bottom:.85%;">
+      <div class="qt">🎯 "You Cannot Secure What You Cannot See"</div>
+      <div class="qs">CBOM transforms invisible cryptographic risk into a visible, managed, auditable enterprise asset registry</div>
+    </div>
+
+    <!-- Governance flow -->
+    <div class="sl sl-t" style="text-align:center;">🔄 How CBOM Powers the Governance Lifecycle</div>
+    <div class="gov-flow" style="margin-bottom:.85%;">
+      <div class="gf-stage gfs-1">
+        <span class="gfi">🔍</span>
+        <h4 class="as">Discover</h4>
+        <p>CBOM auto-discovers every crypto component across all services, containers, and cloud environments — no asset is invisible.</p>
+      </div>
+      <div class="gf-arr">→</div>
+      <div class="gf-stage gfs-2">
+        <span class="gfi">📋</span>
+        <h4 class="ai">Inventory</h4>
+        <p>Structured record of every component with all mandatory fields — owner, version, algorithm, location, and risk classification.</p>
+      </div>
+      <div class="gf-arr">→</div>
+      <div class="gf-stage gfs-3">
+        <span class="gfi">⚖️</span>
+        <h4 class="av">Enforce Policy</h4>
+        <p>CBOM checked against approved-algorithm policy on every build. Non-compliant components trigger CI/CD gate failures automatically.</p>
+      </div>
+      <div class="gf-arr">→</div>
+      <div class="gf-stage gfs-4">
+        <span class="gfi">📡</span>
+        <h4 class="at">Monitor</h4>
+        <p>Continuous scanning detects new CVEs, expiring certs, and configuration drift. Owners alerted before issues become incidents.</p>
+      </div>
+      <div class="gf-arr">→</div>
+      <div class="gf-stage gfs-5">
+        <span class="gfi">📊</span>
+        <h4 class="ag">Report &amp; Govern</h4>
+        <p>CISO dashboard, compliance evidence for regulators, and risk posture trends over time — all from a single CBOM source of truth.</p>
+      </div>
+    </div>
+
+    <!-- Executive dashboard mockup -->
+    <div class="sl sl-t" style="text-align:center;">📊 CBOM Executive Governance Dashboard — Real-Time Crypto Posture</div>
+    <div class="dash-mock">
+      <div class="dash-titlebar">
+        <div class="dt-dot dt-r"></div><div class="dt-dot dt-y"></div><div class="dt-dot dt-g"></div>
+        <span style="margin-left:.5%;">🏛️ Cryptographic Asset Governance Dashboard — Production Environment</span>
+        <span style="margin-left:auto;">Updated: 2026-04-05 · Next scan: 02:00 UTC</span>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-kpi"><span class="kpi-val kpi-inf">247</span><span class="kpi-lbl">Total Crypto Assets</span><span class="kpi-sub" style="color:#475569;">↑12 this week</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-ok">231</span><span class="kpi-lbl">Policy Compliant</span><span class="kpi-sub kpi-ok">93.5% compliance rate</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-bad">4</span><span class="kpi-lbl">Critical Findings</span><span class="kpi-sub kpi-bad">Require immediate action</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-warn">12</span><span class="kpi-lbl">High Findings</span><span class="kpi-sub kpi-warn">Fix this sprint</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-warn">3</span><span class="kpi-lbl">Certs Expiring</span><span class="kpi-sub kpi-warn">≤ 30 days remaining</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-bad">1</span><span class="kpi-lbl">Expired Cert</span><span class="kpi-sub kpi-bad">cdn.assets.io ← action</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-ok">89%</span><span class="kpi-lbl">Key Rotation SLA</span><span class="kpi-sub kpi-ok">On schedule</span></div>
+        <div class="dash-kpi"><span class="kpi-val kpi-inf">18</span><span class="kpi-lbl">CVEs Matched</span><span class="kpi-sub" style="color:#475569;">NVD sync: 6h ago</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 5 · Benefits of Crypto Asset Management
+  ═══════════════════════════════════ -->
+  <div class="slide s5" id="slide-5">
+    <div class="orb" style="background:#4f46e5;width:28%;height:28%;top:-4%;right:5%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:4%;"></div>
+
+    <div class="tag tg-blu">🎯 Enterprise Benefits · Slide 5 of 6</div>
+    <h2>Benefits of Cryptographic Asset Management with CBOM</h2>
+
+    <div class="hbox hb-blu" style="margin-bottom:.85%;">
+      <p>📖 Implementing CBOM-driven Cryptographic Asset Management delivers measurable, enterprise-wide security improvements. These benefits cascade across security, engineering, compliance, and executive stakeholders — making it one of the highest-ROI investments in a modern DevSecOps security programme.</p>
+    </div>
+
+    <div class="ben-grid" style="margin-bottom:.85%;">
+      <div class="bbox" style="border-color:rgba(56,189,248,.24);">
+        <span class="bi">👁️</span>
+        <h4 class="as">Centralized Visibility</h4>
+        <p>A single, unified view of every cryptographic asset across all teams, services, and environments. No more shadow crypto, no more unknown dependencies. Complete enterprise crypto situational awareness.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(248,113,113,.22);">
+        <span class="bi">📉</span>
+        <h4 class="ar">Risk Reduction</h4>
+        <p>Proactively identifies and eliminates weak algorithms, expiring certificates, and vulnerable libraries before they become exploitable incidents — dramatically shrinking the cryptographic attack surface.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(74,222,128,.24);">
+        <span class="bi">📋</span>
+        <h4 class="ag">Compliance Readiness</h4>
+        <p>Auto-generated, digitally signed CBOM provides the structured evidence required for CERT-In, PCI-DSS 4.0, HIPAA, FIPS 140-3, and ISO 27001 audits — without manual documentation effort.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(192,132,252,.24);">
+        <span class="bi">🧠</span>
+        <h4 class="av">Better Decision Making</h4>
+        <p>Security and architecture teams can make informed, data-driven decisions about cryptographic upgrades, migration timelines, and risk acceptance — backed by complete, accurate inventory data.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(45,212,191,.24);">
+        <span class="bi">⚡</span>
+        <h4 class="at">Faster Incident Response</h4>
+        <p>When a critical CVE drops — like Log4Shell — CBOM tells your team within hours exactly which services are affected, who owns them, and what the fix is. No investigation delay, no guesswork.</p>
+      </div>
+      <div class="bbox" style="border-color:rgba(251,146,60,.22);">
+        <span class="bi">⚛️</span>
+        <h4 class="ao">Quantum Readiness</h4>
+        <p>CBOM maps all current algorithms — providing the exact data needed to plan and execute migration to post-quantum cryptography (CRYSTALS-Kyber, Dilithium) before quantum computers become a practical threat.</p>
+      </div>
+    </div>
+
+    <!-- Value chain -->
+    <div class="sl sl-b" style="text-align:center;">💎 Enterprise Value Chain — CBOM Translates to Measurable Outcomes</div>
+    <div class="vchain">
+      <div class="vcnode vcn-1"><span class="vci">📋</span><h4 class="as">CBOM Inventory</h4><p>Complete crypto visibility across all systems</p></div>
+      <div class="vcarr">→</div>
+      <div class="vcnode vcn-2"><span class="vci">📊</span><h4 class="ai">Governance Control</h4><p>Policies enforced, exceptions tracked</p></div>
+      <div class="vcarr">→</div>
+      <div class="vcnode vcn-3"><span class="vci">🔍</span><h4 class="av">Risk Intelligence</h4><p>CVEs mapped, risks scored and prioritised</p></div>
+      <div class="vcarr">→</div>
+      <div class="vcnode vcn-4"><span class="vci">🔧</span><h4 class="at">Managed Remediation</h4><p>Owners notified, SLAs tracked to closure</p></div>
+      <div class="vcarr">→</div>
+      <div class="vcnode vcn-5"><span class="vci">🛡️</span><h4 class="ag">Secure Enterprise</h4><p>Compliant · auditable · resilient posture</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       SLIDE 6 · Summary
+  ═══════════════════════════════════ -->
+  <div class="slide s6" id="slide-6">
+    <div class="orb" style="background:#4f46e5;width:26%;height:26%;top:0;right:8%;"></div>
+    <div class="orb" style="background:#059669;width:18%;height:18%;bottom:3%;left:5%;"></div>
+
+    <div class="tag tg-ind">🏁 Full Recap · Slide 6 of 6</div>
+    <h2>Summary &amp; Key Takeaways</h2>
+
+    <div class="sum3" style="margin-bottom:.85%;">
+      <div class="s3b" style="border-color:rgba(56,189,248,.24);">
+        <span class="si">🗝️</span>
+        <h4 class="as">Crypto Asset Management</h4>
+        <p>Treat algorithms, keys, and certificates as formal enterprise assets with defined owners, lifecycles, classification, and controls — just like any other critical IT asset.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(192,132,252,.24);">
+        <span class="si">🏛️</span>
+        <h4 class="av">Governance Framework</h4>
+        <p>Policies, standards, controls, and accountability cascading from CISO to engineering — ensuring every cryptographic decision is deliberate, documented, and enforceable.</p>
+      </div>
+      <div class="s3b" style="border-color:rgba(45,212,191,.24);">
+        <span class="si">📋</span>
+        <h4 class="at">CBOM as the Foundation</h4>
+        <p>CBOM provides the centralized inventory that makes governance possible — without it, policies exist on paper but cannot be enforced, monitored, or audited in practice.</p>
+      </div>
+    </div>
+
+    <!-- Monitor · Manage · Secure strip -->
+    <div style="width:100%;display:flex;gap:.8%;margin-bottom:.85%;">
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1.2%;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.24);display:flex;align-items:center;gap:1%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">📡</span>
+        <div><div style="font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#38bdf8;">Monitor</div><div style="font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;">Continuous scanning · real-time alerts · CVE matching · cert expiry tracking · runtime visibility</div></div>
+      </div>
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1.2%;background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.24);display:flex;align-items:center;gap:1%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">⚙️</span>
+        <div><div style="font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#c084fc;">Manage</div><div style="font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;">Asset lifecycle · key rotation · cert renewal · policy enforcement · owner accountability</div></div>
+      </div>
+      <div style="flex:1;border-radius:.7vw;padding:1.1% 1.2%;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.24);display:flex;align-items:center;gap:1%;">
+        <span style="font-size:clamp(.9rem,1.7vw,1.25rem);flex-shrink:0;">🛡️</span>
+        <div><div style="font-size:clamp(.52rem,.97vw,.71rem);font-weight:700;color:#4ade80;">Secure</div><div style="font-size:clamp(.44rem,.8vw,.6rem);color:#94a3b8;">Cryptographic posture · risk reduction · compliance assurance · quantum readiness · audit confidence</div></div>
+      </div>
+    </div>
+
+    <div class="closing">
+      <h3>🔑 The Enterprise Imperative</h3>
+      <p><strong>CBOM is the key to enterprise-grade security and compliance readiness.</strong> Organizations that implement CBOM-driven Cryptographic Asset Management transform scattered, unknown crypto risk into a governed, controlled, and continuously improving security programme — one that satisfies regulators, protects customers, and prepares for the next wave of cryptographic challenges including the quantum era.</p>
+    </div>
+
+    <div class="next-box">
+      <div>
+        <h3>🚀 Continue Your DevSecOps Journey</h3>
+        <p>Real-World Use Cases of CBOM — hands-on scenarios showing how leading enterprises apply CBOM in banking, healthcare, cloud, and critical infrastructure DevSecOps programmes
+        </p>
+      </div>
+      <div class="nbtn">▶ Explore More</div>
+    </div>
+  </div>
+
+</div><!-- /.deck -->
+
+<button class="nav-btn" id="pb" onclick="nav(-1)">‹</button>
+<button class="nav-btn" id="nb" onclick="nav(1)">›</button>
+<div class="progress" id="prog"></div>
+<div class="snum" id="snum"></div>
+
+<script>
+  const N=6;let cur=1;
+  const prog=document.getElementById('prog');
+  const snum=document.getElementById('snum');
+  for(let i=1;i<=N;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===1?' active':'');
+    d.onclick=()=>go(i);
+    prog.appendChild(d);
+  }
+  function go(n){
+    if(n<1||n>N)return;
+    document.getElementById('slide-'+cur).classList.remove('active');
+    prog.children[cur-1].classList.remove('active');
+    cur=n;
+    document.getElementById('slide-'+cur).classList.add('active');
+    prog.children[cur-1].classList.add('active');
+    snum.textContent=cur+' / '+N;
+  }
+  function nav(d){go(cur+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowDown')nav(1);
+    if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  nav(-1);
+  });
+  snum.textContent='1 / '+N;
+</script>
+</body>
+</html>
