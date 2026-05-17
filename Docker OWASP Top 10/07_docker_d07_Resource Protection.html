@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 – D07: Resource Protection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation-container {
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 16/9;
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 25px 40px 80px 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            position: relative;
+            border: 6px solid #2c5282;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .slide-number {
+            background: #2c5282;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        h1 {
+            color: #2c5282;
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: #2c5282;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .content-area {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
+        .icon {
+            font-size: 60px;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .main-text {
+            text-align: center;
+            font-size: 24px;
+            line-height: 1.5;
+            color: #2d3748;
+            max-width: 1000px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #4299e1, #667eea);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.4;
+        }
+
+        .example-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-left: 6px solid #4299e1;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 25px 0;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .grid-item {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #e2e8f0;
+            transition: transform 0.2s ease;
+        }
+
+        .grid-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .grid-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .grid-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .grid-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4299e1;
+            margin-bottom: 5px;
+        }
+
+        .grid-desc {
+            font-size: 14px;
+            color: #718096;
+            line-height: 1.3;
+        }
+
+        .steps-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        .steps-list li {
+            counter-increment: step-counter;
+            margin-bottom: 18px;
+            padding-left: 60px;
+            position: relative;
+            color: #2d3748;
+        }
+
+        .steps-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #4299e1;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .warning-section {
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
+            border: 2px solid #f56565;
+            color: #742a2a;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.4;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .success-section {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            border: 2px solid #48bb78;
+            color: #22543d;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.4;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #2c5282;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .nav-btn:hover {
+            background: #4299e1;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            background: rgba(44, 82, 130, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            color: #2c5282;
+            font-weight: bold;
+        }
+
+        /* Title slide specific */
+        .slide:first-child {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide:first-child h1 {
+            color: white;
+            font-size: 48px;
+        }
+
+        .slide:first-child .main-text {
+            color: white;
+            font-size: 28px;
+        }
+
+        .slide:first-child .content-area {
+            justify-content: center;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .column-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .large-stat {
+            font-size: 48px;
+            font-weight: bold;
+            color: #e53e3e;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-indicator" id="slideIndicator">
+            Slide 1 of 10
+        </div>
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-header">
+                <div class="slide-number">OWASP Docker Top 10</div>
+                <h1>D07 – Resource Protection</h1>
+            </div>
+            <div class="content-area">
+                <div class="icon">🛡️</div>
+                <div class="main-text">
+                    Preventing Docker containers from consuming excessive system resources through proper limits and monitoring. Essential for maintaining system stability and security.
+                </div>
+                <div class="highlight-box">
+                    Learn how to set CPU, memory, disk, and network boundaries to protect your infrastructure
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is Resource Protection -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">02</div>
+                <h2>What is Resource Protection in Docker?</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">⚙️</div>
+                <div class="main-text">
+                    Resource protection involves setting explicit boundaries on how much CPU, memory, disk space, and network bandwidth each Docker container can consume on the host system.
+                </div>
+                <div class="two-column">
+                    <div class="column-content">
+                        <div class="highlight-box">
+                            <strong>Without Limits:</strong><br>
+                            Containers can consume 100% of available system resources, potentially crashing the host and other containers.
+                        </div>
+                    </div>
+                    <div class="column-content">
+                        <div class="success-section">
+                            <strong>With Proper Limits:</strong><br>
+                            Each container operates within defined boundaries, ensuring stable multi-container environments.
+                        </div>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <strong>Analogy:</strong> Like speed limits on highways - they prevent accidents and ensure smooth traffic flow for everyone
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why Containers Need Boundaries -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">03</div>
+                <h2>Why Docker Containers Need Resource Boundaries</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">🏗️</div>
+                <div class="main-text">
+                    Docker containers share the host OS kernel and resources. Without proper limits, a single runaway container can monopolize all system resources, causing cascading failures.
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon">💻</div>
+                        <div class="grid-title">CPU Protection</div>
+                        <div class="grid-desc">Prevent CPU starvation of other processes and maintain system responsiveness</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">🧠</div>
+                        <div class="grid-title">Memory Limits</div>
+                        <div class="grid-desc">Avoid out-of-memory conditions that can crash the host system</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">💾</div>
+                        <div class="grid-title">Disk Space Control</div>
+                        <div class="grid-desc">Prevent containers from filling up the host filesystem completely</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">🌐</div>
+                        <div class="grid-title">Network Bandwidth</div>
+                        <div class="grid-desc">Ensure fair network access and prevent bandwidth exhaustion attacks</div>
+                    </div>
+                </div>
+                <div class="warning-section">
+                    <strong>⚠️ Key Risk:</strong> Docker containers inherit NO resource limits by default - they can use 100% of available system resources!
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: D07 Examples -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">04</div>
+                <h2>D07 Examples: Typical Container Resource Limits</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">📊</div>
+                <div class="main-text">
+                    Here are recommended starting resource limits for different types of containerized applications in production environments.
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon">⚡</div>
+                        <div class="grid-title">Web Application</div>
+                        <div class="grid-value">0.5 CPU cores</div>
+                        <div class="grid-value">512MB RAM</div>
+                        <div class="grid-desc">Typical web server with moderate traffic</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">🗄️</div>
+                        <div class="grid-title">Database Container</div>
+                        <div class="grid-value">2 CPU cores</div>
+                        <div class="grid-value">2GB RAM</div>
+                        <div class="grid-desc">Production database with caching</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">🔄</div>
+                        <div class="grid-title">Background Worker</div>
+                        <div class="grid-value">0.25 CPU cores</div>
+                        <div class="grid-value">256MB RAM</div>
+                        <div class="grid-desc">Queue processing and batch jobs</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">📈</div>
+                        <div class="grid-title">Monitoring Service</div>
+                        <div class="grid-value">0.1 CPU cores</div>
+                        <div class="grid-value">128MB RAM</div>
+                        <div class="grid-desc">Lightweight monitoring agents</div>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <strong>💡 Pro Tip:</strong> Start with conservative limits (25-50% of expected usage) and scale up based on monitoring data
+                </div>
+                <div class="example-box">
+                    # Additional limits to consider:<br>
+                    • Disk I/O: --device-read-bps, --device-write-bps<br>
+                    • Network: --network bandwidth (via tc in custom networks)<br>
+                    • File descriptors: --ulimit nofile=1024:2048<br>
+                    • Process count: --pids-limit=100
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: How to Set Resource Limits -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">05</div>
+                <h2>How to Set Docker Resource Limits</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">⚙️</div>
+                <div class="main-text">
+                    Resource limits can be configured using Docker CLI commands, Docker Compose files, or Kubernetes resource specifications. Here are practical examples for each method.
+                </div>
+                <div class="example-box">
+                    <strong>Docker CLI Examples:</strong><br>
+                    # Basic memory and CPU limits<br>
+                    docker run --memory="512m" --cpus="0.5" nginx<br><br>
+                    # Advanced resource controls<br>
+                    docker run --memory="1g" --memory-swap="2g" \<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--cpus="1.5" --cpu-shares=512 \<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--pids-limit=100 my-app<br><br>
+                    # Disk I/O limits<br>
+                    docker run --device-read-bps /dev/sda:1mb \<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--device-write-bps /dev/sda:1mb my-app
+                </div>
+                <div class="example-box">
+                    <strong>Docker Compose Configuration:</strong><br>
+                    version: '3.8'<br>
+                    services:<br>
+                    &nbsp;&nbsp;web:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;image: nginx<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;deploy:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resources:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;limits:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpus: '0.50'<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memory: 512M<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;reservations:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpus: '0.25'<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memory: 256M
+                </div>
+                <div class="highlight-box">
+                    <strong>📋 Remember:</strong> Always test resource limits in staging environment before applying to production containers
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Attack Vectors -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">06</div>
+                <h2>Attack Vectors: What Can Go Wrong Without Limits</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">⚠️</div>
+                <div class="main-text">
+                    Attackers exploit containers without resource limits to launch resource exhaustion attacks. Even unintentional bugs can cause system-wide failures.
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">🔥</div>
+                        <div class="grid-title">CPU Bomb Attack</div>
+                        <div class="grid-desc">Malicious code spawns infinite loops or processes to consume 100% CPU, making system unresponsive</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">💥</div>
+                        <div class="grid-title">Memory Exhaustion</div>
+                        <div class="grid-desc">Rapid memory allocation to trigger OOM killer, potentially crashing critical system processes</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">🌊</div>
+                        <div class="grid-title">Disk Space Flooding</div>
+                        <div class="grid-desc">Writing massive files or logs to fill up disk space, preventing system operations</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">📡</div>
+                        <div class="grid-title">Network Bandwidth Abuse</div>
+                        <div class="grid-desc">Generating excessive network traffic to saturate bandwidth and disrupt services</div>
+                    </div>
+                </div>
+                <div class="warning-section">
+                    <strong>🚨 Real Attack Example:</strong> Fork bomb attacks can spawn thousands of processes rapidly: <code>:(){ :|:& };:</code> - This single command can crash an unlimited container in seconds!
+                </div>
+                <div class="example-box">
+                    <strong>Common Attack Techniques:</strong><br>
+                    • Cryptocurrency mining malware consuming CPU<br>
+                    • Log flooding attacks filling disk space<br>
+                    • Memory leaks in compromised applications<br>
+                    • DoS attacks through resource starvation<br>
+                    • Container escape attempts via resource pressure
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Impact of Ignoring -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">07</div>
+                <h2>Business Impact of Ignoring Resource Protection</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">💣</div>
+                <div class="main-text">
+                    The consequences of inadequate resource protection extend beyond technical failures to significant business and financial impacts.
+                </div>
+                <div class="two-column">
+                    <div class="column-content">
+                        <div class="large-stat">99.9%</div>
+                        <div class="stat-label">Service Downtime Risk</div>
+                        <div class="large-stat">$5,600</div>
+                        <div class="stat-label">Average Cost per Minute of Downtime</div>
+                    </div>
+                    <div class="column-content">
+                        <div class="large-stat">73%</div>
+                        <div class="stat-label">Of Organizations Experience Resource-Related Outages</div>
+                        <div class="large-stat">4.2 hrs</div>
+                        <div class="stat-label">Average Recovery Time</div>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">⚡</div>
+                        <div class="grid-title">System Crashes</div>
+                        <div class="grid-desc">Complete host system failure requiring emergency restart and potential data loss</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">🔓</div>
+                        <div class="grid-title">Security Breaches</div>
+                        <div class="grid-desc">Resource pressure can disable security monitoring and logging systems</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">🎯</div>
+                        <div class="grid-title">SLA Violations</div>
+                        <div class="grid-desc">Breach of service level agreements resulting in financial penalties</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #e53e3e;">📉</div>
+                        <div class="grid-title">Customer Loss</div>
+                        <div class="grid-desc">Poor user experience and service reliability leading to customer churn</div>
+                    </div>
+                </div>
+                <div class="warning-section">
+                    <strong>💰 Case Study:</strong> A major e-commerce site lost $1.7M in 4 hours due to a runaway container consuming all available memory during Black Friday traffic
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Monitoring -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">08</div>
+                <h2>Identifying Containers Using Excessive Resources</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">📈</div>
+                <div class="main-text">
+                    Proactive monitoring helps identify resource issues before they cause system failures. Use built-in Docker tools and external monitoring solutions.
+                </div>
+                <div class="example-box">
+                    <strong>Essential Docker Monitoring Commands:</strong><br>
+                    # Real-time resource usage for all containers<br>
+                    docker stats<br><br>
+                    # Monitor specific container with detailed metrics<br>
+                    docker stats my-container --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"<br><br>
+                    # Get resource usage history<br>
+                    docker exec container-name top -bn1<br><br>
+                    # Check container limits vs actual usage<br>
+                    docker inspect container-name | grep -A 10 "Resources"
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon">🔍</div>
+                        <div class="grid-title">CPU Monitoring</div>
+                        <div class="grid-desc">Watch for containers consistently above 80% CPU usage or sudden spikes</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">📊</div>
+                        <div class="grid-title">Memory Tracking</div>
+                        <div class="grid-desc">Monitor memory growth patterns and identify containers approaching limits</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">💾</div>
+                        <div class="grid-title">Disk I/O Analysis</div>
+                        <div class="grid-desc">Track read/write operations and disk space consumption trends</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon">🌐</div>
+                        <div class="grid-title">Network Monitoring</div>
+                        <div class="grid-desc">Observe network traffic patterns and bandwidth utilization</div>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <strong>🎯 Best Practice:</strong> Set up alerts when containers exceed 80% of their resource limits - don't wait for 100% utilization!
+                </div>
+                <div class="example-box">
+                    <strong>Advanced Monitoring Tools:</strong><br>
+                    • Prometheus + Grafana for metrics collection<br>
+                    • cAdvisor for container-specific monitoring<br>
+                    • Docker system events: docker events --filter container=myapp<br>
+                    • System logs: journalctl -u docker.service
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: How to Fix -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">09</div>
+                <h2>Step-by-Step: Fixing Resource Protection Issues</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">✅</div>
+                <div class="main-text">
+                    Follow this systematic approach to implement comprehensive resource protection for your Docker containers.
+                </div>
+                <div class="steps-container">
+                    <ol class="steps-list">
+                        <li><strong>Assess Current Usage:</strong> Run docker stats for 24-48 hours to understand normal resource consumption patterns across all containers</li>
+                        <li><strong>Calculate Baseline Limits:</strong> Set initial limits at 150% of observed average usage to allow for traffic spikes while preventing runaway processes</li>
+                        <li><strong>Implement Gradually:</strong> Start with memory limits first (most critical), then CPU, followed by disk and network controls</li>
+                        <li><strong>Test Under Load:</strong> Use stress testing tools to verify containers perform adequately within the defined resource boundaries</li>
+                        <li><strong>Monitor and Alert:</strong> Set up monitoring dashboards and configure alerts at 80% resource utilization thresholds</li>
+                        <li><strong>Document Standards:</strong> Create team guidelines specifying standard resource limits for different application types and deployment environments</li>
+                    </ol>
+                </div>
+                <div class="example-box">
+                    <strong>Quick Implementation Script:</strong><br>
+                    #!/bin/bash<br>
+                    # Apply resource limits to existing containers<br>
+                    docker update --memory="512m" --cpus="0.5" $(docker ps -q)<br>
+                    # Create new container with limits<br>
+                    docker run -d --name secure-app \<br>
+                    &nbsp;&nbsp;--memory="1g" --cpus="1.0" \<br>
+                    &nbsp;&nbsp;--pids-limit=100 nginx
+                </div>
+                <div class="success-section">
+                    <strong>⚡ Quick Win:</strong> You can apply resource limits to running containers using `docker update` command without restarting them!
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Best Practices -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">10</div>
+                <h2>Resource Protection Best Practices Recap</h2>
+            </div>
+            <div class="content-area">
+                <div class="icon">🎯</div>
+                <div class="main-text">
+                    Essential best practices for implementing robust Docker resource protection in production environments.
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #38a169;">✓</div>
+                        <div class="grid-title">Always Set Limits</div>
+                        <div class="grid-desc">Never run production containers without memory and CPU limits - it's a critical security risk</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #38a169;">📊</div>
+                        <div class="grid-title">Monitor Continuously</div>
+                        <div class="grid-desc">Use docker stats, Prometheus, or similar tools to track resource usage trends and patterns</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #38a169;">🔄</div>
+                        <div class="grid-title">Test & Optimize</div>
+                        <div class="grid-desc">Regularly review and adjust limits based on actual usage data and performance requirements</div>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-icon" style="color: #38a169;">🚨</div>
+                        <div class="grid-title">Set Up Alerts</div>
+                        <div class="grid-desc">Configure alerts at 80% resource utilization to prevent issues before they impact users</div>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <strong>🛡️ Security Golden Rule:</strong> Resource limits are not optional - they're a fundamental security control that protects your entire infrastructure!
+                </div>
+                <div class="steps-container">
+                    <div style="text-align: center; margin-bottom: 20px; font-size: 22px; font-weight: bold; color: #2d3748;">
+                        Essential Resource Limits Checklist
+                    </div>
+                    <ol class="steps-list">
+                        <li><strong>Memory:</strong> Always set --memory limits to prevent OOM crashes</li>
+                        <li><strong>CPU:</strong> Use --cpus to prevent CPU starvation of other processes</li>
+                        <li><strong>PIDs:</strong> Set --pids-limit to prevent fork bomb attacks</li>
+                        <li><strong>Storage:</strong> Monitor disk usage and implement cleanup policies</li>
+                        <li><strong>Network:</strong> Consider bandwidth limits for network-intensive applications</li>
+                    </ol>
+                </div>
+                <div class="warning-section">
+                    <strong>🎯 Final Reminder:</strong> D07 Resource Protection violations are among the most common causes of production outages - make resource limits part of your standard deployment process!
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            
+            // Update slide indicator
+            document.getElementById('slideIndicator').textContent = `Slide ${currentSlide + 1} of ${totalSlides}`;
+        }
+
+        function changeSlide(direction) {
+            if (direction === 1 && currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            } else if (direction === -1 && currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Initialize
+        showSlide(0);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);
+            }
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                changeSlide(1);
+            }
+            if (touchEndX > touchStartX + 50) {
+                changeSlide(-1);
+            }
+        }
+    </script>
+</body>
+</html>

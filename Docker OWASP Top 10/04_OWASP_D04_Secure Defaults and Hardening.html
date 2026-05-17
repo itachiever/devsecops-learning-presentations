@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 - D04: Secure Defaults and Hardening</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .presentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .slide {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 4px solid #2c3e50;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f, #2ecc71, #3498db, #9b59b6);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #34495e;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 3.2em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon {
+            font-size: 1.2em;
+            color: #3498db;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        ul {
+            list-style: none;
+            font-size: 1.4em;
+            line-height: 1.8;
+            color: #34495e;
+        }
+
+        li {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .warning {
+            border-left-color: #e74c3c;
+        }
+
+        .success {
+            border-left-color: #2ecc71;
+        }
+
+        .info {
+            border-left-color: #f39c12;
+        }
+
+        .example {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px dashed #3498db;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            color: #2c3e50;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dot {
+            height: 12px;
+            width: 12px;
+            margin: 0 5px;
+            background-color: #bdc3c7;
+            border-radius: 50%;
+            display: inline-block;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #3498db;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.3);
+        }
+
+        .owasp-logo {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            h2 {
+                font-size: 2em;
+            }
+            
+            ul {
+                font-size: 1.2em;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-number">1/10</div>
+            <div class="content">
+                <h1>🛡️ OWASP Docker Top 10</h1>
+                <div style="text-align: center; margin: 40px 0;">
+                    <div style="font-size: 2.5em; color: #e74c3c; font-weight: bold; margin-bottom: 20px;">
+                        D04 – Secure Defaults and Hardening
+                    </div>
+                    <div style="font-size: 1.8em; color: #7f8c8d; font-style: italic;">
+                        Building Secure Docker Containers from the Ground Up
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    🔐 Essential Security for Every Docker Team
+                </div>
+            </div>
+            <div class="owasp-logo">OWASP</div>
+        </div>
+
+        <!-- Slide 2: What are secure defaults? -->
+        <div class="slide">
+            <div class="slide-number">2/10</div>
+            <div class="content">
+                <h2>🔧 What are Secure Defaults?</h2>
+                <ul>
+                    <li class="info">✅ Pre-configured settings that prioritize security over convenience</li>
+                    <li class="info">🛡️ "Safe by default" approach - systems start secure, not easy</li>
+                    <li class="info">🔒 Minimal permissions, disabled unnecessary features, restricted access</li>
+                    <li class="info">⚡ Prevents common security mistakes from day one</li>
+                </ul>
+                <div class="example">
+                    Example: SSH disabled by default, not running on port 22
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: What is hardening? -->
+        <div class="slide">
+            <div class="slide-number">3/10</div>
+            <div class="content">
+                <h2>🔨 What is Hardening?</h2>
+                <ul>
+                    <li class="success">🛠️ Process of securing a system by reducing attack surface</li>
+                    <li class="success">❌ Removing unnecessary services, features, and access points</li>
+                    <li class="success">🔐 Applying additional security configurations beyond defaults</li>
+                    <li class="success">📋 Following security benchmarks and best practices</li>
+                </ul>
+                <div class="example">
+                    Example: Removing package managers, shell access, and debug tools from production containers
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Why defaults matter -->
+        <div class="slide">
+            <div class="slide-number">4/10</div>
+            <div class="content">
+                <h2>⚠️ Why Defaults Matter</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #e74c3c; margin-bottom: 20px;">🚨 Risks of "Easy but Unsafe"</h3>
+                        <ul>
+                            <li class="warning">🏃‍♂️ Teams rush to production without security review</li>
+                            <li class="warning">🔓 Default credentials and open permissions</li>
+                            <li class="warning">📡 Unnecessary services exposed to networks</li>
+                            <li class="warning">🎯 Easy targets for automated attacks</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            💡 80% of breaches exploit weak defaults and misconfigurations!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Examples -->
+        <div class="slide">
+            <div class="slide-number">5/10</div>
+            <div class="content">
+                <h2>🛡️ Security Configuration Examples</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #e74c3c;">❌ Disable:</h3>
+                        <ul>
+                            <li class="warning">SSH daemon in containers</li>
+                            <li class="warning">Debug and development tools</li>
+                            <li class="warning">Unnecessary network services</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #2ecc71;">✅ Enable:</h3>
+                        <ul>
+                            <li class="success">Read-only root filesystem</li>
+                            <li class="success">Non-root user execution</li>
+                            <li class="success">Resource limits and quotas</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="example">
+                    docker run --read-only --user 1000:1000 --memory=512m myapp
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Attack vectors -->
+        <div class="slide">
+            <div class="slide-number">6/10</div>
+            <div class="content">
+                <h2>⚔️ Attack Vectors</h2>
+                <ul>
+                    <li class="warning">🌐 <strong>Exposed APIs:</strong> Management interfaces left open to internet</li>
+                    <li class="warning">👑 <strong>Privilege Escalation:</strong> Containers running as root unnecessarily</li>
+                    <li class="warning">🚪 <strong>Backdoors:</strong> Debug tools and SSH access in production</li>
+                    <li class="warning">📊 <strong>Information Disclosure:</strong> Verbose error messages and logs</li>
+                </ul>
+                <div class="example">
+                    Real Attack: Docker API on port 2376 exposed → Full host compromise
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Impact -->
+        <div class="slide">
+            <div class="slide-number">7/10</div>
+            <div class="content">
+                <h2>💥 Real-World Impact</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li class="warning">🏢 <strong>Tesla (2018):</strong> Exposed Kubernetes dashboard led to cryptocurrency mining</li>
+                            <li class="warning">💻 <strong>Docker Hub breach:</strong> Default credentials on admin accounts</li>
+                            <li class="warning">🏦 <strong>Financial services:</strong> $2M loss from misconfigured containers</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            ⏱️ Average breach detection: 197 days<br>
+                            💰 Average cost: $4.45M
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: How to identify -->
+        <div class="slide">
+            <div class="slide-number">8/10</div>
+            <div class="content">
+                <h2>🔍 How to Identify Weak Defaults</h2>
+                <ul>
+                    <li class="info">📊 <strong>Benchmarks:</strong> CIS Docker Benchmark, NIST guidelines</li>
+                    <li class="info">🛠️ <strong>Tools:</strong> Docker Bench Security, Trivy, Clair scanners</li>
+                    <li class="info">📋 <strong>Audits:</strong> Regular security assessments and penetration testing</li>
+                    <li class="info">🔎 <strong>Monitoring:</strong> Runtime security monitoring for anomalies</li>
+                </ul>
+                <div class="example">
+                    docker run --rm -it --net host --pid host --userns host --cap-add audit_control \<br>
+                    &nbsp;&nbsp;-v /var/lib:/var/lib:ro docker/docker-bench-security
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Prevention -->
+        <div class="slide">
+            <div class="slide-number">9/10</div>
+            <div class="content">
+                <h2>🛡️ Prevention Steps</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #3498db;">🔧 Configuration:</h3>
+                        <ul>
+                            <li class="success">Use minimal base images (Alpine, Distroless)</li>
+                            <li class="success">Run as non-root user</li>
+                            <li class="success">Set resource limits</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #3498db;">📋 Process:</h3>
+                        <ul>
+                            <li class="success">Security-first Dockerfile templates</li>
+                            <li class="success">Automated security scanning in CI/CD</li>
+                            <li class="success">Regular benchmark compliance checks</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="example">
+                    FROM alpine:latest<br>
+                    RUN addgroup -g 1000 appgroup && adduser -D -u 1000 -G appgroup appuser<br>
+                    USER appuser
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Key takeaways -->
+        <div class="slide">
+            <div class="slide-number">10/10</div>
+            <div class="content">
+                <h2>🎯 Key Takeaways</h2>
+                <ul>
+                    <li class="success">🔐 <strong>Start Secure:</strong> Configure security from day one, not as afterthought</li>
+                    <li class="success">📏 <strong>Follow Standards:</strong> Use CIS benchmarks and security frameworks</li>
+                    <li class="success">🔄 <strong>Automate Checks:</strong> Integrate security scanning in your pipeline</li>
+                    <li class="success">👥 <strong>Team Training:</strong> Educate developers on secure defaults</li>
+                    <li class="success">📊 <strong>Monitor & Audit:</strong> Regular assessment and continuous improvement</li>
+                </ul>
+                <div class="highlight-box" style="margin-top: 30px;">
+                    🏆 Remember: Security is everyone's responsibility!
+                </div>
+            </div>
+            <div class="owasp-logo">OWASP Top 10</div>
+        </div>
+
+        <div class="slide-indicator">
+            <span class="dot active" onclick="showSlide(1)"></span>
+            <span class="dot" onclick="showSlide(2)"></span>
+            <span class="dot" onclick="showSlide(3)"></span>
+            <span class="dot" onclick="showSlide(4)"></span>
+            <span class="dot" onclick="showSlide(5)"></span>
+            <span class="dot" onclick="showSlide(6)"></span>
+            <span class="dot" onclick="showSlide(7)"></span>
+            <span class="dot" onclick="showSlide(8)"></span>
+            <span class="dot" onclick="showSlide(9)"></span>
+            <span class="dot" onclick="showSlide(10)"></span>
+        </div>
+
+        <div class="navigation">
+            <button onclick="previousSlide()" id="prevBtn">← Previous</button>
+            <button onclick="nextSlide()" id="nextBtn">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            else currentSlide = n;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[currentSlide - 1].classList.add('active');
+            dots[currentSlide - 1].classList.add('active');
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') previousSlide();
+            if (event.key === 'ArrowRight') nextSlide();
+            if (event.key === 'Escape') showSlide(1);
+        });
+
+        // Initialize
+        showSlide(1);
+    </script>
+</body>
+</html>

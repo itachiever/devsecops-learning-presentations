@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker D02 - Patch Management Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            padding: 60px 80px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            border: 8px solid #2c3e50;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide h1 {
+            color: #2c3e50;
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .slide h2 {
+            color: #34495e;
+            font-size: 2.8rem;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .slide h3 {
+            color: #e74c3c;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .content {
+            max-width: 1200px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .bullet-points {
+            list-style: none;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .bullet-points li {
+            margin-bottom: 15px;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .bullet-points li:before {
+            content: "▶";
+            color: #3498db;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 10px;
+            top: 2px;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            display: block;
+            text-align: center;
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            border-left: 8px solid #e74c3c;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: #34495e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .source {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .title-slide {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+        }
+
+        .title-slide h1 {
+            color: white;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .title-slide h3 {
+            color: #ecf0f1;
+            font-size: 2.2rem;
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        .subtitle {
+            color: #3498db;
+            font-size: 1.8rem;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .layers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .layer-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .layer-item h4 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .layer-item p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .tool-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-top: 4px solid #e74c3c;
+        }
+
+        .tool-item h4 {
+            color: #2c3e50;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .best-practices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 20px 0;
+        }
+
+        .practice-item {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+        }
+
+        .docker-icon {
+            color: #0db7ed;
+        }
+
+        .shield-icon {
+            color: #27ae60;
+        }
+
+        .warning-icon {
+            color: #e74c3c;
+        }
+
+        .gear-icon {
+            color: #f39c12;
+        }
+
+        .update-icon {
+            color: #9b59b6;
+        }
+
+        .scan-icon {
+            color: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="content">
+                <div class="icon docker-icon">🐳</div>
+                <h1>OWASP Docker Top 10</h1>
+                <h3>D02 - Patch Management Strategy</h3>
+                <div class="subtitle">A Beginner's Guide to Secure Docker Environments</div>
+                <div class="quote-box">
+                    "Patch early, patch often!"
+                </div>
+            </div>
+            <div class="slide-counter">1 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 2: What is Patch Management -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon update-icon">🔄</div>
+                <h2>What is Patch Management?</h2>
+                <ul class="bullet-points">
+                    <li>Process of applying security updates to software components</li>
+                    <li>Fixes known vulnerabilities and security holes</li>
+                    <li>Includes operating systems, applications, and dependencies</li>
+                    <li>Systematic approach to keep systems current and secure</li>
+                    <li>Critical part of cybersecurity defense strategy</li>
+                </ul>
+                <div class="quote-box">
+                    "A patch a day keeps the hackers away!"
+                </div>
+            </div>
+            <div class="slide-counter">2 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 3: Why Critical in Docker -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon shield-icon">🛡️</div>
+                <h2>Why Critical in Docker Environments?</h2>
+                <ul class="bullet-points">
+                    <li>Containers share the host kernel - vulnerabilities multiply</li>
+                    <li>Base images often contain outdated packages</li>
+                    <li>Multiple layers create complex dependency chains</li>
+                    <li>Immutable infrastructure requires proactive patching</li>
+                    <li>Scale amplifies security risks across deployments</li>
+                </ul>
+                <div class="warning-box">
+                    "One vulnerable container can compromise entire infrastructure!"
+                </div>
+            </div>
+            <div class="slide-counter">3 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 4: Different Layers to Patch -->
+        <div class="slide">
+            <div class="content">
+                <h2>Layers That Need Patching</h2>
+                <div class="layers-grid">
+                    <div class="layer-item">
+                        <h4>🖥️ Host OS</h4>
+                        <p>Operating system kernel and system libraries</p>
+                    </div>
+                    <div class="layer-item">
+                        <h4>🐳 Docker Engine</h4>
+                        <p>Docker daemon and container runtime</p>
+                    </div>
+                    <div class="layer-item">
+                        <h4>📦 Base Images</h4>
+                        <p>Ubuntu, Alpine, CentOS foundation layers</p>
+                    </div>
+                    <div class="layer-item">
+                        <h4>⚙️ Applications</h4>
+                        <p>Your code, libraries, and dependencies</p>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    "Security is only as strong as its weakest layer!"
+                </div>
+            </div>
+            <div class="slide-counter">4 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 5: Common Vulnerabilities -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon warning-icon">⚠️</div>
+                <h2>Common Vulnerabilities Fixed by Patching</h2>
+                <ul class="bullet-points">
+                    <li>CVE vulnerabilities in system libraries (OpenSSL, glibc)</li>
+                    <li>Container escape exploits and privilege escalation</li>
+                    <li>Outdated package managers with security flaws</li>
+                    <li>Known exploits in programming language runtimes</li>
+                    <li>Vulnerable third-party dependencies and components</li>
+                </ul>
+                <div class="warning-box">
+                    "Outdated code is an open door to attackers!"
+                </div>
+            </div>
+            <div class="slide-counter">5 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 6: Automation -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon gear-icon">⚙️</div>
+                <h2>Automating Patches and Updates</h2>
+                <ul class="bullet-points">
+                    <li>Use multi-stage builds to minimize attack surface</li>
+                    <li>Implement CI/CD pipelines for automated rebuilding</li>
+                    <li>Schedule regular base image updates and testing</li>
+                    <li>Use package managers for dependency updates</li>
+                    <li>Deploy container orchestration for rolling updates</li>
+                </ul>
+                <div class="quote-box">
+                    "Automate today, sleep peacefully tonight!"
+                </div>
+            </div>
+            <div class="slide-counter">6 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 7: Scanning Tools -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon scan-icon">🔍</div>
+                <h2>Tools for Vulnerability Scanning</h2>
+                <div class="tools-grid">
+                    <div class="tool-item">
+                        <h4>Docker Scout</h4>
+                        <p>Built-in scanning</p>
+                    </div>
+                    <div class="tool-item">
+                        <h4>Trivy</h4>
+                        <p>Comprehensive scanner</p>
+                    </div>
+                    <div class="tool-item">
+                        <h4>Snyk</h4>
+                        <p>Developer security</p>
+                    </div>
+                    <div class="tool-item">
+                        <h4>Clair</h4>
+                        <p>Static analysis</p>
+                    </div>
+                    <div class="tool-item">
+                        <h4>Anchore</h4>
+                        <p>Policy engine</p>
+                    </div>
+                    <div class="tool-item">
+                        <h4>Twistlock</h4>
+                        <p>Runtime protection</p>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    "Scan early, scan often - know before you deploy!"
+                </div>
+            </div>
+            <div class="slide-counter">7 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 8: Policy and Procedures -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon">📋</div>
+                <h2>Patch Management Policy</h2>
+                <ul class="bullet-points">
+                    <li>Establish regular patching schedules and windows</li>
+                    <li>Define critical vs non-critical vulnerability classifications</li>
+                    <li>Create testing procedures before production deployment</li>
+                    <li>Document rollback plans for failed updates</li>
+                    <li>Assign ownership and responsibilities to teams</li>
+                </ul>
+                <div class="quote-box">
+                    "A plan without action is just a wish!"
+                </div>
+            </div>
+            <div class="slide-counter">8 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 9: Risks of Ignoring -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon warning-icon">💥</div>
+                <h2>What Happens If Patching Is Ignored?</h2>
+                <ul class="bullet-points">
+                    <li>Data breaches through known exploits</li>
+                    <li>Compliance violations and regulatory fines</li>
+                    <li>System compromises and malware infections</li>
+                    <li>Downtime from security incidents</li>
+                    <li>Loss of customer trust and reputation damage</li>
+                </ul>
+                <div class="warning-box">
+                    "The cost of not patching always exceeds the cost of patching!"
+                </div>
+            </div>
+            <div class="slide-counter">9 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Slide 10: Summary -->
+        <div class="slide">
+            <div class="content">
+                <div class="icon">✅</div>
+                <h2>Summary & Best Practices</h2>
+                <div class="best-practices">
+                    <div class="practice-item">
+                        <strong>Stay Updated</strong><br>
+                        Regular image rebuilds
+                    </div>
+                    <div class="practice-item">
+                        <strong>Automate Scanning</strong><br>
+                        Integrate into CI/CD
+                    </div>
+                    <div class="practice-item">
+                        <strong>Use Minimal Images</strong><br>
+                        Reduce attack surface
+                    </div>
+                    <div class="practice-item">
+                        <strong>Monitor Continuously</strong><br>
+                        Track vulnerabilities
+                    </div>
+                </div>
+                <div class="quote-box">
+                    "Proactive patching is the foundation of container security!"
+                </div>
+            </div>
+            <div class="slide-counter">10 / 10</div>
+            <div class="source">Source: OWASP Docker Security Project (GitHub)</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(n) {
+            if (currentSlide + n >= 0 && currentSlide + n < totalSlides) {
+                showSlide(currentSlide + n);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'Home') showSlide(0);
+            if (e.key === 'End') showSlide(totalSlides - 1);
+        });
+
+        // Initialize
+        showSlide(0);
+
+        // Auto-resize to fit screen
+        function resizePresentation() {
+            const container = document.querySelector('.presentation-container');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const aspectRatio = 16 / 9;
+            
+            let width, height;
+            
+            if (windowWidth / windowHeight > aspectRatio) {
+                height = windowHeight;
+                width = height * aspectRatio;
+            } else {
+                width = windowWidth;
+                height = width / aspectRatio;
+            }
+            
+            container.style.width = width + 'px';
+            container.style.height = height + 'px';
+        }
+
+        window.addEventListener('resize', resizePresentation);
+        resizePresentation();
+    </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 - D05: Maintain Security Contexts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .presentation-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 16/9;
+        }
+        
+        .slide {
+            display: none;
+            padding: 40px 60px;
+            height: 100%;
+            position: relative;
+            border: 3px solid #2c3e50;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .slide h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .slide h2 {
+            color: #34495e;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .icon {
+            font-size: 1.2em;
+        }
+        
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .slide ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .slide li {
+            background: white;
+            margin: 15px 0;
+            padding: 20px 25px;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-left: 5px solid #c0392b;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #00d2d3, #54a0ff);
+            color: white;
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            color: #2c3e50;
+            border-left: 5px solid #f39c12;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 2px solid #34495e;
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-indicators {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: #e74c3c;
+            transform: scale(1.3);
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .emphasis-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+            border: 3px solid #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-number">1/10</div>
+            <div class="content">
+                <h1>🛡️ OWASP Docker Top 10</h1>
+                <div class="emphasis-box">
+                    D05 – Maintain Security Contexts
+                </div>
+                <ul>
+                    <li class="highlight">🎯 Essential protection layer for Docker containers</li>
+                    <li class="success">🔒 Controls what containers can and cannot do</li>
+                    <li class="warning">⚠️ Often overlooked but critical for security</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is a security context? -->
+        <div class="slide">
+            <div class="slide-number">2/10</div>
+            <h2>🔐 What is a Security Context?</h2>
+            <div class="content">
+                <ul>
+                    <li>🛡️ <strong>Security boundaries</strong> that control container permissions</li>
+                    <li>👤 <strong>User/Group IDs:</strong> Who the container runs as</li>
+                    <li>🚫 <strong>Capabilities:</strong> What system functions are allowed</li>
+                    <li>📁 <strong>File permissions:</strong> What files can be accessed</li>
+                    <li>🔒 <strong>System calls:</strong> What the container can request from kernel</li>
+                </ul>
+                <div class="emphasis-box">
+                    Think of it as an ID card that says "You can only do THIS"
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why are security contexts important? -->
+        <div class="slide">
+            <div class="slide-number">3/10</div>
+            <h2>🚨 Why Security Contexts Matter</h2>
+            <div class="content">
+                <ul>
+                    <li class="highlight">🔥 <strong>Container escape prevention:</strong> Stops containers from breaking out</li>
+                    <li class="warning">👑 <strong>Privilege escalation:</strong> Prevents gaining root access</li>
+                    <li class="success">🏠 <strong>Host protection:</strong> Shields your server from container attacks</li>
+                    <li>📊 <strong>Compliance:</strong> Many regulations require proper contexts</li>
+                    <li>🛡️ <strong>Defense in depth:</strong> Additional security layer beyond images</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: How security contexts work -->
+        <div class="slide">
+            <div class="slide-number">4/10</div>
+            <h2>⚙️ How Security Contexts Work</h2>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li class="success">🐧 <strong>SELinux:</strong> Mandatory access control for Linux</li>
+                            <li class="warning">🛡️ <strong>AppArmor:</strong> Application security profiles</li>
+                            <li>🔒 <strong>seccomp:</strong> System call filtering</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul>
+                            <li>👤 <strong>User namespaces:</strong> Isolate user IDs</li>
+                            <li>🚫 <strong>Capabilities:</strong> Fine-grained permissions</li>
+                            <li>📁 <strong>Read-only filesystems:</strong> Prevent modifications</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="code-block">
+# Basic security context example<br>
+docker run --user 1000:1000 --read-only --cap-drop=ALL myapp
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: D05 Examples -->
+        <div class="slide">
+            <div class="slide-number">5/10</div>
+            <h2>💻 D05 Examples: Real Commands</h2>
+            <div class="content">
+                <div class="code-block">
+# BAD: Running as root with all privileges<br>
+docker run -d myapp<br>
+
+# GOOD: Non-root user with dropped capabilities<br>
+docker run -d --user 1000:1000 --cap-drop=ALL --cap-add=NET_BIND_SERVICE --read-only --security-opt=no-new-privileges myapp
+                </div>
+                <ul>
+                    <li class="success">✅ Always specify non-root user (--user)</li>
+                    <li class="success">✅ Drop all capabilities, add only needed ones</li>
+                    <li class="success">✅ Use read-only filesystem when possible</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Attack vectors -->
+        <div class="slide">
+            <div class="slide-number">6/10</div>
+            <h2>🎯 Attack Vectors: What Hackers Try</h2>
+            <div class="content">
+                <ul>
+                    <li class="highlight">💀 <strong>Container escape:</strong> Break out to host system</li>
+                    <li class="highlight">👑 <strong>Privilege escalation:</strong> Gain root access from limited user</li>
+                    <li class="highlight">📁 <strong>File system access:</strong> Read/write sensitive host files</li>
+                    <li class="warning">🔓 <strong>Capability abuse:</strong> Use excessive permissions for attacks</li>
+                    <li class="warning">🐚 <strong>Shell injection:</strong> Execute commands via weak contexts</li>
+                </ul>
+                <div class="emphasis-box">
+                    Without proper contexts, containers = root access to your host!
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Impact -->
+        <div class="slide">
+            <div class="slide-number">7/10</div>
+            <h2>💥 Impact: What Goes Wrong</h2>
+            <div class="content">
+                <ul>
+                    <li class="highlight">🔥 <strong>Complete host compromise:</strong> Attacker owns your server</li>
+                    <li class="highlight">📊 <strong>Data breach:</strong> Access to all host data and other containers</li>
+                    <li class="warning">💸 <strong>Service disruption:</strong> Shutdown or modify critical services</li>
+                    <li class="warning">🦠 <strong>Malware installation:</strong> Persistent backdoors on host</li>
+                    <li class="warning">⚖️ <strong>Compliance violations:</strong> Regulatory fines and legal issues</li>
+                </ul>
+                <div class="emphasis-box">
+                    One weak container = Entire infrastructure at risk
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: How to identify -->
+        <div class="slide">
+            <div class="slide-number">8/10</div>
+            <h2>🔍 How to Identify Weak Contexts</h2>
+            <div class="content">
+                <div class="code-block">
+# Check running containers<br>
+docker ps --format "table {{.Names}}\t{{.RunningFor}}\t{{.Status}}"<br>
+
+# Inspect container security settings<br>
+docker inspect CONTAINER_NAME | grep -E "(User|CapDrop|CapAdd|SecurityOpt)"<br>
+
+# Check for root processes<br>
+docker exec CONTAINER_NAME ps aux | grep "root"
+                </div>
+                <ul>
+                    <li class="warning">🚨 <strong>Red flags:</strong> User: root, no --cap-drop, privileged mode</li>
+                    <li class="success">📋 <strong>Use security scanners:</strong> Docker Bench, Clair, Trivy</li>
+                    <li>📊 <strong>Regular audits:</strong> Check all running containers monthly</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: How to fix and prevent -->
+        <div class="slide">
+            <div class="slide-number">9/10</div>
+            <h2>🛠️ How to Fix & Prevent</h2>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #27ae60; margin-bottom: 15px;">✅ Best Practices:</h3>
+                        <ul>
+                            <li class="success">👤 Always use non-root users</li>
+                            <li class="success">🚫 Drop ALL capabilities first</li>
+                            <li class="success">📖 Use read-only filesystems</li>
+                            <li class="success">🔒 Enable seccomp profiles</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #e74c3c; margin-bottom: 15px;">❌ Avoid:</h3>
+                        <ul>
+                            <li class="highlight">Never use --privileged</li>
+                            <li class="highlight">Don't run as root (UID 0)</li>
+                            <li class="highlight">Avoid --cap-add=ALL</li>
+                            <li class="highlight">No --security-opt=apparmor:unconfined</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Recap and takeaways -->
+        <div class="slide">
+            <div class="slide-number">10/10</div>
+            <h2>📚 Recap & Key Takeaways</h2>
+            <div class="content">
+                <ul>
+                    <li class="success">🎯 <strong>Security contexts = Container ID cards</strong> - Control what containers can do</li>
+                    <li class="warning">🚨 <strong>Missing contexts = Easy host compromise</strong> - Always configure them!</li>
+                    <li class="highlight">💻 <strong>Use --user, --cap-drop=ALL, --read-only</strong> - Your security baseline</li>
+                    <li>🔍 <strong>Regular audits with docker inspect</strong> - Check every container monthly</li>
+                    <li class="success">🛡️ <strong>Defense in depth approach</strong> - Multiple security layers protect better</li>
+                </ul>
+                <div class="emphasis-box">
+                    Remember: Secure by default, not secure by accident! 🔐
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" onclick="prevSlide()">⬅️ Previous</button>
+            <button class="nav-btn" onclick="nextSlide()">Next ➡️</button>
+        </div>
+
+        <!-- Slide indicators -->
+        <div class="slide-indicators">
+            <div class="indicator active" onclick="goToSlide(0)"></div>
+            <div class="indicator" onclick="goToSlide(1)"></div>
+            <div class="indicator" onclick="goToSlide(2)"></div>
+            <div class="indicator" onclick="goToSlide(3)"></div>
+            <div class="indicator" onclick="goToSlide(4)"></div>
+            <div class="indicator" onclick="goToSlide(5)"></div>
+            <div class="indicator" onclick="goToSlide(6)"></div>
+            <div class="indicator" onclick="goToSlide(7)"></div>
+            <div class="indicator" onclick="goToSlide(8)"></div>
+            <div class="indicator" onclick="goToSlide(9)"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalSlides = slides.length;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+            
+            // Update navigation buttons
+            const prevBtn = document.querySelector('.nav-btn');
+            const nextBtn = document.querySelectorAll('.nav-btn')[1];
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            nextBtn.textContent = currentSlide === totalSlides - 1 ? 'Finish 🎉' : 'Next ➡️';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateSlide();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        updateSlide();
+    </script>
+</body>
+</html>

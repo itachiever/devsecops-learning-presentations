@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 - D09: Follow Immutable Paradigm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation-container {
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 16/9;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 3px solid #2c3e50;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 40px;
+            border-bottom: 4px solid #e74c3c;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            background: rgba(231, 76, 60, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .slide-title {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .slide-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .slide-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .content-left {
+            flex: 1;
+        }
+
+        .content-right {
+            flex: 0 0 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon {
+            font-size: 8em;
+            opacity: 0.1;
+            color: #2c3e50;
+        }
+
+        .bullet-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .bullet-list li {
+            margin-bottom: 16px;
+            padding-left: 40px;
+            position: relative;
+            font-size: 1.2em;
+            line-height: 1.4;
+            color: #2c3e50;
+        }
+
+        .bullet-list li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #e74c3c;
+            font-size: 1.2em;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 6px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 6px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .danger-box {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left: 6px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(44, 62, 80, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: #e74c3c;
+            transform: scale(1.2);
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .step-number {
+            background: #e74c3c;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-header">
+                <div class="slide-number">1/10</div>
+                <div class="slide-title">OWASP Docker Top 10</div>
+                <div class="slide-subtitle">D09 – Follow Immutable Paradigm</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li>Secure containers by making them unchangeable after deployment</li>
+                        <li>Prevent runtime modifications that create security vulnerabilities</li>
+                        <li>Essential practice for production Docker environments</li>
+                        <li>Part of OWASP's top security recommendations for containers</li>
+                    </ul>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🔒</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What does "immutable" mean? -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">2/10</div>
+                <div class="slide-title">What Does "Immutable" Mean?</div>
+                <div class="slide-subtitle">Simple Definition for Containers</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><span class="highlight">Immutable</span> = Cannot be changed or modified</li>
+                        <li>Container filesystem becomes <strong>read-only</strong> after startup</li>
+                        <li>No files can be added, modified, or deleted inside the container</li>
+                        <li>Like a sealed box - you can't alter its contents once closed</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>Think of it like:</strong> A DVD vs. a USB drive<br>
+                        DVD = Immutable (read-only)<br>
+                        USB = Mutable (can write/change files)
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="icon">📦</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why immutable containers are more secure -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">3/10</div>
+                <div class="slide-title">Why Immutable Containers Are Secure</div>
+                <div class="slide-subtitle">Security Benefits</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><strong>Prevents malware installation</strong> - attackers can't write files</li>
+                        <li><strong>Stops configuration tampering</strong> - settings stay unchanged</li>
+                        <li><strong>Eliminates drift</strong> - containers remain identical to original</li>
+                        <li><strong>Simplifies compliance</strong> - easier to audit and verify</li>
+                        <li><strong>Faster recovery</strong> - just restart, no cleanup needed</li>
+                    </ul>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🛡️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: D09 Examples -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">4/10</div>
+                <div class="slide-title">D09 Examples</div>
+                <div class="slide-subtitle">Using --read-only and Handling Updates</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <div class="example-box">
+                        <strong>✅ Good: Read-only container</strong><br>
+                        docker run --read-only nginx:latest<br><br>
+                        <strong>❌ Bad: Writable container</strong><br>
+                        docker run nginx:latest
+                    </div>
+                    <ul class="bullet-list">
+                        <li><strong>Updates:</strong> Build new image → Deploy → Remove old</li>
+                        <li><strong>Temporary files:</strong> Use tmpfs mounts for /tmp</li>
+                        <li><strong>Logs:</strong> Write to volumes, not container filesystem</li>
+                    </ul>
+                </div>
+                <div class="content-right">
+                    <div class="icon">⚙️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Troubleshooting Benefits -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">5/10</div>
+                <div class="slide-title">Troubleshooting & Recovery Benefits</div>
+                <div class="slide-subtitle">How Immutability Simplifies Operations</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><strong>Predictable behavior</strong> - containers always start the same way</li>
+                        <li><strong>Easy rollback</strong> - redeploy previous working image</li>
+                        <li><strong>No configuration drift</strong> - eliminates "it works on my machine"</li>
+                        <li><strong>Fast recovery</strong> - restart container instead of debugging</li>
+                        <li><strong>Simplified debugging</strong> - issues are in code, not runtime changes</li>
+                    </ul>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🔄</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Attack Vectors -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">6/10</div>
+                <div class="slide-title">Attack Vectors</div>
+                <div class="slide-subtitle">What Hackers Do with Writable Containers</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><strong>Install backdoors</strong> - persistent access tools</li>
+                        <li><strong>Plant cryptocurrency miners</strong> - steal computing resources</li>
+                        <li><strong>Modify system binaries</strong> - hide malicious activities</li>
+                        <li><strong>Change configurations</strong> - disable security features</li>
+                        <li><strong>Store stolen data</strong> - use container as temporary storage</li>
+                    </ul>
+                    <div class="danger-box">
+                        <strong>⚠️ Real Attack:</strong> Hackers modify /etc/passwd to create new admin users
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🎯</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Impact of Ignoring Immutability -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">7/10</div>
+                <div class="slide-title">Impact of Ignoring Immutability</div>
+                <div class="slide-subtitle">Consequences of Mutable Containers</div>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #e74c3c; margin-bottom: 20px;">Security Risks</h3>
+                        <ul class="bullet-list">
+                            <li><strong>Data breaches</strong> - sensitive information stolen</li>
+                            <li><strong>Hidden malware</strong> - undetected malicious software</li>
+                            <li><strong>Privilege escalation</strong> - attackers gain admin access</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: #e74c3c; margin-bottom: 20px;">Operational Issues</h3>
+                        <ul class="bullet-list">
+                            <li><strong>Configuration drift</strong> - inconsistent environments</li>
+                            <li><strong>Complex debugging</strong> - unknown system state</li>
+                            <li><strong>Compliance failures</strong> - audit trail lost</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: How to Identify Mutable Containers -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">8/10</div>
+                <div class="slide-title">How to Identify Mutable Containers</div>
+                <div class="slide-subtitle">Detection Methods</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><strong>Check docker run commands</strong> - look for missing --read-only</li>
+                        <li><strong>Inspect running containers</strong> - verify ReadonlyRootfs setting</li>
+                        <li><strong>Monitor file changes</strong> - detect runtime modifications</li>
+                        <li><strong>Review Dockerfile</strong> - look for unnecessary write permissions</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>Command to check:</strong><br>
+                        docker inspect &lt;container&gt; | grep ReadonlyRootfs<br>
+                        # Should return: "ReadonlyRootfs": true
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🔍</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: How to Fix & Prevent -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">9/10</div>
+                <div class="slide-title">How to Fix & Prevent</div>
+                <div class="slide-subtitle">Steps for Immutable Containers</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <ul class="bullet-list">
+                        <li><span class="step-number">1</span><strong>Add --read-only flag</strong> to docker run commands</li>
+                        <li><span class="step-number">2</span><strong>Use tmpfs mounts</strong> for temporary files (/tmp, /var/run)</li>
+                        <li><span class="step-number">3</span><strong>External volumes</strong> for persistent data</li>
+                        <li><span class="step-number">4</span><strong>Log to external systems</strong> not container filesystem</li>
+                        <li><span class="step-number">5</span><strong>Test thoroughly</strong> ensure app works read-only</li>
+                    </ul>
+                    <div class="example-box">
+                        docker run --read-only --tmpfs /tmp nginx:latest
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="icon">🔧</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Recap & Best Practices -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">10/10</div>
+                <div class="slide-title">Recap & Best Practices</div>
+                <div class="slide-subtitle">Key Takeaways</div>
+            </div>
+            <div class="slide-content">
+                <div class="content-left">
+                    <div class="two-column">
+                        <div>
+                            <h3 style="color: #2c3e50; margin-bottom: 15px;">Core Principles</h3>
+                            <ul class="bullet-list" style="font-size: 1em;">
+                                <li><strong>Rebuild, don't patch</strong> - create new images</li>
+                                <li><strong>Data stays outside</strong> - use volumes</li>
+                                <li><strong>Always --read-only</strong> in production</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 style="color: #2c3e50; margin-bottom: 15px;">Remember</h3>
+                            <ul class="bullet-list" style="font-size: 1em;">
+                                <li><strong>Security by design</strong> - prevent, don't detect</li>
+                                <li><strong>Consistency matters</strong> - same behavior everywhere</li>
+                                <li><strong>Simplify operations</strong> - restart over repair</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="warning-box" style="margin-top: 30px;">
+                        <strong>🎯 Action Item:</strong> Review your current containers and add --read-only flag today!
+                    </div>
+                </div>
+                <div class="content-right">
+                    <div class="icon">✅</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-btn" onclick="previousSlide()">← Previous</button>
+            <button class="control-btn" onclick="nextSlide()">Next →</button>
+        </div>
+
+        <!-- Slide Indicators -->
+        <div class="slide-indicator">
+            <div class="indicator-dot active" onclick="goToSlide(0)"></div>
+            <div class="indicator-dot" onclick="goToSlide(1)"></div>
+            <div class="indicator-dot" onclick="goToSlide(2)"></div>
+            <div class="indicator-dot" onclick="goToSlide(3)"></div>
+            <div class="indicator-dot" onclick="goToSlide(4)"></div>
+            <div class="indicator-dot" onclick="goToSlide(5)"></div>
+            <div class="indicator-dot" onclick="goToSlide(6)"></div>
+            <div class="indicator-dot" onclick="goToSlide(7)"></div>
+            <div class="indicator-dot" onclick="goToSlide(8)"></div>
+            <div class="indicator-dot" onclick="goToSlide(9)"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const indicators = document.querySelectorAll('.indicator-dot');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            indicators.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            // Update button states
+            const prevBtn = document.querySelector('.control-btn');
+            const nextBtn = document.querySelectorAll('.control-btn')[1];
+            
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === totalSlides - 1;
+            
+            if (index === totalSlides - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next →';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

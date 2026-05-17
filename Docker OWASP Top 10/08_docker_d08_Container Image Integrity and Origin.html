@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 - D08: Container Image Integrity and Origin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation-container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 3px solid #2c3e50;
+        }
+
+        .slide {
+            width: 100%;
+            aspect-ratio: 16/9;
+            padding: 60px;
+            display: none;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            border: 2px solid #dee2e6;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .slide-subtitle {
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .icon-large {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .bullet-list {
+            list-style: none;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #34495e;
+        }
+
+        .bullet-list li {
+            margin-bottom: 20px;
+            padding-left: 60px;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .bullet-list li::before {
+            content: "•";
+            font-size: 2rem;
+            color: #3498db;
+            position: absolute;
+            left: 20px;
+            top: -5px;
+            font-weight: bold;
+        }
+
+        .example-box {
+            background: #e8f5e8;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .warning-box {
+            background: #fef2f2;
+            border: 2px solid #e74c3c;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #34495e;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .title-slide {
+            text-align: center;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+
+        .title-slide .slide-title {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .title-slide .slide-subtitle {
+            font-size: 1.8rem;
+            color: #ecf0f1;
+            margin-bottom: 40px;
+        }
+
+        .title-slide .icon-large {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .icon-inline {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <div class="icon-large">🐳</div>
+                    <h1 class="slide-title">OWASP Docker Top 10</h1>
+                    <h2 class="slide-subtitle">D08: Container Image Integrity and Origin</h2>
+                    <div style="font-size: 1.4rem; margin-top: 30px; opacity: 0.9;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is a container image? -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">What is a Container Image? 📦</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li>A lightweight, standalone package containing everything needed to run an application</li>
+                        <li>Includes code, runtime, system tools, libraries, and settings</li>
+                        <li>Built from layers defined in a Dockerfile</li>
+                        <li>Stored in registries like Docker Hub, ECR, or private repositories</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>📋 Example:</strong> nginx:latest contains the Nginx web server, configuration files, and all dependencies ready to run
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Why image integrity is important -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Why Image Integrity Matters 🛡️</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li>Container images can contain <span class="highlight">malware or backdoors</span></li>
+                        <li>Compromised images can lead to data breaches and system takeovers</li>
+                        <li>Supply chain attacks target popular base images</li>
+                        <li>Modified images may contain vulnerable or outdated components</li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>⚠️ Risk:</strong> A single malicious image can compromise your entire container environment and spread to other systems
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: What does trusted origin mean? -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Trusted Origin Sources ✅</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <div class="two-column">
+                        <div>
+                            <h3 style="color: #27ae60; margin-bottom: 20px;">✅ Trusted Sources</h3>
+                            <ul class="bullet-list" style="font-size: 1.2rem;">
+                                <li>Official Docker Hub images</li>
+                                <li>Verified publisher images</li>
+                                <li>Your organization's private registry</li>
+                                <li>Signed images with cryptographic verification</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 style="color: #e74c3c; margin-bottom: 20px;">❌ Untrusted Sources</h3>
+                            <ul class="bullet-list" style="font-size: 1.2rem;">
+                                <li>Random user repositories</li>
+                                <li>Unverified third-party images</li>
+                                <li>Images without clear maintainer</li>
+                                <li>Unsigned or tampered images</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: D08 examples -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">D08 Best Practices 🎯</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li>Use official base images: <code>python:3.9-slim</code> instead of <code>randomuser/python</code></li>
+                        <li>Verify image signatures using Docker Content Trust</li>
+                        <li>Pin specific image versions with SHA256 hashes</li>
+                        <li>Regularly update base images to latest secure versions</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>📋 Good Practice:</strong><br>
+                        <code>FROM python:3.9.16-slim@sha256:abc123...</code><br>
+                        Uses official image with specific version and hash verification
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Attack vectors -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Common Attack Vectors 🚨</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li><strong>Typosquatting:</strong> Images with names similar to popular ones</li>
+                        <li><strong>Backdoored images:</strong> Legitimate images with hidden malicious code</li>
+                        <li><strong>Supply chain poisoning:</strong> Compromising upstream dependencies</li>
+                        <li><strong>Registry takeover:</strong> Attackers gaining control of image repositories</li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>🐛 Real Attack:</strong> Cryptomining malware found in popular "node.js" images (typo of "nodejs") downloaded 100,000+ times
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Impact if ignored -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Impact of Ignoring D08 💥</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li><strong>Data breaches:</strong> Sensitive information stolen or exposed</li>
+                        <li><strong>System compromise:</strong> Attackers gain persistent access</li>
+                        <li><strong>Service disruption:</strong> Malware causing downtime and instability</li>
+                        <li><strong>Compliance violations:</strong> Regulatory fines and audit failures</li>
+                    </ul>
+                    <div class="warning-box">
+                        <strong>💸 Business Impact:</strong> Average cost of container security incident: $4.24M including downtime, investigation, and remediation
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: How to identify problems -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Identifying Image Problems 🔍</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li>Scan images with tools like Trivy, Clair, or Snyk</li>
+                        <li>Check image source and maintainer reputation</li>
+                        <li>Verify digital signatures and checksums</li>
+                        <li>Monitor unusual network activity from containers</li>
+                    </ul>
+                    <div class="info-box">
+                        <strong>🔧 Quick Check:</strong><br>
+                        <code>docker history image:tag</code> - Review image layers<br>
+                        <code>trivy image image:tag</code> - Scan for vulnerabilities
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: How to fix and prevent -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Prevention & Remediation 🛠️</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li>Implement image allowlists with approved base images only</li>
+                        <li>Enable automated vulnerability scanning in CI/CD pipelines</li>
+                        <li>Use private registries with access controls</li>
+                        <li>Regularly patch and rebuild images with latest updates</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>🚀 Prevention Strategy:</strong> Set up admission controllers (like OPA Gatekeeper) to automatically reject non-compliant images at deployment time
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Recap and best tips -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Key Takeaways & Best Tips 📚</h1>
+            </div>
+            <div class="slide-content">
+                <div class="content-wrapper">
+                    <ul class="bullet-list">
+                        <li><strong>Always use official images</strong> from trusted publishers</li>
+                        <li><strong>Scan everything</strong> - automate vulnerability scanning</li>
+                        <li><strong>Keep images updated</strong> with regular security patches</li>
+                        <li><strong>Verify integrity</strong> using signatures and checksums</li>
+                    </ul>
+                    <div class="example-box">
+                        <strong>🎯 Golden Rule:</strong> Treat container images like any other software - verify source, scan for vulnerabilities, and keep updated. Never trust, always verify!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" onclick="previousSlide()" id="prevBtn">← Previous</button>
+            <button class="nav-btn" onclick="nextSlide()" id="nextBtn">Next →</button>
+        </div>
+
+        <!-- Slide counter -->
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">10</span>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = index + 1;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
