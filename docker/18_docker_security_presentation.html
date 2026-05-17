@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Docker Top 10 - Security Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentation-container {
+            width: 95vw;
+            max-width: 1280px;
+            height: 90vh;
+            max-height: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            padding: 40px;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            background: #4f46e5;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .slide-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide-subtitle {
+            font-size: 1.2em;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: grid;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .content-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #e2e8f0;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .section-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .bullet-points {
+            list-style: none;
+        }
+
+        .bullet-points li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1em;
+            line-height: 1.4;
+            color: #334155;
+        }
+
+        .bullet-points li::before {
+            content: "🔹";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        .danger-point::before {
+            content: "⚠️";
+        }
+
+        .security-point::before {
+            content: "🔒";
+        }
+
+        .tip-point::before {
+            content: "💡";
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-btn:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicator {
+            display: flex;
+            gap: 8px;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: #4f46e5;
+            transform: scale(1.2);
+        }
+
+        .full-width-content {
+            grid-column: 1 / -1;
+        }
+
+        .diagram-container {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .docker-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .docker-box {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 120px;
+            text-align: center;
+            font-weight: bold;
+            color: #1e40af;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #4f46e5;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+            border: 3px solid #f59e0b;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .highlight-text {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #92400e;
+        }
+
+        /* Slide-specific styles */
+        .slide1 .slide-content {
+            grid-template-rows: auto 1fr auto;
+        }
+
+        .intro-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .container-visual {
+            background: #dbeafe;
+            border: 3px solid #3b82f6;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .vs-text {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ef4444;
+        }
+
+        .risk-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .meter-bar {
+            flex: 1;
+            height: 20px;
+            background: linear-gradient(to right, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            border-radius: 10px;
+            border: 2px solid #374151;
+        }
+
+        .meter-label {
+            font-weight: bold;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Introduction -->
+        <div class="slide active slide1">
+            <div class="slide-header">
+                <div class="slide-number">1/7</div>
+                <h1 class="slide-title">🐳 Docker Security Basics</h1>
+                <p class="slide-subtitle">What is Docker & Why Security Matters?</p>
+            </div>
+            <div class="slide-content">
+                <div class="diagram-container full-width-content">
+                    <div class="intro-visual">
+                        <div class="container-visual">
+                            <div style="font-size: 3em;">📦</div>
+                            <h3>Traditional Apps</h3>
+                            <p>Heavy, slow setup</p>
+                        </div>
+                        <div class="vs-text">VS</div>
+                        <div class="container-visual">
+                            <div style="font-size: 3em;">🐳</div>
+                            <h3>Docker Containers</h3>
+                            <p>Lightweight, portable</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">🚀</div>
+                        <h3 class="section-title">What is Docker?</h3>
+                        <ul class="bullet-points">
+                            <li>Packages apps into lightweight "containers"</li>
+                            <li>Like shipping containers for software</li>
+                            <li>Runs the same everywhere</li>
+                            <li>Popular in modern development</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">⚠️</div>
+                        <h3 class="section-title">Why Security Matters</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Containers share the host system</li>
+                            <li class="danger-point">Bad containers can escape</li>
+                            <li class="danger-point">One breach affects everything</li>
+                            <li class="security-point">OWASP Top 10 helps us stay safe</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Images & Vulnerabilities -->
+        <div class="slide slide2">
+            <div class="slide-header">
+                <div class="slide-number">2/7</div>
+                <h1 class="slide-title">🖼️ Container Images & Vulnerabilities</h1>
+                <p class="slide-subtitle">Bad Images = Security Nightmares</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">🏗️</div>
+                        <h3 class="section-title">Image Problems</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Untrusted sources (random internet images)</li>
+                            <li class="danger-point">Hidden malware or backdoors</li>
+                            <li class="danger-point">Bloated images with unnecessary tools</li>
+                            <li class="tip-point">Use official images from Docker Hub</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">📅</div>
+                        <h3 class="section-title">Outdated Software</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Old versions have known security holes</li>
+                            <li class="danger-point">Attackers target these weaknesses</li>
+                            <li class="tip-point">Scan images before using them</li>
+                            <li class="tip-point">Update regularly</li>
+                            <li class="tip-point">Use minimal base images</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box full-width-content">
+                    <div class="highlight-text">🔍 Always scan your images and keep them updated!</div>
+                    <div class="risk-meter">
+                        <span class="meter-label">Risk Level:</span>
+                        <div class="meter-bar"></div>
+                        <span class="meter-label">HIGH</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Host Security & Breakouts -->
+        <div class="slide slide3">
+            <div class="slide-header">
+                <div class="slide-number">3/7</div>
+                <h1 class="slide-title">🏠 Docker Host & Container Breakouts</h1>
+                <p class="slide-subtitle">When Containers Escape Their Cage</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">🖥️</div>
+                        <h3 class="section-title">Insecure Docker Host</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Unpatched host operating system</li>
+                            <li class="danger-point">Docker daemon exposed to internet</li>
+                            <li class="danger-point">Weak access controls</li>
+                            <li class="tip-point">Keep host OS updated</li>
+                            <li class="tip-point">Secure Docker daemon</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">🏃‍♂️</div>
+                        <h3 class="section-title">Container Breakouts</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Containers running as root user</li>
+                            <li class="danger-point">Privileged mode enabled</li>
+                            <li class="danger-point">Shared kernel vulnerabilities</li>
+                            <li class="tip-point">Use non-root users</li>
+                            <li class="tip-point">Avoid privileged mode</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="diagram-container full-width-content">
+                    <div class="docker-diagram">
+                        <div class="docker-box" style="background: #fecaca; border-color: #ef4444; color: #dc2626;">
+                            😈 Bad Container
+                        </div>
+                        <div class="arrow">➡️</div>
+                        <div class="docker-box" style="background: #fecaca; border-color: #ef4444; color: #dc2626;">
+                            🏠 Host System
+                        </div>
+                        <div class="arrow">➡️</div>
+                        <div class="docker-box" style="background: #fecaca; border-color: #ef4444; color: #dc2626;">
+                            💻 Full Access!
+                        </div>
+                    </div>
+                    <p><strong>Container Escape Chain: Bad container → Host compromise → Game over!</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Secrets & Default Settings -->
+        <div class="slide slide4">
+            <div class="slide-header">
+                <div class="slide-number">4/7</div>
+                <h1 class="slide-title">🔐 Secrets & Default Security Settings</h1>
+                <p class="slide-subtitle">Don't Leave the Door Wide Open</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">🗝️</div>
+                        <h3 class="section-title">Secrets Management</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Passwords hardcoded in images</li>
+                            <li class="danger-point">API keys in environment variables</li>
+                            <li class="danger-point">Database credentials exposed</li>
+                            <li class="tip-point">Use Docker secrets or vault systems</li>
+                            <li class="tip-point">Never put secrets in code</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">⚙️</div>
+                        <h3 class="section-title">Default Security Settings</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Default passwords unchanged</li>
+                            <li class="danger-point">Unnecessary ports exposed</li>
+                            <li class="danger-point">Weak security configurations</li>
+                            <li class="tip-point">Change all defaults</li>
+                            <li class="tip-point">Follow principle of least privilege</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box full-width-content">
+                    <div class="highlight-text">🚨 "admin:password" is NOT a good secret!</div>
+                    <p style="margin-top: 10px; font-size: 1.1em;">Treat secrets like your wallet - keep them safe and out of sight!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Networking & Volumes -->
+        <div class="slide slide5">
+            <div class="slide-header">
+                <div class="slide-number">5/7</div>
+                <h1 class="slide-title">🌐 Insecure Networking & Volumes</h1>
+                <p class="slide-subtitle">Network Holes & Data Leaks</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">📡</div>
+                        <h3 class="section-title">Insecure Networking</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">All ports exposed to internet</li>
+                            <li class="danger-point">No network segmentation</li>
+                            <li class="danger-point">Unencrypted communications</li>
+                            <li class="tip-point">Use custom networks</li>
+                            <li class="tip-point">Expose only necessary ports</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">💾</div>
+                        <h3 class="section-title">Insecure Volumes</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Mounting sensitive host directories</li>
+                            <li class="danger-point">Write access to host filesystem</li>
+                            <li class="danger-point">Shared volumes between containers</li>
+                            <li class="tip-point">Use read-only mounts when possible</li>
+                            <li class="tip-point">Limit volume access</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="diagram-container full-width-content">
+                    <div class="docker-diagram">
+                        <div class="docker-box">
+                            🌍 Internet
+                        </div>
+                        <div class="arrow">➡️</div>
+                        <div class="docker-box" style="background: #fecaca; border-color: #ef4444; color: #dc2626;">
+                            🐳 Container<br>:22, :80, :443
+                        </div>
+                        <div class="arrow">➡️</div>
+                        <div class="docker-box" style="background: #fecaca; border-color: #ef4444; color: #dc2626;">
+                            💽 Host Files
+                        </div>
+                    </div>
+                    <p><strong>Bad: Direct access from internet to container to host files!</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Resource Abuse -->
+        <div class="slide slide6">
+            <div class="slide-header">
+                <div class="slide-number">6/7</div>
+                <h1 class="slide-title">💻 Resource Usage Abuse</h1>
+                <p class="slide-subtitle">When Containers Become Resource Hogs</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">🐷</div>
+                        <h3 class="section-title">Resource Hogging</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">No CPU or memory limits set</li>
+                            <li class="danger-point">One container crashes the host</li>
+                            <li class="danger-point">DoS attacks through resource exhaustion</li>
+                            <li class="tip-point">Set resource limits always</li>
+                            <li class="tip-point">Monitor resource usage</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">📊</div>
+                        <h3 class="section-title">Common Problems</h3>
+                        <ul class="bullet-points">
+                            <li class="danger-point">Memory leaks in applications</li>
+                            <li class="danger-point">Infinite loops consuming CPU</li>
+                            <li class="danger-point">Fork bombs creating processes</li>
+                            <li class="tip-point">Use Docker resource constraints</li>
+                            <li class="tip-point">Implement health checks</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box full-width-content">
+                    <div class="highlight-text">⚡ Set limits: --memory=512m --cpus=1.0</div>
+                    <div style="margin-top: 15px; display: flex; justify-content: space-around; align-items: center;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2em;">😵</div>
+                            <strong>No Limits</strong>
+                            <div>System Crash</div>
+                        </div>
+                        <div style="font-size: 2em;">→</div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2em;">😊</div>
+                            <strong>With Limits</strong>
+                            <div>System Stable</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Best Practices -->
+        <div class="slide slide7">
+            <div class="slide-header">
+                <div class="slide-number">7/7</div>
+                <h1 class="slide-title">📝 Logging, Monitoring & Best Practices</h1>
+                <p class="slide-subtitle">Your Security Toolkit Recap</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-grid">
+                    <div class="content-section">
+                        <div class="section-icon">📋</div>
+                        <h3 class="section-title">Logging & Monitoring</h3>
+                        <ul class="bullet-points">
+                            <li class="tip-point">Enable comprehensive logging</li>
+                            <li class="tip-point">Monitor container behavior</li>
+                            <li class="tip-point">Set up security alerts</li>
+                            <li class="tip-point">Regular security audits</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <div class="section-icon">✅</div>
+                        <h3 class="section-title">Quick Security Checklist</h3>
+                        <ul class="bullet-points">
+                            <li class="security-point">Use trusted, updated images</li>
+                            <li class="security-point">Run as non-root user</li>
+                            <li class="security-point">Set resource limits</li>
+                            <li class="security-point">Secure secrets properly</li>
+                            <li class="security-point">Monitor everything!</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box full-width-content">
+                    <div class="highlight-text">🎯 Remember: Security is not a destination, it's a journey!</div>
+                    <div style="margin-top: 20px; font-size: 1.2em;">
+                        <strong>🔒 Secure by default → 🔍 Monitor continuously → 🛠️ Update regularly</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <div class="slide-indicator">
+                <div class="indicator-dot active" onclick="currentSlide(1)"></div>
+                <div class="indicator-dot" onclick="currentSlide(2)"></div>
+                <div class="indicator-dot" onclick="currentSlide(3)"></div>
+                <div class="indicator-dot" onclick="currentSlide(4)"></div>
+                <div class="indicator-dot" onclick="currentSlide(5)"></div>
+                <div class="indicator-dot" onclick="currentSlide(6)"></div>
+                <div class="indicator-dot" onclick="currentSlide(7)"></div>
+            </div>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 1;
+        const totalSlides = 7;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.indicator-dot');
+            
+            if (n > totalSlides) currentSlideIndex = 1;
+            if (n < 1) currentSlideIndex = totalSlides;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[currentSlideIndex - 1].classList.add('active');
+            dots[currentSlideIndex - 1].classList.add('active');
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlideIndex === 1;
+            document.getElementById('nextBtn').disabled = currentSlideIndex === totalSlides;
+        }
+
+        function changeSlide(n) {
+            currentSlideIndex += n;
+            showSlide(currentSlideIndex);
+        }
+
+        function currentSlide(n) {
+            currentSlideIndex = n;
+            showSlide(currentSlideIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') changeSlide(-1);
+            if (event.key === 'ArrowRight') changeSlide(1);
+            if (event.key >= '1' && event.key <= '7') {
+                currentSlide(parseInt(event.key));
+            }
+        });
+
+        // Initialize
+        showSlide(currentSlideIndex);
+    </script>
+</body>
+</html>

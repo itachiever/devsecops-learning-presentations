@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Registry Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentation-container {
+            width: 1280px;
+            height: 800px;
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide h2 {
+            font-size: 2rem;
+            color: #34495e;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .text-section {
+            flex: 1;
+        }
+
+        .visual-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bullet-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+        }
+
+        .bullet-icon {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin-right: 20px;
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            border-left: 6px solid #27ae60;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+
+        .diagram {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 3px solid #ecf0f1;
+        }
+
+        .registry-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .storage-box {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .vs-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e74c3c;
+            text-transform: uppercase;
+        }
+
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid #667eea;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 20px;
+        }
+
+        .command-code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .registry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .registry-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .registry-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+        }
+
+        .registry-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .pipeline-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .pipeline-step {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .best-practice {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 6px solid #f39c12;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .practice-title {
+            font-weight: 700;
+            color: #d35400;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="current-slide">1</span> / 6
+        </div>
+
+        <!-- Slide 1: What is a Docker Registry? -->
+        <div class="slide active">
+            <h1>What is a Docker Registry?</h1>
+            <h2>Your Digital Warehouse for Docker Images</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Docker Registry</strong> is a storage and distribution system for Docker images</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div>Think of it as a <strong>cloud storage</strong> for your containerized applications</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div>Allows <strong>sharing and versioning</strong> of Docker images across teams and environments</div>
+                    </div>
+                    
+                    <div class="analogy-box">
+                        🏬 <strong>Real-world analogy:</strong> Like a library where you can store, organize, and share books (Docker images). Anyone with access can borrow (pull) or contribute (push) books to the collection.
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="diagram">
+                        <div class="registry-visual">
+                            <div class="storage-box">🐳 Docker Registry<br>(Cloud Storage)</div>
+                            <div class="vs-text">VS</div>
+                            <div class="storage-box" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">💻 Local Storage<br>(Your Computer Only)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why Use a Registry? -->
+        <div class="slide">
+            <h1>Why Use a Registry?</h1>
+            <h2>The Power of Centralized Image Management</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>🤝 Team Collaboration:</strong> Share images instantly across development, testing, and production teams</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>🔄 Version Control:</strong> Track different versions of your applications with tags (v1.0, v2.1, latest)</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>⚡ Automation:</strong> Enable CI/CD pipelines to automatically build, test, and deploy applications</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>🌐 Global Access:</strong> Deploy your applications anywhere in the world with consistent results</div>
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="diagram">
+                        <div style="text-align: center; color: #2c3e50;">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">🚀</div>
+                            <div style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px;">DevOps Benefits</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
+                                <div style="background: #ecf0f1; padding: 15px; border-radius: 8px;">
+                                    <strong>Before Registry:</strong><br>
+                                    • Manual image sharing<br>
+                                    • Inconsistent versions<br>
+                                    • Complex deployments
+                                </div>
+                                <div style="background: #d5f4e6; padding: 15px; border-radius: 8px;">
+                                    <strong>With Registry:</strong><br>
+                                    • Automated workflows<br>
+                                    • Version consistency<br>
+                                    • Seamless deployments
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Common Registries & Repositories -->
+        <div class="slide">
+            <h1>Common Registries & Repositories</h1>
+            <h2>Where to Store Your Docker Images</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Public Registries:</strong> Free, open access (Docker Hub, Quay.io)</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Private Registries:</strong> Enterprise solutions (AWS ECR, Azure ACR, Google GCR)</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Self-hosted:</strong> Run your own registry server for complete control</div>
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="registry-grid">
+                        <div class="registry-card">
+                            <div class="registry-icon">🐳</div>
+                            <h3>Docker Hub</h3>
+                            <p>Most popular public registry. Free tier available.</p>
+                        </div>
+                        <div class="registry-card">
+                            <div class="registry-icon">☁️</div>
+                            <h3>AWS ECR</h3>
+                            <p>Fully managed private registry integrated with AWS.</p>
+                        </div>
+                        <div class="registry-card">
+                            <div class="registry-icon">🏢</div>
+                            <h3>Private Registry</h3>
+                            <p>Self-hosted solution for maximum security.</p>
+                        </div>
+                        <div class="registry-card">
+                            <div class="registry-icon">📁</div>
+                            <h3>Project Organization</h3>
+                            <p>Group images by teams, projects, or environments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Push, Pull, Tag Workflow -->
+        <div class="slide">
+            <h1>Push, Pull, Tag Workflow</h1>
+            <h2>Essential Commands for Registry Operations</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <strong>Build Your Image:</strong>
+                                <div class="command-code">docker build -t myapp .</div>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <strong>Tag for Registry:</strong>
+                                <div class="command-code">docker tag myapp username/myapp:v1.0</div>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-number">3</div>
+                            <div>
+                                <strong>Push to Registry:</strong>
+                                <div class="command-code">docker push username/myapp:v1.0</div>
+                            </div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-number">4</div>
+                            <div>
+                                <strong>Pull from Registry:</strong>
+                                <div class="command-code">docker pull username/myapp:v1.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="diagram">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; color: #2c3e50;">Image Lifecycle</div>
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                                <div style="background: #3498db; color: white; padding: 12px; border-radius: 8px;">💻 Developer Machine</div>
+                                <div style="font-size: 1.5rem; color: #667eea;">⬇️ Push</div>
+                                <div style="background: #e74c3c; color: white; padding: 12px; border-radius: 8px;">🏢 Docker Registry</div>
+                                <div style="font-size: 1.5rem; color: #667eea;">⬇️ Pull</div>
+                                <div style="background: #27ae60; color: white; padding: 12px; border-radius: 8px;">🚀 Production Server</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Real-Life DevOps Example -->
+        <div class="slide">
+            <h1>Real-Life DevOps Example</h1>
+            <h2>Team Collaboration & CI/CD Pipeline</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Scenario:</strong> E-commerce team with 5 developers working on microservices</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Challenge:</strong> Different environments, multiple services, frequent updates</div>
+                    </div>
+                    <div class="bullet-point">
+                        <div class="bullet-icon"></div>
+                        <div><strong>Solution:</strong> Automated CI/CD pipeline using Docker Registry</div>
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="diagram">
+                        <div class="pipeline-flow">
+                            <div class="pipeline-step">Code<br>Commit</div>
+                            <div class="arrow">→</div>
+                            <div class="pipeline-step">Build<br>Image</div>
+                            <div class="arrow">→</div>
+                            <div class="pipeline-step">Push to<br>Registry</div>
+                            <div class="arrow">→</div>
+                            <div class="pipeline-step">Deploy<br>Production</div>
+                        </div>
+                        
+                        <div style="margin-top: 30px; background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">🔄 Rolling Updates Process:</h4>
+                            <div style="font-size: 1.1rem; line-height: 1.6; color: #34495e;">
+                                1. Developer pushes code changes<br>
+                                2. CI system builds new image version<br>
+                                3. Image pushed to registry with new tag<br>
+                                4. Kubernetes pulls and deploys gradually<br>
+                                5. Zero downtime deployment achieved!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Best Practices & Tips -->
+        <div class="slide">
+            <h1>Best Practices & Tips</h1>
+            <h2>Professional Registry Management</h2>
+            
+            <div class="slide-content">
+                <div class="text-section">
+                    <div class="best-practice">
+                        <div class="practice-title">🏷️ Smart Tagging Strategy</div>
+                        <div>Use semantic versioning (v1.2.3), environment tags (dev, staging, prod), and meaningful names</div>
+                    </div>
+                    
+                    <div class="best-practice">
+                        <div class="practice-title">🔒 Security Essentials</div>
+                        <div>Use private registries for proprietary code, scan images for vulnerabilities, implement access controls</div>
+                    </div>
+                    
+                    <div class="best-practice">
+                        <div class="practice-title">📈 Performance Optimization</div>
+                        <div>Keep images small, use multi-stage builds, leverage layer caching, clean up old images</div>
+                    </div>
+                </div>
+                
+                <div class="visual-section">
+                    <div class="diagram">
+                        <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">💡 Interview Tips</h3>
+                        <div style="background: #e8f4fd; padding: 25px; border-radius: 12px; border-left: 6px solid #3498db;">
+                            <div style="font-size: 1.2rem; margin-bottom: 15px; font-weight: 600; color: #2c3e50;">Key Points to Remember:</div>
+                            <div style="line-height: 1.8; color: #34495e;">
+                                • Explain registry as "centralized image storage"<br>
+                                • Mention Docker Hub as most common example<br>
+                                • Demonstrate push/pull command knowledge<br>
+                                • Discuss security considerations<br>
+                                • Show understanding of CI/CD integration<br>
+                                • Compare public vs private registry trade-offs
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px; font-size: 2rem;">🎯</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[index].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = index + 1;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            const newIndex = currentSlideIndex + direction;
+            if (newIndex >= 0 && newIndex < totalSlides) {
+                currentSlideIndex = newIndex;
+                showSlide(currentSlideIndex);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

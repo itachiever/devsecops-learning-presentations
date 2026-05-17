@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dockerfile - A Beginner's Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 98vw;
+            height: 96vh;
+            aspect-ratio: 16/10;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            padding: 35px;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide h1 {
+            font-size: 2.8rem;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .slide h2 {
+            font-size: 2.2rem;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .slide h3 {
+            font-size: 1.4rem;
+            color: #4a5568;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .slide p {
+            font-size: 1.05rem;
+            color: #4a5568;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .icon {
+            width: 55px;
+            height: 55px;
+            margin: 0 auto 18px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.3);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 18px 0;
+            height: calc(100% - 200px);
+        }
+
+        .content-section {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .instruction-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .instruction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .cmd-from { border-left-color: #48bb78; }
+        .cmd-workdir { border-left-color: #ed8936; }
+        .cmd-copy { border-left-color: #4299e1; }
+        .cmd-run { border-left-color: #9f7aea; }
+        .cmd-expose { border-left-color: #f56565; }
+        .cmd-cmd { border-left-color: #38b2ac; }
+
+        .code-block {
+            background: #2d3748;
+            color: #a0aec0;
+            padding: 18px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 15px 0;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .code-comment {
+            color: #68d391;
+        }
+
+        .code-instruction {
+            color: #63b3ed;
+            font-weight: bold;
+        }
+
+        .analogy-section {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border-left: 4px solid #38b2ac;
+            padding: 18px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .visual-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .flow-item {
+            flex: 1;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .flow-box {
+            width: 100px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .from-box { background: linear-gradient(135deg, #48bb78, #38a169); }
+        .workdir-box { background: linear-gradient(135deg, #ed8936, #dd6b20); }
+        .copy-box { background: linear-gradient(135deg, #4299e1, #3182ce); }
+        .run-box { background: linear-gradient(135deg, #9f7aea, #805ad5); }
+        .expose-box { background: linear-gradient(135deg, #f56565, #e53e3e); }
+        .cmd-box { background: linear-gradient(135deg, #38b2ac, #319795); }
+
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.85rem;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            border: 1px solid #fc8181;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            margin: 15px 0;
+        }
+
+        .key-point-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .step-by-step {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .step-item {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 25px 20px;
+                height: 98vh;
+            }
+            
+            .slide h1 { font-size: 2rem; }
+            .slide h2 { font-size: 1.6rem; }
+            .slide h3 { font-size: 1.2rem; }
+            .slide p { font-size: 0.95rem; }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .instructions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .visual-flow {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: What is a Dockerfile? -->
+        <div class="slide active">
+            <div class="slide-number">1 / 6</div>
+            <div class="icon">📄</div>
+            <h1>Dockerfile</h1>
+            <h1 style="font-size: 2rem; margin-top: -10px;">A Beginner's Guide</h1>
+
+            <div class="content-grid">
+                <div class="content-section">
+                    <h3>🤔 What is a Dockerfile?</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">A <strong>Dockerfile</strong> is a text file that contains step-by-step instructions to build a Docker image. Think of it as a recipe that tells Docker how to create your application container.</p>
+                    
+                    <div class="analogy-section">
+                        <h3>🍰 Recipe Analogy</h3>
+                        <p style="text-align: left;"><strong>Dockerfile = Recipe</strong><br>
+                        Just like a recipe tells you what ingredients to use and what steps to follow to make a cake, a Dockerfile tells Docker what base image to use and what steps to follow to build your application.</p>
+                    </div>
+
+                    <div class="highlight-box">
+                        <p><strong>Key Point:</strong> Dockerfile creates consistent, reproducible environments for your applications!</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3>🎯 Why Use Dockerfiles?</h3>
+                    <div class="step-by-step">
+                        <div class="step-item">
+                            <strong>Consistency:</strong> Same environment everywhere - development, testing, production
+                        </div>
+                        <div class="step-item">
+                            <strong>Automation:</strong> No manual setup - Docker builds everything automatically
+                        </div>
+                        <div class="step-item">
+                            <strong>Version Control:</strong> Track changes to your environment setup
+                        </div>
+                        <div class="step-item">
+                            <strong>Sharing:</strong> Team members get identical development environments
+                        </div>
+                        <div class="step-item">
+                            <strong>Portability:</strong> Run anywhere Docker is installed
+                        </div>
+                    </div>
+
+                    <div class="visual-flow" style="margin-top: 20px;">
+                        <div class="flow-item">
+                            <div class="flow-box from-box">📄</div>
+                            <p><strong>Dockerfile</strong><br><small>Recipe</small></p>
+                        </div>
+                        <div style="font-size: 1.5rem; align-self: center;">→</div>
+                        <div class="flow-item">
+                            <div class="flow-box workdir-box">🏗️</div>
+                            <p><strong>Docker Build</strong><br><small>Cooking Process</small></p>
+                        </div>
+                        <div style="font-size: 1.5rem; align-self: center;">→</div>
+                        <div class="flow-item">
+                            <div class="flow-box copy-box">🐳</div>
+                            <p><strong>Docker Image</strong><br><small>Finished Cake</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Dockerfile Structure -->
+        <div class="slide">
+            <div class="slide-number">2 / 6</div>
+            <h2>Dockerfile Structure</h2>
+            <p>Every Dockerfile uses these main instructions to build images:</p>
+
+            <div class="instructions-grid">
+                <div class="instruction-card cmd-from">
+                    <h3>FROM</h3>
+                    <p><strong>Base Image</strong><br>What to start with</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">FROM node:18</div>
+                </div>
+
+                <div class="instruction-card cmd-workdir">
+                    <h3>WORKDIR</h3>
+                    <p><strong>Working Directory</strong><br>Where to work inside container</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">WORKDIR /app</div>
+                </div>
+
+                <div class="instruction-card cmd-copy">
+                    <h3>COPY</h3>
+                    <p><strong>Copy Files</strong><br>Add files from host to container</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">COPY . /app</div>
+                </div>
+
+                <div class="instruction-card cmd-run">
+                    <h3>RUN</h3>
+                    <p><strong>Execute Commands</strong><br>Install packages, build app</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">RUN npm install</div>
+                </div>
+
+                <div class="instruction-card cmd-expose">
+                    <h3>EXPOSE</h3>
+                    <p><strong>Open Ports</strong><br>Which ports app uses</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">EXPOSE 3000</div>
+                </div>
+
+                <div class="instruction-card cmd-cmd">
+                    <h3>CMD</h3>
+                    <p><strong>Default Command</strong><br>What runs when container starts</p>
+                    <div class="code-block" style="font-size: 0.8rem; margin-top: 10px;">CMD ["npm", "start"]</div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <h3>🏗️ Building Process</h3>
+                <div class="visual-flow">
+                    <div class="flow-item">
+                        <div class="flow-box from-box">🏠</div>
+                        <p><strong>FROM</strong><br><small>Choose foundation</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box workdir-box">📁</div>
+                        <p><strong>WORKDIR</strong><br><small>Set workspace</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box copy-box">📋</div>
+                        <p><strong>COPY</strong><br><small>Add ingredients</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box run-box">⚙️</div>
+                        <p><strong>RUN</strong><br><small>Prepare & cook</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box cmd-box">🚀</div>
+                        <p><strong>CMD</strong><br><small>Serve dish</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="margin-top: 20px;">
+                <p><strong>Remember:</strong> Instructions are executed in order, from top to bottom!</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Base Image & Working Directory -->
+        <div class="slide">
+            <div class="slide-number">3 / 6</div>
+            <h2>Base Image & Working Directory</h2>
+
+            <div class="content-grid">
+                <div class="content-section">
+                    <div class="from-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">🏠</div>
+                    <h3>FROM - Choose Your Foundation</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">The <code>FROM</code> instruction specifies the base image - like choosing what type of house foundation you want to build on.</p>
+
+                    <div class="code-block">
+<span class="code-comment"># Popular base images:</span>
+<span class="code-instruction">FROM</span> ubuntu:20.04
+<span class="code-instruction">FROM</span> node:18
+<span class="code-instruction">FROM</span> python:3.9
+<span class="code-instruction">FROM</span> nginx:alpine</div>
+
+                    <div class="key-points">
+                        <div class="key-point-card">
+                            <h4>🎯 Official Images</h4>
+                            <p>Use official images from Docker Hub for reliability and security.</p>
+                        </div>
+                        <div class="key-point-card">
+                            <h4>🏔️ Alpine Images</h4>
+                            <p>Smaller, lightweight versions (e.g., node:alpine) for production.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="workdir-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">📁</div>
+                    <h3>WORKDIR - Set Your Workspace</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">The <code>WORKDIR</code> instruction sets the working directory inside the container - like choosing which room in your house to work in.</p>
+
+                    <div class="code-block">
+<span class="code-comment"># Set working directory</span>
+<span class="code-instruction">WORKDIR</span> /app
+
+<span class="code-comment"># All subsequent commands run from /app</span>
+<span class="code-instruction">WORKDIR</span> /usr/src/app
+<span class="code-instruction">WORKDIR</span> /var/www/html</div>
+
+                    <div class="key-points">
+                        <div class="key-point-card">
+                            <h4>📍 Best Practice</h4>
+                            <p>Always set WORKDIR to avoid running commands in random directories.</p>
+                        </div>
+                        <div class="key-point-card">
+                            <h4>🔄 Multiple WORKDIR</h4>
+                            <p>You can use WORKDIR multiple times to change directories.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <h3>🏗️ Foundation & Workspace Analogy</h3>
+                <div class="visual-flow">
+                    <div class="flow-item">
+                        <div class="flow-box from-box">🏠</div>
+                        <p><strong>FROM ubuntu:20.04</strong><br><small>"I want to build on Ubuntu foundation"</small></p>
+                    </div>
+                    <div style="font-size: 1.5rem; align-self: center;">+</div>
+                    <div class="flow-item">
+                        <div class="flow-box workdir-box">📁</div>
+                        <p><strong>WORKDIR /app</strong><br><small>"I'll work in the /app room"</small></p>
+                    </div>
+                    <div style="font-size: 1.5rem; align-self: center;">=</div>
+                    <div class="flow-item">
+                        <div class="flow-box copy-box">✅</div>
+                        <p><strong>Ready to Build!</strong><br><small>Foundation set, workspace prepared</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Copying Files & Running Commands -->
+        <div class="slide">
+            <div class="slide-number">4 / 6</div>
+            <h2>Copying Files & Running Commands</h2>
+
+            <div class="content-grid">
+                <div class="content-section">
+                    <div class="copy-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">📋</div>
+                    <h3>COPY - Add Your Ingredients</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">The <code>COPY</code> instruction copies files from your computer (host) into the container - like adding ingredients to your kitchen.</p>
+
+                    <div class="code-block">
+<span class="code-comment"># Copy specific file</span>
+<span class="code-instruction">COPY</span> package.json /app/
+
+<span class="code-comment"># Copy entire directory</span>
+<span class="code-instruction">COPY</span> . /app/
+
+<span class="code-comment"># Copy with rename</span>
+<span class="code-instruction">COPY</span> config.txt /app/settings.txt</div>
+
+                    <div class="step-by-step">
+                        <div class="step-item">
+                            <strong>Source:</strong> File/folder on your computer
+                        </div>
+                        <div class="step-item">
+                            <strong>Destination:</strong> Path inside container
+                        </div>
+                        <div class="step-item">
+                            <strong>Tip:</strong> Copy package.json first, then source code for better caching
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="run-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">⚙️</div>
+                    <h3>RUN - Execute Commands</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">The <code>RUN</code> instruction executes commands inside the container during build time - like following cooking steps in your recipe.</p>
+
+                    <div class="code-block">
+<span class="code-comment"># Install packages</span>
+<span class="code-instruction">RUN</span> apt-get update && apt-get install -y curl
+
+<span class="code-comment"># Install Node.js dependencies</span>
+<span class="code-instruction">RUN</span> npm install
+
+<span class="code-comment"># Build application</span>
+<span class="code-instruction">RUN</span> npm run build</div>
+
+                    <div class="step-by-step">
+                        <div class="step-item">
+                            <strong>Build Time:</strong> RUN commands execute when building the image
+                        </div>
+                        <div class="step-item">
+                            <strong>Layers:</strong> Each RUN creates a new layer in the image
+                        </div>
+                        <div class="step-item">
+                            <strong>Tip:</strong> Combine commands with && to reduce layers
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <h3>👩‍🍳 Cooking Process Example</h3>
+                <div class="visual-flow">
+                    <div class="flow-item">
+                        <div class="flow-box copy-box">📋</div>
+                        <p><strong>COPY ingredients</strong><br><small>"Add flour, eggs, milk to kitchen"</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem; align-self: center;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box run-box">🥄</div>
+                        <p><strong>RUN mix</strong><br><small>"Mix all ingredients together"</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem; align-self: center;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box run-box">🔥</div>
+                        <p><strong>RUN bake</strong><br><small>"Bake in oven for 30 minutes"</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem; align-self: center;">→</div>
+                    <div class="flow-item">
+                        <div class="flow-box cmd-box">🍰</div>
+                        <p><strong>Ready!</strong><br><small>Cake is prepared</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>Pro Tip:</strong> COPY files first, then RUN commands that use those files. This improves Docker's caching!</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Exposing Ports & Default Commands -->
+        <div class="slide">
+            <div class="slide-number">5 / 6</div>
+            <h2>Exposing Ports & Default Commands</h2>
+
+            <div class="content-grid">
+                <div class="content-section">
+                    <div class="expose-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">🚪</div>
+                    <h3>EXPOSE - Open the Door</h3>
+                    <p style="text-align: left; margin-bottom: 15px;">The <code>EXPOSE</code> instruction tells Docker which ports your application uses - like putting a door number on your restaurant.</p>
+
+                    <div class="code-block">
+<span class="code-comment"># Expose web server port</span>
+<span class="code-instruction">EXPOSE</span> 80
+
+<span class="code-comment"># Expose Node.js app port</span>
+<span class="code-instruction">EXPOSE</span> 3000
+
+<span class="code-comment"># Expose multiple ports</span>
+<span class="code-instruction">EXPOSE</span> 8080 8443</div>
+
+                    <div class="key-point-card">
+                        <h4>🔍 Important Note</h4>
+                        <p>EXPOSE is documentation - it doesn't actually publish ports. Use <code>docker run -p</code> to publish ports to the host.</p>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="cmd-box" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.2rem;">🚀</div>
+                    <h3>CMD & ENTRYPOINT - Start Serving</h3>
+                    <p style="text-align: left; margin-bottom: 12px;"><strong>CMD:</strong> Default command when container starts</p>
+                    <p style="text-align: left; margin-bottom: 15px;"><strong>ENTRYPOINT:</strong> Fixed command that always runs</p>
+
+                    <div class="code-block">
+<span class="code-comment"># CMD - can be overridden</span>
+<span class="code-instruction">CMD</span> ["npm", "start"]
+<span class="code-instruction">CMD</span> ["python", "app.py"]
+
+<span class="code-comment"># ENTRYPOINT - always runs</span>
+<span class="code-instruction">ENTRYPOINT</span> ["python", "app.py"]
+
+<span class="code-comment"># Combined usage</span>
+<span class="code-instruction">ENTRYPOINT</span> ["python"]
+<span class="code-instruction">CMD</span> ["app.py"]</div>
+
+                    <div class="step-by-step">
+                        <div class="step-item">
+                            <strong>CMD:</strong> Can be overridden when running container
+                        </div>
+                        <div class="step-item">
+                            <strong>ENTRYPOINT:</strong> Cannot be overridden, always executes
+                        </div>
+                        <div class="step-item">
+                            <strong>Best Practice:</strong> Use CMD for default behavior
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <h3>🍽️ Restaurant Analogy</h3>
+                <div class="visual-flow">
+                    <div class="flow-item">
+                        <div class="flow-box expose-box">🚪</div>
+                        <p><strong>EXPOSE 3000</strong><br><small>"Restaurant door #3000"</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem; align-self: center;">+</div>
+                    <div class="flow-item">
+                        <div class="flow-box cmd-box">👨‍🍳</div>
+                        <p><strong>CMD ["serve"]</strong><br><small>"Start serving customers"</small></p>
+                    </div>
+                    <div style="font-size: 1.2rem; align-self: center;">=</div>
+                    <div class="flow-item">
+                        <div class="flow-box" style="background: linear-gradient(135deg, #48bb78, #38a169);">✅</div>
+                        <p><strong>Restaurant Open!</strong><br><small>Customers can visit door #3000</small></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>Key Difference:</strong> CMD can be overridden, ENTRYPOINT always runs. Use CMD for flexibility!</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Example Dockerfile -->
+        <div class="slide">
+            <div class="slide-number">6 / 6</div>
+            <h2>Complete Dockerfile Example</h2>
+            <p>Here's a real Dockerfile for a Node.js web application with detailed explanations:</p>
+
+            <div class="content-grid">
+                <div class="content-section">
+                    <h3>📄 Sample Dockerfile</h3>
+                    <div class="code-block">
+<span class="code-comment"># Use official Node.js runtime as base image</span>
+<span class="code-instruction">FROM</span> node:18-alpine
+
+<span class="code-comment"># Set working directory inside container</span>
+<span class="code-instruction">WORKDIR</span> /usr/src/app
+
+<span class="code-comment"># Copy package files first (for better caching)</span>
+<span class="code-instruction">COPY</span> package*.json ./
+
+<span class="code-comment"># Install dependencies</span>
+<span class="code-instruction">RUN</span> npm ci --only=production
+
+<span class="code-comment"># Copy application source code</span>
+<span class="code-instruction">COPY</span> . .
+
+<span class="code-comment"># Create non-root user for security</span>
+<span class="code-instruction">RUN</span> addgroup -g 1001 -S nodejs
+<span class="code-instruction">RUN</span> adduser -S nextjs -u 1001
+
+<span class="code-comment"># Change to non-root user</span>
+<span class="code-instruction">USER</span> nextjs
+
+<span class="code-comment"># Expose port that app runs on</span>
+<span class="code-instruction">EXPOSE</span> 3000
+
+<span class="code-comment"># Command to start the application</span>
+<span class="code-instruction">CMD</span> ["npm", "start"]</div>
+                </div>
+
+                <div class="content-section">
+                    <h3>🔍 Step-by-Step Breakdown</h3>
+                    <div class="step-by-step">
+                        <div class="step-item">
+                            <strong>Line 2:</strong> Start with Node.js 18 Alpine (lightweight Linux)
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 5:</strong> Set /usr/src/app as our workspace
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 8:</strong> Copy only package files first
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 11:</strong> Install production dependencies
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 14:</strong> Copy all application source code
+                        </div>
+                        <div class="step-item">
+                            <strong>Lines 17-18:</strong> Create secure non-root user
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 21:</strong> Switch to non-root user
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 24:</strong> Document that app uses port 3000
+                        </div>
+                        <div class="step-item">
+                            <strong>Line 27:</strong> Start the application with npm start
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 20px;">⚡ Build & Run Commands</h3>
+                    <div class="code-block">
+<span class="code-comment"># Build image from Dockerfile</span>
+docker build -t my-node-app .
+
+<span class="code-comment"># Run container from image</span>
+docker run -p 3000:3000 my-node-app
+
+<span class="code-comment"># Visit http://localhost:3000</span></div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <h3>🎯 Best Practices Applied</h3>
+                <div class="key-points">
+                    <div class="key-point-card">
+                        <h4>📦 Layer Optimization</h4>
+                        <p>Copy package.json first, then install dependencies. This allows Docker to cache the dependency installation layer.</p>
+                    </div>
+                    <div class="key-point-card">
+                        <h4>🔒 Security</h4>
+                        <p>Create and use a non-root user to run the application, reducing security risks.</p>
+                    </div>
+                    <div class="key-point-card">
+                        <h4>📏 Size Optimization</h4>
+                        <p>Use Alpine Linux base image (smaller) and install only production dependencies.</p>
+                    </div>
+                    <div class="key-point-card">
+                        <h4>📖 Documentation</h4>
+                        <p>Use comments to explain each step, making the Dockerfile self-documenting.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <p><strong>Congratulations! 🎉</strong> You now understand how to create Dockerfiles. Start with simple examples and gradually add more features as you learn!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="prevSlide()">← Previous</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            updateNavigation();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.querySelector('.navigation .nav-btn:first-child');
+            const nextBtn = document.querySelector('.navigation .nav-btn:last-child');
+            
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        updateNavigation();
+    </script>
+</body>
+</html>

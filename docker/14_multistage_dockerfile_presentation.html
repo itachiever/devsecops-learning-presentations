@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Stage Dockerfile Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .presentation-container {
+            width: 100%;
+            max-width: 1280px;
+            aspect-ratio: 16/10;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+
+        .slide h2 {
+            font-size: 1.8rem;
+            color: #34495e;
+            margin-bottom: 20px;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+        }
+
+        .slide h3 {
+            font-size: 1.4rem;
+            color: #2980b9;
+            margin-bottom: 15px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: calc(100% - 120px);
+        }
+
+        .content-full {
+            height: calc(100% - 120px);
+        }
+
+        .definition-box {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.3);
+        }
+
+        .benefits-list {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #28a745;
+        }
+
+        .benefits-list ul {
+            list-style: none;
+        }
+
+        .benefits-list li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        .benefits-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stage-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stage {
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .stage.build {
+            background: linear-gradient(135deg, #ff7675, #fd79a8);
+            color: white;
+        }
+
+        .stage.final {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+        }
+
+        .arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-comment {
+            color: #95a5a6;
+        }
+
+        .code-keyword {
+            color: #3498db;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            height: 100%;
+        }
+
+        .use-case {
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            height: 100%;
+        }
+
+        .tips-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+        }
+
+        .do {
+            border-left: 5px solid #28a745;
+        }
+
+        .dont {
+            border-left: 5px solid #dc3545;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter" id="slideCounter">1 / 6</div>
+        
+        <!-- Slide 1: What is a Multi-Stage Dockerfile? -->
+        <div class="slide active">
+            <h1>What is a Multi-Stage Dockerfile?</h1>
+            <div class="content-grid">
+                <div>
+                    <div class="definition-box">
+                        <h3>📋 Plain Definition</h3>
+                        <p><strong>Multi-Stage Dockerfile:</strong> A single Dockerfile that uses multiple FROM statements to create separate build stages. Each stage can serve different purposes - like compiling code, installing dependencies, or creating the final runtime image.</p>
+                    </div>
+                    
+                    <h2>🎯 Why It Matters</h2>
+                    <ul style="font-size: 1.1rem; line-height: 1.6; margin-left: 20px;">
+                        <li><strong>Smaller Images:</strong> Keep only what you need in production</li>
+                        <li><strong>Better Security:</strong> Remove build tools and source code</li>
+                        <li><strong>Cleaner Process:</strong> One file handles everything</li>
+                        <li><strong>Performance:</strong> Faster deployments and less storage</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <div class="analogy-box">
+                        <h3>🏗️ Building Analogy</h3>
+                        <p><strong>Think of it like building a house:</strong></p>
+                        <p style="margin-top: 15px;"><strong>Stage 1 (Construction Site):</strong><br>
+                        • Heavy machinery, raw materials<br>
+                        • Scaffolding, construction tools<br>
+                        • Messy, temporary workspace</p>
+                        
+                        <p style="margin-top: 15px;"><strong>Stage 2 (Final House):</strong><br>
+                        • Clean, furnished rooms<br>
+                        • Only what residents need<br>
+                        • No construction debris</p>
+                        
+                        <p style="margin-top: 15px;"><em>Multi-stage builds work the same way - build messy, ship clean!</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Key Benefits -->
+        <div class="slide">
+            <h1>Key Benefits of Multi-Stage Builds</h1>
+            <div class="content-grid">
+                <div class="benefits-list">
+                    <h2>🚀 Production Advantages</h2>
+                    <ul>
+                        <li><strong>Dramatically Smaller Images</strong><br>
+                        Go from 1GB+ to 100MB or less by excluding build dependencies</li>
+                        
+                        <li><strong>Enhanced Security</strong><br>
+                        Remove compilers, dev tools, and source code from final image</li>
+                        
+                        <li><strong>Single Dockerfile Management</strong><br>
+                        One file for both build and runtime - easier maintenance</li>
+                        
+                        <li><strong>Faster Deployments</strong><br>
+                        Smaller images = faster push/pull times and quicker scaling</li>
+                        
+                        <li><strong>Cost Efficiency</strong><br>
+                        Less storage, bandwidth, and compute resources needed</li>
+                    </ul>
+                </div>
+                
+                <div class="benefits-list">
+                    <h2>⚡ Development Best Practices</h2>
+                    <ul>
+                        <li><strong>Clean Separation</strong><br>
+                        Build dependencies separate from runtime requirements</li>
+                        
+                        <li><strong>Better Caching</strong><br>
+                        Docker can cache intermediate stages for faster rebuilds</li>
+                        
+                        <li><strong>Parallel Processing</strong><br>
+                        Different stages can be built concurrently when possible</li>
+                        
+                        <li><strong>Environment Consistency</strong><br>
+                        Same build process for dev, staging, and production</li>
+                        
+                        <li><strong>Simplified CI/CD</strong><br>
+                        One Dockerfile, multiple deployment targets</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: How Multi-Stage Builds Work -->
+        <div class="slide">
+            <h1>How Multi-Stage Builds Work</h1>
+            <div class="content-grid">
+                <div>
+                    <h2>🔧 Key Concepts</h2>
+                    <ul style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 20px;">
+                        <li><strong>Multiple FROM statements:</strong> Each creates a new stage</li>
+                        <li><strong>Named stages:</strong> Use <code style="background: #f8f9fa; padding: 2px 6px;">AS stage-name</code></li>
+                        <li><strong>COPY --from:</strong> Transfer files between stages</li>
+                        <li><strong>Final stage:</strong> Last FROM becomes the final image</li>
+                    </ul>
+                    
+                    <h3>📝 Basic Syntax</h3>
+                    <div class="code-block">
+  <span class="code-comment"># Stage 1: Build stage</span><br>
+  <span class="code-keyword">FROM</span> node:18 <span class="code-keyword">AS</span> builder<br>
+  <span class="code-comment"># Build commands here...</span><br><br>
+
+  <span class="code-comment"># Stage 2: Production stage</span><br>
+  <span class="code-keyword">FROM</span> node:18-alpine<br>
+  <span class="code-keyword">COPY --from=</span>builder /app/dist ./dist
+</div>
+                </div>
+                
+                <div class="diagram-container">
+                    <h3 style="text-align: center; margin-bottom: 20px;">📊 Step-by-Step Workflow</h3>
+                    <div class="stage-flow">
+                        <div class="stage build">
+                            <strong>🏗️ BUILD STAGE</strong><br>
+                            <small>FROM node:18 AS builder</small><br>
+                            Install dependencies, compile code, run tests
+                        </div>
+                        <div class="arrow">⬇️ COPY --from=builder</div>
+                        <div class="stage final">
+                            <strong>📦 FINAL STAGE</strong><br>
+                            <small>FROM node:18-alpine</small><br>
+                            Copy only compiled artifacts, minimal runtime
+                        </div>
+                        <div class="arrow">⬇️ Docker Build Result</div>
+                        <div class="stage" style="background: linear-gradient(135deg, #00b894, #00cec9); color: white;">
+                            <strong>🚀 OPTIMIZED IMAGE</strong><br>
+                            Small, secure, production-ready container
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Example Dockerfile -->
+        <div class="slide">
+            <h1>Example Dockerfile</h1>
+            <div class="content-full">
+                <h2>📄 Complete Node.js Application Example</h2>
+                <div class="code-block" style="height: calc(100% - 80px); overflow-y: auto;">
+<span class="code-comment"># ================================
+# STAGE 1: Build Stage
+# ================================</span>
+<span class="code-keyword">FROM</span> node:18 <span class="code-keyword">AS</span> builder
+
+<span class="code-comment"># Set working directory for build</span>
+<span class="code-keyword">WORKDIR</span> /app
+
+<span class="code-comment"># Copy package files first (for better caching)</span>
+<span class="code-keyword">COPY</span> package*.json ./
+
+<span class="code-comment"># Install ALL dependencies (including devDependencies)</span>
+<span class="code-keyword">RUN</span> npm ci --include=dev
+
+<span class="code-comment"># Copy source code</span>
+<span class="code-keyword">COPY</span> . .
+
+<span class="code-comment"># Build the application (compile TypeScript, bundle assets, etc.)</span>
+<span class="code-keyword">RUN</span> npm run build
+<span class="code-keyword">RUN</span> npm run test
+<span class="code-keyword">RUN</span> npm prune --production  <span class="code-comment"># Remove dev dependencies</span>
+
+<span class="code-comment"># ================================
+# STAGE 2: Production Stage
+# ================================</span>
+<span class="code-keyword">FROM</span> node:18-alpine <span class="code-keyword">AS</span> production
+
+<span class="code-comment"># Create non-root user for security</span>
+<span class="code-keyword">RUN</span> addgroup -g 1001 -S nodejs
+<span class="code-keyword">RUN</span> adduser -S nextjs -u 1001
+
+<span class="code-comment"># Set working directory</span>
+<span class="code-keyword">WORKDIR</span> /app
+
+<span class="code-comment"># Copy only production dependencies from builder stage</span>
+<span class="code-keyword">COPY --from=</span>builder /app/node_modules ./node_modules
+
+<span class="code-comment"># Copy only the built application (not source code!)</span>
+<span class="code-keyword">COPY --from=</span>builder /app/dist ./dist
+<span class="code-keyword">COPY --from=</span>builder /app/package.json ./package.json
+
+<span class="code-comment"># Change ownership to non-root user</span>
+<span class="code-keyword">RUN</span> chown -R nextjs:nodejs /app
+<span class="code-keyword">USER</span> nextjs
+
+<span class="code-comment"># Expose port</span>
+<span class="code-keyword">EXPOSE</span> 3000
+
+<span class="code-comment"># Health check</span>
+<span class="code-keyword">HEALTHCHECK --interval=</span>30s --timeout=3s --start-period=5s --retries=3 \
+  <span class="code-keyword">CMD</span> curl -f http://localhost:3000/health || exit 1
+
+<span class="code-comment"># Start the application</span>
+<span class="code-keyword">CMD</span> ["node", "dist/index.js"]
+
+<span class="code-comment"># Final image size: ~150MB vs 1.2GB+ without multi-stage!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Use Cases in DevOps -->
+        <div class="slide">
+            <h1>Use Cases in DevOps</h1>
+            <div class="content-full">
+                <h2>🎯 Common Interview Scenarios</h2>
+                <div class="use-cases-grid">
+                    <div class="use-case">
+                        <h3>🔄 CI/CD Pipelines</h3>
+                        <p><strong>Problem:</strong> Build artifacts cluttering production images</p>
+                        <p><strong>Solution:</strong> Build stage compiles code, test stage runs tests, final stage contains only runtime</p>
+                        <p><strong>Benefit:</strong> Faster deployments, cleaner rollbacks</p>
+                    </div>
+                    
+                    <div class="use-case">
+                        <h3>🌐 Frontend + Backend</h3>
+                        <p><strong>Problem:</strong> React app needs Node build tools but production needs only static files</p>
+                        <p><strong>Solution:</strong> Build stage with full Node.js, final stage with nginx serving built files</p>
+                        <p><strong>Benefit:</strong> 1.5GB → 25MB image size</p>
+                    </div>
+                    
+                    <div class="use-case">
+                        <h3>🔐 Secrets Management</h3>
+                        <p><strong>Problem:</strong> Build-time secrets (API keys, certificates) in final image</p>
+                        <p><strong>Solution:</strong> Use secrets in build stage, don't copy to production stage</p>
+                        <p><strong>Benefit:</strong> Enhanced security compliance</p>
+                    </div>
+                    
+                    <div class="use-case">
+                        <h3>🧪 Testing Integration</h3>
+                        <p><strong>Problem:</strong> Want to run tests but not include test frameworks in production</p>
+                        <p><strong>Solution:</strong> Separate test stage with test dependencies</p>
+                        <p><strong>Benefit:</strong> Quality gates without bloat</p>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <h3>💬 Interview Question Examples:</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>"How would you optimize a Docker image for production?"</strong> → Multi-stage builds</li>
+                        <li><strong>"What's the difference between build-time and runtime dependencies?"</strong> → Separate stages</li>
+                        <li><strong>"How do you handle secrets in Docker builds?"</strong> → Build secrets, clean final stage</li>
+                        <li><strong>"Why are your images so large?"</strong> → Include only runtime necessities</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Practical Tips & Common Mistakes -->
+        <div class="slide">
+            <h1>Practical Tips & Common Mistakes</h1>
+            <div class="content-full">
+                <div class="tips-grid">
+                    <div class="tips-section do">
+                        <h2>✅ DO's - Best Practices</h2>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Name your stages</strong> for clarity:<br>
+                            <code style="background: #e8f5e8; padding: 2px 6px;">FROM node AS builder</code></li>
+                            
+                            <li><strong>Order stages strategically</strong><br>
+                            Most changing files last for better caching</li>
+                            
+                            <li><strong>Use specific base images</strong><br>
+                            <code style="background: #e8f5e8; padding: 2px 6px;">node:18-alpine</code> vs <code>node:latest</code></li>
+                            
+                            <li><strong>Copy only what you need</strong><br>
+                            <code style="background: #e8f5e8; padding: 2px 6px;">COPY --from=builder /app/dist .</code></li>
+                            
+                            <li><strong>Use .dockerignore</strong> files<br>
+                            Exclude node_modules, .git, tests</li>
+                            
+                            <li><strong>Run tests in build stage</strong><br>
+                            Fail fast if tests don't pass</li>
+                            
+                            <li><strong>Add health checks</strong><br>
+                            Monitor container health in production</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tips-section dont">
+                        <h2>❌ DON'Ts - Common Mistakes</h2>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Don't copy everything</strong><br>
+                            Avoid <code style="background: #ffe8e8; padding: 2px 6px;">COPY . .</code> in final stage</li>
+                            
+                            <li><strong>Don't use root user</strong><br>
+                            Create dedicated app user for security</li>
+                            
+                            <li><strong>Don't include build tools</strong><br>
+                            No compilers, dev dependencies in production</li>
+                            
+                            <li><strong>Don't hardcode versions</strong><br>
+                            Use ARG for flexible version management</li>
+                            
+                            <li><strong>Don't skip layer optimization</strong><br>
+                            Combine related RUN commands with &&</li>
+                            
+                            <li><strong>Don't forget to clean up</strong><br>
+                            Remove package caches, temp files</li>
+                            
+                            <li><strong>Don't ignore image scanning</strong><br>
+                            Always scan for vulnerabilities</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <h3>🎯 Interview Success Tips:</h3>
+                    <p style="margin-top: 10px;"><strong>Demonstrate understanding by explaining:</strong> 1) Problem multi-stage solves, 2) How stages communicate, 3) Real-world size savings you've achieved, 4) Security benefits of clean final images</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[n].classList.add('active');
+            
+            document.getElementById('slideCounter').textContent = `${n + 1} / ${totalSlides}`;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = n === 0;
+            document.getElementById('nextBtn').disabled = n === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                changeSlide(1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

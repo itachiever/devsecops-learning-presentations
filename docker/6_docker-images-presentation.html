@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Images - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            width: 95vw;
+            height: 95vh;
+            max-width: 1400px;
+            max-height: 875px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335);
+        }
+
+        .slide-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .slide-number {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 20px 0;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            height: 100%;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .analogy-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .layer-diagram {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .layer {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            position: relative;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .dockerfile-box {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 2px solid #4a5568;
+        }
+
+        .code-line {
+            margin: 4px 0;
+        }
+
+        .code-keyword {
+            color: #81c784;
+            font-weight: bold;
+        }
+
+        .code-string {
+            color: #ffb74d;
+        }
+
+        .tag-example {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-family: monospace;
+            font-weight: 500;
+        }
+
+        .registry-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .registry-step {
+            text-align: center;
+            flex: 1;
+        }
+
+        .registry-arrow {
+            font-size: 2rem;
+            color: #667eea;
+            margin: 0 20px;
+        }
+
+        .command-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 2px solid #2d3748;
+            margin: 10px 0;
+        }
+
+        .command-prompt {
+            color: #81c784;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            border: 2px solid #ff8a65;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .best-practices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .practice-item {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .slide-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin: 12px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        li::before {
+            content: '▸';
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .demo-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        @media (max-width: 1200px) {
+            .slide {
+                padding: 30px;
+            }
+            
+            .slide-title {
+                font-size: 2rem;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: What is a Docker Image? -->
+        <div class="slide active">
+            <div class="slide-header">
+                <div class="slide-number">1/6</div>
+            </div>
+            <h1 class="slide-title">🐳 What is a Docker Image?</h1>
+            <div class="slide-content two-column">
+                <div>
+                    <h3 style="color: #667eea; margin-bottom: 20px;">📋 Definition</h3>
+                    <ul>
+                        <li>A Docker image is a <strong>lightweight, standalone package</strong> that contains everything needed to run an application</li>
+                        <li>Includes <strong>code, runtime, libraries, environment variables,</strong> and configuration files</li>
+                        <li>Images are <strong>read-only templates</strong> used to create containers</li>
+                        <li>Foundation of containerization and modern DevOps workflows</li>
+                    </ul>
+                    
+                    <div class="highlight-box">
+                        <h4>🔑 Key Benefits</h4>
+                        <ul style="margin-top: 10px;">
+                            <li>Consistent environments across development, testing, and production</li>
+                            <li>Faster deployment and scaling</li>
+                            <li>Improved resource utilization</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="analogy-box">
+                    <span class="analogy-icon">🏗️</span>
+                    <h3>Think of it like a Blueprint</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.6; margin-top: 15px;">
+                        Just like an <strong>architectural blueprint</strong> contains all the instructions to build a house, a Docker image contains all the instructions and components needed to create and run a container.
+                    </p>
+                    <br>
+                    <p style="font-style: italic; color: #666;">
+                        Blueprint → House<br>
+                        Docker Image → Container
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Layered Structure -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">2/6</div>
+            </div>
+            <h1 class="slide-title">🏗️ Layered Structure</h1>
+            <div class="slide-content two-column">
+                <div>
+                    <h3 style="color: #667eea; margin-bottom: 20px;">📚 How Layers Work</h3>
+                    <ul>
+                        <li><strong>Base Image:</strong> Foundation layer (e.g., Ubuntu, Alpine Linux)</li>
+                        <li><strong>Application Layers:</strong> Each command in Dockerfile creates a new layer</li>
+                        <li><strong>Read-Only:</strong> All layers are immutable once created</li>
+                        <li><strong>Efficient Storage:</strong> Layers are shared between images</li>
+                        <li><strong>Incremental Updates:</strong> Only changed layers need to be downloaded</li>
+                    </ul>
+                    
+                    <div class="highlight-box">
+                        <h4>💡 Why Layers Matter</h4>
+                        <p>If you update your application code, only the top layer needs to be rebuilt and redistributed - not the entire image!</p>
+                    </div>
+                </div>
+                
+                <div class="layer-diagram">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">Layer Stack Example</h3>
+                    <div class="layer" style="animation-delay: 0.1s;">🐧 Base: Ubuntu 20.04</div>
+                    <div class="layer" style="animation-delay: 0.2s;">☕ Install: Java Runtime</div>
+                    <div class="layer" style="animation-delay: 0.3s;">📦 Install: Dependencies</div>
+                    <div class="layer" style="animation-delay: 0.4s;">📁 Copy: Application Code</div>
+                    <div class="layer" style="animation-delay: 0.5s;">⚙️ Configure: Environment</div>
+                    <div class="layer" style="animation-delay: 0.6s; background: linear-gradient(90deg, #28a745, #20c997);">🚀 Entrypoint: Start App</div>
+                    
+                    <p style="text-align: center; margin-top: 20px; font-style: italic; color: #666;">
+                        Each layer builds upon the previous one
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Building Images -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">3/6</div>
+            </div>
+            <h1 class="slide-title">🔨 Building Images</h1>
+            <div class="slide-content two-column">
+                <div>
+                    <h3 style="color: #667eea; margin-bottom: 20px;">📋 Dockerfile Basics</h3>
+                    <ul>
+                        <li><strong>Dockerfile:</strong> Text file with instructions to build an image</li>
+                        <li><strong>Commands:</strong> Each line creates a new layer</li>
+                        <li><strong>Build Process:</strong> Docker reads Dockerfile top to bottom</li>
+                        <li><strong>Best Practice:</strong> Order commands by frequency of change</li>
+                    </ul>
+                    
+                    <h3 style="color: #667eea; margin: 25px 0 15px 0;">🛠️ Common Build Commands</h3>
+                    <div class="command-box">
+                        <div><span class="command-prompt">$</span> docker build -t myapp:1.0 .</div>
+                    </div>
+                    <div class="command-box">
+                        <div><span class="command-prompt">$</span> docker build -t myapp:latest --no-cache .</div>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-style: italic;">
+                        The <code>.</code> tells Docker to look for Dockerfile in current directory
+                    </p>
+                </div>
+                
+                <div class="dockerfile-box">
+                    <h3 style="color: #81c784; margin-bottom: 15px;">Sample Dockerfile</h3>
+                    <div class="code-line"><span class="code-keyword">FROM</span> <span class="code-string">node:16-alpine</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">WORKDIR</span> <span class="code-string">/app</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">COPY</span> <span class="code-string">package*.json ./</span></div>
+                    <div class="code-line"><span class="code-keyword">RUN</span> <span class="code-string">npm install</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">COPY</span> <span class="code-string">. .</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">EXPOSE</span> <span class="code-string">3000</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">CMD</span> <span class="code-string">["npm", "start"]</span></div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #4a5568; color: #a0aec0; font-size: 12px;">
+                        <strong>Layer Optimization:</strong> Dependencies are copied and installed before application code, enabling layer caching.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Versioning & Tags -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">4/6</div>
+            </div>
+            <h1 class="slide-title">🏷️ Versioning & Tags</h1>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 20px;">🔖 What are Tags?</h3>
+                        <ul>
+                            <li><strong>Human-readable labels</strong> for image versions</li>
+                            <li><strong>Format:</strong> repository:tag (e.g., nginx:1.21)</li>
+                            <li><strong>Default tag:</strong> "latest" if no tag specified</li>
+                            <li><strong>Multiple tags:</strong> Same image can have multiple tags</li>
+                            <li><strong>Best Practice:</strong> Use semantic versioning</li>
+                        </ul>
+                        
+                        <h3 style="color: #667eea; margin: 25px 0 15px 0;">📊 Tagging Strategies</h3>
+                        <ul>
+                            <li><strong>Semantic:</strong> v1.2.3, v1.2, v1</li>
+                            <li><strong>Environment:</strong> dev, staging, prod</li>
+                            <li><strong>Feature:</strong> feature-auth, hotfix-security</li>
+                            <li><strong>Timestamp:</strong> 2025-01-15</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 20px; text-align: center;">Tag Examples</h3>
+                        <div style="text-align: center; margin-bottom: 25px;">
+                            <div class="tag-example">nginx:latest</div>
+                            <div class="tag-example">nginx:1.21</div>
+                            <div class="tag-example">myapp:v2.1.0</div>
+                            <div class="tag-example">myapp:dev</div>
+                            <div class="tag-example">redis:6-alpine</div>
+                        </div>
+                        
+                        <div class="highlight-box">
+                            <h4>⚠️ Interview Tip</h4>
+                            <p><strong>Never use "latest" in production!</strong> It's unpredictable and can break your application when the image updates.</p>
+                        </div>
+                        
+                        <h3 style="color: #667eea; margin: 20px 0 15px 0;">🛠️ Tagging Commands</h3>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker tag myapp:latest myapp:v1.0</div>
+                        </div>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker build -t myapp:v1.1.0 .</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Registries & Sharing -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">5/6</div>
+            </div>
+            <h1 class="slide-title">🏪 Registries & Sharing</h1>
+            <div class="slide-content">
+                <h3 style="color: #667eea; margin-bottom: 20px; text-align: center;">📦 Image Registry Workflow</h3>
+                
+                <div class="registry-flow">
+                    <div class="registry-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">💻</div>
+                        <h4>Developer</h4>
+                        <p>Builds Image</p>
+                        <div class="command-box" style="margin-top: 10px;">docker build -t myapp:v1.0 .</div>
+                    </div>
+                    
+                    <div class="registry-arrow">→</div>
+                    
+                    <div class="registry-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">☁️</div>
+                        <h4>Registry</h4>
+                        <p>Stores Images</p>
+                        <div class="command-box" style="margin-top: 10px;">docker push myapp:v1.0</div>
+                    </div>
+                    
+                    <div class="registry-arrow">→</div>
+                    
+                    <div class="registry-step">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🚀</div>
+                        <h4>Production</h4>
+                        <p>Pulls & Runs</p>
+                        <div class="command-box" style="margin-top: 10px;">docker pull myapp:v1.0</div>
+                    </div>
+                </div>
+                
+                <div class="two-column" style="margin-top: 30px;">
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 20px;">🏪 Registry Types</h3>
+                        <ul>
+                            <li><strong>Docker Hub:</strong> Public registry (free tier available)</li>
+                            <li><strong>AWS ECR:</strong> Amazon's private registry</li>
+                            <li><strong>Google GCR:</strong> Google Cloud Registry</li>
+                            <li><strong>Azure ACR:</strong> Azure Container Registry</li>
+                            <li><strong>Harbor:</strong> Open-source private registry</li>
+                            <li><strong>Private:</strong> Self-hosted registries</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 20px;">🛠️ Essential Commands</h3>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker login</div>
+                        </div>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker push myapp:v1.0</div>
+                        </div>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker pull nginx:latest</div>
+                        </div>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker search ubuntu</div>
+                        </div>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <strong>💡 Pro Tip:</strong> Always use specific tags when pulling images in production environments for consistency.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Practical Example & Interview Tips -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">6/6</div>
+            </div>
+            <h1 class="slide-title">🎯 Practical Example & Interview Tips</h1>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div class="demo-container">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">🚀 Real-World Example: Node.js App</h3>
+                        <div class="command-box">
+                            <div># Build the image</div>
+                            <div><span class="command-prompt">$</span> docker build -t webapp:v1.0 .</div>
+                            <div></div>
+                            <div># Run locally for testing</div>
+                            <div><span class="command-prompt">$</span> docker run -p 3000:3000 webapp:v1.0</div>
+                            <div></div>
+                            <div># Tag for production</div>
+                            <div><span class="command-prompt">$</span> docker tag webapp:v1.0 myregistry/webapp:v1.0</div>
+                            <div></div>
+                            <div># Push to registry</div>
+                            <div><span class="command-prompt">$</span> docker push myregistry/webapp:v1.0</div>
+                        </div>
+                        
+                        <h4 style="color: #667eea; margin: 20px 0 10px 0;">📋 Image Inspection</h4>
+                        <div class="command-box">
+                            <div><span class="command-prompt">$</span> docker images</div>
+                            <div><span class="command-prompt">$</span> docker history webapp:v1.0</div>
+                            <div><span class="command-prompt">$</span> docker inspect webapp:v1.0</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: #667eea; margin-bottom: 20px;">💼 Interview Success Tips</h3>
+                        
+                        <div class="best-practices">
+                            <div class="practice-item">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;">🎯</div>
+                                <strong>Key Concepts</strong>
+                                <p>Explain layers, immutability, and efficiency benefits clearly</p>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;">⚡</div>
+                                <strong>Best Practices</strong>
+                                <p>Multi-stage builds, .dockerignore, minimal base images</p>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;">🔒</div>
+                                <strong>Security</strong>
+                                <p>Use specific tags, scan for vulnerabilities, non-root users</p>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <div style="font-size: 1.5rem; margin-bottom: 8px;">📊</div>
+                                <strong>Optimization</strong>
+                                <p>Layer caching, order commands by change frequency</p>
+                            </div>
+                        </div>
+                        
+                        <div class="highlight-box" style="margin-top: 25px;">
+                            <h4>🔥 Common Interview Questions</h4>
+                            <ul style="text-align: left; margin-top: 10px;">
+                                <li>Difference between image and container?</li>
+                                <li>How do Docker layers work?</li>
+                                <li>What's wrong with using 'latest' tag?</li>
+                                <li>How to optimize Dockerfile for better performance?</li>
+                                <li>Explain Docker image security best practices</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-indicator">
+        <span id="current-slide">1</span> / 6
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" onclick="previousSlide()">← Previous</button>
+        <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 6;
+
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[n - 1].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = n;
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = n === 1;
+            document.getElementById('next-btn').disabled = n === totalSlides;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                event.preventDefault();
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>

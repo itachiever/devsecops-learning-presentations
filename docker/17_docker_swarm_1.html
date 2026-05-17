@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐳 Docker Swarm - Complete Beginner's Guide</title>
+    <style>
+        /* ---------- GLOBAL STYLES ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        .presentation { width: 100vw; height: 100vh; position: relative; }
+        .slide {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            background: white; display: none;
+            padding: 3vh 4vw; flex-direction: column;
+        }
+        .slide.active { display: flex; }
+        .slide-header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white; padding: 2vh 3vw;
+            margin: -3vh -4vw 3vh -4vw; border-bottom: 4px solid #0D47A1;
+        }
+        .slide-header h1 { font-size: 3.2vh; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .slide-content { flex: 1; display: flex; flex-direction: column; gap: 2vh; overflow-y: auto; }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; flex: 1; }
+        .column { display: flex; flex-direction: column; gap: 1.5vh; }
+        h2 { color: #1976D2; font-size: 2.5vh; margin-bottom: 1vh; border-bottom: 2px solid #2196F3; padding-bottom: 0.5vh; }
+        h3 { color: #0D47A1; font-size: 2.2vh; margin-top: 1vh; }
+        p, li { font-size: 1.8vh; line-height: 1.6; color: #333; }
+        ul { padding-left: 2vw; } li { margin-bottom: 0.8vh; }
+
+        /* ---------- SPECIAL ELEMENTS ---------- */
+        .highlight { background: #E3F2FD; padding: 1.5vh 2vw; border-left: 4px solid #2196F3; border-radius: 4px; margin: 1vh 0; }
+        .code-block {
+            background: #1e1e1e; color: #d4d4d4; padding: 1.5vh 2vw;
+            border-radius: 6px; font-family: 'Courier New', monospace;
+            font-size: 1.6vh; overflow-x: auto; border: 2px solid #0D47A1;
+        }
+        .command { color: #4EC9B0; } .flag { color: #CE9178; } .comment { color: #6A9955; }
+
+        .diagram {
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            border: 3px solid #2196F3; border-radius: 8px;
+            padding: 2vh; display: flex; align-items: center; justify-content: center;
+            min-height: 25vh; position: relative;
+        }
+
+        .controls { position: fixed; bottom: 2vh; right: 2vw; display: flex; gap: 1vw; z-index: 1000; }
+        button {
+            background: #2196F3; color: white; border: none; padding: 1.2vh 2vw;
+            font-size: 1.8vh; border-radius: 6px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: all 0.3s;
+        }
+        button:hover { background: #1976D2; transform: translateY(-2px); }
+        .slide-number { position: fixed; bottom: 2vh; left: 2vw; background: rgba(33,150,243,0.9);
+            color: white; padding: 1vh 2vw; border-radius: 6px; font-weight: bold; font-size: 1.8vh; }
+
+        .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5vh 2vw; }
+        .feature-item { background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            padding: 1.5vh 1.5vw; border-left: 4px solid #2196F3; border-radius: 4px; }
+
+        .workflow { border: 3px solid #2196F3; border-radius: 8px; padding: 1.5vh; display: flex; flex-direction: column; gap: 1vh; }
+        .workflow-step {
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            color: white; padding: 1vh 1.5vw; border-radius: 4px; font-weight: bold; position: relative; padding-left: 3vw;
+        }
+        .workflow-step::before {
+            content: attr(data-step); position: absolute; left: 1vw; background: white; color: #4CAF50;
+            width: 2.5vh; height: 2.5vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6vh;
+        }
+
+        .tips-box { background: #FFF3E0; border: 3px solid #FF9800; border-radius: 8px; padding: 1.5vh 2vw; }
+        .tips-box h3 { color: #E65100; margin-bottom: 1vh; }
+        .badge { display: inline-block; background: #4CAF50; color: white; padding: 0.5vh 1vw; border-radius: 4px; font-size: 1.5vh; font-weight: bold; margin-left: 1vw; }
+        .badge.warning { background: #FF9800; }
+    </style>
+</head>
+<body>
+
+<div class="presentation">
+
+    <!-- Slide 1 -->
+    <div class="slide active">
+        <div class="slide-header"><h1>🐳 What is Docker Swarm & Why Use It?</h1></div>
+        <div class="slide-content">
+            <div class="two-column">
+                <div class="column">
+                    <h2>Simple Definition</h2>
+                    <div class="highlight">
+                        <p><strong>Docker Swarm</strong> is a native clustering and orchestration tool that turns multiple Docker hosts into a single system for managing containers.</p>
+                    </div>
+                    <h3>🎯 Analogy</h3>
+                    <p>Like a <strong>team of workers</strong> building a house — coordinated, reliable, and scalable.</p>
+                    <ul>
+                        <li>Without Swarm: One person doing all work (slow, fragile)</li>
+                        <li>With Swarm: A coordinated team that adapts if one fails</li>
+                    </ul>
+                    <h3>❌ Problems It Solves</h3>
+                    <ul>
+                        <li>No more manual container deployment</li>
+                        <li>Automatic scaling & failover</li>
+                        <li>Built-in load balancing</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h2>Orchestration Benefits</h2>
+                    <ul>
+                        <li>✅ Automatic Load Balancing</li>
+                        <li>✅ Self-Healing</li>
+                        <li>✅ Zero-Downtime Updates</li>
+                        <li>✅ Easy Scaling</li>
+                        <li>✅ Service Discovery</li>
+                    </ul>
+                    <div class="diagram">
+                        <p><strong>Managers</strong> orchestrate • <strong>Workers</strong> execute</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+        <div class="slide-header"><h1>🏗️ Swarm Architecture</h1></div>
+        <div class="slide-content">
+            <div class="two-column">
+                <div class="column">
+                    <h2>🎯 Manager Nodes <span class="badge">Control Plane</span></h2>
+                    <ul>
+                        <li>Orchestrate and schedule containers</li>
+                        <li>Maintain cluster state with Raft</li>
+                        <li>Handle Docker API requests</li>
+                    </ul>
+                    <div class="highlight"><p>💡 Use odd numbers (3, 5, 7) for managers — ensures quorum.</p></div>
+                </div>
+                <div class="column">
+                    <h2>⚙️ Worker Nodes <span class="badge warning">Data Plane</span></h2>
+                    <ul>
+                        <li>Run assigned containers</li>
+                        <li>Report health/status</li>
+                        <li>Execute manager instructions</li>
+                    </ul>
+                    <div class="highlight"><p>Managers can run tasks too, but best to separate roles in production.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+        <div class="slide-header"><h1>🚀 Setting Up a Swarm Cluster</h1></div>
+        <div class="slide-content">
+            <div class="two-column">
+                <div class="column">
+                    <h2>Step 1: Initialize Swarm</h2>
+                    <div class="code-block">
+<span class="comment"># On first manager</span>
+<span class="command">docker swarm init</span> <span class="flag">--advertise-addr</span> 192.168.1.100
+                    </div>
+                    <h2>Step 2: Generate Join Tokens</h2>
+                    <div class="code-block">
+<span class="command">docker swarm join-token worker</span><br>
+<span class="command">docker swarm join-token manager</span>
+                    </div>
+                </div>
+                <div class="column">
+                    <h2>Step 3: Join Nodes</h2>
+                    <div class="code-block">
+<span class="comment"># On worker</span>
+<span class="command">docker swarm join</span> --token <span class="flag">SWMTKN-1-xxx</span> 192.168.1.100:2377
+                    </div>
+                    <h2>Step 4: Verify</h2>
+                    <div class="code-block">
+<span class="command">docker node ls</span>
+                    </div>
+                    <h3>Ports Used</h3>
+                    <ul>
+                        <li>2377 – Cluster management</li>
+                        <li>7946 – Node discovery</li>
+                        <li>4789 – Overlay network</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide">
+        <div class="slide-header"><h1>📦 Services, Tasks & Deployment</h1></div>
+        <div class="slide-content">
+            <div class="two-column">
+                <div class="column">
+                    <h2>Concepts</h2>
+                    <ul>
+                        <li><strong>Service:</strong> Defines what to run</li>
+                        <li><strong>Task:</strong> A running container</li>
+                    </ul>
+                    <h3>Replicated Services</h3>
+                    <div class="code-block">
+<span class="command">docker service create</span> --replicas 3 nginx
+                    </div>
+                    <h3>Global Services</h3>
+                    <div class="code-block">
+<span class="command">docker service create</span> --mode global cadvisor
+                    </div>
+                </div>
+                <div class="column">
+                    <h2>Scaling & Management</h2>
+                    <div class="code-block">
+<span class="command">docker service scale</span> web=10<br>
+<span class="command">docker service ls</span><br>
+<span class="command">docker service ps</span> web
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide">
+        <div class="slide-header"><h1>✨ Key Features & Benefits</h1></div>
+        <div class="slide-content">
+            <div class="feature-grid">
+                <div class="feature-item">High Availability</div>
+                <div class="feature-item">Automatic Failover</div>
+                <div class="feature-item">Self-Healing</div>
+                <div class="feature-item">Load Balancing</div>
+                <div class="feature-item">Rolling Updates</div>
+                <div class="feature-item">Horizontal Scaling</div>
+                <div class="feature-item">Service Discovery</div>
+                <div class="feature-item">Overlay Networking</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide">
+        <div class="slide-header"><h1>🧩 Real Example & Best Practices</h1></div>
+        <div class="slide-content">
+            <div class="two-column">
+                <div class="column">
+                    <h2>Example: E-Commerce App</h2>
+                    <ul>
+                        <li>Frontend (Nginx)</li>
+                        <li>Backend (Node.js)</li>
+                        <li>Database (MySQL)</li>
+                    </ul>
+                    <div class="code-block">
+<span class="command">docker service create</span> --name frontend --replicas 3 -p 80:80 nginx<br>
+<span class="command">docker service create</span> --name backend --replicas 2 node:18<br>
+<span class="command">docker service create</span> --name db mysql:8
+                    </div>
+                </div>
+                <div class="column">
+                    <h2>💡 Best Practices</h2>
+                    <ul>
+                        <li>Use overlay networks</li>
+                        <li>Keep managers dedicated</li>
+                        <li>Monitor with Prometheus</li>
+                        <li>Rotate join tokens</li>
+                    </ul>
+                    <div class="highlight"><strong>Swarm vs Kubernetes:</strong> Swarm is simpler, great for small setups.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+    <button id="prev">⬅ Prev</button>
+    <button id="next">Next ➡</button>
+</div>
+<div class="slide-number">Slide 1 / 6</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const slideNum = document.querySelector('.slide-number');
+let current = 0;
+function updateSlides() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    slideNum.textContent = `Slide ${current + 1} / ${slides.length}`;
+}
+document.getElementById('next').onclick = () => {
+    current = (current + 1) % slides.length;
+    updateSlides();
+};
+document.getElementById('prev').onclick = () => {
+    current = (current - 1 + slides.length) % slides.length;
+    updateSlides();
+};
+updateSlides();
+</script>
+</body>
+</html>

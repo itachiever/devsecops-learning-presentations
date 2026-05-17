@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Port Binding - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .presentation-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            padding: 40px;
+            border: 3px solid #4a90e2;
+            min-height: 800px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #4a90e2, #50c878, #ff6b6b);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            background: #4a90e2;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .slide-title {
+            font-size: 48px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .slide-subtitle {
+            font-size: 24px;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            flex-grow: 1;
+            align-items: start;
+        }
+
+        .content-full {
+            flex-grow: 1;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #4a90e2;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .concept-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .concept-title::before {
+            content: '🔗';
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .analogy-title {
+            font-size: 18px;
+            color: #d35400;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .diagram {
+            background: #f8f9fa;
+            border: 2px dashed #4a90e2;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .diagram-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .flow-box {
+            background: #4a90e2;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 16px;
+            margin: 15px 0;
+            border-left: 4px solid #4a90e2;
+            overflow-x: auto;
+        }
+
+        .code-comment {
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .highlight {
+            background: #ffd93d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 12px;
+            font-size: 18px;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        li::before {
+            content: '▶';
+            color: #4a90e2;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-title {
+            font-size: 18px;
+            color: #c0392b;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .warning-title::before {
+            content: '⚠️';
+            margin-right: 10px;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-title {
+            font-size: 18px;
+            color: #155724;
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .success-title::before {
+            content: '✅';
+            margin-right: 10px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .port-visual {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border: 2px solid #4a90e2;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .host-side, .container-side {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .host-side {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .container-side {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            border-radius: 8px;
+            margin-left: 20px;
+        }
+
+        .port-arrow {
+            font-size: 36px;
+            color: #4a90e2;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .scenario-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #28a745;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .scenario-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .scenario-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .key-takeaway {
+            background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+            border: 2px solid #8b5cf6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .key-takeaway h3 {
+            color: #6b21a8;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: What is Docker Port Binding? -->
+        <div class="slide" id="slide1">
+            <div class="slide-number">1</div>
+            <h1 class="slide-title">What is Docker Port Binding?</h1>
+            <p class="slide-subtitle">Connecting the Inside and Outside Worlds</p>
+            
+            <div class="content-grid">
+                <div>
+                    <div class="concept-box">
+                        <h3 class="concept-title">Simple Definition</h3>
+                        <p>Port binding is how we connect a port inside a Docker container to a port on our host machine, making containerized applications accessible from the outside world.</p>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h3 class="concept-title">Why Do We Need It?</h3>
+                        <ul>
+                            <li>Containers are isolated by default</li>
+                            <li>Applications inside containers can't be reached directly</li>
+                            <li>Port binding creates a "bridge" between container and host</li>
+                            <li>Essential for web apps, APIs, and databases</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="analogy-box">
+                        <h3 class="analogy-title">🏠 Real-World Analogy</h3>
+                        <p><strong>Think of a container like an apartment building:</strong></p>
+                        <ul style="margin-top: 15px;">
+                            <li><strong>Container:</strong> The apartment building</li>
+                            <li><strong>Container Port:</strong> Apartment number (80, 3000, etc.)</li>
+                            <li><strong>Host Port:</strong> Building's main address</li>
+                            <li><strong>Port Binding:</strong> The mail system that delivers letters from the street address to specific apartments</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="port-visual">
+                        <div class="host-side">
+                            <h4>Host Machine</h4>
+                            <p>Port 8080</p>
+                            <p>🌐 Accessible</p>
+                        </div>
+                        <div class="port-arrow">⟷</div>
+                        <div class="container-side">
+                            <h4>Container</h4>
+                            <p>Port 80</p>
+                            <p>🔒 Isolated</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: How Port Binding Works -->
+        <div class="slide" id="slide2">
+            <div class="slide-number">2</div>
+            <h1 class="slide-title">How Port Binding Works</h1>
+            <p class="slide-subtitle">Understanding the -p/--publish Syntax</p>
+            
+            <div class="content-grid">
+                <div>
+                    <div class="concept-box">
+                        <h3 class="concept-title">Basic Syntax</h3>
+                        <div class="code-block">
+docker run -p &lt;host_port&gt;:&lt;container_port&gt; &lt;image&gt;
+                        </div>
+                        <p>The <span class="highlight">-p</span> flag publishes container ports to the host</p>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h3 class="concept-title">What Happens Behind the Scenes</h3>
+                        <ul>
+                            <li>Docker creates a network bridge</li>
+                            <li>Traffic to host port gets forwarded</li>
+                            <li>Container receives requests on its internal port</li>
+                            <li>Responses travel back the same path</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="diagram">
+                        <h3 class="diagram-title">Port Binding Flow</h3>
+                        <div class="flow-diagram">
+                            <div class="flow-box">User Browser</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">Host:8080</div>
+                            <div class="arrow">→</div>
+                            <div class="flow-box">Docker Bridge</div>
+                        </div>
+                        <div class="flow-diagram" style="margin-top: 30px;">
+                            <div class="flow-box">Web Server</div>
+                            <div class="arrow">←</div>
+                            <div class="flow-box">Container:80</div>
+                            <div class="arrow">←</div>
+                        </div>
+                    </div>
+                    
+                    <div class="success-box">
+                        <h4 class="success-title">Key Benefits</h4>
+                        <ul>
+                            <li><strong>Accessibility:</strong> Reach containers from anywhere</li>
+                            <li><strong>Flexibility:</strong> Map any host port to container port</li>
+                            <li><strong>Security:</strong> Only bound ports are accessible</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Common Syntax & Commands -->
+        <div class="slide" id="slide3">
+            <div class="slide-number">3</div>
+            <h1 class="slide-title">Common Syntax & Commands</h1>
+            <p class="slide-subtitle">Essential Port Binding Examples</p>
+            
+            <div class="content-full">
+                <div class="content-grid">
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">Basic Port Mapping</h3>
+                            <div class="code-block">
+  <!-- Explanation Line -->
+  <p># Map host port 8080 to container port 80</p>
+  <!-- Docker Command Line -->
+  <pre>docker run -p 8080:80 nginx</pre>
+
+  <!-- Explanation Line -->
+  <p># Same host and container port</p>
+  <!-- Docker Command Line -->
+  <pre>docker run -p 3000:3000 node-app</pre>
+</div>
+                        </div>
+                        
+                        <div class="concept-box">
+                            <h3 class="concept-title">Multiple Port Mapping</h3>
+                            <div class="code-block">
+  <!-- Map multiple ports -->
+  <p># Map multiple ports</p>
+  <pre>docker run -p 8080:80 -p 8443:443 nginx</pre>
+
+  <!-- Map range of ports -->
+  <p># Map range of ports</p>
+  <pre>docker run -p 8000-8010:8000-8010 my-app</pre>
+</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">Protocol & Interface Specification</h3>
+                            <div class="code-block">
+  <!-- TCP Protocol -->
+  <p># Specify TCP protocol (default)</p>
+  <pre>docker run -p 8080:80/tcp nginx</pre>
+
+  <!-- UDP Protocol -->
+  <p># Specify UDP protocol</p>
+  <pre>docker run -p 53:53/udp dns-server</pre>
+
+  <!-- Bind to specific interface -->
+  <p># Bind to specific interface</p>
+  <pre>docker run -p 127.0.0.1:8080:80 nginx</pre>
+</div>
+                        </div>
+                        
+                        <div class="concept-box">
+                            <h3 class="concept-title">Dynamic Port Assignment</h3>
+                            <div class="code-block">
+  <!-- Let Docker choose a host port -->
+  <p># Let Docker choose host port</p>
+  <pre>docker run -P nginx</pre>
+
+  <!-- Uses EXPOSE instruction -->
+  <p># Uses EXPOSE instruction from Dockerfile</p>
+
+  <!-- Check assigned ports -->
+  <p># Check assigned ports</p>
+  <pre>docker port &lt;container_name&gt;</pre>
+</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="key-takeaway">
+                    <h3>💡 Remember: Host Port : Container Port</h3>
+                    <p>The format is always <strong>host_port:container_port</strong> - think "outside:inside"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Practical Examples -->
+        <div class="slide" id="slide4">
+            <div class="slide-number">4</div>
+            <h1 class="slide-title">Practical Examples</h1>
+            <p class="slide-subtitle">Real-World Container Access Scenarios</p>
+            
+            <div class="content-full">
+                <div class="concept-box">
+                    <h3 class="concept-title">Example 1: Running a Web Application</h3>
+                    <div class="code-block">
+# Run nginx web server
+docker run -d -p 8080:80 --name my-nginx nginx
+
+# Access via browser: http://localhost:8080
+# Check if it's running
+curl http://localhost:8080
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">Example 2: Database Container</h3>
+                            <div class="code-block">
+<p># Run MySQL database</p>
+<pre>docker run \ 
+    -d -p 3306:3306 \
+    -e MYSQL_ROOT_PASSWORD=password \
+    --name my-mysql mysql:8.0</pre>
+<p># Connect from host</p>
+<pre>mysql -h localhost -P 3306 -u root -p</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="concept-box">
+                            <h3 class="concept-title">Checking Mapped Ports</h3>
+                            <div class="code-block">
+<p># List all containers with ports</p>
+<pre>docker ps</pre>
+
+<p># Check specific container ports</p>
+<pre>docker port my-nginx</pre>
+
+# Output: 80/tcp -> 0.0.0.0:8080
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">Example 3: Development Server</h3>
+                            <div class="code-block">
+<p># Node.js development server</p>
+<pre>docker run -d -p 3000:3000 -v $(pwd):/app \
+  --name dev-server node:16</pre>
+
+<p># React development server</p>
+<pre>docker run -p 3000:3000 my-react-app</pre>
+                            </div>
+                        </div>
+                        
+                        <div class="success-box">
+                            <h4 class="success-title">Testing Your Setup</h4>
+                            <ul>
+                                <li><strong>Browser:</strong> Navigate to localhost:port</li>
+                                <li><strong>cURL:</strong> Test API endpoints</li>
+                                <li><strong>docker ps:</strong> Verify port mappings</li>
+                                <li><strong>netstat:</strong> Check which ports are listening</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Security and Best Practices -->
+        <div class="slide" id="slide5">
+            <div class="slide-number">5</div>
+            <h1 class="slide-title">Security & Best Practices</h1>
+            <p class="slide-subtitle">Safe and Efficient Port Publishing</p>
+            
+            <div class="content-grid">
+                <div>
+                    <div class="success-box">
+                        <h4 class="success-title">Security Benefits</h4>
+                        <ul>
+                            <li><strong>Isolation:</strong> Unbound ports remain completely private</li>
+                            <li><strong>Controlled Access:</strong> Only expose what's necessary</li>
+                            <li><strong>Interface Binding:</strong> Limit to localhost if needed</li>
+                            <li><strong>Firewall Integration:</strong> Works with host firewall rules</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h3 class="concept-title">Best Practices</h3>
+                        <ul>
+                            <li>Only bind ports you actually need</li>
+                            <li>Use non-standard ports for security</li>
+                            <li>Bind to localhost for development</li>
+                            <li>Use environment variables for port configuration</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="warning-box">
+                        <h4 class="warning-title">Security Warnings</h4>
+                        <ul>
+                            <li><strong>Don't bind to 0.0.0.0</strong> unless necessary</li>
+                            <li><strong>Avoid well-known ports</strong> (22, 80, 443) in production</li>
+                            <li><strong>Never expose database ports</strong> directly to internet</li>
+                            <li><strong>Use reverse proxies</strong> for web applications</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h3 class="concept-title">Recommended Patterns</h3>
+                        <div class="code-block">
+# Development - localhost only
+docker run -p 127.0.0.1:8080:80 nginx
+
+# Production - specific interface
+docker run -p 10.0.1.100:8080:80 nginx
+
+# With environment variables
+docker run -p ${PORT}:80 -e PORT=8080 nginx
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="key-takeaway">
+                <h3>🔐 Security First</h3>
+                <p>Remember: Every bound port is a potential attack vector. Only expose what your application truly needs!</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Real-World Scenarios -->
+        <div class="slide" id="slide6">
+            <div class="slide-number">6</div>
+            <h1 class="slide-title">Real-World DevOps Scenarios</h1>
+            <p class="slide-subtitle">Why Port Binding Matters in Production</p>
+            
+            <div class="content-full">
+                <div class="scenario-grid">
+                    <div class="scenario-card">
+                        <div class="scenario-icon">🌐</div>
+                        <h4 class="scenario-title">Load Balancing</h4>
+                        <p>Multiple containers on different ports, load balancer distributes traffic</p>
+                        <div class="code-block" style="font-size: 14px; margin-top: 10px;">
+docker run -p 8001:80 web-app
+docker run -p 8002:80 web-app
+docker run -p 8003:80 web-app
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-icon">🔄</div>
+                        <h4 class="scenario-title">Blue-Green Deployment</h4>
+                        <p>Switch between versions by changing port mappings</p>
+                        <div class="code-block" style="font-size: 14px; margin-top: 10px;">
+# Blue version
+docker run -p 80:8080 app:v1
+# Green version  
+docker run -p 80:8080 app:v2
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-icon">🐋</div>
+                        <h4 class="scenario-title">Microservices</h4>
+                        <p>Each service on different ports, API gateway routes requests</p>
+                        <div class="code-block" style="font-size: 14px; margin-top: 10px;">
+docker run -p 3001:3000 user-service
+docker run -p 3002:3000 order-service
+docker run -p 3003:3000 payment-service
+                        </div>
+                    </div>
+                    
+                    <div class="scenario-card">
+                        <div class="scenario-icon">🔧</div>
+                        <h4 class="scenario-title">Development Environment</h4>
+                        <p>Multiple developers, different ports for same application</p>
+                        <div class="code-block" style="font-size: 14px; margin-top: 10px;">
+# Developer 1
+docker run -p 8080:80 my-app
+# Developer 2  
+docker run -p 8081:80 my-app
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid" style="margin-top: 40px;">
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">Interview Key Points</h3>
+                            <ul>
+                                <li>Port binding enables container accessibility</li>
+                                <li>Host port can differ from container port</li>
+                                <li>Multiple containers can't share same host port</li>
+                                <li>Essential for web apps, APIs, databases</li>
+                                <li>Security through selective exposure</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="concept-box">
+                            <h3 class="concept-title">DevOps Impact</h3>
+                            <ul>
+                                <li><strong>Scalability:</strong> Run multiple instances</li>
+                                <li><strong>Flexibility:</strong> Easy service discovery</li>
+                                <li><strong>Isolation:</strong> Service independence</li>
+                                <li><strong>Monitoring:</strong> Port-based health checks</li>
+                                <li><strong>Integration:</strong> Works with orchestration tools</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="key-takeaway">
+                    <h3>🎯 The Bottom Line</h3>
+                    <p>Port binding is the bridge between isolated containers and the outside world. Master it, and you master container accessibility!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Previous</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 6;
+
+        function showSlide(n) {
+            // Hide all slides
+            for (let i = 1; i <= totalSlides; i++) {
+                document.getElementById(`slide${i}`).style.display = 'none';
+            }
+            
+            // Show current slide
+            document.getElementById(`slide${n}`).style.display = 'flex';
+            
+            // Update current slide number
+            currentSlide = n;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            }
+        });
+
+        // Initialize - show first slide
+        showSlide(1);
+
+        // Smooth scrolling to current slide
+        function scrollToCurrentSlide() {
+            document.getElementById(`slide${currentSlide}`).scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Auto-scroll to current slide when navigating
+        function showSlide(n) {
+            // Hide all slides
+            for (let i = 1; i <= totalSlides; i++) {
+                document.getElementById(`slide${i}`).style.display = 'none';
+            }
+            
+            // Show current slide
+            document.getElementById(`slide${n}`).style.display = 'flex';
+            currentSlide = n;
+            
+            //

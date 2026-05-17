@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stateless Docker Containers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: calc(100vw - 40px);
+            height: calc(100vh - 40px);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+            position: relative;
+            border: 3px solid #4a5568;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide h1 {
+            font-size: 2.8em;
+            color: #2d3748;
+            margin: 0 0 25px 0;
+            text-align: center;
+            border-bottom: 4px solid #4299e1;
+            padding-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .slide h2 {
+            font-size: 1.8em;
+            color: #2b6cb0;
+            margin: 15px 0 12px 0;
+        }
+
+        .slide h3 {
+            font-size: 1.4em;
+            color: #2c5282;
+            margin: 12px 0 8px 0;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .bullet-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .bullet-points li {
+            font-size: 1.1em;
+            margin: 8px 0;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border-left: 4px solid #38b2ac;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .comparison-box {
+            background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+            border: 2px solid #f6ad55;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 0.95em;
+        }
+
+        .comparison-box h3 {
+            color: #c05621;
+            margin: 0 0 8px 0;
+            font-size: 1.2em;
+        }
+
+        .diagram {
+            background: #f7fafc;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .container-visual {
+            background: #4299e1;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .data-visual {
+            background: #48bb78;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .arrow {
+            font-size: 1.8em;
+            color: #4a5568;
+            margin: 5px 0;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background 0.3s;
+            border: 2px solid #2b6cb0;
+        }
+
+        .nav-btn:hover {
+            background: #2b6cb0;
+        }
+
+        .nav-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            border-color: #718096;
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #4a5568;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            border: 2px solid #2d3748;
+            font-size: 0.9em;
+        }
+
+        .analogy-box {
+            background: linear-gradient(135deg, #e6f3ff 0%, #cce7ff 100%);
+            border: 2px solid #4299e1;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1em;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .best-practice {
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            border: 2px solid #48bb78;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .dont-practice {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border: 2px solid #f56565;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .interview-question {
+            background: linear-gradient(135deg, #faf5ff 0%, #e9d8fd 100%);
+            border: 2px solid #9f7aea;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slide-counter">
+            <span id="current-slide">1</span> / 6
+        </div>
+
+        <!-- Slide 1: What is a Stateless Container? -->
+        <div class="slide active">
+            <h1>🐳 What is a Stateless Container?</h1>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h2>Simple Definition</h2>
+                        <ul class="bullet-points">
+                            <li><strong>Stateless:</strong> No memory of previous interactions</li>
+                            <li><strong>Fresh start</strong> every time it runs</li>
+                            <li><strong>No data stored</strong> inside the container itself</li>
+                            <li>Can be <strong>destroyed and recreated</strong> anytime</li>
+                        </ul>
+
+                        <div class="analogy-box">
+                            💡 <strong>Everyday Analogy:</strong><br>
+                            Like a hotel room - you use it temporarily, but don't leave personal belongings. The next guest gets a clean, empty room!
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>Stateless vs Stateful</h2>
+                        <div class="comparison-box">
+                            <h3>✅ Stateless Container</h3>
+                            <p>• No files saved inside<br>
+                            • Can restart safely<br>
+                            • Multiple copies possible<br>
+                            • Data stored elsewhere</p>
+                        </div>
+
+                        <div class="comparison-box" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-color: #f56565;">
+                            <h3 style="color: #c53030;">❌ Stateful Container</h3>
+                            <p>• Files saved inside<br>
+                            • Risky to restart<br>
+                            • Hard to scale<br>
+                            • Data dies with container</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Why Stateless Containers? -->
+        <div class="slide">
+            <h1>🚀 Why Stateless Containers?</h1>
+            <div class="content">
+                <div class="three-column">
+                    <div>
+                        <h2>🔄 Easy Scaling</h2>
+                        <ul class="bullet-points">
+                            <li>Create <strong>10 identical copies</strong> instantly</li>
+                            <li>No conflicts between containers</li>
+                            <li>Handle more users automatically</li>
+                        </ul>
+                        
+                        <div class="diagram">
+                            <div class="container-visual">App Container 1</div>
+                            <div class="container-visual">App Container 2</div>
+                            <div class="container-visual">App Container 3</div>
+                            <p>All identical, all independent!</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>🔒 Safe Restarts</h2>
+                        <ul class="bullet-points">
+                            <li><strong>No data loss</strong> when restarting</li>
+                            <li>Quick updates and patches</li>
+                            <li>Crash recovery is simple</li>
+                        </ul>
+
+                        <div class="diagram">
+                            <div class="container-visual" style="background: #f56565;">💥 Container Crashes</div>
+                            <div class="arrow">⬇️</div>
+                            <div class="container-visual">✨ New Container Starts</div>
+                            <p>Business continues as normal!</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>☁️ Cloud Ready</h2>
+                        <ul class="bullet-points">
+                            <li>Perfect for <strong>AWS, Azure, Google Cloud</strong></li>
+                            <li>Auto-scaling based on demand</li>
+                            <li>Cost-effective resource usage</li>
+                        </ul>
+
+                        <div class="diagram">
+                            <div class="container-visual" style="background: #9f7aea;">☁️ Cloud Platform</div>
+                            <div class="arrow">⬇️</div>
+                            <div style="display: flex; justify-content: space-around;">
+                                <div class="container-visual" style="font-size: 0.9em; padding: 10px;">App 1</div>
+                                <div class="container-visual" style="font-size: 0.9em; padding: 10px;">App 2</div>
+                                <div class="container-visual" style="font-size: 0.9em; padding: 10px;">App 3</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: How Does It Work? -->
+        <div class="slide">
+            <h1>⚙️ How Does It Work?</h1>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h2>Where Data Actually Goes</h2>
+                        <ul class="bullet-points">
+                            <li><strong>Databases:</strong> MySQL, PostgreSQL, MongoDB</li>
+                            <li><strong>External Volumes:</strong> Shared file storage</li>
+                            <li><strong>Cloud Storage:</strong> AWS S3, Google Drive</li>
+                            <li><strong>Cache Systems:</strong> Redis, Memcached</li>
+                            <li><strong>Message Queues:</strong> RabbitMQ, Kafka</li>
+                        </ul>
+
+                        <div class="diagram">
+                            <div class="container-visual">🐳 Stateless App</div>
+                            <div class="arrow">↕️</div>
+                            <div class="data-visual">🗄️ External Database</div>
+                            <p>App reads/writes data outside itself</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>❌ What NOT to Store in Container</h2>
+                        <div class="dont-practice">
+                            <strong>Never Store:</strong>
+                            <p>• User uploaded files<br>
+                            • Session data<br>
+                            • Configuration changes<br>
+                            • Log files (for long term)<br>
+                            • Database files<br>
+                            • Cache data<br>
+                            • Temporary calculations</p>
+                        </div>
+
+                        <div class="best-practice">
+                            <strong>✅ Safe to Store:</strong>
+                            <p>• Application code<br>
+                            • Static assets (CSS, JS)<br>
+                            • Configuration templates<br>
+                            • Runtime dependencies</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Common Use Cases -->
+        <div class="slide">
+            <h1>🎯 Common Use Cases</h1>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h2>Perfect Applications</h2>
+                        <ul class="bullet-points">
+                            <li><strong>🌐 Web Servers:</strong> Serve HTML, handle requests</li>
+                            <li><strong>🔌 REST APIs:</strong> Process data, return responses</li>
+                            <li><strong>⚡ Microservices:</strong> Small, focused services</li>
+                            <li><strong>📊 Batch Jobs:</strong> Process data and exit</li>
+                            <li><strong>🔄 Load Balancers:</strong> Route traffic efficiently</li>
+                        </ul>
+
+                        <div class="diagram">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="container-visual" style="font-size: 0.9em;">Web App</div>
+                                <div class="container-visual" style="font-size: 0.9em;">API Server</div>
+                                <div class="container-visual" style="font-size: 0.9em;">Auth Service</div>
+                                <div class="container-visual" style="font-size: 0.9em;">Payment API</div>
+                            </div>
+                            <p>All talking to shared database</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>Real-World Examples</h2>
+                        <div class="comparison-box">
+                            <h3>🛒 E-commerce Website</h3>
+                            <p><strong>Stateless:</strong> Web frontend, product API<br>
+                            <strong>Data stored:</strong> Product database, user sessions in Redis</p>
+                        </div>
+
+                        <div class="comparison-box">
+                            <h3>📱 Social Media App</h3>
+                            <p><strong>Stateless:</strong> Feed API, image processor<br>
+                            <strong>Data stored:</strong> Posts in database, images in S3</p>
+                        </div>
+
+                        <div class="comparison-box">
+                            <h3>🏦 Banking System</h3>
+                            <p><strong>Stateless:</strong> Transaction API, balance checker<br>
+                            <strong>Data stored:</strong> Account data in secure database</p>
+                        </div>
+
+                        <div class="analogy-box">
+                            Think of containers as <strong>workers</strong> and databases as <strong>filing cabinets</strong> - workers do the job, cabinets keep the records!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Practical Example -->
+        <div class="slide">
+            <h1>💡 Practical Example</h1>
+            <div class="content">
+                <h2 style="text-align: center; margin-bottom: 20px;">How a Stateless Web App Works</h2>
+                
+                <div class="diagram" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; align-items: center; flex: 1;">
+                        <div style="text-align: center;">
+                            <h3>👤 User Request</h3>
+                            <div style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; padding: 15px; border-radius: 10px; margin: 10px 0; font-size: 1em;">
+                                "Show me my shopping cart"
+                            </div>
+                            <div class="arrow">➡️</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <h3>🐳 Stateless Container</h3>
+                            <div class="container-visual" style="margin: 10px 0; padding: 15px; font-size: 0.9em;">
+                                <strong>Web App</strong><br><br>
+                                1. Receives request<br>
+                                2. Queries database<br>
+                                3. Processes data<br>
+                                4. Returns response
+                            </div>
+                            <div class="arrow">⬇️⬆️</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <h3>🗄️ Data Store</h3>
+                            <div class="data-visual" style="margin: 10px 0; padding: 15px; font-size: 0.9em;">
+                                <strong>Database</strong><br><br>
+                                • User: John Doe<br>
+                                • Cart: 3 items<br>
+                                • Total: $45.99<br>
+                                • Session: Active
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #e6fffa; padding: 15px; border-radius: 10px; border: 2px solid #38b2ac; margin-top: 15px;">
+                        <h3 style="color: #234e52; text-align: center; margin: 0 0 8px 0;">🔄 The Magic: Container Can Be Replaced Anytime!</h3>
+                        <p style="text-align: center; font-size: 1em; margin: 0;">
+                            If the container crashes or updates, a new one starts immediately. The user's cart data is safe in the database, and the experience continues seamlessly!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Best Practices & Interview Tips -->
+        <div class="slide">
+            <h1>🎓 Best Practices & Interview Tips</h1>
+            <div class="content">
+                <div class="two-column">
+                    <div>
+                        <h2>✅ Design Best Practices</h2>
+                        <div class="best-practice">
+                            <strong>1. External Storage</strong><br>
+                            Always store data outside containers
+                        </div>
+                        
+                        <div class="best-practice">
+                            <strong>2. Environment Variables</strong><br>
+                            Use env vars for configuration, not files
+                        </div>
+                        
+                        <div class="best-practice">
+                            <strong>3. Health Checks</strong><br>
+                            Implement /health endpoints for monitoring
+                        </div>
+                        
+                        <div class="best-practice">
+                            <strong>4. Graceful Shutdown</strong><br>
+                            Handle stop signals properly
+                        </div>
+
+                        <div class="dont-practice">
+                            <strong>❌ Common Mistakes</strong><br>
+                            • Writing to container filesystem<br>
+                            • Hardcoded configurations<br>
+                            • Storing session data locally<br>
+                            • Not handling container restarts
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2>💼 Interview Questions</h2>
+                        
+                        <div class="interview-question">
+                            <strong>Q: "What makes a container stateless?"</strong><br>
+                            <em>A: No data is stored within the container itself. All persistent data lives outside in databases, volumes, or cloud storage.</em>
+                        </div>
+
+                        <div class="interview-question">
+                            <strong>Q: "Benefits of stateless design?"</strong><br>
+                            <em>A: Easy scaling, safe restarts, cloud compatibility, and simplified deployment strategies.</em>
+                        </div>
+
+                        <div class="interview-question">
+                            <strong>Q: "How do you handle user sessions?"</strong><br>
+                            <em>A: Store sessions in external systems like Redis, database, or use stateless tokens like JWT.</em>
+                        </div>
+
+                        <div class="interview-question">
+                            <strong>Q: "Stateless vs Stateful - when to use which?"</strong><br>
+                            <em>A: Stateless for web apps, APIs, microservices. Stateful for databases, file systems, legacy applications.</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)">⬅️ Previous</button>
+        <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">Next ➡️</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const slideCounter = document.getElementById('current-slide');
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[n].classList.add('active');
+            
+            slideCounter.textContent = n + 1;
+            
+            prevBtn.disabled = (n === 0);
+            nextBtn.disabled = (n === totalSlides - 1);
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide < totalSlides - 1) changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentSlide > 0) changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

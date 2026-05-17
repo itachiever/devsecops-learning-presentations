@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding the OSI Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide {
+            width: 95vw;
+            height: 90vh;
+            max-width: 1600px;
+            max-height: 1000px;
+            aspect-ratio: 16/10;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 12px;
+            padding: 30px 50px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        .slide.active {
+            display: flex;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .slide h1 {
+            font-size: 3.8em;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .slide h2 {
+            font-size: 2.8em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 1.6em;
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+        
+        .network-icon {
+            width: 400px;
+            height: 250px;
+            margin: 0 auto 20px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.4); }
+            50% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(79, 172, 254, 0); }
+        }
+        
+        .layers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            flex-grow: 1;
+            margin-top: 10px;
+        }
+        
+        .layer-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .layer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .layer-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .layer-card .description {
+            font-size: 1.2em;
+            line-height: 1.5;
+            color: #444;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .layer-card .examples {
+            font-size: 1.1em;
+            color: #666;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .layer-card .real-world {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 500;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        /* Layer-specific colors */
+        .layer-7 { border-color: #ff6b6b; }
+        .layer-7 h3 { color: #ff6b6b; }
+        
+        .layer-6 { border-color: #4ecdc4; }
+        .layer-6 h3 { color: #4ecdc4; }
+        
+        .layer-5 { border-color: #45b7d1; }
+        .layer-5 h3 { color: #45b7d1; }
+        
+        .layer-4 { border-color: #96ceb4; }
+        .layer-4 h3 { color: #96ceb4; }
+        
+        .layer-3 { border-color: #feca57; }
+        .layer-3 h3 { color: #e67e22; }
+        
+        .layer-2 { border-color: #a29bfe; }
+        .layer-2 h3 { color: #6c5ce7; }
+        
+        .layer-1 { border-color: #fd79a8; }
+        .layer-1 h3 { color: #e84393; }
+        
+        .single-layer {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 8px solid;
+        }
+        
+        .single-layer h3 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .single-layer .main-description {
+            font-size: 1.4em;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .detail-box {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .detail-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .detail-box p {
+            font-size: 1.1em;
+            line-height: 1.5;
+            color: #555;
+        }
+        
+        .analogy-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .analogy-box h4 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+        
+        .analogy-box p {
+            font-size: 1.2em;
+            line-height: 1.4;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title Slide -->
+        <div class="slide active">
+            <h1>Understanding the OSI Model</h1>
+            <p class="subtitle">A Comprehensive Guide to the 7-Layer Networking Framework</p>
+            <div class="network-icon">
+                <svg width="250" height="150" viewBox="0 0 250 150" fill="none">
+                    <circle cx="60" cy="75" r="25" fill="white" opacity="0.9"/>
+                    <circle cx="125" cy="40" r="20" fill="white" opacity="0.8"/>
+                    <circle cx="125" cy="110" r="20" fill="white" opacity="0.8"/>
+                    <circle cx="190" cy="75" r="25" fill="white" opacity="0.9"/>
+                    <line x1="85" y1="75" x2="105" y2="45" stroke="white" stroke-width="3"/>
+                    <line x1="85" y1="75" x2="105" y2="105" stroke="white" stroke-width="3"/>
+                    <line x1="145" y1="40" x2="165" y2="75" stroke="white" stroke-width="3"/>
+                    <line x1="145" y1="110" x2="165" y2="75" stroke="white" stroke-width="3"/>
+                    <text x="60" y="82" fill="white" text-anchor="middle" font-size="12" font-weight="bold">PC</text>
+                    <text x="190" y="82" fill="white" text-anchor="middle" font-size="12" font-weight="bold">SERVER</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Slide 2: Application & Presentation Layers -->
+        <div class="slide">
+            <h2>Top Layers: User Interface (7-6)</h2>
+            <div class="layers-grid">
+                <div class="layer-card layer-7">
+                    <h3>🖥️ Layer 7: Application</h3>
+                    <div class="description">
+                        The closest layer to users. Provides network services directly to applications and end-users. This is where human-computer interaction occurs through network-aware applications.
+                    </div>
+                    <div class="examples">
+                        <strong>Examples:</strong> HTTP/HTTPS, FTP, SMTP, POP3, DNS, Telnet, SNMP
+                    </div>
+                    <div class="real-world">
+                        <strong>Real World:</strong> Web browsers, email clients, file transfer programs, remote desktop applications
+                    </div>
+                </div>
+                
+                <div class="layer-card layer-6">
+                    <h3>🎨 Layer 6: Presentation</h3>
+                    <div class="description">
+                        Acts as a translator between the application and network. Handles data formatting, encryption/decryption, compression, and character encoding to ensure data is readable by the receiving application.
+                    </div>
+                    <div class="examples">
+                        <strong>Examples:</strong> SSL/TLS, JPEG, GIF, MPEG, ASCII, EBCDIC, encryption algorithms
+                    </div>
+                    <div class="real-world">
+                        <strong>Real World:</strong> HTTPS encryption, image/video compression, file format conversion, password encryption
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Session & Transport Layers -->
+        <div class="slide">
+            <h2>Communication Layers: Connection Management (5-4)</h2>
+            <div class="layers-grid">
+                <div class="layer-card layer-5">
+                    <h3>🤝 Layer 5: Session</h3>
+                    <div class="description">
+                        Establishes, manages, and terminates communication sessions between applications. Controls dialogues and connections, handles session checkpointing, recovery, and restart procedures.
+                    </div>
+                    <div class="examples">
+                        <strong>Examples:</strong> NetBIOS, RPC, SQL sessions, PPTP, L2TP, SOCKS
+                    </div>
+                    <div class="real-world">
+                        <strong>Real World:</strong> Video conference calls, database connections, login sessions, online shopping cart sessions
+                    </div>
+                </div>
+                
+                <div class="layer-card layer-4">
+                    <h3>🚛 Layer 4: Transport</h3>
+                    <div class="description">
+                        Provides reliable, transparent transfer of data between end systems. Handles error recovery, flow control, segmentation, and reassembly. Ensures complete data transfer with error correction.
+                    </div>
+                    <div class="examples">
+                        <strong>Examples:</strong> TCP (reliable), UDP (fast), port numbers, SPX, NetBEUI
+                    </div>
+                    <div class="real-world">
+                        <strong>Real World:</strong> Web downloads, email delivery, file transfers, streaming services, online gaming
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Network Layer -->
+        <div class="slide">
+            <h2>Routing Layer: Path Finding (3)</h2>
+            <div class="single-layer layer-3" style="border-color: #feca57;">
+                <h3 style="color: #e67e22;">🗺️ Layer 3: Network</h3>
+                <div class="main-description">
+                    The Network Layer is responsible for packet forwarding including routing through intermediate routers. It determines the best physical path for data to travel from source to destination across multiple networks.
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <h4>Key Functions</h4>
+                        <p>• Logical addressing (IP addresses)<br>
+                        • Path determination and routing<br>
+                        • Packet forwarding<br>
+                        • Congestion control<br>
+                        • Internetworking between different networks</p>
+                    </div>
+                    
+                    <div class="detail-box">
+                        <h4>Common Protocols & Devices</h4>
+                        <p>• <strong>Protocols:</strong> IP, ICMP, ARP, OSPF, BGP, RIP<br>
+                        • <strong>Devices:</strong> Routers, Layer 3 switches<br>
+                        • <strong>Addressing:</strong> IPv4, IPv6 addresses<br>
+                        • <strong>Tools:</strong> Ping, traceroute, routing tables</p>
+                    </div>
+                </div>
+                
+                <div class="analogy-box">
+                    <h4>🚚 Real-World Analogy</h4>
+                    <p>Like a GPS navigation system that finds the best route from your house to a destination, considering traffic, road conditions, and multiple possible paths through different cities and highways.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Data Link Layer -->
+        <div class="slide">
+            <h2>Link Layer: Local Network Communication (2)</h2>
+            <div class="single-layer layer-2" style="border-color: #a29bfe;">
+                <h3 style="color: #6c5ce7;">🔗 Layer 2: Data Link</h3>
+                <div class="main-description">
+                    The Data Link Layer provides node-to-node data transfer and handles error correction from the Physical layer. It ensures reliable transmission of data frames between two directly connected nodes and manages access to the physical medium.
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <h4>Key Functions</h4>
+                        <p>• Frame synchronization and delimiting<br>
+                        • Error detection and correction<br>
+                        • Physical addressing (MAC addresses)<br>
+                        • Flow control between adjacent nodes<br>
+                        • Medium access control (who can transmit when)</p>
+                    </div>
+                    
+                    <div class="detail-box">
+                        <h4>Common Protocols & Devices</h4>
+                        <p>• <strong>Protocols:</strong> Ethernet, Wi-Fi (802.11), PPP, Frame Relay<br>
+                        • <strong>Devices:</strong> Switches, bridges, network interface cards<br>
+                        • <strong>Addressing:</strong> MAC addresses (48-bit)<br>
+                        • <strong>Standards:</strong> IEEE 802.3 (Ethernet), 802.11 (Wi-Fi)</p>
+                    </div>
+                </div>
+                
+                <div class="analogy-box">
+                    <h4>📮 Real-World Analogy</h4>
+                    <p>Like a local mail sorting facility that ensures letters are properly formatted, addressed to the right local address, and delivered error-free to neighboring houses on the same street.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Physical Layer -->
+        <div class="slide">
+            <h2>Foundation Layer: Hardware Communication (1)</h2>
+            <div class="single-layer layer-1" style="border-color: #fd79a8;">
+                <h3 style="color: #e84393;">⚡ Layer 1: Physical</h3>
+                <div class="main-description">
+                    The Physical Layer defines the hardware means of sending and receiving data on a carrier, including the electrical, mechanical, and procedural interface to the transmission medium. It deals with the actual physical connection between devices.
+                </div>
+                
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <h4>Key Functions</h4>
+                        <p>• Transmission of raw bit streams<br>
+                        • Physical topology definition<br>
+                        • Electrical and mechanical specifications<br>
+                        • Bit timing and synchronization<br>
+                        • Signal encoding and modulation</p>
+                    </div>
+                    
+                    <div class="detail-box">
+                        <h4>Common Media & Devices</h4>
+                        <p>• <strong>Wired:</strong> Copper cables, fiber optic cables, coaxial cables<br>
+                        • <strong>Wireless:</strong> Radio waves, microwaves, infrared<br>
+                        • <strong>Devices:</strong> Hubs, repeaters, network adapters<br>
+                        • <strong>Connectors:</strong> RJ45, BNC, SC/ST fiber connectors</p>
+                    </div>
+                </div>
+                
+                <div class="analogy-box">
+                    <h4>🛤️ Real-World Analogy</h4>
+                    <p>Like the actual roads, highways, and pathways that vehicles use to travel - the physical infrastructure that enables transportation, including the road surface, lane markings, and traffic signals.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="currentSlide">1</span> / 6
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            if (direction === 1 && currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            } else if (direction === -1 && currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

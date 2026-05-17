@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose for DevOps - Beginner's Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .slide {
+            width: 95%;
+            height: 90%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            border: 3px solid #4a90e2;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 15px;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .content-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4a90e2;
+        }
+
+        .bullet-points {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .bullet-points li {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .bullet-points li::before {
+            content: "🐳";
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            border: 2px solid #34495e;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            color: #2c3e50;
+            border: 2px solid #4a90e2;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .service-box {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .network-line {
+            height: 3px;
+            background: #4caf50;
+            margin: 10px 0;
+            border-radius: 2px;
+        }
+
+        .command-example {
+            background: #1e1e1e;
+            color: #00ff41;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin: 10px 0;
+            border: 2px solid #333;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #e17055;
+            margin: 15px 0;
+        }
+
+        .tip-box h4 {
+            color: #d63031;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: What is Docker Compose File? -->
+        <div class="slide active">
+            <div class="slide-header">
+                <h1 class="slide-title">What is a Docker Compose File?</h1>
+                <p class="slide-subtitle">Simple definition, purpose & multi-container setup in DevOps</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-section">
+                    <h3 style="color: #4a90e2; margin-bottom: 20px;">📋 Definition</h3>
+                    <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 20px;">
+                        A <span class="highlight">Docker Compose file</span> is a YAML configuration file that defines and manages multiple Docker containers as a single application stack.
+                    </p>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 15px;">🎯 Why Multi-Container?</h3>
+                        <ul class="bullet-points">
+                            <li>Real applications have multiple components</li>
+                            <li>Database + Web App + Cache + Load Balancer</li>
+                            <li>Each service runs in its own container</li>
+                            <li>Easy to scale individual components</li>
+                        </ul>
+                    </div>
+                    <div class="diagram">
+                        <h4 style="margin-bottom: 15px; color: #2c3e50;">Traditional vs Docker Compose</h4>
+                        <div style="margin-bottom: 20px;">
+                            <strong>Before:</strong> Manual container management<br>
+                            <code style="color: #e74c3c;">docker run -d nginx</code><br>
+                            <code style="color: #e74c3c;">docker run -d mysql</code><br>
+                            <code style="color: #e74c3c;">docker run -d redis</code>
+                        </div>
+                        <div>
+                            <strong>With Compose:</strong><br>
+                            <code style="color: #27ae60;">docker compose up</code><br>
+                            <span style="color: #7f8c8d;">→ Starts all services together!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <h4>🚀 DevOps Benefits</h4>
+                    <p>Consistent environments across development, testing, and production. One command to rule them all!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Core Structure -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Core Structure</h1>
+                <p class="slide-subtitle">YAML format & main keywords: version, services, networks, volumes</p>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">📝 YAML Basics</h3>
+                        <ul class="bullet-points">
+                            <li><strong>Indentation matters!</strong> Use 2 spaces</li>
+                            <li>Key-value pairs: <code>key: value</code></li>
+                            <li>Lists use <code>-</code> (dash + space)</li>
+                            <li>Comments start with <code>#</code></li>
+                        </ul>
+
+                        <h3 style="color: #4a90e2; margin: 30px 0 20px 0;">🔑 Main Keywords</h3>
+                        <div class="content-section">
+                            <p><span class="highlight">version</span>: Compose file format version</p>
+                            <p><span class="highlight">services</span>: Define your containers</p>
+                            <p><span class="highlight">networks</span>: Custom networks for communication</p>
+                            <p><span class="highlight">volumes</span>: Persistent data storage</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 15px;">📄 Basic Structure</h3>
+                        <div class="code-block">version: "3.8"
+
+services:
+  web:
+    image: nginx
+    ports:
+      - "80:80"
+  
+  database:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local</div>
+                        
+                        <div class="tip-box" style="margin-top: 20px;">
+                            <h4>💡 Remember</h4>
+                            <p>File must be named <code>docker-compose.yml</code> or <code>compose.yml</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Service Configuration -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Service Configuration</h1>
+                <p class="slide-subtitle">Define containers: image, build, ports, environment, depends_on</p>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">🔧 Service Options</h3>
+                        <div class="content-section">
+                            <p><span class="highlight">image</span>: Use pre-built image from registry</p>
+                            <p><span class="highlight">build</span>: Build from Dockerfile</p>
+                            <p><span class="highlight">ports</span>: Map container ports to host</p>
+                            <p><span class="highlight">environment</span>: Set environment variables</p>
+                            <p><span class="highlight">depends_on</span>: Start services in order</p>
+                            <p><span class="highlight">volumes</span>: Mount files/directories</p>
+                        </div>
+
+                        <h3 style="color: #4a90e2; margin: 25px 0 15px 0;">🌐 Port Mapping</h3>
+                        <div class="command-example">
+ports:
+  - "8080:80"  # host:container
+  - "3306:3306"</div>
+                        <p style="margin-top: 10px; color: #7f8c8d;">Access on localhost:8080 → goes to container:80</p>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 15px;">📋 Complete Service Example</h3>
+                        <div class="code-block">services:
+  web:
+    build: ./app          # Build from Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=database
+    depends_on:
+      - database          # Start DB first
+    volumes:
+      - ./app:/usr/src/app
+  
+  database:
+    image: postgres:13    # Use pre-built image
+    environment:
+      - POSTGRES_DB=myapp
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Volumes and Networks -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Volumes and Networks</h1>
+                <p class="slide-subtitle">Persistent data storage & inter-container communication</p>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">💾 Volumes (Data Persistence)</h3>
+                        <ul class="bullet-points">
+                            <li><strong>Named volumes:</strong> Docker manages storage</li>
+                            <li><strong>Bind mounts:</strong> Map host directories</li>
+                            <li><strong>Tmpfs mounts:</strong> Temporary in-memory storage</li>
+                            <li>Data survives container restart/removal</li>
+                        </ul>
+
+                        <div class="code-block">volumes:
+  # Named volume
+  db_data:
+    driver: local
+
+services:
+  database:
+    volumes:
+      - db_data:/var/lib/mysql  # Named
+      - ./config:/etc/mysql     # Bind mount</div>
+
+                        <div class="tip-box" style="margin-top: 20px;">
+                            <h4>⚠️ Important</h4>
+                            <p>Without volumes, data is lost when container stops!</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">🌐 Networks (Communication)</h3>
+                        
+                        <div class="diagram">
+                            <div class="service-box">Frontend (web)</div>
+                            <div class="network-line"></div>
+                            <div class="service-box">Backend (api)</div>
+                            <div class="network-line"></div>
+                            <div class="service-box">Database (db)</div>
+                        </div>
+
+                        <ul class="bullet-points" style="margin-top: 20px;">
+                            <li>Services can talk using <strong>service names</strong></li>
+                            <li>Default network created automatically</li>
+                            <li>Custom networks for isolation</li>
+                        </ul>
+
+                        <div class="code-block">networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+services:
+  web:
+    networks:
+      - frontend
+  api:
+    networks:
+      - frontend
+      - backend
+  db:
+    networks:
+      - backend</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Workflow & Commands -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Workflow & Commands</h1>
+                <p class="slide-subtitle">Essential commands & DevOps team workflow</p>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">⚡ Essential Commands</h3>
+                        
+                        <div class="command-example">$ docker compose up</div>
+                        <p style="margin-bottom: 15px;">Start all services</p>
+                        
+                        <div class="command-example">$ docker compose up -d</div>
+                        <p style="margin-bottom: 15px;">Start in background (detached)</p>
+                        
+                        <div class="command-example">$ docker compose down</div>
+                        <p style="margin-bottom: 15px;">Stop and remove containers</p>
+                        
+                        <div class="command-example">$ docker compose logs</div>
+                        <p style="margin-bottom: 15px;">View logs from all services</p>
+                        
+                        <div class="command-example">$ docker compose ps</div>
+                        <p style="margin-bottom: 15px;">List running services</p>
+
+                        <div class="command-example">$ docker compose exec web bash</div>
+                        <p>Access container shell</p>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">🔄 DevOps Workflow</h3>
+                        
+                        <div class="content-section">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">1. Development</h4>
+                            <ul class="bullet-points">
+                                <li>Developer writes <code>docker-compose.yml</code></li>
+                                <li>Commits to version control (Git)</li>
+                                <li>Team members can replicate environment</li>
+                            </ul>
+                        </div>
+
+                        <div class="content-section">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">2. Team Collaboration</h4>
+                            <ul class="bullet-points">
+                                <li><strong>Sharing:</strong> Same file across team</li>
+                                <li><strong>Environment parity:</strong> Dev = Staging = Prod</li>
+                                <li><strong>Onboarding:</strong> New developers get started quickly</li>
+                            </ul>
+                        </div>
+
+                        <div class="tip-box">
+                            <h4>🎯 Best Practice</h4>
+                            <p>Use <code>.env</code> files for environment-specific variables</p>
+                            <div class="command-example" style="margin-top: 10px;">DB_PASSWORD=${DB_PASSWORD}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Real-World Example & Interview Tips -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Real-World Example & Interview Tips</h1>
+                <p class="slide-subtitle">Practical example with annotations & common interview questions</p>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 15px;">🏗️ Complete Web App Stack</h3>
+                        <div class="code-block" style="font-size: 0.85rem;">version: "3.8"
+
+services:
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+    networks:
+      - frontend
+
+  # Node.js application  
+  web:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=database
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - database
+      - cache
+    networks:
+      - frontend
+      - backend
+
+  # PostgreSQL database
+  database:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=webapp
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret123
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  # Redis cache
+  cache:
+    image: redis:alpine
+    networks:
+      - backend
+
+volumes:
+  db_data:
+
+networks:
+  frontend:
+  backend:</div>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a90e2; margin-bottom: 20px;">💡 Best Practices</h3>
+                        <ul class="bullet-points">
+                            <li>Use specific image tags (not <code>:latest</code>)</li>
+                            <li>Define health checks for services</li>
+                            <li>Use multi-stage builds for optimization</li>
+                            <li>Keep secrets in environment files</li>
+                            <li>Use networks for service isolation</li>
+                        </ul>
+
+                        <h3 style="color: #e74c3c; margin: 30px 0 20px 0;">🎯 Common Interview Questions</h3>
+                        <div class="content-section">
+                            <p><strong>Q:</strong> What's the difference between <code>docker run</code> and <code>docker compose</code>?</p>
+                            <p><strong>A:</strong> <code>docker run</code> manages single containers, Compose manages multi-container applications.</p>
+                        </div>
+                        
+                        <div class="content-section">
+                            <p><strong>Q:</strong> How do containers communicate?</p>
+                            <p><strong>A:</strong> Using service names as hostnames within the same network.</p>
+                        </div>
+
+                        <div class="content-section">
+                            <p><strong>Q:</strong> What happens to data when containers stop?</p>
+                            <p><strong>A:</strong> Lost unless stored in volumes or bind mounts.</p>
+                        </div>
+
+                        <div class="tip-box">
+                            <h4>🚀 Pro Tip</h4>
+                            <p>Practice explaining how you'd containerize a 3-tier application (Frontend + API + Database)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-counter">
+        <span id="current-slide">1</span> / 6
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" onclick="previousSlide()">← Previous</button>
+        <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
