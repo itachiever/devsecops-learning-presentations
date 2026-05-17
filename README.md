@@ -56,14 +56,16 @@ It is designed for beginners, students, working professionals, and anyone prepar
 # 📂 Repository Structure
 
 ```text
-devsecops-concepts/
+devsecops-learning-presentations/
 │
-├── presentations/
-├── demos/
-├── notes/
-├── cheatsheets/
-├── assets/
-└── youtube-links/
+├── docker/
+├── Docker OWASP Top 10/
+├── SAST/
+├── SCA/
+├── SBOM/
+├── CBOM/
+├── kubernetes/
+└── next series../
 ```
 
 ---
