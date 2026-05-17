@@ -1,0 +1,12 @@
+OWASP_top_ten_for_docker
+
+D01	Secure User Mapping
+D02	Patch Management
+D03	Network Segmentation & Firewalling
+D04	Secure Defaults & Hardening
+D05	Maintain Security Contexts
+D06	Protect Secrets
+D07	Resource Protection
+D08	Image Integrity & Origin
+D09	Follow Immutable Paradigm
+D10	Logging
