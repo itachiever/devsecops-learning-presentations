@@ -23,7 +23,7 @@ It is designed for beginners, students, working professionals, and anyone prepar
 - SBOM (Software Bill Of Materials)
 - CBOM (Cryptography Bill Of Materials)
 - Kubrnetes Concepts
-- Terraform  (In Roadmap)
+- Terraform  (In Progress)
 
 # 🔮 Longterm plan to cover all areas of DevOps/DevSecOps:
 - Linux Fundamentals
