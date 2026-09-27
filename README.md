@@ -2,7 +2,6 @@
 DevOps &amp; DevSecOps concepts, presentations, notes, demos, and learning resources.
 
 
-
 # DevSecOps Concepts Repository 🚀
 
 Welcome to the DevSecOps Concepts Repository.
